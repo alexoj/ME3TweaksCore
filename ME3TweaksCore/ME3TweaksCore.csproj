@@ -1,12 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
+    <!--Version info-->
+    <Description>Core library for ME3Tweaks software</Description>
+    <Company>ME3Tweaks</Company>
+    <Authors>ME3Tweaks</Authors>
+    <Version>7.0</Version>
     <TargetFramework>net5.0</TargetFramework>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
-    <Folder Include="Updater\" />
+    <Content Remove="submodules\**" />
+    <Compile Remove="submodules\**" />
+    <EmbeddedResource Remove="submodules\**" />
+    <None Remove="submodules\**" />
   </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="submodules\LegendaryExplorer\LegendaryExplorer\LegendaryExplorerCore\LegendaryExplorerCore.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+    <Folder Include="Services\Restore\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="AuthenticodeExaminer" Version="0.3.0" />
+    <PackageReference Include="System.Management" Version="6.0.0" />
+  </ItemGroup>
+
 
 </Project>
