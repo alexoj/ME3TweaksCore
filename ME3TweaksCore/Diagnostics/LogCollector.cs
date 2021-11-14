@@ -14,9 +14,9 @@ using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using LegendaryExplorerCore.Unreal;
-using MassEffectModManagerCore.modmanager.helpers;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Helpers.ME1;
 using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Targets;
@@ -319,13 +319,13 @@ namespace ME3TweaksCore.Diagnostics
 
                 if (selectedDiagnosticTarget.Game.IsLEGame())
                 {
-                    oldMemGamePath = ini.GetSection(@"GameDataPath")[@"MELE"];
+                    oldMemGamePath = ini[@"GameDataPath"][@"MELE"].Value;
                     var rootPath = Directory.GetParent(gamePath);
                     if (rootPath != null)
                         rootPath = Directory.GetParent(rootPath.FullName);
                     if (rootPath != null)
                     {
-                        ini[@"GameDataPath"][@"MELE"] = rootPath.FullName;
+                        ini[@"GameDataPath"][@"MELE"].Value = rootPath.FullName;
                     }
                     else
                     {
@@ -336,8 +336,8 @@ namespace ME3TweaksCore.Diagnostics
                 }
                 else
                 {
-                    oldMemGamePath = ini[@"GameDataPath"][selectedDiagnosticTarget.Game.ToString()];
-                    ini[@"GameDataPath"][selectedDiagnosticTarget.Game.ToString()] = gamePath;
+                    oldMemGamePath = ini[@"GameDataPath"][selectedDiagnosticTarget.Game.ToString()]?.Value;
+                    ini[@"GameDataPath"][selectedDiagnosticTarget.Game.ToString()].Value = gamePath;
                 }
 
                 if (hasMEM)
@@ -1491,8 +1491,8 @@ namespace ME3TweaksCore.Diagnostics
                 {
                     if (File.Exists(_iniPath))
                     {
-                        IniData ini = new FileIniDataParser().ReadFile(_iniPath);
-                        ini[@"GameDataPath"][selectedDiagnosticTarget.Game.ToString()] = oldMemGamePath;
+                        DuplicatingIni ini = DuplicatingIni.LoadIni(_iniPath);
+                        ini[@"GameDataPath"][selectedDiagnosticTarget.Game.ToString()].Value = oldMemGamePath;
                         File.WriteAllText(_iniPath, ini.ToString());
                     }
                 }
@@ -1504,7 +1504,7 @@ namespace ME3TweaksCore.Diagnostics
         private static void SeeIfIncompatibleDLCIsInstalled(GameTarget target, Action<string, Severity> addDiagLine)
         {
             var installedDLCMods = VanillaDatabaseService.GetInstalledDLCMods(target);
-            var metaFiles = M3Directories.GetMetaMappedInstalledDLC(target, false);
+            var metaFiles = target.GetMetaMappedInstalledDLC(false);
 
             foreach (var v in metaFiles)
             {

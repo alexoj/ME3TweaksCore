@@ -23,6 +23,7 @@
 
 
   <ItemGroup>
+    <Folder Include="Misc\" />
     <Folder Include="NewFolder\" />
     <Folder Include="Services\Restore\" />
   </ItemGroup>

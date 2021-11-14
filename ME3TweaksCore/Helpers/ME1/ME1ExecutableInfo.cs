@@ -2,7 +2,7 @@
 using LegendaryExplorerCore.Helpers;
 
 //Taken from ALOT Installer V4
-namespace ME3TweaksCore.Helpers
+namespace ME3TweaksCore.Helpers.ME1
 {
     public class ME1ExecutableInfo
     {

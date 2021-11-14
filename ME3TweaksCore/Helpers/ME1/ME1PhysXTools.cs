@@ -1,8 +1,8 @@
 ﻿using System.IO;
-using MassEffectModManagerCore.modmanager.objects;
+using ME3TweaksCore.Targets;
 using Serilog;
 
-namespace MassEffectModManagerCore.modmanager.helpers
+namespace ME3TweaksCore.Helpers.ME1
 {
     public class ME1PhysXTools
     {

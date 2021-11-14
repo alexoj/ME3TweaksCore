@@ -13,6 +13,7 @@ using LegendaryExplorerCore.Packages;
 using LegendaryExplorerCore.Unreal;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Helpers.ME1;
 using ME3TweaksCore.Targets;
 using Serilog;
 
@@ -641,7 +642,7 @@ namespace ME3TweaksCore.Services
         /// Checks the existing listed backup and tags it with cmm_vanilla if determined to be vanilla. This is because ALOT Installer allows modified backups where as Mod Manager will not
         /// </summary>
         /// <param name="game"></param>
-        internal static void CheckAndTagBackup(MEGame game)
+        public static void CheckAndTagBackup(MEGame game)
         {
             Log.Information(@"Validating backup for " + game.ToGameName());
             var targetPath = BackupService.GetGameBackupPath(game, false);
