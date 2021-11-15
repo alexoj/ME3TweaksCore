@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ME3TweaksCore.Localization;
 using Serilog;
 
 namespace ME3TweaksCore.Helpers

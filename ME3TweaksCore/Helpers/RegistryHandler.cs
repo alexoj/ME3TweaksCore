@@ -9,6 +9,12 @@ namespace ME3TweaksCore.Helpers
 {
     public class RegistryHandler
     {
+        /// <summary>
+        /// Writes a string value to the registry. The path must start with HKEY_CURRENT_USER.
+        /// </summary>
+        /// <param name="subpath"></param>
+        /// <param name="value"></param>
+        /// <param name="data"></param>
         public static void WriteRegistryKey(string subpath, string value, string data)
         {
             int i = 0;
@@ -31,6 +37,23 @@ namespace ME3TweaksCore.Helpers
             }
 
             subkey.SetValue(value, data);
+        }
+
+        /// <summary>
+        /// Deletes a registry key from the registry. USE WITH CAUTION
+        /// </summary>
+        /// <param name="primaryKey"></param>
+        /// <param name="subkey"></param>
+        /// <param name="valuename"></param>
+        public static void DeleteRegistryKey(RegistryKey primaryKey, string subkey, string valuename)
+        {
+            using RegistryKey key = primaryKey.OpenSubKey(subkey, true);
+            key?.DeleteValue(valuename, false);
+        }
+
+        public static string GetRegistryString(string key, string valueName)
+        {
+            return (string)Registry.GetValue(key, valueName, null);
         }
     }
 }

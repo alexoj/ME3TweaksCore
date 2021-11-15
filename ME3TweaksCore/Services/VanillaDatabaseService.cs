@@ -14,6 +14,8 @@ using LegendaryExplorerCore.Unreal;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Helpers.ME1;
+using ME3TweaksCore.Localization;
+using ME3TweaksCore.Services.Backup;
 using ME3TweaksCore.Targets;
 using Serilog;
 
@@ -649,7 +651,6 @@ namespace ME3TweaksCore.Services
             Log.Information(@"Backup location: " + targetPath);
             BackupService.SetStatus(game, LC.GetString(LC.string_checkingBackup), LC.GetString(LC.string_pleaseWait));
             BackupService.SetActivity(game, true);
-            BackupService.SetIcon(game, FontAwesomeIcon.Spinner);
             GameTarget target = new GameTarget(game, targetPath, false);
             var validationFailedReason = target.ValidateTarget();
             if (target.IsValid)
@@ -686,7 +687,7 @@ namespace ME3TweaksCore.Services
                 {
                     //Backup is OK
                     //Tag
-                    File.WriteAllText(Path.Combine(targetPath, BackupService.CMM_VANILLA_FILENAME), App.AppVersionHR);
+                    File.WriteAllText(Path.Combine(targetPath, BackupService.CMM_VANILLA_FILENAME), ME3TweaksCoreLib.CoreLibVersionHR);
                     Log.Information($@"Wrote {BackupService.CMM_VANILLA_FILENAME} to validated backup");
                     BackupService.SetBackedUp(game, true);
                 }
@@ -701,7 +702,6 @@ namespace ME3TweaksCore.Services
             }
             BackupService.RefreshBackupStatus(null, game);
             BackupService.SetActivity(game, false);
-            BackupService.ResetIcon(game);
         }
     }
 }

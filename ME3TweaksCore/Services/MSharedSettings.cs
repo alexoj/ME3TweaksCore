@@ -8,7 +8,7 @@ using Microsoft.Win32;
 
 namespace ME3TweaksCore.Services
 {
-    class MSharedSettings
+    internal class MSharedSettings
     {
         private const string REGISTRY_KEY_ME3TWEAKS = @"HKEY_CURRENT_USER\Software\ME3Tweaks";
 
@@ -16,5 +16,25 @@ namespace ME3TweaksCore.Services
         {
             RegistryHandler.WriteRegistryKey(REGISTRY_KEY_ME3TWEAKS, valuename, data);
         }
+
+        public static string GetSettingString(string valuename)
+        {
+            return RegistryHandler.GetRegistryString(REGISTRY_KEY_ME3TWEAKS, valuename);
+        }
+
+
+
+
+        // SETTINGS
+
+        /// <summary>
+        /// Timeout for ShortWebClient, in seconds.
+        /// </summary>
+        public static int WebClientTimeout { get; set; } = 5;
+
+        /// <summary>
+        /// The last time content was checked online. This is to gate off content refreshes.
+        /// </summary>
+        public static DateTime LastContentCheck { get; set; }
     }
 }

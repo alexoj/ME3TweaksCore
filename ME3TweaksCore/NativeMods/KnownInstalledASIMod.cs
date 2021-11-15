@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Localization;
 
 namespace ME3TweaksCore.NativeMods
 {
@@ -28,6 +29,6 @@ namespace ME3TweaksCore.NativeMods
         /// </summary>
         public bool Outdated => AssociatedManifestItem.OwningMod.Versions.Last() != AssociatedManifestItem;
 
-        public string InstallStatus => Outdated ? M3L.GetString(M3L.string_outdatedVersionInstalled) : M3L.GetString(M3L.string_installed);
+        public string InstallStatus => Outdated ? LC.GetString(LC.string_outdatedVersionInstalled) : LC.GetString(LC.string_installed);
     }
 }

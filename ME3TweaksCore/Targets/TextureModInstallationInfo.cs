@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using LegendaryExplorerCore.Helpers;
+using ME3TweaksCore.Localization;
 
 namespace ME3TweaksCore.Targets
 {

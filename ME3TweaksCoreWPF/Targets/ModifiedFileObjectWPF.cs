@@ -12,12 +12,11 @@ namespace ME3TweaksCoreWPF.Targets
     public class ModifiedFileObjectWPF : ModifiedFileObject
     {
         public ICommand RestoreCommand { get; }
-        public bool Restoring { get; set; }
 
         public ModifiedFileObjectWPF(string filePath, GameTarget target,
             Func<string, bool> restoreBasegamefileConfirmationCallback,
             Action notifyRestoringFileCallback,
-            Action<object> notifyRestoredCallback) : base(filePath, target, restoreBasegamefileConfirmationCallback, notifyRestoredCallback)
+            Action<object> notifyRestoredCallback) : base(filePath, target, restoreBasegamefileConfirmationCallback, notifyRestoringFileCallback, notifyRestoredCallback)
         {
             RestoreCommand = new GenericCommand(RestoreFileWrapper, CanRestoreFile);
         }

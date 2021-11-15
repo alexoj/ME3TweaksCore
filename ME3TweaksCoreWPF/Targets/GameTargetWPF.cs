@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Targets;
 
 namespace ME3TweaksCoreWPF
@@ -48,8 +50,8 @@ namespace ME3TweaksCoreWPF
         {
             get
             {
-                if (RegistryActive) return M3L.GetString(M3L.string_dialog_cannotRemoveActiveTarget);
-                return M3L.GetString(M3L.string_tooltip_removeTargetFromM3);
+                if (RegistryActive) return LC.GetString(LC.string_dialog_cannotRemoveActiveTarget);
+                return LC.GetString(LC.string_tooltip_removeTargetFromM3);
             }
         }
 
@@ -59,7 +61,7 @@ namespace ME3TweaksCoreWPF
         public override void DumpModifiedFilesFromMemory()
         {
             //Some commands are made from a background thread, which means this might not be called from dispatcher
-            ME3TweaksCoreWPF.App.Dispatcher.Invoke(delegate
+            ME3TweaksCoreLib.RunOnUIThread(()=>
             {
                 ModifiedBasegameFiles.ClearEx();
                 ModifiedSFARFiles.ClearEx();

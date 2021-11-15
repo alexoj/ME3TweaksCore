@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using LegendaryExplorerCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Services;
+using ME3TweaksCore.Services.Backup;
 using PropertyChanged;
 using Serilog;
 

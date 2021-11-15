@@ -14,6 +14,8 @@ using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
+using ME3TweaksCore.Misc;
 using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.Services;
 using PropertyChanged;
@@ -68,7 +70,7 @@ namespace ME3TweaksCore.Targets
 
             if (Game.IsLEGame())
             {
-                OodleHelper.EnsureOodleDll(TargetPath, MUtilities.GetDllDirectory());
+                OodleHelper.EnsureOodleDll(TargetPath, MCoreFilesystem.GetDllDirectory());
             }
         }
 
@@ -78,7 +80,7 @@ namespace ME3TweaksCore.Targets
             {
                 if (Directory.Exists(TargetPath))
                 {
-                    CLog.Information(@"Getting game source for target " + TargetPath, logInfo);
+                    MLog.Information(@"Getting game source for target " + TargetPath, logInfo);
                     var hashCheckResult = VanillaDatabaseService.GetGameSource(this, reverseME1Executable);
 
                     GameSource = hashCheckResult.result;
@@ -143,14 +145,15 @@ namespace ME3TweaksCore.Targets
                         IsPolishME1 = Game == MEGame.ME1 && File.Exists(Path.Combine(TargetPath, @"BioGame", @"CookedPC", @"Movies", @"niebieska_pl.bik"));
                         if (IsPolishME1)
                         {
-                            CLog.Information(@"ME1 Polish Edition detected", logInfo);
+                            MLog.Information(@"ME1 Polish Edition detected", logInfo);
                         }
 
+                        /* This feature is only in Mod Manager
                         if (RegistryActive && (Settings.AutoUpdateLODs2K || Settings.AutoUpdateLODs4K) &&
                             oldTMOption != TextureModded && forceLodUpdate)
                         {
                             UpdateLODs(Settings.AutoUpdateLODs2K);
-                        }
+                        }*/
                     }
                     else
                     {
@@ -178,7 +181,8 @@ namespace ME3TweaksCore.Targets
 
             if (!TextureModded)
             {
-                MUtilities.SetLODs(this, false, false, false);
+                // Reset LODs
+                MTextureLODSetter.SetLODs(this, false, false, false);
             }
             else
             {
@@ -192,15 +196,14 @@ namespace ME3TweaksCore.Targets
                         if (File.Exists(branchingPCFCommon))
                         {
                             var md5 = MUtilities.CalculateMD5(branchingPCFCommon);
-                            MUtilities.SetLODs(this, true, twoK, md5 == @"10db76cb98c21d3e90d4f0ffed55d424");
-                            return;
+                            MTextureLODSetter.SetLODs(this, true, twoK, md5 == @"10db76cb98c21d3e90d4f0ffed55d424");
                         }
                     }
                 }
                 else if (Game.IsOTGame())
                 {
                     //me2/3
-                    MUtilities.SetLODs(this, true, twoK, false);
+                    MTextureLODSetter.SetLODs(this, true, twoK, false);
                 }
             }
         }
@@ -418,10 +421,10 @@ namespace ME3TweaksCore.Targets
             UIInstalledDLCMods.ClearEx();
         }
 
-        public ObservableCollectionExtended<InstallationInformation.InstalledDLCMod> UIInstalledDLCMods { get; } = new ObservableCollectionExtended<InstallationInformation.InstalledDLCMod>();
-        public ObservableCollectionExtended<InstalledOfficialDLC> UIInstalledOfficialDLC { get; } = new ObservableCollectionExtended<InstalledOfficialDLC>();
+        public ObservableCollectionExtended<InstalledDLCMod> UIInstalledDLCMods { get; } = new();
+        public ObservableCollectionExtended<InstalledOfficialDLC> UIInstalledOfficialDLC { get; } = new();
 
-        public void PopulateDLCMods(bool includeDisabled, Func<InstallationInformation.InstalledDLCMod, bool> deleteConfirmationCallback = null, Action notifyDeleted = null, Action notifyToggled = null, bool modNamePrefersTPMI = false)
+        public void PopulateDLCMods(bool includeDisabled, Func<InstalledDLCMod, bool> deleteConfirmationCallback = null, Action notifyDeleted = null, Action notifyToggled = null, bool modNamePrefersTPMI = false)
         {
             if (Game == MEGame.LELauncher) return; // LE Launcher doesn't have DLC mods
             var dlcDir = M3Directories.GetDLCPath(this);
@@ -437,10 +440,10 @@ namespace ME3TweaksCore.Targets
             officialDLC.AddRange(notInstalledOfficialDLC.Select(x => new InstalledOfficialDLC(x, false, Game)));
             officialDLC = officialDLC.OrderBy(x => x.HumanName).ToList();
 
-            //Must run on UI thread
-            MediaTypeNames.Application.Current.Dispatcher.Invoke(delegate
+            //Must run on UI thread (if this library is being used in a UI project)
+            ME3TweaksCoreLib.RunOnUIThread(() =>
             {
-                UIInstalledDLCMods.ReplaceAll(installedMods.Select(x => new InstallationInformation.InstalledDLCMod(Path.Combine(dlcDir, x), Game, deleteConfirmationCallback, notifyDeleted, notifyToggled, modNamePrefersTPMI)).ToList().OrderBy(x => x.ModName));
+                UIInstalledDLCMods.ReplaceAll(installedMods.Select(x => new InstalledDLCMod(Path.Combine(dlcDir, x), Game, deleteConfirmationCallback, notifyDeleted, notifyToggled, modNamePrefersTPMI)).ToList().OrderBy(x => x.ModName));
                 UIInstalledOfficialDLC.ReplaceAll(officialDLC);
             });
         }
@@ -967,6 +970,82 @@ namespace ME3TweaksCore.Targets
             }
 
             return metamap;
+        }
+
+        private const string ME1ASILoaderHash = "30660f25ab7f7435b9f3e1a08422411a";
+        private const string ME2ASILoaderHash = "a5318e756893f6232284202c1196da13";
+        private const string ME3ASILoaderHash = "1acccbdae34e29ca7a50951999ed80d5";
+        private const string LEASILoaderHash = "2026e1cb78b5c7d95477395ac8c9979a"; // Will need changed as game is updated // bink 2005 by d00t
+
+        public bool CheckIfBinkw32ASIIsInstalled()
+        {
+            string binkPath = GetVanillaBinkPath();
+            string expectedHash = null;
+            if (Game == MEGame.ME1) expectedHash = ME1ASILoaderHash;
+            else if (Game == MEGame.ME2) expectedHash = ME2ASILoaderHash;
+            else if (Game == MEGame.ME3) expectedHash = ME3ASILoaderHash;
+            else if (Game.IsLEGame()) expectedHash = LEASILoaderHash;
+
+            if (File.Exists(binkPath))
+            {
+                return MUtilities.CalculateMD5(binkPath) == expectedHash;
+            }
+
+            return false;
+        }
+
+        public bool InstallBinkBypass()
+        {
+            var destPath = GetVanillaBinkPath();
+            Log.Information($"Installing Bink bypass for {Game} to {destPath}");
+            if (Game == MEGame.ME1)
+            {
+                var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me1.binkw32.dll", destPath, true);
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me1.binkw23.dll", obinkPath, true);
+            }
+            else if (Game == MEGame.ME2)
+            {
+                var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me2.binkw32.dll", destPath, true);
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me2.binkw23.dll", obinkPath, true);
+
+            }
+            else if (Game == MEGame.ME3)
+            {
+                var obinkPath = Path.Combine(TargetPath, "Binaries", "win32", "binkw23.dll");
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me3.binkw32.dll", destPath, true);
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me3.binkw23.dll", obinkPath, true);
+            }
+            else if (Game.IsLEGame())
+            {
+                var obinkPath = Path.Combine(TargetPath, "Binaries", "Win64", "bink2w64_original.dll"); // Where the original bink should go
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw64.bink2w64.dll", destPath, true);  // Bypass proxy
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw64.bink2w64_original.dll", obinkPath, true); //
+            }
+            else if (Game == MEGame.LELauncher)
+            {
+                var obinkPath = Path.Combine(TargetPath, "bink2w64_original.dll"); // Where the original bink should go
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw64.bink2w64.dll", destPath, true);  // Bypass proxy
+                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw64.bink2w64_original.dll", obinkPath, true); //
+            }
+            else
+            {
+                MLog.Error(@"Unknown game for gametarget (InstallBinkBypass)");
+                return false;
+            }
+
+            MLog.Information($@"Installed Bink bypass for {Game}");
+            return true;
+        }
+
+        private string GetVanillaBinkPath()
+        {
+            if (Game == MEGame.ME1 || Game == MEGame.ME2) return Path.Combine(TargetPath, "Binaries", "binkw32.dll");
+            if (Game == MEGame.ME3) return Path.Combine(TargetPath, "Binaries", "win32", "binkw32.dll");
+            if (Game.IsLEGame()) return Path.Combine(TargetPath, "Binaries", "Win64", "bink2w64.dll");
+            if (Game == MEGame.LELauncher) return Path.Combine(TargetPath, "bink2w64.dll");
+            return null;
         }
     }
 }

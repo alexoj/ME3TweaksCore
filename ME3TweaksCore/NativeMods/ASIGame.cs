@@ -4,6 +4,7 @@ using System.Windows.Input;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Targets;
 using PropertyChanged;
 

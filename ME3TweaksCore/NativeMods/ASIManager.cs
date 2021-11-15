@@ -9,6 +9,7 @@ using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Services;
 using ME3TweaksCore.Targets;
 using PropertyChanged;
 using Serilog;
@@ -21,7 +22,7 @@ namespace ME3TweaksCore.NativeMods
     [AddINotifyPropertyChangedInterface]
     public class ASIManager
     {
-        public static readonly string CachedASIsFolder = Directory.CreateDirectory(Path.Combine(Utilities.GetAppDataFolder(), @"CachedASIs")).FullName;
+        public static readonly string CachedASIsFolder = Directory.CreateDirectory(Path.Combine(MCoreFilesystem.GetME3TweaksCoreDataFolder(), @"CachedASIs")).FullName;
 
         public static readonly string ManifestLocation = Path.Combine(CachedASIsFolder, @"manifest.xml");
         public static readonly string StagedManifestLocation = Path.Combine(CachedASIsFolder, @"manifest_staged.xml");
@@ -33,8 +34,7 @@ namespace ME3TweaksCore.NativeMods
         public static List<ASIMod> MasterLE1ASIUpdateGroups = new List<ASIMod>();
         public static List<ASIMod> MasterLE2ASIUpdateGroups = new List<ASIMod>();
         public static List<ASIMod> MasterLE3ASIUpdateGroups = new List<ASIMod>();
-
-
+        
         /// <summary>
         /// Loads the ASI manifest. This should only be done at startup or when the online manifest is refreshed. ForceLocal only works if there is local ASI manifest present
         /// </summary>
@@ -53,17 +53,17 @@ namespace ME3TweaksCore.NativeMods
 
         private static void internalLoadManifest(bool forceLocal = false, bool overrideThrottling = false)
         {
-            if (File.Exists(ManifestLocation) && (forceLocal || (!OnlineContent.CanFetchContentThrottleCheck() && !overrideThrottling))) //Force local, or we can't online check and cannot override throttle
+            if (File.Exists(ManifestLocation) && (forceLocal || (!MOnlineContent.CanFetchContentThrottleCheck() && !overrideThrottling))) //Force local, or we can't online check and cannot override throttle
             {
                 LoadManifestFromDisk(ManifestLocation);
                 return;
             }
 
-            var shouldNotFetch = forceLocal || (!overrideThrottling && !OnlineContent.CanFetchContentThrottleCheck()) && File.Exists(ManifestLocation);
+            var shouldNotFetch = forceLocal || (!overrideThrottling && !MOnlineContent.CanFetchContentThrottleCheck()) && File.Exists(ManifestLocation);
             if (!shouldNotFetch) //this cannot be triggered if forceLocal is true
             {
                 Log.Information(@"Fetching ASI manifest from online source");
-                var onlineManifest = OnlineContent.FetchRemoteString(@"https://me3tweaks.com/mods/asi/getmanifest?AllGames=1");
+                var onlineManifest = MOnlineContent.FetchRemoteString(@"https://me3tweaks.com/mods/asi/getmanifest?AllGames=1");
                 onlineManifest = onlineManifest.Trim();
                 try
                 {
@@ -97,21 +97,21 @@ namespace ME3TweaksCore.NativeMods
             }
         }
 
-        /// <summary>
-        /// Extracts the default ASI assets from this assembly so there is a default set of cached assets that are alway required for proper program functionality
-        /// </summary>
-        public static void ExtractDefaultASIResources()
-        {
-            string[] defaultResources = { @"BalanceChangesReplacer-v3.0.asi", @"ME1-DLC-ModEnabler-v1.0.asi", @"ME3Logger_truncating-v1.0.asi", @"AutoTOC_LE-v2.0.asi", @"LE1AutoloadEnabler-v1.0.asi", @"manifest.xml" };
-            foreach (var file in defaultResources)
-            {
-                var outfile = Path.Combine(CachedASIsFolder, file);
-                if (!File.Exists(outfile))
-                {
-                    Utilities.ExtractInternalFile(@"MassEffectModManagerCore.modmanager.asi." + file, outfile, true);
-                }
-            }
-        }
+        ///// <summary>
+        ///// Extracts the default ASI assets from this assembly so there is a default set of cached assets that are alway required for proper program functionality
+        ///// </summary>
+        //public static void ExtractDefaultASIResources()
+        //{
+        //    string[] defaultResources = { @"BalanceChangesReplacer-v3.0.asi", @"ME1-DLC-ModEnabler-v1.0.asi", @"ME3Logger_truncating-v1.0.asi", @"AutoTOC_LE-v2.0.asi", @"LE1AutoloadEnabler-v1.0.asi", @"manifest.xml" };
+        //    foreach (var file in defaultResources)
+        //    {
+        //        var outfile = Path.Combine(CachedASIsFolder, file);
+        //        if (!File.Exists(outfile))
+        //        {
+        //            MUtilities.ExtractInternalFile(@"MassEffectModManagerCore.modmanager.asi." + file, outfile, true);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Calls ParseManifest() on the given file path.

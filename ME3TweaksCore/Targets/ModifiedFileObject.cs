@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
+using ME3TweaksCore.Services.Backup;
+using ME3TweaksCore.Services.BasegameFileIdentification;
 using PropertyChanged;
 using Serilog;
 
