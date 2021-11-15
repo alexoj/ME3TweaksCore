@@ -1,3 +1,6 @@
 [submodule "ME3TweaksCore/submodules/LegendaryExplorer"]
 	path = ME3TweaksCore/submodules/LegendaryExplorer
 	url = https://github.com/ME3Tweaks/LegendaryExplorer.git
+[submodule "ME3TweaksCore/submodules/ComputerInfo"]
+	path = ME3TweaksCore/submodules/ComputerInfo
+	url = https://github.com/ME3Tweaks/ComputerInfo
