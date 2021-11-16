@@ -69,7 +69,7 @@ namespace ME3TweaksCore.Misc
             return encoding.GetString(rawData).Normalize();
         }
 
-        private static bool StartsWith(this byte[] thisArray, byte[] otherArray)
+        public static bool StartsWith(this byte[] thisArray, byte[] otherArray)
         {
             // Handle invalid/unexpected input
             // (nulls, thisArray.Length < otherArray.Length, etc.)
@@ -143,6 +143,5 @@ namespace ME3TweaksCore.Misc
 
             return (length < value.Length) ? value.Substring(value.Length - length) : value;
         }
-
     }
 }

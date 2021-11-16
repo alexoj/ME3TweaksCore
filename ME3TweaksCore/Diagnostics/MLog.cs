@@ -74,5 +74,14 @@ namespace ME3TweaksCore.Diagnostics
                 Log.Error($"{LoggingPrefix}{ex.FlattenException()}");
             }
         }
+
+        /// <summary>
+        /// Calls Log.CloseAndFlush(). This is here just so everything routes through MLog.
+        /// </summary>
+        public static void CloseAndFlush()
+        {
+            Log.CloseAndFlush();
+
+        }
     }
 }
