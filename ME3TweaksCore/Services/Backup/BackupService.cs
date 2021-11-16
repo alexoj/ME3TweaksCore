@@ -7,6 +7,7 @@ using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Targets;
@@ -605,7 +606,7 @@ namespace ME3TweaksCore.Services.Backup
         /// Deletes the registry key used to store the backup location
         /// </summary>
         /// <param name="game"></param>
-        public static void RemoveBackupPath(MEGame game)
+        private static void RemoveBackupPath(MEGame game)
         {
             RegistryHandler.DeleteRegistryKey(Registry.CurrentUser, @"Software\ME3Tweaks", game + @"VanillaBackupLocation");
 
@@ -658,6 +659,25 @@ namespace ME3TweaksCore.Services.Backup
                     MSharedSettings.WriteSettingString(@"ME3VanillaBackupLocation", storedPath);
                 }
             }
+        }
+        /// <summary>
+        /// Makes ME3Tweaks software not know about a backup.
+        /// </summary>
+        /// <param name="meGame"></param>
+        public static void UnlinkBackup(MEGame meGame)
+        {
+            MLog.Information($"Unlinking backup for {meGame}");
+            var gbPath = BackupService.GetGameBackupPath(meGame, forceReturnPath: true);
+            if (gbPath != null)
+            {
+                var cmmVanilla = Path.Combine(gbPath, "cmm_vanilla");
+                if (File.Exists(cmmVanilla))
+                {
+                    MLog.Information("Deleting cmm_vanilla file: " + cmmVanilla);
+                    File.Delete(cmmVanilla);
+                }
+            }
+            BackupService.RemoveBackupPath(meGame);
         }
     }
 }

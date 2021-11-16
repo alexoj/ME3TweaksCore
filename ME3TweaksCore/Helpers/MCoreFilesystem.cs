@@ -99,5 +99,24 @@ namespace ME3TweaksCore.Helpers
         {
             return Directory.CreateDirectory(Path.Combine(GetME3TweaksCoreDataFolder(), "Temp")).FullName;
         }
+
+        /// <summary>
+        /// Gets directory where executables that must be run are stored (PermissionsGranter.exe for example)
+        /// </summary>
+        /// <returns></returns>
+        public static string GetCachedExecutablesDirectory()
+        {
+            return Directory.CreateDirectory(Path.Combine(GetME3TweaksCoreDataFolder(), "CachedExecutables")).FullName;
+        }
+
+        /// <summary>
+        /// Gets filepath where a cached executable would reside. This does not mean the file exists.
+        /// </summary>
+        /// <param name="executableName">Full executable name including the extension.</param>
+        /// <returns></returns>
+        public static string GetCachedExecutable(string executableName)
+        {
+            return Path.Combine(GetCachedExecutablesDirectory(), executableName);
+        }
     }
 }

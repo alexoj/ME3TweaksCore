@@ -343,6 +343,13 @@ namespace ME3TweaksCore.Services
             return false;
         }
 
+        /// <summary>
+        /// Checks the specified target against the vanilla database.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="failedValidationCallback"></param>
+        /// <param name="strictCheck">If true, TOC files and bink files are included in the check.</param>
+        /// <returns></returns>
         public static bool ValidateTargetAgainstVanilla(GameTarget target, Action<string> failedValidationCallback, bool strictCheck)
         {
             bool isVanilla = true;

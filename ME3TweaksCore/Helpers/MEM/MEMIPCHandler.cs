@@ -153,7 +153,7 @@ namespace ME3TweaksCore.Helpers.MEM
                     case @"CACHE_USAGE":
                         if (DateTime.Now > (lastCacheoutput.AddSeconds(10)))
                         {
-                            Log.Information($@"[AICORE] MEM cache usage: {FileSize.FormatSize(long.Parse(parm))}");
+                            Log.Information($@"MEM cache usage: {FileSize.FormatSize(long.Parse(parm))}");
                             lastCacheoutput = DateTime.Now;
                         }
                         break;
@@ -201,7 +201,7 @@ namespace ME3TweaksCore.Helpers.MEM
                         {
                             if (exceptionOcurred)
                             {
-                                Log.Fatal($@"[AICORE] {stdOut.Text}");
+                                Log.Fatal($@"{stdOut.Text}");
                                 memCrashLine?.Invoke(stdOut.Text);
                             }
                         }
@@ -210,7 +210,7 @@ namespace ME3TweaksCore.Helpers.MEM
                         Debug.WriteLine(@"STDERR " + stdErr.Text);
                         if (exceptionOcurred)
                         {
-                            Log.Fatal($@"[AICORE] {stdErr.Text}");
+                            Log.Fatal($@"{stdErr.Text}");
                         }
                         else
                         {
@@ -451,7 +451,7 @@ namespace ME3TweaksCore.Helpers.MEM
                     MEMIPCHandler.RunMEMIPCUntilExit(args, applicationExited: x => exitcode = x);
                     if (exitcode != 0)
                     {
-                        Log.Error($@"[AICORE] Non-zero MassEffectModderNoGui exit code setting game config path: {exitcode}");
+                        Log.Error($@"Non-zero MassEffectModderNoGui exit code setting game config path: {exitcode}");
                     }
                     return exitcode == 0;
                 }

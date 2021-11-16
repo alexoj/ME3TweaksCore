@@ -15,6 +15,7 @@ namespace ME3TweaksCore.Helpers
         /// Callback to invoke to outer library if it uses telemetry
         /// </summary>
         private static Action<string, Dictionary<string, string>> TrackEventCallback { get; set; }
+        private static Action<Exception, Dictionary<string, string>> TrackErrorCallback { get; set; }
 
         public void SetEventCallback(Action<string, Dictionary<string, string>> trackEventCallback)
         {
@@ -55,9 +56,19 @@ namespace ME3TweaksCore.Helpers
         /// </summary>
         /// <param name="exception"></param>
         /// <param name="relevantInfo"></param>
-        internal static void UploadErrorLog(Exception exception, Dictionary<string, string> relevantInfo)
+        internal static void UploadErrorLog(Exception exception, Dictionary<string, string> relevantInfo = null)
         {
             UploadErrorLogCallback?.Invoke(exception, relevantInfo);
+        }
+
+        /// <summary>
+        /// Instructs the calling application to trigger a error exception upload because an error has occurred
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <param name="relevantInfo"></param>
+        public static void TrackError(Exception exception, Dictionary<string, string> relevantInfo = null)
+        {
+            TrackErrorCallback?.Invoke(exception, relevantInfo);
         }
     }
 }

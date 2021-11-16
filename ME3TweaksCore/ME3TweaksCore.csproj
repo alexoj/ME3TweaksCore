@@ -21,13 +21,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="submodules\ComputerInfo\ComputerInfo\ComputerInfo.csproj" />
-    <ProjectReference Include="submodules\LegendaryExplorer\LegendaryExplorer\LegendaryExplorerCore\LegendaryExplorerCore.csproj" />
+    <None Remove="Binaries\PermissionsGranter.exe" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Binaries\PermissionsGranter.exe" />
+  </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Restore\" />
+    <ProjectReference Include="submodules\ComputerInfo\ComputerInfo\ComputerInfo.csproj" />
+    <ProjectReference Include="submodules\LegendaryExplorer\LegendaryExplorer\LegendaryExplorerCore\LegendaryExplorerCore.csproj" />
+    <ProjectReference Include="submodules\RoboSharp\RoboSharp\RoboSharp.csproj" />
   </ItemGroup>
 
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -123,6 +124,7 @@ namespace ME3TweaksCore.Helpers
                         fi.IsReadOnly = false; //clear read only. might happen on some binkw32 in archives, maybe
                     }
                 }
+
                 MLog.Information($@"Writing internal asset to disk: {internalResourceName} -> {destination}");
                 var resource = ExtractInternalFileToStream(internalResourceName);
                 resource.WriteToFile(destination);
@@ -238,6 +240,7 @@ namespace ME3TweaksCore.Helpers
                     {
                         throw;
                     }
+
                     return false;
                 }
             }
@@ -261,6 +264,7 @@ namespace ME3TweaksCore.Helpers
                     {
                         throw;
                     }
+
                     return false;
                 }
             }
@@ -279,7 +283,7 @@ namespace ME3TweaksCore.Helpers
                 DeleteEmptySubdirectories(directory);
                 if (!Directory.EnumerateFileSystemEntries(directory).Any())
                 {
-                    Log.Information("Deleting empty directory: " + directory);
+                    MLog.Information("Deleting empty directory: " + directory);
                     Directory.Delete(directory, false);
                 }
             }
@@ -358,7 +362,242 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static int GetPercent(long downloaded, long total)
         {
-            return (int) Math.Round(downloaded * 100.0 / total);
+            return (int)Math.Round(downloaded * 100.0 / total);
+        }
+
+        public static long GetSizeOfDirectory(string d, string[] extensionsToCalculate = null)
+        {
+            return GetSizeOfDirectory(new DirectoryInfo(d), extensionsToCalculate);
+        }
+
+        public static long GetSizeOfDirectory(DirectoryInfo d, string[] extensionsToCalculate = null)
+        {
+            long size = 0;
+            // Add file sizes.
+            FileInfo[] fis = d.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                if (extensionsToCalculate != null)
+                {
+                    if (extensionsToCalculate.Contains(Path.GetExtension(fi.Name)))
+                    {
+                        size += fi.Length;
+                    }
+                }
+                else
+                {
+                    size += fi.Length;
+                }
+            }
+
+            // Add subdirectory sizes.
+            DirectoryInfo[] dis = d.GetDirectories();
+            foreach (DirectoryInfo di in dis)
+            {
+                size += GetSizeOfDirectory(di, extensionsToCalculate);
+            }
+
+            return size;
+        }
+
+        public static bool IsSubfolder(string parentPath, string childPath)
+        {
+            var parentUri = new Uri(parentPath);
+            var childUri = new DirectoryInfo(childPath).Parent;
+            while (childUri != null)
+            {
+                if (new Uri(childUri.FullName) == parentUri)
+                {
+                    return true;
+                }
+
+                childUri = childUri.Parent;
+            }
+
+            return false;
+        }
+
+        public static bool CreateDirectoryWithWritePermission(string directoryPath, bool forcePermissions = false)
+        {
+            if (!forcePermissions && Directory.Exists(Directory.GetParent(directoryPath).FullName) && MUtilities.IsDirectoryWritable(Directory.GetParent(directoryPath).FullName))
+            {
+                Directory.CreateDirectory(directoryPath);
+                return true;
+            }
+
+            try
+            {
+                //try first without admin.
+                if (forcePermissions) throw new UnauthorizedAccessException(); //just go to the alternate case.
+                Directory.CreateDirectory(directoryPath);
+                return true;
+            }
+            catch (UnauthorizedAccessException uae)
+            {
+                //Must have admin rights.
+                MLog.Information("We need admin rights to create this directory");
+
+                // This works because the executable is extracted as part of the published single file package
+                // This method would NOT work on Linux single file as it doesn't extract!
+                var permissionsGranterExe = MCoreFilesystem.GetCachedExecutable("PermissionsGranter.exe");
+                if (!File.Exists(permissionsGranterExe))
+                {
+                    MUtilities.ExtractInternalFile("ME3TweaksCore.Binaries.PermissionsGranter.exe", permissionsGranterExe, true);
+                }
+
+                string args = "\"" + System.Security.Principal.WindowsIdentity.GetCurrent().Name + "\" -create-directory \"" + directoryPath.TrimEnd('\\') + "\"";
+                try
+                {
+                    int result = MUtilities.RunProcess(permissionsGranterExe, args, waitForProcess: true, requireAdmin: true, noWindow: true);
+                    if (result == 0)
+                    {
+                        MLog.Information("Elevated process returned code 0, restore directory is hopefully writable now.");
+                        return true;
+                    }
+                    else
+                    {
+                        MLog.Error("Elevated process returned code " + result + ", directory likely is not writable");
+                        return false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    if (e is Win32Exception w32e)
+                    {
+                        if (w32e.NativeErrorCode == 1223)
+                        {
+                            //Admin canceled.
+                            return false;
+                        }
+                    }
+
+                    MLog.Error("Error creating directory with PermissionsGranter: " + e.Message);
+                    return false;
+
+                }
+            }
+        }
+
+        public static int RunProcess(string exe, string args, bool waitForProcess = false, bool allowReattemptAsAdmin = false, bool requireAdmin = false, bool noWindow = true, bool useShellExecute = true)
+        {
+            return RunProcess(exe, null, args, waitForProcess: waitForProcess, allowReattemptAsAdmin: allowReattemptAsAdmin, requireAdmin: requireAdmin, noWindow: noWindow, useShellExecute: useShellExecute);
+        }
+
+        public static int RunProcess(string exe, List<string> args, bool waitForProcess = false, bool allowReattemptAsAdmin = false, bool requireAdmin = false, bool noWindow = true, bool useShellExecute = true)
+        {
+            return RunProcess(exe, args, null, waitForProcess: waitForProcess, allowReattemptAsAdmin: allowReattemptAsAdmin, requireAdmin: requireAdmin, noWindow: noWindow, useShellExecute: useShellExecute);
+        }
+
+        private static int RunProcess(string exe, List<string> argsL, string argsS, bool waitForProcess, bool allowReattemptAsAdmin, bool requireAdmin, bool noWindow, bool useShellExecute)
+        {
+            var argsStr = argsS;
+            if (argsStr == null && argsL != null)
+            {
+                argsStr = "";
+                foreach (var arg in argsL)
+                {
+                    if (arg != "") argsStr += " ";
+                    if (arg.Contains(" "))
+                    {
+                        argsStr += $"\"{arg}\"";
+                    }
+                    else
+                    {
+                        argsStr += arg;
+                    }
+                }
+            }
+
+            if (requireAdmin)
+            {
+                MLog.Information($"Running process as admin: {exe} {argsStr}");
+                //requires elevation
+                using (Process p = new Process())
+                {
+                    p.StartInfo.FileName = exe;
+                    p.StartInfo.UseShellExecute = useShellExecute;
+                    p.StartInfo.WorkingDirectory = Path.GetDirectoryName(exe);
+                    p.StartInfo.CreateNoWindow = true;
+                    if (noWindow)
+                    {
+                        p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    }
+
+                    p.StartInfo.Arguments = argsStr;
+                    p.StartInfo.Verb = "runas";
+                    p.Start();
+                    if (waitForProcess)
+                    {
+                        p.WaitForExit();
+                        return p.ExitCode;
+                    }
+
+                    return -1;
+                }
+            }
+            else
+            {
+                MLog.Information($"Running process: {exe} {argsStr}");
+                try
+                {
+                    using (Process p = new Process())
+                    {
+                        p.StartInfo.FileName = exe;
+                        p.StartInfo.UseShellExecute = useShellExecute;
+                        p.StartInfo.WorkingDirectory = Path.GetDirectoryName(exe);
+                        p.StartInfo.CreateNoWindow = noWindow;
+                        if (noWindow)
+                        {
+                            p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        }
+
+                        p.StartInfo.Arguments = argsStr;
+                        p.Start();
+                        if (waitForProcess)
+                        {
+                            p.WaitForExit();
+                            return p.ExitCode;
+                        }
+
+                        return -1;
+                    }
+                }
+                catch (Win32Exception w32e)
+                {
+                    MLog.Warning("Win32 exception running process: " + w32e.ToString());
+                    if (w32e.NativeErrorCode == 740 && allowReattemptAsAdmin)
+                    {
+                        MLog.Information("Attempting relaunch with administrative rights.");
+                        //requires elevation
+                        using (Process p = new Process())
+                        {
+                            p.StartInfo.FileName = exe;
+                            p.StartInfo.UseShellExecute = useShellExecute;
+                            p.StartInfo.WorkingDirectory = Path.GetDirectoryName(exe);
+                            p.StartInfo.CreateNoWindow = noWindow;
+                            if (noWindow)
+                            {
+                                p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                            }
+
+                            p.StartInfo.Arguments = argsStr;
+                            p.StartInfo.Verb = "runas";
+                            p.Start();
+                            if (waitForProcess)
+                            {
+                                p.WaitForExit();
+                                return p.ExitCode;
+                            }
+
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        throw; //rethrow to higher.
+                    }
+                }
+            }
         }
     }
 }

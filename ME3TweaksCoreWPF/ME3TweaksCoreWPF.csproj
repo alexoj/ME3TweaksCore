@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Folder Include="GAmeFilesystem\" />
+    <Folder Include="Services\Restore\" />
   </ItemGroup>
 
   <ItemGroup>
