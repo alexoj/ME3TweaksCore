@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Gammtek.Extensions;
+using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
@@ -25,11 +26,14 @@ namespace ME3TweaksCore.Services.Restore
 {
     #region RESTORE
 
-    public class GameRestore : INotifyPropertyChanged
+    [AddINotifyPropertyChangedInterface]
+    public class GameRestore
     {
         private MEGame Game;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public long ProgressValue { get; set; }
+        public long ProgressMax { get; set; }
+        public bool ProgressIndeterminate { get; set; }
 
         /// <summary>
         /// Callback for when there is a blocking error and the restore cannot be performed
@@ -72,8 +76,9 @@ namespace ME3TweaksCore.Services.Restore
         /// <returns></returns>
         public bool PerformRestore(GameTarget restoreTarget, string destinationDirectory)
         {
-            int ProgressValue = 0;
-            int ProgressMax = 0;
+            var useFullCopyMethod = false;  // Prefer robocopy for now.
+
+
             if (MUtilities.IsGameRunning(Game))
             {
                 BlockingErrorCallback?.Invoke("Cannot restore game", $"Cannot restore {Game.ToGameName()} while an instance of it is running.");
@@ -115,7 +120,7 @@ namespace ME3TweaksCore.Services.Restore
                     }
                     else
                     {
-                        Log.Warning("User declined to choose destination directory");
+                        MLog.Warning("User declined to choose destination directory");
                         return false;
                     }
                 }
@@ -126,7 +131,7 @@ namespace ME3TweaksCore.Services.Restore
                 {
                     if (Enumerable.Any(Directory.GetFiles(destinationDirectory)) || Enumerable.Any(Directory.GetDirectories(destinationDirectory)))
                     {
-                        Log.Information(@"Deleting existing game directory: " + destinationDirectory);
+                        MLog.Information(@"Deleting existing game directory: " + destinationDirectory);
                         try
                         {
                             bool deletedDirectory = MUtilities.DeleteFilesAndFoldersRecursively(destinationDirectory);
@@ -140,7 +145,7 @@ namespace ME3TweaksCore.Services.Restore
                         catch (Exception ex)
                         {
                             //todo: handle this better
-                            Log.Error($@"Exception deleting game directory: {destinationDirectory}: {ex.Message}");
+                            MLog.Error($@"Exception deleting game directory: {destinationDirectory}: {ex.Message}");
                             RestoreErrorCallback?.Invoke("Error deleting game directory", $"Could not delete the game directory for {Game.ToGameName()}: {ex.Message}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.");
                             //b.Result = RestoreResult.EXCEPTION_DELETING_GAME_DIRECTORY;
                             return false;
@@ -149,7 +154,7 @@ namespace ME3TweaksCore.Services.Restore
                 }
                 else
                 {
-                    Log.Error(@"Game directory not found! Was it removed while the app was running?");
+                    MLog.Error(@"Game directory not found! Was it removed while the app was running?");
                 }
 
                 var created = MUtilities.CreateDirectoryWithWritePermission(destinationDirectory);
@@ -163,146 +168,231 @@ namespace ME3TweaksCore.Services.Restore
                 UpdateStatusCallback?.Invoke("Restoring game from backup");
                 //callbacks
 
-                #region callbacks
-
-                void fileCopiedCallback()
+                if (useFullCopyMethod)
                 {
-                    ProgressValue++;
-                    if (ProgressMax != 0)
-                    {
-                        UpdateProgressCallback?.Invoke(ProgressValue, ProgressMax);
-                    }
+                    RestoreUsingFullCopy(backupPath, destinationDirectory);
                 }
-
-                string dlcFolderpath = MEDirectories.GetDLCPath(Game, backupPath) + Path.DirectorySeparatorChar; //\ at end makes sure we are restoring a subdir
-                int dlcSubStringLen = dlcFolderpath.Length;
-                //Debug.WriteLine(@"DLC Folder: " + dlcFolderpath);
-                //Debug.Write(@"DLC Folder path len:" + dlcFolderpath);
-
-                // Cached stuff to avoid hitting same codepath thousands of times
-                var officialDLCNames = MEDirectories.OfficialDLCNames(Game);
-
-                bool aboutToCopyCallback(string fileBeingCopied)
+                else
                 {
-                    if (fileBeingCopied.Contains(@"\cmmbackup\")) return false; //do not copy cmmbackup files
-                    Debug.WriteLine(fileBeingCopied);
-                    if (fileBeingCopied.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        //It's a DLC!
-                        string dlcname = fileBeingCopied.Substring(dlcSubStringLen);
-                        int index = dlcname.IndexOf(Path.DirectorySeparatorChar);
-                        if (index > 0) //Files directly in the DLC directory won't have path sep
-                        {
-                            try
-                            {
-                                dlcname = dlcname.Substring(0, index);
-                                if (officialDLCNames.TryGetValue(dlcname, out var hrName))
-                                {
-                                    UpdateStatusCallback?.Invoke($"Restoring {hrName}");
-                                }
-                                else
-                                {
-                                    UpdateStatusCallback?.Invoke($"Restoring {dlcname}");
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                TelemetryInterposer.TrackError(e, new Dictionary<string, string>()
-                                    {
-                                        {@"Source", @"Restore UI display callback"},
-                                        {@"Value", fileBeingCopied},
-                                        {@"DLC Folder path", dlcFolderpath}
-                                    });
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //It's basegame
-                        if (fileBeingCopied.EndsWith(@".bik"))
-                        {
-                            UpdateStatusCallback?.Invoke("Restoring movies");
-                        }
-                        else if (new FileInfo(fileBeingCopied).Length > 52428800)
-                        {
-                            UpdateStatusCallback?.Invoke($"Restoring {Path.GetFileName(fileBeingCopied)}");
-                        }
-                        else
-                        {
-                            UpdateStatusCallback?.Invoke($"Restoring basegame");
-                        }
-                    }
-
-                    return true;
+                    RestoreUsingRoboCopy(backupPath, restoreTarget);
                 }
-
-                void totalFilesToCopyCallback(int total)
-                {
-                    ProgressValue = 0;
-                    SetProgressIndeterminateCallback?.Invoke(false);
-                    ProgressMax = total;
-                }
-
-                void bigFileProgressCallback(string fileBeingCopied, long dataCopied, long totalDataToCopy)
-                {
-                    if (fileBeingCopied.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        //It's a DLC!
-                        string dlcname = fileBeingCopied.Substring(dlcSubStringLen);
-                        int index = dlcname.IndexOf(Path.DirectorySeparatorChar);
-                        try
-                        {
-                            string prefix = "Restoring ";
-                            dlcname = dlcname.Substring(0, index);
-                            if (officialDLCNames.TryGetValue(dlcname, out var hrName))
-                            {
-                                prefix += hrName;
-                            }
-                            else
-                            {
-                                prefix += dlcname;
-                            }
-
-                            UpdateStatusCallback?.Invoke($"{prefix} {(int)(dataCopied * 100d / totalDataToCopy)}%");
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                    else
-                    {
-                        UpdateStatusCallback?.Invoke($"Restoring {Path.GetFileName(fileBeingCopied)} {(int)(dataCopied * 100d / totalDataToCopy)}%");
-                    }
-                }
-
-                #endregion
-
-                UpdateStatusCallback?.Invoke("Calculating how many files will be restored");
-                Log.Information($@"Copying backup to game directory: {backupPath} -> {destinationDirectory}");
-                CopyTools.CopyAll_ProgressBar(new DirectoryInfo(backupPath), new DirectoryInfo(destinationDirectory),
-                    totalItemsToCopyCallback: totalFilesToCopyCallback,
-                    aboutToCopyCallback: aboutToCopyCallback,
-                    fileCopiedCallback: fileCopiedCallback,
-                    ignoredExtensions: new[] { @"*.pdf", @"*.mp3", @"*.bak" },
-                    bigFileProgressCallback: bigFileProgressCallback);
-                Log.Information(@"Restore of game data has completed");
 
                 //Check for cmmvanilla file and remove it present
 
                 string cmmVanilla = Path.Combine(destinationDirectory, @"cmm_vanilla");
                 if (File.Exists(cmmVanilla))
                 {
-                    Log.Information(@"Removing cmm_vanilla file");
+                    MLog.Information(@"Removing cmm_vanilla file");
                     File.Delete(cmmVanilla);
                 }
 
-                Log.Information(@"Restore thread wrapping up");
+                MLog.Information(@"Restore thread wrapping up");
                 restoreTarget?.ReloadGameTarget(); // Reload target if we were passed in one.
                 return true;
             }
 
             return false;
+        }
+
+        private void RestoreUsingRoboCopy(string backupPath, GameTarget destTarget)
+        {
+            if (destTarget.TextureModded)
+            {
+                // Game is texture modded.
+                var packagesToCheck = new List<string>();
+
+                void addNonVanillaFile(string failedItem)
+                {
+                    if (failedItem.RepresentsPackageFilePath())
+                        packagesToCheck.Add(failedItem);
+                }
+
+                VanillaDatabaseService.ValidateTargetAgainstVanilla(destTarget, addNonVanillaFile, false);
+
+                // For each package that failed validation, we should check the size.
+                foreach (var ptc in packagesToCheck)
+                {
+                    var fullPath = Path.Combine(destTarget.TargetPath, ptc);
+                    var fi = new FileInfo(fullPath);
+                    var vanillaInfos = VanillaDatabaseService.GetVanillaFileInfo(destTarget, ptc);
+                    if (vanillaInfos.Any(x => x.size == fi.Length + 4))
+                    {
+                        // Might just be MEMI tagged
+                        using var fileStream = File.Open(fullPath, FileMode.Open);
+                        fileStream.SeekEnd();
+                        fileStream.Seek(-4, SeekOrigin.Current);
+                        var tag = fileStream.ReadStringASCII(4);
+                        if (tag == @"MEMI")
+                        {
+                            fileStream.SetLength(fileStream.Length - 4); // Truncate
+                            fileStream.Dispose();
+
+                            // Copy data over from backup so robocopy doesn't copy it.
+                            fi = new FileInfo(fullPath);
+                            var bi = new FileInfo(Path.Combine(backupPath, ptc));
+                            fi.CreationTime = bi.CreationTime;
+                            fi.LastAccessTime = bi.LastAccessTime;
+                            fi.LastWriteTime = bi.LastWriteTime;
+                        }
+                    }
+
+                }
+            }
+
+            string currentRoboCopyFile = null;
+            RoboCommand rc = new RoboCommand();
+            rc.CopyOptions.Destination = destTarget.TargetPath;
+            rc.CopyOptions.Source = backupPath;
+            rc.CopyOptions.Mirror = true;
+            rc.CopyOptions.MultiThreadedCopiesCount = 2;
+            rc.OnCopyProgressChanged += (sender, args) =>
+            {
+                ProgressIndeterminate = false;
+                ProgressValue = (int)args.CurrentFileProgress;
+                ProgressMax = 100;
+            };
+            rc.OnFileProcessed += (sender, args) =>
+            {
+                if (args.ProcessedFile.Name.StartsWith(backupPath) && args.ProcessedFile.Name.Length > backupPath.Length)
+                {
+                    currentRoboCopyFile = args.ProcessedFile.Name.Substring(backupPath.Length + 1);
+                    UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_copyingX, currentRoboCopyFile));
+                }
+            };
+            rc.Start().Wait();
+        }
+
+        private void PrecheckTextureModded(GameTarget destinationTarget, string relativePackagePath)
+        {
+
+        }
+
+        private void RestoreUsingFullCopy(string backupPath, string destinationDirectory)
+        {
+            #region callbacks
+
+            void fileCopiedCallback()
+            {
+                ProgressValue++;
+                if (ProgressMax != 0)
+                {
+                    UpdateProgressCallback?.Invoke(ProgressValue, ProgressMax);
+                }
+            }
+
+            string dlcFolderpath = MEDirectories.GetDLCPath(Game, backupPath) + Path.DirectorySeparatorChar; //\ at end makes sure we are restoring a subdir
+            int dlcSubStringLen = dlcFolderpath.Length;
+            //Debug.WriteLine(@"DLC Folder: " + dlcFolderpath);
+            //Debug.Write(@"DLC Folder path len:" + dlcFolderpath);
+
+            // Cached stuff to avoid hitting same codepath thousands of times
+            var officialDLCNames = MEDirectories.OfficialDLCNames(Game);
+
+            bool aboutToCopyCallback(string fileBeingCopied)
+            {
+                if (fileBeingCopied.Contains(@"\cmmbackup\")) return false; //do not copy cmmbackup files
+                Debug.WriteLine(fileBeingCopied);
+                if (fileBeingCopied.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    //It's a DLC!
+                    string dlcname = fileBeingCopied.Substring(dlcSubStringLen);
+                    int index = dlcname.IndexOf(Path.DirectorySeparatorChar);
+                    if (index > 0) //Files directly in the DLC directory won't have path sep
+                    {
+                        try
+                        {
+                            dlcname = dlcname.Substring(0, index);
+                            if (officialDLCNames.TryGetValue(dlcname, out var hrName))
+                            {
+                                UpdateStatusCallback?.Invoke($"Restoring {hrName}");
+                            }
+                            else
+                            {
+                                UpdateStatusCallback?.Invoke($"Restoring {dlcname}");
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            TelemetryInterposer.TrackError(e, new Dictionary<string, string>()
+                                    {
+                                        {@"Source", @"Restore UI display callback"},
+                                        {@"Value", fileBeingCopied},
+                                        {@"DLC Folder path", dlcFolderpath}
+                                    });
+                        }
+                    }
+                }
+                else
+                {
+                    //It's basegame
+                    if (fileBeingCopied.EndsWith(@".bik"))
+                    {
+                        UpdateStatusCallback?.Invoke("Restoring movies");
+                    }
+                    else if (new FileInfo(fileBeingCopied).Length > 52428800)
+                    {
+                        UpdateStatusCallback?.Invoke($"Restoring {Path.GetFileName(fileBeingCopied)}");
+                    }
+                    else
+                    {
+                        UpdateStatusCallback?.Invoke($"Restoring basegame");
+                    }
+                }
+
+                return true;
+            }
+
+            void totalFilesToCopyCallback(int total)
+            {
+                ProgressValue = 0;
+                SetProgressIndeterminateCallback?.Invoke(false);
+                ProgressMax = total;
+            }
+
+            void bigFileProgressCallback(string fileBeingCopied, long dataCopied, long totalDataToCopy)
+            {
+                if (fileBeingCopied.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    //It's a DLC!
+                    string dlcname = fileBeingCopied.Substring(dlcSubStringLen);
+                    int index = dlcname.IndexOf(Path.DirectorySeparatorChar);
+                    try
+                    {
+                        string prefix = "Restoring ";
+                        dlcname = dlcname.Substring(0, index);
+                        if (officialDLCNames.TryGetValue(dlcname, out var hrName))
+                        {
+                            prefix += hrName;
+                        }
+                        else
+                        {
+                            prefix += dlcname;
+                        }
+
+                        UpdateStatusCallback?.Invoke($"{prefix} {(int)(dataCopied * 100d / totalDataToCopy)}%");
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                else
+                {
+                    UpdateStatusCallback?.Invoke($"Restoring {Path.GetFileName(fileBeingCopied)} {(int)(dataCopied * 100d / totalDataToCopy)}%");
+                }
+            }
+
+            #endregion
+
+            UpdateStatusCallback?.Invoke("Calculating how many files will be restored");
+            MLog.Information($@"Copying backup to game directory: {backupPath} -> {destinationDirectory}");
+            CopyTools.CopyAll_ProgressBar(new DirectoryInfo(backupPath), new DirectoryInfo(destinationDirectory),
+                totalItemsToCopyCallback: totalFilesToCopyCallback,
+                aboutToCopyCallback: aboutToCopyCallback,
+                fileCopiedCallback: fileCopiedCallback,
+                ignoredExtensions: new[] { @"*.pdf", @"*.mp3", @"*.bak" },
+                bigFileProgressCallback: bigFileProgressCallback);
+            MLog.Information(@"Restore of game data has completed");
         }
     }
 
