@@ -46,21 +46,20 @@ namespace ME3TweaksCore
                 return; // Already initialized.
             }
 
-            // Initialize the logger
+            // Initialize the logger if it is not already initialized
             LogCollector.CreateLogger = createLogger;
-            Log.Logger = LogCollector.CreateLogger?.Invoke();
+            Log.Logger ??= LogCollector.CreateLogger?.Invoke();
 
-            MLog.Information(@"Initializing ME3TweaksCore library");
+            MLog.Information($@"Initializing ME3TweaksCore library {MLibraryConsumer.GetLibraryVersion()}");
 
-            // Load Legendary Explorer Core
+            // Load Legendary Explorer Core.
             LegendaryExplorerCoreLib.InitLib(null, logger: Log.Logger);
 
             // Load our library
             RunOnUIThread = RunOnUiThreadDelegate;
             MUtilities.DeleteFilesAndFoldersRecursively(MCoreFilesystem.GetTempDirectory(), deleteDirectoryItself: false); // Clear temp but don't delete the directory itself
 
-            // ???
-
+            Initialized = true;
         }
     }
 }

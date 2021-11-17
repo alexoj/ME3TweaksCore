@@ -28,6 +28,12 @@ namespace ME3TweaksCore.Helpers
         public static string GetExecutablePath() => Process.GetCurrentProcess().MainModule.FileName;
 
         /// <summary>
+        /// Gets the folder of the current program that is running this library.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetExecutingAssemblyFolder() => Path.GetDirectoryName(GetExecutablePath());
+
+        /// <summary>
         /// Gets the version information for the ALOT Installer Core Library.
         /// </summary>
         /// <returns></returns>

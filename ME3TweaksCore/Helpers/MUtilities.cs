@@ -7,6 +7,7 @@ using System.Linq;
 using System.Management;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
+using NickStrupat;
 using Serilog;
 
 namespace ME3TweaksCore.Helpers
@@ -598,6 +600,18 @@ namespace ME3TweaksCore.Helpers
                     }
                 }
             }
+        }
+
+        public static bool IsAdministrator()
+        {
+            var identity = WindowsIdentity.GetCurrent();
+            var principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
+        public static double GetInstalledRamAmount()
+        {
+            return new ComputerInfo().TotalPhysicalMemory;
         }
     }
 }

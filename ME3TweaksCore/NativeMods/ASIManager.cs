@@ -22,7 +22,7 @@ namespace ME3TweaksCore.NativeMods
     [AddINotifyPropertyChangedInterface]
     public class ASIManager
     {
-        public static readonly string CachedASIsFolder = Directory.CreateDirectory(Path.Combine(MCoreFilesystem.GetME3TweaksCoreDataFolder(), @"CachedASIs")).FullName;
+        public static readonly string CachedASIsFolder = Directory.CreateDirectory(Path.Combine(MCoreFilesystem.GetAppDataFolder(), @"CachedASIs")).FullName;
 
         public static readonly string ManifestLocation = Path.Combine(CachedASIsFolder, @"manifest.xml");
         public static readonly string StagedManifestLocation = Path.Combine(CachedASIsFolder, @"manifest_staged.xml");

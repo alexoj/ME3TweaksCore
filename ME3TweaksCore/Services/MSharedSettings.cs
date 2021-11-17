@@ -14,7 +14,7 @@ namespace ME3TweaksCore.Services
 
         public static void WriteSettingString(string valuename, string data)
         {
-            RegistryHandler.WriteRegistryKey(REGISTRY_KEY_ME3TWEAKS, valuename, data);
+            RegistryHandler.WriteRegistryString(REGISTRY_KEY_ME3TWEAKS, valuename, data);
         }
 
         public static string GetSettingString(string valuename)
@@ -22,7 +22,10 @@ namespace ME3TweaksCore.Services
             return RegistryHandler.GetRegistryString(REGISTRY_KEY_ME3TWEAKS, valuename);
         }
 
-
+        public static void DeleteSetting(string valuename)
+        {
+            RegistryHandler.DeleteRegistryKey(REGISTRY_KEY_ME3TWEAKS, valuename);
+        }
 
 
         // SETTINGS

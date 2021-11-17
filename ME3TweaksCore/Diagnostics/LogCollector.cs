@@ -32,8 +32,14 @@ using Serilog;
 
 namespace ME3TweaksCore.Diagnostics
 {
-    class LogCollector
+    public class LogCollector
     {
+        public static List<LogItem> GetLogsList()
+        {
+            var logs = Directory.GetFiles(MCoreFilesystem.GetLogDir(), "*.txt");
+            return logs.Select(x => new LogItem(x)).ToList();
+        }
+
         public static string CollectLogs(string logfile)
         {
             Log.Information(@"Shutting down logger to allow application to pull log file.");
@@ -55,7 +61,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <summary>
         /// ILogger creation delegate that is invoked when reopening the logger after collecting logs.
         /// </summary>
-        internal static Func<ILogger> CreateLogger;
+        public static Func<ILogger> CreateLogger;
 
         // Following is an example CreateLogger call that can be used in consuming applications.
         //        internal static void CreateLogger()
@@ -1777,5 +1783,10 @@ namespace ME3TweaksCore.Diagnostics
                 return $"Error getting processor information: {e.Message}\n"; //do not localize
             }
         }
+
+        /// <summary>
+        /// Log session divider. Should always be the very first line of a new session
+        /// </summary>
+        public static string SessionStartString { get; } = "============================SESSION START============================";
     }
 }

@@ -17,19 +17,19 @@ namespace ME3TweaksCore.Helpers
         private static Action<string, Dictionary<string, string>> TrackEventCallback { get; set; }
         private static Action<Exception, Dictionary<string, string>> TrackErrorCallback { get; set; }
 
-        public void SetEventCallback(Action<string, Dictionary<string, string>> trackEventCallback)
+        public static void SetEventCallback(Action<string, Dictionary<string, string>> trackEventCallback)
         {
             TrackEventCallback = trackEventCallback;
         }
 
 
-        public void SetErrorCallback()
+        public static void SetErrorCallback(Action<Exception, Dictionary<string, string>> trackErrorCallback)
         {
-
+            TrackErrorCallback = trackErrorCallback;
         }
 
 
-        public static void TrackEvent(string eventName, Dictionary<string, string> data)
+        public static void TrackEvent(string eventName, Dictionary<string, string> data = null)
         {
             TrackEventCallback?.Invoke(eventName, data);
         }

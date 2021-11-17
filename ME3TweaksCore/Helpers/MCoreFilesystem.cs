@@ -18,11 +18,11 @@ namespace ME3TweaksCore.Helpers
         public static string AppDataFolderName { get; set; } = "ME3TweaksCore";
 
         /// <summary>
-        /// Gets the ME3TweaksCore appdata directory.
+        /// Gets the appdata directory for app data storage. The folder name can be changed via AppDataFolderName.
         /// </summary>
         /// <param name="createIfMissing"></param>
         /// <returns></returns>
-        internal static string GetME3TweaksCoreDataFolder(bool createIfMissing = true)
+        public static string GetAppDataFolder(bool createIfMissing = true)
         {
             var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppDataFolderName);
             if (createIfMissing && !Directory.Exists(folder))
@@ -38,7 +38,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         internal static string GetDllDirectory()
         {
-            return Directory.CreateDirectory(Path.Combine(GetME3TweaksCoreDataFolder(), "dlls")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "dlls")).FullName;
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         internal static string GetME3TweaksServicesCache()
         {
-            return Directory.CreateDirectory(Path.Combine(GetME3TweaksCoreDataFolder(), "ME3TweaksServicesCache")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "ME3TweaksServicesCache")).FullName;
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace ME3TweaksCore.Helpers
 
         private static string GetMEMDir()
         {
-            return Directory.CreateDirectory(Path.Combine(GetME3TweaksCoreDataFolder(), "MassEffectModder")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "MassEffectModder")).FullName;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string GetTempDirectory()
         {
-            return Directory.CreateDirectory(Path.Combine(GetME3TweaksCoreDataFolder(), "Temp")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "Temp")).FullName;
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string GetCachedExecutablesDirectory()
         {
-            return Directory.CreateDirectory(Path.Combine(GetME3TweaksCoreDataFolder(), "CachedExecutables")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "CachedExecutables")).FullName;
         }
 
         /// <summary>
@@ -117,6 +117,15 @@ namespace ME3TweaksCore.Helpers
         public static string GetCachedExecutable(string executableName)
         {
             return Path.Combine(GetCachedExecutablesDirectory(), executableName);
+        }
+
+        /// <summary>
+        /// Gets the log directory for the application.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLogDir()
+        {
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "logs")).FullName;
         }
     }
 }

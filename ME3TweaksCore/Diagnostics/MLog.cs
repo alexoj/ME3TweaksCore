@@ -83,5 +83,38 @@ namespace ME3TweaksCore.Diagnostics
             Log.CloseAndFlush();
 
         }
+
+        public static void Exception(Exception exception, string preMessage, bool fatal = false)
+        {
+            Log.Error($"{LoggingPrefix}{preMessage}");
+
+            // Log exception
+            while (exception != null)
+            {
+                var line1 = exception.GetType().Name + ": " + exception.Message;
+                foreach (var line in line1.Split("\n"))
+                {
+                    if (fatal)
+                        Log.Fatal(LoggingPrefix + line);
+                    else
+                        Log.Error(LoggingPrefix + line);
+
+                }
+
+                if (exception.StackTrace != null)
+                {
+                    foreach (var line in exception.StackTrace.Split("\n"))
+                    {
+                        if (fatal)
+                            Log.Fatal(LoggingPrefix + line);
+                        else
+                            Log.Error(LoggingPrefix + line);
+                    }
+                }
+
+                exception = exception.InnerException;
+            }
+        }
+
     }
 }

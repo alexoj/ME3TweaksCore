@@ -696,7 +696,7 @@ namespace ME3TweaksCore.Services
                     //Tag
                     File.WriteAllText(Path.Combine(targetPath, BackupService.CMM_VANILLA_FILENAME), ME3TweaksCoreLib.CoreLibVersionHR);
                     Log.Information($@"Wrote {BackupService.CMM_VANILLA_FILENAME} to validated backup");
-                    BackupService.SetBackedUp(game, true);
+                    BackupService.RefreshBackupStatus(null,true, game, true);
                 }
                 else
                 {
@@ -707,7 +707,7 @@ namespace ME3TweaksCore.Services
             {
                 Log.Information(@"Backup target is invalid. This backup cannot not be used. Reason: " + validationFailedReason);
             }
-            BackupService.RefreshBackupStatus(null, game);
+            BackupService.RefreshBackupStatus(null, game: game);
             BackupService.SetActivity(game, false);
         }
     }

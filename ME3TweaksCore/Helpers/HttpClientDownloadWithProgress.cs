@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 using ME3TweaksCore.Misc;
 using Serilog;
 
-namespace ALOTInstallerCore.Helpers
+namespace ME3TweaksCore.Helpers
 {
     /// <summary>
     /// Use HttpClient instead of WebClient, microsoft says! Oh yeah, we also removed all of hte useful things from webclient. Oh and we also

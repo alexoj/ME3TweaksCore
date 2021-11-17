@@ -1,19 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using FontAwesome5;
 using LegendaryExplorerCore.Packages;
-using ME3TweaksCore.Services.Backup;
 
 namespace ME3TweaksCoreWPF.Services.Backup
 {
     /// <summary>
     /// ME3Tweaks Backup Service, with WPF extensions (for icons)
     /// </summary>
-    public class BackupServiceWPF : BackupService
+    public static class BackupServiceWPF
     {
+        #region Static Property Changed
+
+        public static event PropertyChangedEventHandler StaticPropertyChanged;
+
+        /// <summary>
+        /// Sets given property and notifies listeners of its change. IGNORES setting the property to same value.
+        /// Should be called in property setters.
+        /// </summary>
+        /// <typeparam name="T">Type of given property.</typeparam>
+        /// <param name="field">Backing field to update.</param>
+        /// <param name="value">New value of property.</param>
+        /// <param name="propertyName">Name of property.</param>
+        /// <returns>True if success, false if backing field and new value aren't compatible.</returns>
+        private static bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "")
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            StaticPropertyChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+        #endregion
+
+
         private static EFontAwesomeIcon _me1ActivityIcon = EFontAwesomeIcon.Solid_TimesCircle;
         public static EFontAwesomeIcon ME1ActivityIcon
         {
