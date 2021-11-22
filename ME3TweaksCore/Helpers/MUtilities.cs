@@ -444,7 +444,7 @@ namespace ME3TweaksCore.Helpers
                 var permissionsGranterExe = MCoreFilesystem.GetCachedExecutable("PermissionsGranter.exe");
                 if (!File.Exists(permissionsGranterExe))
                 {
-                    MUtilities.ExtractInternalFile("ME3TweaksCore.Binaries.PermissionsGranter.exe", permissionsGranterExe, true);
+                    MUtilities.ExtractInternalFile("ME3TweaksCore.Assets.PermissionsGranter.exe", permissionsGranterExe, true);
                 }
 
                 string args = "\"" + System.Security.Principal.WindowsIdentity.GetCurrent().Name + "\" -create-directory \"" + directoryPath.TrimEnd('\\') + "\"";

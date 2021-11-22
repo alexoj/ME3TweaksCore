@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using LegendaryExplorerCore.Compression;
 using ME3TweaksCore.Helpers;
 using Serilog;
@@ -38,8 +41,22 @@ namespace ME3TweaksCore.Localization
             var localizationXaml = LoadLocalizationXaml($"{langcode.ToLower()}.xaml.lzma");
             if (localizationXaml == null) return false;
             XDocument localizationDoc = XDocument.Parse(localizationXaml);
-            var strings = localizationDoc.Descendants("//system:String");
 
+            // Dumb stuff to get NAmeTable so it can read the xml... sigh
+            //Grab the reader
+            var reader = localizationDoc.CreateReader();
+            //Set the root
+            var root = localizationDoc.Root;
+            //Use the reader NameTable
+            var namespaceManager = new XmlNamespaceManager(reader.NameTable);
+            //Add the GeoRSS NS
+            namespaceManager.AddNamespace("system", "clr-namespace:System;assembly=System.Runtime");
+            var x = XNamespace.Get("http://schemas.microsoft.com/winfx/2006/xaml");
+            var strings = localizationDoc.XPathSelectElements("//system:String", namespaceManager);
+            foreach (var str in strings)
+            {
+                LocalizationDictionary[str.Attribute(x + "Key").Value] = str.Value;
+            }
             // Todo: Parse and install strings.
 
             return true;

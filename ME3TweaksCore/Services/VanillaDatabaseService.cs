@@ -38,9 +38,9 @@ namespace ME3TweaksCore.Services
 
         public static CaseInsensitiveDictionary<List<(int size, string md5)>> LoadDatabaseFor(MEGame game, bool isMe1PL = false)
         {
-            string assetPrefix = $@"MassEffectModManagerCore.modmanager.gamemd5.{game.ToString().ToLower()}";
+            string assetPrefix = $@"ME3TweaksCore.Assets.VanillaDatabase.{game.ToString().ToLower()}";
             if (game == MEGame.LELauncher)
-                assetPrefix = $@"MassEffectModManagerCore.modmanager.gamemd5.lel";
+                assetPrefix = @"ME3TweaksCore.Assets.VanillaDatabase.lel";
 
             switch (game)
             {
@@ -499,7 +499,13 @@ namespace ME3TweaksCore.Services
             return allConsistent;
         }
 
-        public static List<(int size, string md5)> GetVanillaFileInfo(GameTarget target, string filepath)
+        /// <summary>
+        /// Gets vanilla information about the specfied relative filepath (relative to the specified gametarget)
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="relativeFilepath"></param>
+        /// <returns></returns>
+        public static List<(int size, string md5)> GetVanillaFileInfo(GameTarget target, string relativeFilepath)
         {
             CaseInsensitiveDictionary<List<(int size, string md5)>> vanillaDB = null;
             switch (target.Game)
@@ -531,7 +537,7 @@ namespace ME3TweaksCore.Services
                 default:
                     throw new Exception(@"Cannot vanilla check against game that is not ME1/ME2/ME3");
             }
-            if (vanillaDB.TryGetValue(filepath, out var info))
+            if (vanillaDB.TryGetValue(relativeFilepath, out var info))
             {
                 return info;
             }

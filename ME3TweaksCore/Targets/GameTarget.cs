@@ -1001,33 +1001,33 @@ namespace ME3TweaksCore.Targets
             if (Game == MEGame.ME1)
             {
                 var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me1.binkw32.dll", destPath, true);
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me1.binkw23.dll", obinkPath, true);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw32.dll", destPath, true);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw23.dll", obinkPath, true);
             }
             else if (Game == MEGame.ME2)
             {
                 var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me2.binkw32.dll", destPath, true);
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me2.binkw23.dll", obinkPath, true);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw32.dll", destPath, true);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw23.dll", obinkPath, true);
 
             }
             else if (Game == MEGame.ME3)
             {
                 var obinkPath = Path.Combine(TargetPath, "Binaries", "win32", "binkw23.dll");
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me3.binkw32.dll", destPath, true);
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw32.me3.binkw23.dll", obinkPath, true);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw32.dll", destPath, true);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw23.dll", obinkPath, true);
             }
             else if (Game.IsLEGame())
             {
                 var obinkPath = Path.Combine(TargetPath, "Binaries", "Win64", "bink2w64_original.dll"); // Where the original bink should go
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw64.bink2w64.dll", destPath, true);  // Bypass proxy
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw64.bink2w64_original.dll", obinkPath, true); //
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true);  // Bypass proxy
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
             }
             else if (Game == MEGame.LELauncher)
             {
                 var obinkPath = Path.Combine(TargetPath, "bink2w64_original.dll"); // Where the original bink should go
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw64.bink2w64.dll", destPath, true);  // Bypass proxy
-                MUtilities.ExtractInternalFile("MassEffectModManagerCore.modmanager.binkw64.bink2w64_original.dll", obinkPath, true); //
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true);  // Bypass proxy
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
             }
             else
             {

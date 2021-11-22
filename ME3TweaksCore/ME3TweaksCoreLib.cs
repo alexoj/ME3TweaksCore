@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using LegendaryExplorerCore;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Services.Backup;
 using Serilog;
 
 namespace ME3TweaksCore
@@ -58,6 +59,8 @@ namespace ME3TweaksCore
             // Load our library
             RunOnUIThread = RunOnUiThreadDelegate;
             MUtilities.DeleteFilesAndFoldersRecursively(MCoreFilesystem.GetTempDirectory(), deleteDirectoryItself: false); // Clear temp but don't delete the directory itself
+
+            BackupService.InitBackupService(RunOnUIThread);
 
             Initialized = true;
         }

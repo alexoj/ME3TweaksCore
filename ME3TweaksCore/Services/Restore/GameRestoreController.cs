@@ -126,37 +126,42 @@ namespace ME3TweaksCore.Services.Restore
                 }
 
                 SetProgressIndeterminateCallback?.Invoke(true);
-                UpdateStatusCallback?.Invoke("Deleting existing game installation");
-                if (Directory.Exists(destinationDirectory))
+
+                if (useFullCopyMethod)
                 {
-                    if (Enumerable.Any(Directory.GetFiles(destinationDirectory)) || Enumerable.Any(Directory.GetDirectories(destinationDirectory)))
+                    UpdateStatusCallback?.Invoke("Deleting existing game installation");
+                    if (Directory.Exists(destinationDirectory))
                     {
-                        MLog.Information(@"Deleting existing game directory: " + destinationDirectory);
-                        try
+                        if (Enumerable.Any(Directory.GetFiles(destinationDirectory)) || Enumerable.Any(Directory.GetDirectories(destinationDirectory)))
                         {
-                            bool deletedDirectory = MUtilities.DeleteFilesAndFoldersRecursively(destinationDirectory);
-                            if (deletedDirectory != true)
+                            MLog.Information(@"Deleting existing game directory: " + destinationDirectory);
+                            try
                             {
-                                RestoreErrorCallback?.Invoke("Could not delete game directory", $"Could not delete the game directory for {Game.ToGameName()}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.");
-                                //b.Result = RestoreResult.ERROR_COULD_NOT_DELETE_GAME_DIRECTORY;
+                                bool deletedDirectory = MUtilities.DeleteFilesAndFoldersRecursively(destinationDirectory);
+                                if (deletedDirectory != true)
+                                {
+                                    RestoreErrorCallback?.Invoke("Could not delete game directory", $"Could not delete the game directory for {Game.ToGameName()}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.");
+                                    //b.Result = RestoreResult.ERROR_COULD_NOT_DELETE_GAME_DIRECTORY;
+                                    return false;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                //todo: handle this better
+                                MLog.Error($@"Exception deleting game directory: {destinationDirectory}: {ex.Message}");
+                                RestoreErrorCallback?.Invoke("Error deleting game directory", $"Could not delete the game directory for {Game.ToGameName()}: {ex.Message}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.");
+                                //b.Result = RestoreResult.EXCEPTION_DELETING_GAME_DIRECTORY;
                                 return false;
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            //todo: handle this better
-                            MLog.Error($@"Exception deleting game directory: {destinationDirectory}: {ex.Message}");
-                            RestoreErrorCallback?.Invoke("Error deleting game directory", $"Could not delete the game directory for {Game.ToGameName()}: {ex.Message}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.");
-                            //b.Result = RestoreResult.EXCEPTION_DELETING_GAME_DIRECTORY;
-                            return false;
-                        }
+                    }
+                    else
+                    {
+                        MLog.Error(@"Game directory not found! Was it removed while the app was running?");
                     }
                 }
-                else
-                {
-                    MLog.Error(@"Game directory not found! Was it removed while the app was running?");
-                }
 
+                UpdateStatusCallback?.Invoke("Preparing game directory");
                 var created = MUtilities.CreateDirectoryWithWritePermission(destinationDirectory);
                 if (!created)
                 {
@@ -198,6 +203,7 @@ namespace ME3TweaksCore.Services.Restore
         {
             if (destTarget.TextureModded)
             {
+                UpdateStatusCallback?.Invoke("Analyzing game files");
                 // Game is texture modded.
                 var packagesToCheck = new List<string>();
 
@@ -210,32 +216,39 @@ namespace ME3TweaksCore.Services.Restore
                 VanillaDatabaseService.ValidateTargetAgainstVanilla(destTarget, addNonVanillaFile, false);
 
                 // For each package that failed validation, we should check the size.
-                foreach (var ptc in packagesToCheck)
+                UpdateStatusCallback?.Invoke("Checking texture-tagged packages");
+                foreach (var fullPath in packagesToCheck)
                 {
-                    var fullPath = Path.Combine(destTarget.TargetPath, ptc);
+                    var relativePath = fullPath.Substring(destTarget.TargetPath.Length + 1);
                     var fi = new FileInfo(fullPath);
-                    var vanillaInfos = VanillaDatabaseService.GetVanillaFileInfo(destTarget, ptc);
-                    if (vanillaInfos.Any(x => x.size == fi.Length + 4))
+                    bool resetDate = false;
+                    var vanillaInfos = VanillaDatabaseService.GetVanillaFileInfo(destTarget, relativePath);
+                    if (vanillaInfos != null && vanillaInfos.Any(x => x.size == fi.Length - 24))
                     {
                         // Might just be MEMI tagged
                         using var fileStream = File.Open(fullPath, FileMode.Open);
                         fileStream.SeekEnd();
-                        fileStream.Seek(-4, SeekOrigin.Current);
-                        var tag = fileStream.ReadStringASCII(4);
-                        if (tag == @"MEMI")
+                        fileStream.Seek(-24, SeekOrigin.Current);
+                        var tag = fileStream.ReadStringASCII(24);
+                        if (tag == @"ThisIsMEMEndOfFileMarker")
                         {
-                            fileStream.SetLength(fileStream.Length - 4); // Truncate
+                            fileStream.SetLength(fileStream.Length - 24); // Truncate
                             fileStream.Dispose();
-
-                            // Copy data over from backup so robocopy doesn't copy it.
-                            fi = new FileInfo(fullPath);
-                            var bi = new FileInfo(Path.Combine(backupPath, ptc));
-                            fi.CreationTime = bi.CreationTime;
-                            fi.LastAccessTime = bi.LastAccessTime;
-                            fi.LastWriteTime = bi.LastWriteTime;
+                            fileStream.Close();
+                            resetDate = true;
                         }
                     }
 
+                    // This is done outside of the previous block to make the filestream be closed so it doesn't interfere with our operation
+                    if (resetDate)
+                    {
+                        // Copy data over from backup so robocopy doesn't copy it.
+                        var bi = new FileInfo(Path.Combine(backupPath, relativePath));
+                        File.SetLastWriteTime(fullPath, bi.LastWriteTime);
+                        File.SetCreationTime(fullPath, bi.CreationTime);
+                        File.SetLastAccessTime(fullPath, bi.LastAccessTime);
+                        Debug.WriteLine($"File only texture tagged: {fullPath}");
+                    }
                 }
             }
 
