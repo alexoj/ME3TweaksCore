@@ -30,7 +30,6 @@ namespace ME3TweaksCore.Services.Restore
     public class GameRestore
     {
         private MEGame Game;
-
         public long ProgressValue { get; set; }
         public long ProgressMax { get; set; }
         public bool ProgressIndeterminate { get; set; }
@@ -74,14 +73,13 @@ namespace ME3TweaksCore.Services.Restore
         }
 
         /// <summary>
-        /// Restores the game to the specified directory (game location). Pass in null if you wish to restore to a custom location.
+        /// Restores the game to the specified directory (game location). Pass in null if you wish to restore to a custom location. Refreshes the target on completion.
         /// </summary>
         /// <param name="destinationDirectory">Game directory that will be replaced with backup</param>
         /// <returns></returns>
         public bool PerformRestore(GameTarget restoreTarget, string destinationDirectory)
         {
             var useFullCopyMethod = false;  // Prefer robocopy for now.
-
 
             if (MUtilities.IsGameRunning(Game))
             {

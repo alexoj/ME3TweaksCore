@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Shell;
 using ME3TweaksCore.Misc;
+using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace ME3TweaksCoreWPF.UI
 {
@@ -15,11 +15,11 @@ namespace ME3TweaksCoreWPF.UI
             switch (taskbarState)
             {
                 case MTaskbarState.None:
-                    return TaskbarItemProgressState.None;
+                    return TaskbarProgressBarState.NoProgress;
                 case MTaskbarState.Indeterminate:
-                    return TaskbarItemProgressState.Indeterminate;
+                    return TaskbarProgressBarState.Indeterminate;
                 case MTaskbarState.Progressing:
-                    return TaskbarItemProgressState.Normal;
+                    return TaskbarProgressBarState.Normal;
                 default:
                     throw new Exception($"MTaskBarState: Undefined conversion from {taskbarState} to WPF");
             }

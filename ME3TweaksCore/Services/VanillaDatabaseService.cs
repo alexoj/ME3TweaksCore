@@ -265,7 +265,7 @@ namespace ME3TweaksCore.Services
         /// <param name="dlcfoldername">DLC foldername</param>
         /// <param name="filename">filename</param>
         /// <returns></returns>
-        internal static MemoryStream FetchME1ME2DLCFile(MEGame game, string dlcfoldername, string filename)
+        public static MemoryStream FetchME1ME2DLCFile(MEGame game, string dlcfoldername, string filename)
         {
             if (game == MEGame.ME3) throw new Exception(@"Cannot call this method with game = ME3");
             var backupPath = BackupService.GetGameBackupPath(game);
@@ -326,8 +326,10 @@ namespace ME3TweaksCore.Services
         }
 
         private static readonly string[] BasegameTFCs = { @"CharTextures", @"Movies", @"Textures", @"Lighting" };
-        internal static bool IsBasegameTFCName(string tfcName, MEGame game)
+
+        public static bool IsBasegameTFCName(string tfcName, MEGame game)
         {
+            // NEEDS UPDATED FOR LE!!!
             if (BasegameTFCs.Contains(tfcName)) return true;
             //Might be DLC.
             var dlcs = MEDirectories.OfficialDLC(game);
@@ -456,7 +458,7 @@ namespace ME3TweaksCore.Services
         /// </summary>
         /// <param name="target">Target to get dlc from</param>
         /// <returns>List of DLC foldernames</returns>
-        internal static List<string> GetInstalledOfficialDLC(GameTarget target, bool includeDisabled = false)
+        public static List<string> GetInstalledOfficialDLC(GameTarget target, bool includeDisabled = false)
         {
             return target.GetInstalledDLC(includeDisabled).Where(x => MEDirectories.OfficialDLC(target.Game).Contains(x.TrimStart('x'), StringComparer.InvariantCultureIgnoreCase)).ToList();
         }
@@ -702,7 +704,7 @@ namespace ME3TweaksCore.Services
                     //Tag
                     File.WriteAllText(Path.Combine(targetPath, BackupService.CMM_VANILLA_FILENAME), ME3TweaksCoreLib.CoreLibVersionHR);
                     Log.Information($@"Wrote {BackupService.CMM_VANILLA_FILENAME} to validated backup");
-                    BackupService.RefreshBackupStatus(null,true, game, true);
+                    BackupService.RefreshBackupStatus(null, true, game, true);
                 }
                 else
                 {
