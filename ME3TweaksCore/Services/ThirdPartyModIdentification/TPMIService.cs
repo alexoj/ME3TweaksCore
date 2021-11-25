@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Xml.Schema;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
@@ -28,6 +30,14 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
         internal static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> Database;
 
         #region ONLINE FETCH AND LOAD
+
+        public static bool LoadService(bool forceRefresh = false)
+        {
+            Database = FetchThirdPartyIdentificationManifest(forceRefresh);
+            ServiceLoaded = true;
+            return true;
+        }
+
         public static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> FetchThirdPartyIdentificationManifest(bool overrideThrottling = false)
         {
             string cached = null;
@@ -123,7 +133,7 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
             return null;
         }
 
-        internal static List<ThirdPartyModInfo> GetThirdPartyModInfosByModuleNumber(int modDLCModuleNumber, MEGame game)
+        public static List<ThirdPartyModInfo> GetThirdPartyModInfosByModuleNumber(int modDLCModuleNumber, MEGame game)
         {
             if (ServiceLoaded && Database.TryGetValue(game.ToString(), out var infosForGame))
             {
@@ -134,7 +144,7 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
             return new List<ThirdPartyModInfo>(); //Not loaded
         }
 
-        internal static List<ThirdPartyModInfo> GetThirdPartyModInfosByMountPriority(MEGame game, int modMountPriority)
+        public static List<ThirdPartyModInfo> GetThirdPartyModInfosByMountPriority(MEGame game, int modMountPriority)
         {
             if (ServiceLoaded && Database.TryGetValue(game.ToString(), out var infosForGame))
             {
@@ -149,6 +159,16 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
         {
             tpmi = GetThirdPartyModInfo(dlcFolderName, game);
             return tpmi != null;
+        }
+
+        public static IReadOnlyDictionary<string, ThirdPartyModInfo> GetThirdPartyModInfos(MEGame game)
+        {
+            if (Database.TryGetValue(game.ToString(), out var infos))
+            {
+                return infos;
+            }
+
+            return new CaseInsensitiveDictionary<ThirdPartyModInfo>();
         }
     }
 }

@@ -26,6 +26,9 @@ namespace ME3TweaksCore.Services.Restore
 {
     #region RESTORE
 
+    /// <summary>
+    /// Object that contains the logic for performing the restoration of a game.
+    /// </summary>
     [AddINotifyPropertyChangedInterface]
     public class GameRestore
     {

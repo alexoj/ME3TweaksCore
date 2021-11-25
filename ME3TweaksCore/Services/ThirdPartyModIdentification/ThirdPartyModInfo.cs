@@ -33,7 +33,7 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
         /// <summary>
         /// Denotes that this TPMI object represents a preview object (such as in Starter Kit)
         /// </summary>
-        public bool IsPreview { get; internal set; }
+        public bool IsPreview { get; set; }
 
         /// <summary>
         /// Denotes this TPMI object is selected (UI only)
