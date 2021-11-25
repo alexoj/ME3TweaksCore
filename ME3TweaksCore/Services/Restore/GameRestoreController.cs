@@ -63,6 +63,10 @@ namespace ME3TweaksCore.Services.Restore
         /// Callback when the progressbar should change indeterminate states
         /// </summary>
         public Action<bool> SetProgressIndeterminateCallback { get; set; }
+        /// <summary>
+        /// Value indicating if a restore operation is currently in progress
+        /// </summary>
+        public bool RestoreInProgress { get; private set; }
 
         public GameRestore(MEGame game)
         {

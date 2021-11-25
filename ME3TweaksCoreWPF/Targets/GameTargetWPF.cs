@@ -31,7 +31,7 @@ namespace ME3TweaksCoreWPF
         /// <summary>
         /// Determines if this gametarget can be chosen in dropdowns
         /// </summary>
-        public bool Selectable { get; internal set; } = true;
+        public bool Selectable { get; set; } = true;
 
         public string TargetBootIcon
         {

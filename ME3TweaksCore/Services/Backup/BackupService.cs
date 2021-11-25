@@ -149,7 +149,7 @@ namespace ME3TweaksCore.Services.Backup
         /// <param name="allTargets">List of targets to determine if the game is installed or not. Passing null will assume the game is installed</param>
         /// <param name="forceCmmVanilla">If the backups will be forced to have the cmmVanilla file to be considered valid</param>
         /// <param name="game">What game to refresh. Set to unknown to refresh all.</param>
-        public static void RefreshBackupStatus(List<GameTarget> allTargets, bool forceCmmVanilla = true, MEGame game = MEGame.Unknown, bool log = false)
+        public static void RefreshBackupStatus(List<GameTarget> allTargets = null, bool forceCmmVanilla = true, MEGame game = MEGame.Unknown, bool log = false)
         {
             foreach (var v in GameBackupStatuses)
             {
@@ -241,8 +241,10 @@ namespace ME3TweaksCore.Services.Backup
             }
         }
 
-        public static string GetGameBackupPath(MEGame game, bool logReturnedPath = false, bool forceReturnPath = false)
+        public static string GetGameBackupPath(MEGame game, bool logReturnedPath = false, bool forceReturnPath = false, bool refresh = false)
         {
+            // Todo: Compare with M3 build 123 as it has a refresh variable. Maybe to cache lookups?
+
             var path = MSharedSettings.GetSettingString($@"{game}VanillaBackupLocation");
 
             if (forceReturnPath)
@@ -374,10 +376,26 @@ namespace ME3TweaksCore.Services.Backup
 #endif
         }
 
+        /// <summary>
+        /// Signal that backup activity is taking place
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="isActive"></param>
         public static void SetActivity(MEGame game, bool isActive)
         {
             var status = GetBackupStatus(game);
             status.BackupActivity = isActive;
+        }
+
+        public static bool AnyGameMissingBackup(params MEGame[] gamesToCheck)
+        {
+            foreach (var g in gamesToCheck)
+            {
+                var bs = GetBackupStatus(g);
+                if (bs == null || !bs.BackedUp)
+                    return false;
+            }
+            return false;
         }
     }
 }

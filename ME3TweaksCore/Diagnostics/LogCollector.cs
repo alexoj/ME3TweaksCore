@@ -75,7 +75,13 @@ namespace ME3TweaksCore.Diagnostics
         //                .CreateLogger();
         //        }
 
-        internal static string CollectLatestLog(string logdir, bool restartLogger)
+        /// <summary>
+        /// Collects the latest log file and reopens the logger when complete (if specified)
+        /// </summary>
+        /// <param name="logdir"></param>
+        /// <param name="restartLogger"></param>
+        /// <returns></returns>
+        public static string CollectLatestLog(string logdir, bool restartLogger)
         {
             Log.Information(@"Shutting down logger to allow application to pull log file.");
             Log.CloseAndFlush();

@@ -650,7 +650,7 @@ namespace ME3TweaksCore.Targets
             return alotInfos;
         }
 
-        internal void StampDebugALOTInfo()
+        public void StampDebugALOTInfo()
         {
 #if DEBUG
             // Writes a MEMI v4 marker
@@ -777,7 +777,7 @@ namespace ME3TweaksCore.Targets
 #endif
         }
 
-        internal void StripALOTInfo()
+        public void StripALOTInfo()
         {
 #if DEBUG
             var markerPath = M3Directories.GetTextureMarkerPath(this);
@@ -935,6 +935,11 @@ namespace ME3TweaksCore.Targets
 
         public bool SupportsLODUpdates() => Game is MEGame.ME1 or MEGame.ME2 or MEGame.ME3;
 
+        /// <summary>
+        /// Gets all installed and enabled DLC foldernames. Includes disabled if indicated.
+        /// </summary>
+        /// <param name="includeDisabled"></param>
+        /// <returns></returns>
         public List<string> GetInstalledDLC(bool includeDisabled = false)
         {
             var dlcDirectory = M3Directories.GetDLCPath(this);
@@ -944,6 +949,16 @@ namespace ME3TweaksCore.Targets
             }
 
             return new List<string>();
+        }
+
+        /// <summary>
+        /// Gets list of DLC directory names that are not made by BioWare. Does not include disabled DLC.
+        /// </summary>
+        /// <param name="target">Target to get mods from</param>
+        /// <returns>List of DLC foldernames</returns>
+        public List<string> GetInstalledDLCMods()
+        {
+            return GetInstalledDLC().Where(x => !MEDirectories.OfficialDLC(Game).Contains(x, StringComparer.InvariantCultureIgnoreCase)).ToList();
         }
 
         /// <summary>

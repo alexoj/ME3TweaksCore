@@ -65,7 +65,7 @@ namespace ME3TweaksCore.GameFilesystem
         }
         public static bool IsInBasegame(string file, GameTarget target) => MEDirectories.IsInBasegame(file, target.Game, target.TargetPath);
         public static bool IsInOfficialDLC(string file, GameTarget target) => MEDirectories.IsInOfficialDLC(file, target.Game, target.TargetPath);
-        internal static List<string> EnumerateGameFiles(GameTarget validationTarget, Predicate<string> predicate = null)
+        public static List<string> EnumerateGameFiles(GameTarget validationTarget, Predicate<string> predicate = null)
         {
             return MEDirectories.EnumerateGameFiles(validationTarget.Game, validationTarget.TargetPath, predicate: predicate);
         }
