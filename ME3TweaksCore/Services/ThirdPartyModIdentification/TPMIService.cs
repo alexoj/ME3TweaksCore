@@ -38,7 +38,7 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
             return true;
         }
 
-        public static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> FetchThirdPartyIdentificationManifest(bool overrideThrottling = false)
+        private static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> FetchThirdPartyIdentificationManifest(bool overrideThrottling = false)
         {
             string cached = null;
             if (File.Exists(MCoreFilesystem.GetThirdPartyIdentificationCachedFile()))

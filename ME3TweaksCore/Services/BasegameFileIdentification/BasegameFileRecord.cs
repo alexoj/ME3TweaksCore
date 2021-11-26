@@ -21,18 +21,6 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
         public string game { get; set; }
         public int size { get; set; }
         public BasegameFileRecord() { }
-
-        // Mod Manager will need to subclass this to add this method.
-
-        /*public BasegameFileRecord(string fullfilepath, int size, GameTarget gameTarget, Mod modBeingInstalled, string md5 = null)
-        {
-            this.file = fullfilepath.Substring(gameTarget.TargetPath.Length + 1);
-            this.hash = md5 ?? Utilities.CalculateMD5(fullfilepath);
-            this.game = gameTarget.Game.ToGameNum().ToString();
-            this.size = size;
-            this.source = modBeingInstalled.ModName + @" " + modBeingInstalled.ModVersionString;
-        }*/
-
         public BasegameFileRecord(string relativePathToRoot, int size, MEGame game, string humanName, string md5)
         {
             this.file = relativePathToRoot;

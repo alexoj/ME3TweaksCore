@@ -13,19 +13,28 @@ using Serilog;
 
 namespace ME3TweaksCore.Services
 {
+    /// <summary>
+    /// Class containing online content features and helper methods.
+    /// </summary>
     public partial class MOnlineContent
     {
         /// <summary>
         /// Checks if we can perform an online content fetch. This value is updated when manually checking for content updates, and on automatic 1-day intervals (if no previous manual check has occurred)
         /// </summary>
         /// <returns></returns>
-        internal static bool CanFetchContentThrottleCheck()
+        public static bool CanFetchContentThrottleCheck()
         {
             var lastContentCheck = MSharedSettings.LastContentCheck;
             var timeNow = DateTime.Now;
             return (timeNow - lastContentCheck).TotalDays > 1;
         }
 
+        /// <summary>
+        /// Fetches a remote string, aware of its encoding.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="authorizationToken"></param>
+        /// <returns></returns>
         public static string FetchRemoteString(string url, string authorizationToken = null)
         {
             try

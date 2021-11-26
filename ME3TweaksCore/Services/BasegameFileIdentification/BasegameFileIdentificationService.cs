@@ -6,22 +6,38 @@ using LegendaryExplorerCore.Gammtek.Extensions.Collections.Generic;
 using LegendaryExplorerCore.Misc;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Misc;
 using ME3TweaksCore.Targets;
 using Newtonsoft.Json;
 
+namespace ME3TweaksCore.Services
+{
+    public partial class MOnlineContent
+    {
+        /// <summary>
+        /// Basegame File Identification Service URLs
+        /// </summary>
+        public static FallbackLink BasegameFileIdentificationServiceURL { get; } = new FallbackLink()
+        {
+            MainURL = @"https://me3tweaks.com/modmanager/services/basegamefileidentificationservice",
+            FallbackURL = @"https://raw.githubusercontent.com/ME3Tweaks/ME3TweaksModManager/master/MassEffectModManagerCore/staticfiles/basegamefileidentificationservice.json"
+        };
+    }
+}
+
 namespace ME3TweaksCore.Services.BasegameFileIdentification
 {
+    
 
     public class BasegameFileIdentificationService
     {
-        /// <summary>
-        /// Call when a blank database needs to be returned (e.g. load failed)
-        /// </summary>
-        /// <returns></returns>
-        internal static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> GetBlankDatabase() => new();
-
         private static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> LocalDatabase;
         private static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> ME3TweaksDatabase;
+
+        /// <summary>
+        /// If the BasegameFileIdentificationService has been initially loaded
+        /// </summary>
+        public static bool ServiceLoaded { get; private set; }
 
         private static void LoadLocalBasegameIdentificationService()
         {
@@ -30,10 +46,10 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             LoadDatabase(true, LocalDatabase);
         }
 
-        internal static void LoadME3TweaksBasegameIdentificationService()
+        internal static void LoadME3TweaksBasegameIdentificationService(bool forceRefresh)
         {
             if (LocalDatabase != null) return;
-            ME3TweaksDatabase = new CaseInsensitiveDictionary<CaseInsensitiveDictionary<List<BasegameFileRecord>>>();
+            ME3TweaksDatabase = FetchBasegameFileIdentificationServiceManifest(forceRefresh);
             LoadDatabase(false, ME3TweaksDatabase);
         }
 
@@ -56,14 +72,14 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
                 catch (Exception e)
                 {
                     MLog.Error($@"Error loading {typeStr} Basegame File Identification Service: {e.Message}");
-                    var db = GetBlankDatabase();
+                    var db = getBlankBGFIDB();
                     database.ReplaceAll(db);
                 }
             }
             else
             {
                 MLog.Information($@"Loaded blank {typeStr} Basegame File Identification Service");
-                var db = GetBlankDatabase();
+                var db = getBlankBGFIDB();
                 database.ReplaceAll(db);
             }
         }
@@ -181,6 +197,95 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 
             infosForGame = new CaseInsensitiveDictionary<List<BasegameFileRecord>>(0); // None
             return false;
+        }
+
+        public static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> FetchBasegameFileIdentificationServiceManifest(bool overrideThrottling = false)
+        {
+            MLog.Information(@"Fetching basegame file identification manifest");
+
+            //read cached first.
+            string cached = null;
+            if (File.Exists(MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile()))
+            {
+                try
+                {
+                    cached = File.ReadAllText(MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile());
+                }
+                catch (Exception e)
+                {
+                    TelemetryInterposer.TrackErrorWithLog(e, new Dictionary<string, string>()
+                    {
+                        {@"Error type", @"Error reading cached online content" },
+                        {@"Service", @"Basegame File Identification Service" },
+                        {@"Message", e.Message }
+                    });
+                }
+            }
+
+
+            if (!File.Exists(MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile()) || overrideThrottling || MOnlineContent.CanFetchContentThrottleCheck())
+            {
+                foreach (var staticurl in MOnlineContent.BasegameFileIdentificationServiceURL.GetAllLinks())
+                {
+                    Uri myUri = new Uri(staticurl);
+                    string host = myUri.Host;
+                    try
+                    {
+                        using var wc = new ShortTimeoutWebClient();
+                        string json = MOnlineContent.FetchRemoteString(staticurl);
+                        File.WriteAllText(MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile(), json);
+                        return JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>(json);
+                    }
+                    catch (Exception e)
+                    {
+                        //Unable to fetch latest help.
+                        MLog.Error($@"Error fetching online basegame file identification service from endpoint {host}: {e.Message}");
+                    }
+                }
+
+                if (cached == null)
+                {
+                    MLog.Error(@"Unable to load basegame file identification service and local file doesn't exist. Returning a blank copy.");
+                    return getBlankBGFIDB();
+                }
+            }
+            MLog.Information(@"Using cached BGFIS instead");
+
+            try
+            {
+                return JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>(cached);
+            }
+            catch (Exception e)
+            {
+                MLog.Error(@"Could not parse cached basegame file identification service file. Returning blank BFIS data instead. Reason: " + e.Message);
+                return getBlankBGFIDB();
+            }
+        }
+
+        /// <summary>
+        /// Returns a blank Basegame Identification Database
+        /// </summary>
+        /// <returns></returns>
+        private static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> getBlankBGFIDB()
+        {
+            return new Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>
+            {
+                [@"ME1"] = new CaseInsensitiveDictionary<List<BasegameFileRecord>>(),
+                [@"ME2"] = new CaseInsensitiveDictionary<List<BasegameFileRecord>>(),
+                [@"ME3"] = new CaseInsensitiveDictionary<List<BasegameFileRecord>>(),
+                [@"LE1"] = new CaseInsensitiveDictionary<List<BasegameFileRecord>>(),
+                [@"LE2"] = new CaseInsensitiveDictionary<List<BasegameFileRecord>>(),
+                [@"LE3"] = new CaseInsensitiveDictionary<List<BasegameFileRecord>>(),
+                [@"LELauncher"] = new CaseInsensitiveDictionary<List<BasegameFileRecord>>(),
+            };
+        }
+
+        public static bool LoadService(bool forceRefresh)
+        {
+            LoadLocalBasegameIdentificationService();
+            LoadME3TweaksBasegameIdentificationService(forceRefresh);
+            ServiceLoaded = true;
+            return true;
         }
     }
 }

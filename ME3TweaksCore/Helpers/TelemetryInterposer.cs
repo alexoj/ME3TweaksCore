@@ -16,18 +16,22 @@ namespace ME3TweaksCore.Helpers
         /// </summary>
         private static Action<string, Dictionary<string, string>> TrackEventCallback { get; set; }
         private static Action<Exception, Dictionary<string, string>> TrackErrorCallback { get; set; }
+        private static Action<Exception, Dictionary<string, string>> TrackErrorWithLogCallback { get; set; }
 
         public static void SetEventCallback(Action<string, Dictionary<string, string>> trackEventCallback)
         {
             TrackEventCallback = trackEventCallback;
         }
 
-
         public static void SetErrorCallback(Action<Exception, Dictionary<string, string>> trackErrorCallback)
         {
             TrackErrorCallback = trackErrorCallback;
         }
 
+        public static void SetErrorWithLogCallback(Action<Exception, Dictionary<string, string>> trackErrorWithLogCallback)
+        {
+            TrackErrorWithLogCallback = trackErrorWithLogCallback;
+        }
 
         public static void TrackEvent(string eventName, Dictionary<string, string> data = null)
         {
@@ -69,6 +73,11 @@ namespace ME3TweaksCore.Helpers
         public static void TrackError(Exception exception, Dictionary<string, string> relevantInfo = null)
         {
             TrackErrorCallback?.Invoke(exception, relevantInfo);
+        }
+
+        public static void TrackErrorWithLog(Exception exception, Dictionary<string, string> dictionary)
+        {
+            TrackErrorWithLogCallback?.Invoke(exception, dictionary);
         }
     }
 }
