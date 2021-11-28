@@ -19,15 +19,15 @@ namespace ME3TweaksCore.Services
     public partial class MOnlineContent
     {
         /// <summary>
-        /// Checks if we can perform an online content fetch. This value is updated when manually checking for content updates, and on automatic 1-day intervals (if no previous manual check has occurred)
+        /// Checks if we can perform an online content fetch. Library consumers should sets this value for an appropriate throttle.
         /// </summary>
         /// <returns></returns>
-        public static bool CanFetchContentThrottleCheck()
+        public static Func<bool> CanFetchContentThrottleCheck { get; internal set; } = () =>
         {
             var lastContentCheck = MSharedSettings.LastContentCheck;
             var timeNow = DateTime.Now;
             return (timeNow - lastContentCheck).TotalDays > 1;
-        }
+        };
 
         /// <summary>
         /// Fetches a remote string, aware of its encoding.
@@ -78,7 +78,7 @@ namespace ME3TweaksCore.Services
 
             if (logDownload)
             {
-                Log.Information(@"Downloading to memory: " + url);
+                MLog.Information(@"Downloading to memory: " + url);
             }
             else
             {

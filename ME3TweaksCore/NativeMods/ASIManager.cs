@@ -40,14 +40,14 @@ namespace ME3TweaksCore.NativeMods
         /// </summary>
         public static void LoadManifest(bool forceLocal = false, bool overrideThrottling = false)
         {
-            Log.Information(@"Loading ASI Manager manifest");
+            MLog.Information(@"Loading ASI Manager manifest");
             try
             {
                 internalLoadManifest(forceLocal, overrideThrottling);
             }
             catch (Exception e)
             {
-                Log.Error($@"Error loading ASI manifest: {e.Message}");
+                MLog.Error($@"Error loading ASI manifest: {e.Message}");
             }
         }
 
@@ -62,7 +62,7 @@ namespace ME3TweaksCore.NativeMods
             var shouldNotFetch = forceLocal || (!overrideThrottling && !MOnlineContent.CanFetchContentThrottleCheck()) && File.Exists(ManifestLocation);
             if (!shouldNotFetch) //this cannot be triggered if forceLocal is true
             {
-                Log.Information(@"Fetching ASI manifest from online source");
+                MLog.Information(@"Fetching ASI manifest from online source");
                 var onlineManifest = MOnlineContent.FetchRemoteString(@"https://me3tweaks.com/mods/asi/getmanifest?AllGames=1");
                 onlineManifest = onlineManifest.Trim();
                 try
@@ -71,7 +71,7 @@ namespace ME3TweaksCore.NativeMods
                 }
                 catch (Exception e)
                 {
-                    Log.Error(@"Error writing cached ASI manifest to disk: " + e.Message);
+                    MLog.Error(@"Error writing cached ASI manifest to disk: " + e.Message);
                 }
 
                 try
@@ -80,20 +80,20 @@ namespace ME3TweaksCore.NativeMods
                 }
                 catch (Exception e)
                 {
-                    Log.Error(@"Error parsing online manifest: " + e.Message);
+                    MLog.Error(@"Error parsing online manifest: " + e.Message);
                     internalLoadManifest(true); //force local load instead
                 }
             }
             else if (File.Exists(ManifestLocation))
             {
-                Log.Information(@"Loading ASI local manifest");
+                MLog.Information(@"Loading ASI local manifest");
                 LoadManifestFromDisk(ManifestLocation, false);
             }
             else
             {
                 //can't get manifest or local manifest.
                 //Todo: some sort of handling here as we are running in panel startup
-                Log.Error(@"Cannot load ASI manifest: Could not fetch online manifest and no local manifest exists");
+                MLog.Error(@"Cannot load ASI manifest: Could not fetch online manifest and no local manifest exists");
             }
         }
 
@@ -108,7 +108,7 @@ namespace ME3TweaksCore.NativeMods
         //        var outfile = Path.Combine(CachedASIsFolder, file);
         //        if (!File.Exists(outfile))
         //        {
-        //            MUtilities.ExtractInternalFile(@"MassEffectModManagerCore.modmanager.asi." + file, outfile, true);
+        //            MUtilities.ExtractInternalFile(@"ME3TweaksModManager.modmanager.asi." + file, outfile, true);
         //        }
         //    }
         //}
@@ -122,7 +122,7 @@ namespace ME3TweaksCore.NativeMods
         /// <param name="selectionStateUpdateCallback"></param>
         private static void LoadManifestFromDisk(string manifestPath, bool isStaged = false)
         {
-            Log.Information($@"Using ASI manifest from disk: {manifestPath}");
+            MLog.Information($@"Using ASI manifest from disk: {manifestPath}");
             ParseManifest(File.ReadAllText(manifestPath), isStaged);
         }
 
@@ -297,13 +297,13 @@ namespace ME3TweaksCore.NativeMods
         public static bool InstallASIToTarget(ASIModVersion asi, GameTarget target, bool? forceSource = null)
         {
             if (asi.Game != target.Game) throw new Exception($@"ASI {asi.Name} cannot be installed to game {target.Game}");
-            Log.Information($@"Processing ASI installation request: {asi.Name} v{asi.Version} -> {target.TargetPath}");
+            MLog.Information($@"Processing ASI installation request: {asi.Name} v{asi.Version} -> {target.TargetPath}");
             string destinationFilename = $@"{asi.InstalledPrefix}-v{asi.Version}.asi";
             string cachedPath = Path.Combine(CachedASIsFolder, destinationFilename);
             string destinationDirectory = M3Directories.GetASIPath(target);
             if (!Directory.Exists(destinationDirectory))
             {
-                Log.Information(@"Creating ASI directory in game: " + destinationDirectory);
+                MLog.Information(@"Creating ASI directory in game: " + destinationDirectory);
                 Directory.CreateDirectory(destinationDirectory);
             }
             string finalPath = Path.Combine(destinationDirectory, destinationFilename);
@@ -318,11 +318,11 @@ namespace ME3TweaksCore.NativeMods
                 {
                     if (v.Hash == asi.Hash && !forceSource.HasValue && !hasExistingVersionOfModInstalled) //If we are forcing a source, we should always install. Delete duplicates past the first one
                     {
-                        Log.Information($@"{v.AssociatedManifestItem.Name} is already installed. We will not remove the existing correct installed ASI for this install request");
+                        MLog.Information($@"{v.AssociatedManifestItem.Name} is already installed. We will not remove the existing correct installed ASI for this install request");
                         hasExistingVersionOfModInstalled = true;
                         continue; //Don't delete this one. We are already installed. There is no reason to install it again.
                     }
-                    Log.Information($@"Deleting existing ASI from same group: {v.InstalledPath}");
+                    MLog.Information($@"Deleting existing ASI from same group: {v.InstalledPath}");
                     v.Uninstall();
                     installedASIs.Remove(v);
                 }
@@ -360,10 +360,10 @@ namespace ME3TweaksCore.NativeMods
                 md5 = MUtilities.CalculateMD5(cachedPath);
                 if (md5 == asi.Hash)
                 {
-                    Log.Information($@"Copying ASI from cached library to destination: {cachedPath} -> {finalPath}");
+                    MLog.Information($@"Copying ASI from cached library to destination: {cachedPath} -> {finalPath}");
 
                     File.Copy(cachedPath, finalPath, true);
-                    Log.Information($@"Installed ASI to {finalPath}");
+                    MLog.Information($@"Installed ASI to {finalPath}");
                     TelemetryInterposer.TrackEvent(@"Installed ASI", new Dictionary<string, string>() {
                                 { @"Filename", Path.GetFileNameWithoutExtension(finalPath)}
                             });
@@ -374,7 +374,7 @@ namespace ME3TweaksCore.NativeMods
             if (!forceSource.HasValue || forceSource.Value)
             {
                 WebRequest request = WebRequest.Create(asi.DownloadLink);
-                Log.Information(@"Fetching remote ASI from server");
+                MLog.Information(@"Fetching remote ASI from server");
                 try
                 {
                     using WebResponse response = request.GetResponse();
@@ -385,13 +385,13 @@ namespace ME3TweaksCore.NativeMods
                     if (md5 != asi.Hash)
                     {
                         //ERROR!
-                        Log.Error(@"Downloaded ASI did not match the manifest! It has the wrong hash.");
+                        MLog.Error(@"Downloaded ASI did not match the manifest! It has the wrong hash.");
                         return false;
                     }
 
-                    Log.Information(@"Fetched remote ASI from server. Installing ASI to " + finalPath);
+                    MLog.Information(@"Fetched remote ASI from server. Installing ASI to " + finalPath);
                     memoryStream.WriteToFile(finalPath);
-                    Log.Information(@"ASI successfully installed.");
+                    MLog.Information(@"ASI successfully installed.");
                     TelemetryInterposer.TrackEvent(@"Installed ASI", new Dictionary<string, string>()
                     {
                         {@"Filename", Path.GetFileNameWithoutExtension(finalPath)}
@@ -400,7 +400,7 @@ namespace ME3TweaksCore.NativeMods
                     //Cache ASI
                     if (!Directory.Exists(CachedASIsFolder))
                     {
-                        Log.Information(@"Creating cached ASIs folder");
+                        MLog.Information(@"Creating cached ASIs folder");
                         Directory.CreateDirectory(CachedASIsFolder);
                     }
 
@@ -441,7 +441,7 @@ namespace ME3TweaksCore.NativeMods
             if (group == null)
             {
                 // Cannot find ASI!
-                Log.Error($@"Cannot find ASI with update group ID {updateGroup} for game {gameTarget.Game}");
+                MLog.Error($@"Cannot find ASI with update group ID {updateGroup} for game {gameTarget.Game}");
                 return false;
             }
 

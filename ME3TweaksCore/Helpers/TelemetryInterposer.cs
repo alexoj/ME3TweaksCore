@@ -17,6 +17,7 @@ namespace ME3TweaksCore.Helpers
         private static Action<string, Dictionary<string, string>> TrackEventCallback { get; set; }
         private static Action<Exception, Dictionary<string, string>> TrackErrorCallback { get; set; }
         private static Action<Exception, Dictionary<string, string>> TrackErrorWithLogCallback { get; set; }
+        private static Action<Exception, Dictionary<string, string>> UploadErrorLogCallback { get; set; }
 
         public static void SetEventCallback(Action<string, Dictionary<string, string>> trackEventCallback)
         {
@@ -26,11 +27,6 @@ namespace ME3TweaksCore.Helpers
         public static void SetErrorCallback(Action<Exception, Dictionary<string, string>> trackErrorCallback)
         {
             TrackErrorCallback = trackErrorCallback;
-        }
-
-        public static void SetErrorWithLogCallback(Action<Exception, Dictionary<string, string>> trackErrorWithLogCallback)
-        {
-            TrackErrorWithLogCallback = trackErrorWithLogCallback;
         }
 
         public static void TrackEvent(string eventName, Dictionary<string, string> data = null)
@@ -48,7 +44,6 @@ namespace ME3TweaksCore.Helpers
                     }
                     Crashes.TrackError(e, , attachments.ToArray());
          */
-        private static Action<Exception, Dictionary<string, string>> UploadErrorLogCallback { get; set; }
 
         public static void SetUploadErrorLogCallback(Action<Exception, Dictionary<string, string>> uploadErrorLogCallback)
         {

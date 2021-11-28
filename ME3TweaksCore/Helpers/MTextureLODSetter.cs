@@ -22,7 +22,7 @@ namespace ME3TweaksCore.Helpers
         {
             if (target.Game.IsLEGame())
             {
-                Log.Information(@"Settings LODs for Legendary Edition is not currently supported");
+                MLog.Information(@"Settings LODs for Legendary Edition is not currently supported");
                 return true; // fake saying we did it
             }
 
@@ -41,7 +41,7 @@ namespace ME3TweaksCore.Helpers
 
                 if (!File.Exists(settingspath) && game == MEGame.ME1)
                 {
-                    Log.Error("Cannot raise/lower LODs on file that doesn't exist (ME1 bioengine file must already exist or exe will overwrite it)");
+                    MLog.Error("Cannot raise/lower LODs on file that doesn't exist (ME1 bioengine file must already exist or exe will overwrite it)");
                     return false;
                 }
                 else if (!File.Exists(settingspath))
@@ -60,13 +60,13 @@ namespace ME3TweaksCore.Helpers
                         configFileReadOnly = fi.IsReadOnly;
                         if (configFileReadOnly)
                         {
-                            Log.Information(@"Removing read only flag from ME1 bioengine.ini");
+                            MLog.Information(@"Removing read only flag from ME1 bioengine.ini");
                             fi.IsReadOnly = false; //clear read only. might happen on some binkw32 in archives, maybe
                         }
                     }
                     catch (Exception e)
                     {
-                        Log.Error($@"Error removing readonly flag from ME1 bioengine.ini: {e.Message}");
+                        MLog.Error($@"Error removing readonly flag from ME1 bioengine.ini: {e.Message}");
                     }
                 }
 
@@ -138,14 +138,14 @@ namespace ME3TweaksCore.Helpers
                     }
 
                     File.WriteAllText(settingspath, ini.ToString());
-                    Log.Information(operation);
+                    MLog.Information(operation);
                 }
                 else if (game == MEGame.ME1)
                 {
                     var section = ini.Sections.FirstOrDefault(x => x.Header == "TextureLODSettings");
                     if (section == null && highres)
                     {
-                        Log.Error("TextureLODSettings section cannot be null in ME1. Run the game to regenerate the bioengine file.");
+                        MLog.Error("TextureLODSettings section cannot be null in ME1. Run the game to regenerate the bioengine file.");
                         return false; //This section cannot be null
                     }
 
@@ -190,32 +190,32 @@ namespace ME3TweaksCore.Helpers
                             else
                             {
                                 //!!! Error
-                                Log.Error(@"Error: Could not find ME1 high quality settings key in bioengine.ini: " + hqSection.Header);
+                                MLog.Error(@"Error: Could not find ME1 high quality settings key in bioengine.ini: " + hqSection.Header);
                             }
                         }
                     }
 
                     File.WriteAllText(settingspath, ini.ToString());
-                    Log.Information("Set " + (highres ? limit2k ? "2K lods" : "4K lods" : "default LODs") + " in BioEngine.ini file for ME1");
+                    MLog.Information("Set " + (highres ? limit2k ? "2K lods" : "4K lods" : "default LODs") + " in BioEngine.ini file for ME1");
                 }
 
                 if (configFileReadOnly)
                 {
                     try
                     {
-                        Log.Information(@"Re-setting the read only flag on ME1 bioengine.ini");
+                        MLog.Information(@"Re-setting the read only flag on ME1 bioengine.ini");
                         FileInfo fi = new FileInfo(settingspath);
                         fi.IsReadOnly = true;
                     }
                     catch (Exception e)
                     {
-                        Log.Error($@"Error re-setting readonly flag from ME1 bioengine.ini: {e.Message}");
+                        MLog.Error($@"Error re-setting readonly flag from ME1 bioengine.ini: {e.Message}");
                     }
                 }
             }
             catch (Exception e)
             {
-                Log.Error(@"Error setting LODs: " + e.Message);
+                MLog.Error(@"Error setting LODs: " + e.Message);
                 return false;
             }
 

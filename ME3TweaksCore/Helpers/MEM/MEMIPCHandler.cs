@@ -11,6 +11,7 @@ using CliWrap.EventStream;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Misc;
 using Serilog;
 
@@ -153,7 +154,7 @@ namespace ME3TweaksCore.Helpers.MEM
                     case @"CACHE_USAGE":
                         if (DateTime.Now > (lastCacheoutput.AddSeconds(10)))
                         {
-                            Log.Information($@"MEM cache usage: {FileSize.FormatSize(long.Parse(parm))}");
+                            MLog.Information($@"MEM cache usage: {FileSize.FormatSize(long.Parse(parm))}");
                             lastCacheoutput = DateTime.Now;
                         }
                         break;
@@ -201,7 +202,7 @@ namespace ME3TweaksCore.Helpers.MEM
                         {
                             if (exceptionOcurred)
                             {
-                                Log.Fatal($@"{stdOut.Text}");
+                                MLog.Fatal($@"{stdOut.Text}");
                                 memCrashLine?.Invoke(stdOut.Text);
                             }
                         }
@@ -210,7 +211,7 @@ namespace ME3TweaksCore.Helpers.MEM
                         Debug.WriteLine(@"STDERR " + stdErr.Text);
                         if (exceptionOcurred)
                         {
-                            Log.Fatal($@"{stdErr.Text}");
+                            MLog.Fatal($@"{stdErr.Text}");
                         }
                         else
                         {
@@ -255,7 +256,7 @@ namespace ME3TweaksCore.Helpers.MEM
             MEMIPCHandler.RunMEMIPCUntilExit(classicMEM, args, applicationExited: x => exitcode = x);
             if (exitcode != 0)
             {
-                Log.Error($@"Non-zero MassEffectModderNoGui exit code setting game path: {exitcode}");
+                MLog.Error($@"Non-zero MassEffectModderNoGui exit code setting game path: {exitcode}");
             }
             return exitcode == 0;
         }
@@ -270,7 +271,7 @@ namespace ME3TweaksCore.Helpers.MEM
         {
             if (game.IsLEGame())
             {
-                Log.Error(@"Cannot set LODs for LE games! This is a bug.");
+                MLog.Error(@"Cannot set LODs for LE games! This is a bug.");
                 return false;
             }
             string args = $@"--apply-lods-gfx --gameid {game.ToGameNum()}";
@@ -297,11 +298,11 @@ namespace ME3TweaksCore.Helpers.MEM
             // We don't care about IPC on this
             MEMIPCHandler.RunMEMIPCUntilExit(true, args,
                 null, null,
-                x => Log.Error($@"StdError setting LODs: {x}"),
+                x => MLog.Error($@"StdError setting LODs: {x}"),
                 x => exitcode = x); //Change to catch exit code of non zero.        
             if (exitcode != 0)
             {
-                Log.Error($@"MassEffectModderNoGui had error setting LODs, exited with code {exitcode}");
+                MLog.Error($@"MassEffectModderNoGui had error setting LODs, exited with code {exitcode}");
                 return false;
             }
 
@@ -328,11 +329,11 @@ namespace ME3TweaksCore.Helpers.MEM
                         fileListing.Add(param);
                     }
                 },
-                x => Log.Error($@"StdError getting file listing for file {file}: {x}"),
+                x => MLog.Error($@"StdError getting file listing for file {file}: {x}"),
                 x => exitcode = x); //Change to catch exit code of non zero.        
             if (exitcode != 0)
             {
-                Log.Error($@"MassEffectModderNoGui had error getting file listing of archive {file}, exit code {exitcode}");
+                MLog.Error($@"MassEffectModderNoGui had error getting file listing of archive {file}, exit code {exitcode}");
             }
             return fileListing;
         }
@@ -359,7 +360,7 @@ namespace ME3TweaksCore.Helpers.MEM
                         }
                         catch (Exception e)
                         {
-                            Log.Error($@"Error reading LOD line output from MEM: {param}, {e.Message}");
+                            MLog.Error($@"Error reading LOD line output from MEM: {param}, {e.Message}");
                         }
 
                         break;
@@ -372,7 +373,7 @@ namespace ME3TweaksCore.Helpers.MEM
             );
             if (exitcode != 0)
             {
-                Log.Error($@"Error fetching LODs for {game}, exit code {exitcode}");
+                MLog.Error($@"Error fetching LODs for {game}, exit code {exitcode}");
                 return null; // Error getting LODs
             }
 
@@ -451,7 +452,7 @@ namespace ME3TweaksCore.Helpers.MEM
                     MEMIPCHandler.RunMEMIPCUntilExit(args, applicationExited: x => exitcode = x);
                     if (exitcode != 0)
                     {
-                        Log.Error($@"Non-zero MassEffectModderNoGui exit code setting game config path: {exitcode}");
+                        MLog.Error($@"Non-zero MassEffectModderNoGui exit code setting game config path: {exitcode}");
                     }
                     return exitcode == 0;
                 }

@@ -58,10 +58,10 @@ namespace ME3TweaksCore.Diagnostics
                     //should be valid URL.
                     //diagnosticsWorker.ReportProgress(0, new ThreadCommand(SET_DIAGTASK_ICON_GREEN, Image_Upload));
                     //e.Result = responseString;
-                    Log.Information(@"[AICORE] Result from server for log upload: " + responseString);
+                    MLog.Information(@"Result from server for log upload: " + responseString);
                     return (true, responseString);
                 }
-                Log.Error(@"[AICORE] Error uploading log. The server responded with: " + responseString);
+                MLog.Error(@"Error uploading log. The server responded with: " + responseString);
                 return (false, $"The server rejected the upload: {responseString}");
             }
             catch (Exception ex)

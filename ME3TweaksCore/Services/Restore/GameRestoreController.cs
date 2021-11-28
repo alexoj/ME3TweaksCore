@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Helpers;
-using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
-using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
@@ -20,7 +15,6 @@ using ME3TweaksCore.Services.Backup;
 using ME3TweaksCore.Targets;
 using PropertyChanged;
 using RoboSharp;
-using Serilog;
 
 namespace ME3TweaksCore.Services.Restore
 {
@@ -32,13 +26,13 @@ namespace ME3TweaksCore.Services.Restore
     [AddINotifyPropertyChangedInterface]
     public class GameRestore
     {
-        private MEGame Game;
+        public MEGame Game { get; }
+
         public long ProgressValue { get; set; }
         public long ProgressMax { get; set; }
-        public bool ProgressIndeterminate { get; set; }
-
+        //public bool ProgressIndeterminate { get; set; }
         /// <summary>
-        /// Callback for when there is a blocking error and the restore cannot be performed
+        /// Callback for when there is a blocking error and the restore cannot be performed. The first parameter is the title, the second is the message
         /// </summary>
         public Action<string, string> BlockingErrorCallback { get; set; }
         /// <summary>
@@ -76,12 +70,13 @@ namespace ME3TweaksCore.Services.Restore
         }
 
         /// <summary>
-        /// Restores the game to the specified directory (game location). Pass in null if you wish to restore to a custom location. Refreshes the target on completion.
+        /// Restores the game to the specified directory (game location). Pass in null if you wish to restore to a custom location. Refreshes the target on completion. This call is blocking, it should be run on a background thread.
         /// </summary>
         /// <param name="destinationDirectory">Game directory that will be replaced with backup</param>
         /// <returns></returns>
         public bool PerformRestore(GameTarget restoreTarget, string destinationDirectory)
         {
+            // Todo: Localize this to LocalizationCore
             var useFullCopyMethod = false;  // Prefer robocopy for now.
 
             if (MUtilities.IsGameRunning(Game))
@@ -97,8 +92,12 @@ namespace ME3TweaksCore.Services.Restore
                 restore |= confirmDeletion.HasValue && confirmDeletion.Value;
             }
 
+            var backupStatus = BackupService.GetBackupStatus(Game);
+
             if (restore)
             {
+                RestoreInProgress = true;
+                // We will set values on backupStatus.
                 string backupPath = BackupService.GetGameBackupPath(Game);
 
                 if (destinationDirectory == null)
@@ -134,7 +133,7 @@ namespace ME3TweaksCore.Services.Restore
 
                 if (useFullCopyMethod)
                 {
-                    UpdateStatusCallback?.Invoke("Deleting existing game installation");
+                    backupStatus.BackupStatus = "Deleting existing game installation";
                     if (Directory.Exists(destinationDirectory))
                     {
                         if (Enumerable.Any(Directory.GetFiles(destinationDirectory)) || Enumerable.Any(Directory.GetDirectories(destinationDirectory)))
@@ -166,7 +165,7 @@ namespace ME3TweaksCore.Services.Restore
                     }
                 }
 
-                UpdateStatusCallback?.Invoke("Preparing game directory");
+                backupStatus.BackupLocationStatus = "Preparing game directory";
                 var created = MUtilities.CreateDirectoryWithWritePermission(destinationDirectory);
                 if (!created)
                 {
@@ -175,8 +174,6 @@ namespace ME3TweaksCore.Services.Restore
                     return false;
                 }
 
-                UpdateStatusCallback?.Invoke("Restoring game from backup");
-                //callbacks
 
                 if (useFullCopyMethod)
                 {
@@ -184,7 +181,7 @@ namespace ME3TweaksCore.Services.Restore
                 }
                 else
                 {
-                    RestoreUsingRoboCopy(backupPath, restoreTarget);
+                    RestoreUsingRoboCopy(backupPath, restoreTarget, backupStatus, destinationDirectory);
                 }
 
                 //Check for cmmvanilla file and remove it present
@@ -197,18 +194,23 @@ namespace ME3TweaksCore.Services.Restore
                 }
 
                 MLog.Information(@"Restore thread wrapping up");
+                RestoreInProgress = false;
+
+                BackupService.RefreshBackupStatus(game: Game);
                 restoreTarget?.ReloadGameTarget(); // Reload target if we were passed in one.
                 return true;
             }
 
+            BackupService.RefreshBackupStatus(game: Game);
+            RestoreInProgress = false;
             return false;
         }
 
-        private void RestoreUsingRoboCopy(string backupPath, GameTarget destTarget)
+        private void RestoreUsingRoboCopy(string backupPath, GameTarget destTarget, GameBackupStatus backupStatus, string destinationPathOverride = null)
         {
-            if (destTarget.TextureModded)
+            if (destTarget != null && destTarget.TextureModded)
             {
-                UpdateStatusCallback?.Invoke("Analyzing game files");
+                backupStatus.BackupLocationStatus = "Analyzing game files";
                 // Game is texture modded.
                 var packagesToCheck = new List<string>();
 
@@ -221,7 +223,11 @@ namespace ME3TweaksCore.Services.Restore
                 VanillaDatabaseService.ValidateTargetAgainstVanilla(destTarget, addNonVanillaFile, false);
 
                 // For each package that failed validation, we should check the size.
-                UpdateStatusCallback?.Invoke("Checking texture-tagged packages");
+                backupStatus.BackupLocationStatus = "Checking texture-tagged packages";
+                int numOnlyTexTagged = 0;
+                SetProgressIndeterminateCallback?.Invoke(false);
+                ProgressValue = 0;
+                ProgressMax = packagesToCheck.Count;
                 foreach (var fullPath in packagesToCheck)
                 {
                     var relativePath = fullPath.Substring(destTarget.TargetPath.Length + 1);
@@ -252,20 +258,25 @@ namespace ME3TweaksCore.Services.Restore
                         File.SetLastWriteTime(fullPath, bi.LastWriteTime);
                         File.SetCreationTime(fullPath, bi.CreationTime);
                         File.SetLastAccessTime(fullPath, bi.LastAccessTime);
-                        Debug.WriteLine($"File only texture tagged: {fullPath}");
+                        numOnlyTexTagged++;
                     }
+                    ProgressValue++;
                 }
+                Debug.WriteLine($"Files only texture tagged: {numOnlyTexTagged}");
             }
+
+
+            backupStatus.BackupStatus = "Restoring from backup";
 
             string currentRoboCopyFile = null;
             RoboCommand rc = new RoboCommand();
-            rc.CopyOptions.Destination = destTarget.TargetPath;
+            rc.CopyOptions.Destination = destinationPathOverride ?? destTarget.TargetPath;
             rc.CopyOptions.Source = backupPath;
             rc.CopyOptions.Mirror = true;
             rc.CopyOptions.MultiThreadedCopiesCount = 2;
             rc.OnCopyProgressChanged += (sender, args) =>
             {
-                ProgressIndeterminate = false;
+                SetProgressIndeterminateCallback?.Invoke(false);
                 ProgressValue = (int)args.CurrentFileProgress;
                 ProgressMax = 100;
             };
@@ -274,15 +285,11 @@ namespace ME3TweaksCore.Services.Restore
                 if (args.ProcessedFile.Name.StartsWith(backupPath) && args.ProcessedFile.Name.Length > backupPath.Length)
                 {
                     currentRoboCopyFile = args.ProcessedFile.Name.Substring(backupPath.Length + 1);
-                    UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_copyingX, currentRoboCopyFile));
+                    backupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_copyingX, currentRoboCopyFile);
                 }
             };
+            MLog.Information($"Beginning robocopy restore: {backupPath} -> {destTarget.TargetPath}");
             rc.Start().Wait();
-        }
-
-        private void PrecheckTextureModded(GameTarget destinationTarget, string relativePackagePath)
-        {
-
         }
 
         private void RestoreUsingFullCopy(string backupPath, string destinationDirectory)

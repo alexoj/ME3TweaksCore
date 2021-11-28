@@ -27,8 +27,6 @@ namespace ME3TweaksCore.Services
 
 namespace ME3TweaksCore.Services.BasegameFileIdentification
 {
-    
-
     public class BasegameFileIdentificationService
     {
         private static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> LocalDatabase;
@@ -119,7 +117,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 #if DEBUG
                 var outText = JsonConvert.SerializeObject(LocalDatabase, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
 #else
-                var outText = JsonConvert.SerializeObject(Database, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+                var outText = JsonConvert.SerializeObject(LocalDatabase, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
 #endif
                 try
                 {
@@ -280,12 +278,18 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             };
         }
 
-        public static bool LoadService(bool forceRefresh)
+        public static bool LoadService(bool forceRefresh = false)
         {
             LoadLocalBasegameIdentificationService();
             LoadME3TweaksBasegameIdentificationService(forceRefresh);
             ServiceLoaded = true;
             return true;
+        }
+
+        public static IReadOnlyDictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> GetAllServerEntries()
+        {
+            // Would prefer way to make it all read only but... ... ...
+            return ME3TweaksDatabase;
         }
     }
 }

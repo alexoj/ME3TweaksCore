@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Localization;
 using Serilog;
 
@@ -202,7 +203,7 @@ namespace ME3TweaksCore.Helpers
                         {
                             if (parenthesisStack.Count == 0)
                             {
-                                Log.Error(@"Error parsing parenthesis split list: Found closing parenthesis that does not match open parenthesis at position " + i);
+                                MLog.Error(@"Error parsing parenthesis split list: Found closing parenthesis that does not match open parenthesis at position " + i);
                                 throw new Exception(LC.GetString(LC.string_interp_ssp_unopenedParenthsisFound, i, inputString)); //should this be localized?
                             }
 
@@ -226,7 +227,7 @@ namespace ME3TweaksCore.Helpers
             }
             if (parenthesisStack.Count > 0)
             {
-                Log.Error(@"Error parsing parenthesis split list: count of open and closing parenthesis does not match.");
+                MLog.Error(@"Error parsing parenthesis split list: count of open and closing parenthesis does not match.");
                 throw new Exception(LC.GetString(LC.string_interp_ssp_unclosedParenthesisFound, origString)); //should this be localized?
             }
             return splits;

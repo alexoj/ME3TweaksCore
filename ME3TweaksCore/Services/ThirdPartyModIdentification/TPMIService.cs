@@ -73,15 +73,15 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
                 catch (Exception e)
                 {
                     //Unable to fetch latest help.
-                    Log.Error(@"Error fetching online third party identification service: " + e.Message);
+                    MLog.Error(@"Error fetching online third party identification service: " + e.Message);
 
                     if (cached != null)
                     {
-                        Log.Warning(@"Using cached third party identification service  file instead");
+                        MLog.Warning(@"Using cached third party identification service  file instead");
                     }
                     else
                     {
-                        Log.Error(@"Unable to load third party identification service and local file doesn't exist. Returning a blank copy.");
+                        MLog.Error(@"Unable to load third party identification service and local file doesn't exist. Returning a blank copy.");
                         return getBlankTPIS();
                     }
                 }
@@ -93,7 +93,7 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
             }
             catch (Exception e)
             {
-                Log.Error(@"Could not parse cached third party identification service file. Returning blank TPMI data instead. Reason: " + e.Message);
+                MLog.Error(@"Could not parse cached third party identification service file. Returning blank TPMI data instead. Reason: " + e.Message);
                 return getBlankTPIS();
             }
         }

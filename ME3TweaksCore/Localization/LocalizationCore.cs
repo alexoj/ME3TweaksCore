@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using LegendaryExplorerCore.Compression;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using Serilog;
 
@@ -94,7 +95,7 @@ namespace ME3TweaksCore.Localization
             }
             catch (Exception e)
             {
-                Log.Error($@"Error fetching string with key {resourceKey}: {e.ToString()}.");
+                MLog.Error($@"Error fetching string with key {resourceKey}: {e.ToString()}.");
                 return $@"Error fetching string with key {resourceKey}: {e.ToString()}! Please report this to the developer";
             }
         }

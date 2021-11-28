@@ -42,7 +42,7 @@ namespace ME3TweaksCore.Diagnostics
 
         public static string CollectLogs(string logfile)
         {
-            Log.Information(@"Shutting down logger to allow application to pull log file.");
+            MLog.Information(@"Shutting down logger to allow application to pull log file.");
             Log.CloseAndFlush();
             try
             {
@@ -61,7 +61,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <summary>
         /// ILogger creation delegate that is invoked when reopening the logger after collecting logs.
         /// </summary>
-        public static Func<ILogger> CreateLogger;
+        internal static Func<ILogger> CreateLogger;
 
         // Following is an example CreateLogger call that can be used in consuming applications.
         //        internal static void CreateLogger()
@@ -83,7 +83,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <returns></returns>
         public static string CollectLatestLog(string logdir, bool restartLogger)
         {
-            Log.Information(@"Shutting down logger to allow application to pull log file.");
+            MLog.Information(@"Shutting down logger to allow application to pull log file.");
             Log.CloseAndFlush();
             var logFile = new DirectoryInfo(logdir)
                                              .GetFiles(@"*.txt")
@@ -122,7 +122,7 @@ namespace ME3TweaksCore.Diagnostics
 
         //private static void runMassEffectModderNoGuiIPC(string operationName, string exe, string args, object lockObject, Action<string, string> exceptionOccuredCallback, Action<int?> setExitCodeCallback = null, Action<string, string> ipcCallback = null)
         //{
-        //    Log.Information($@"Running Mass Effect Modder No GUI w/ IPC: {exe} {args}");
+        //    MLog.Information($@"Running Mass Effect Modder No GUI w/ IPC: {exe} {args}");
         //    var memProcess = new ConsoleApp(exe, args);
         //    bool hasExceptionOccured = false;
         //    memProcess.ConsoleOutput += (o, args2) =>
@@ -166,7 +166,7 @@ namespace ME3TweaksCore.Diagnostics
 
         public static string PerformDiagnostic(GameTarget selectedDiagnosticTarget, bool textureCheck, Action<string> updateStatusCallback = null, Action<int> updateProgressCallback = null, Action<MTaskbarState> updateTaskbarState = null)
         {
-            Log.Information($@"Collecting diagnostics for target {selectedDiagnosticTarget.TargetPath}");
+            MLog.Information($@"Collecting diagnostics for target {selectedDiagnosticTarget.TargetPath}");
             updateStatusCallback?.Invoke(LC.GetString(LC.string_preparingToCollectDiagnosticInfo));
             updateTaskbarState?.Invoke(MTaskbarState.Indeterminate);
 
@@ -186,7 +186,7 @@ namespace ME3TweaksCore.Diagnostics
             void failedToDownload(string failureMessage)
             {
                 Thread.Sleep(100); //try to stop deadlock
-                Log.Error(@"Failed to acquire MEM for diagnostics.");
+                MLog.Error(@"Failed to acquire MEM for diagnostics.");
                 hasMEM = false;
                 lock (memEnsuredSignaler)
                 {
@@ -211,7 +211,7 @@ namespace ME3TweaksCore.Diagnostics
                 hasMEM = false;
             }
             void currentTaskCallback(string s) => updateStatusCallback?.Invoke(s);
-            void setPercentDone(long downloaded, long total) => updateStatusCallback?.Invoke(LC.GetString(LC.string_interp_preparingMEMNoGUIX, MUtilities.GetPercent(downloaded,total)));
+            void setPercentDone(long downloaded, long total) => updateStatusCallback?.Invoke(LC.GetString(LC.string_interp_preparingMEMNoGUIX, MUtilities.GetPercent(downloaded, total)));
 
             #endregion
             // Ensure MEM NOGUI
@@ -229,7 +229,7 @@ namespace ME3TweaksCore.Diagnostics
             //    }
             //}
             #endregion
-            Log.Information(@"Completed MEM fetch task");
+            MLog.Information(@"Completed MEM fetch task");
 
             #region Diagnostic setup and diag header
             updateStatusCallback?.Invoke(LC.GetString(LC.string_collectingGameInformation));
@@ -301,7 +301,7 @@ namespace ME3TweaksCore.Diagnostics
 
             string gamePath = selectedDiagnosticTarget.TargetPath;
             var gameID = selectedDiagnosticTarget.Game.ToMEMGameNum().ToString();
-            Log.Information(@"Beginning to build diagnostic output");
+            MLog.Information(@"Beginning to build diagnostic output");
 
             addDiagLine(selectedDiagnosticTarget.Game.ToGameNum().ToString(), Severity.GAMEID);
             addDiagLine($@"ME3TweaksCore {Assembly.GetExecutingAssembly().GetName().Version} Game Diagnostic");
@@ -347,7 +347,7 @@ namespace ME3TweaksCore.Diagnostics
                     }
                     else
                     {
-                        Log.Error($@"Invalid game directory: {gamePath} is not part of an overall LE install");
+                        MLog.Error($@"Invalid game directory: {gamePath} is not part of an overall LE install");
                         addDiagLine($@"MEM diagnostics skipped: Game directory is not part of an overall LE install", Severity.ERROR);
                         hasMEM = false;
                     }
@@ -376,20 +376,20 @@ namespace ME3TweaksCore.Diagnostics
             try
             {
                 #region Game Information
-                Log.Information(@"Collecting basic game information");
+                MLog.Information(@"Collecting basic game information");
 
                 updateStatusCallback?.Invoke(LC.GetString(LC.string_collectingGameInformation));
                 addDiagLine(@"Basic game information", Severity.DIAGSECTION);
                 addDiagLine($@"Game is installed at {gamePath}");
 
-                Log.Information(@"Reloading target for most up to date information");
+                MLog.Information(@"Reloading target for most up to date information");
                 selectedDiagnosticTarget.ReloadGameTarget(false); //reload vars
                 TextureModInstallationInfo avi = selectedDiagnosticTarget.GetInstalledALOTInfo();
 
                 string exePath = M3Directories.GetExecutablePath(selectedDiagnosticTarget);
                 if (File.Exists(exePath))
                 {
-                    Log.Information(@"Getting game version");
+                    MLog.Information(@"Getting game version");
                     var versInfo = FileVersionInfo.GetVersionInfo(exePath);
                     addDiagLine($@"Version: {versInfo.FileMajorPart}.{versInfo.FileMinorPart}.{versInfo.FileBuildPart}.{versInfo.FilePrivatePart}");
 
@@ -434,7 +434,7 @@ namespace ME3TweaksCore.Diagnostics
 
                     if (selectedDiagnosticTarget.Game == MEGame.ME1)
                     {
-                        Log.Information(@"Getting additional ME1 executable information");
+                        MLog.Information(@"Getting additional ME1 executable information");
                         var exeInfo = ME1ExecutableInfo.GetExecutableInfo(M3Directories.GetExecutablePath(selectedDiagnosticTarget), false);
                         if (avi != null)
                         {
@@ -451,7 +451,7 @@ namespace ME3TweaksCore.Diagnostics
                     }
 
                     //Executable signatures
-                    Log.Information(@"Checking executable signature");
+                    MLog.Information(@"Checking executable signature");
 
                     var info = new FileInspector(exePath);
                     var certOK = info.Validate();
@@ -482,7 +482,7 @@ namespace ME3TweaksCore.Diagnostics
                     }
 
                     //BINK
-                    Log.Information(@"Checking if Bink ASI loader is installed");
+                    MLog.Information(@"Checking if Bink ASI loader is installed");
 
                     if (selectedDiagnosticTarget.CheckIfBinkw32ASIIsInstalled())
                     {
@@ -528,7 +528,7 @@ namespace ME3TweaksCore.Diagnostics
                 #endregion
 
                 #region System Information
-                Log.Information(@"Collecting system information");
+                MLog.Information(@"Collecting system information");
 
                 updateStatusCallback?.Invoke(LC.GetString(LC.string_collectingSystemInformation));
 
@@ -555,14 +555,14 @@ namespace ME3TweaksCore.Diagnostics
                 addDiagLine(@"Version " + osBuildVersion, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? Severity.ERROR : Severity.INFO);
 
                 addDiagLine();
-                Log.Information(@"Collecting memory information");
+                MLog.Information(@"Collecting memory information");
 
                 addDiagLine(@"System Memory", Severity.BOLD);
                 var computerInfo = new ComputerInfo();
                 long ramInBytes = (long)computerInfo.TotalPhysicalMemory;
                 addDiagLine($@"Total memory available: {FileSize.FormatSize(ramInBytes)}");
                 addDiagLine(@"Processors", Severity.BOLD);
-                Log.Information(@"Collecting processor information");
+                MLog.Information(@"Collecting processor information");
 
                 addDiagLine(GetProcessorInformationForDiag());
                 if (ramInBytes == 0)
@@ -570,7 +570,7 @@ namespace ME3TweaksCore.Diagnostics
                     addDiagLine(@"Unable to get the read amount of physically installed ram. This may be a sign of impending hardware failure in the SMBIOS", Severity.WARN);
                 }
 
-                Log.Information(@"Collecting video card information");
+                MLog.Information(@"Collecting video card information");
 
                 ManagementObjectSearcher objvide = new ManagementObjectSearcher(@"select * from Win32_VideoController");
                 int vidCardIndex = 1;
@@ -635,7 +635,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 #region Texture mod information
 
-                Log.Information(@"Getting texture mod installation info");
+                MLog.Information(@"Getting texture mod installation info");
                 updateStatusCallback?.Invoke(LC.GetString(LC.string_gettingTextureInfo));
                 addDiagLine(@"Current texture mod information", Severity.DIAGSECTION);
 
@@ -743,7 +743,7 @@ namespace ME3TweaksCore.Diagnostics
                 #endregion
 
                 #region Basegame file changes
-                Log.Information(@"Collecting basegame file changes information");
+                MLog.Information(@"Collecting basegame file changes information");
 
                 addDiagLine(@"Basegame changes", Severity.DIAGSECTION);
 
@@ -808,7 +808,7 @@ namespace ME3TweaksCore.Diagnostics
                 #endregion
 
                 #region Blacklisted mods check
-                Log.Information(@"Checking for mods that are known to cause problems in the scene");
+                MLog.Information(@"Checking for mods that are known to cause problems in the scene");
 
                 void memExceptionOccured(string operation)
                 {
@@ -866,7 +866,7 @@ namespace ME3TweaksCore.Diagnostics
                 #endregion
 
                 #region Installed DLCs
-                Log.Information(@"Collecting installed DLC");
+                MLog.Information(@"Collecting installed DLC");
 
                 //Get DLCs
                 updateStatusCallback?.Invoke(LC.GetString(LC.string_collectingDLCInformation));
@@ -926,7 +926,7 @@ namespace ME3TweaksCore.Diagnostics
                     SeeIfIncompatibleDLCIsInstalled(selectedDiagnosticTarget, addDiagLine);
                 }
 
-                Log.Information(@"Collecting supersedance list");
+                MLog.Information(@"Collecting supersedance list");
 
                 var supercedanceList = M3Directories.GetFileSupercedances(selectedDiagnosticTarget).Where(x => x.Value.Count > 1).ToList();
                 if (supercedanceList.Any())
@@ -958,7 +958,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 if (selectedDiagnosticTarget.Game > MEGame.ME1)
                 {
-                    Log.Information(@"Getting list of TFCs");
+                    MLog.Information(@"Getting list of TFCs");
                     updateStatusCallback?.Invoke(LC.GetString(LC.string_collectingTFCFileInformation));
 
                     addDiagLine(@"Texture File Cache (TFC) files", Severity.DIAGSECTION);
@@ -986,13 +986,13 @@ namespace ME3TweaksCore.Diagnostics
                 if (hasMEM)
                 {
                     #region Files added or removed after texture install
-                    Log.Information(@"Finding files that have been added/replaced/removed after textures were installed");
+                    MLog.Information(@"Finding files that have been added/replaced/removed after textures were installed");
 
                     args = $@"--check-game-data-mismatch --gameid {gameID} --ipc";
                     if (selectedDiagnosticTarget.TextureModded)
                     {
                         // Is this correct on linux?
-                        Log.Information(@"Checking texture map is in sync with game state");
+                        MLog.Information(@"Checking texture map is in sync with game state");
 
                         bool textureMapFileExists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + $@"\MassEffectModder\me{gameID}map.bin");
                         addDiagLine(@"Files added or removed after texture mods were installed", Severity.DIAGSECTION);
@@ -1085,7 +1085,7 @@ namespace ME3TweaksCore.Diagnostics
                     //FULL CHECK
                     if (textureCheck)
                     {
-                        Log.Information(@"Performing full texture check");
+                        MLog.Information(@"Performing full texture check");
                         var param = 0;
                         updateStatusCallback?.Invoke(LC.GetString(LC.string_interp_performingFullTexturesCheckX, param)); //done this way to save a string in localization
                         addDiagLine(@"Full Textures Check", Severity.DIAGSECTION);
@@ -1216,7 +1216,7 @@ namespace ME3TweaksCore.Diagnostics
                     #endregion
 
                     #region Texture LODs
-                    Log.Information(@"Collecting texture LODs");
+                    MLog.Information(@"Collecting texture LODs");
 
                     updateStatusCallback?.Invoke(@"Collecting LOD settings");
                     var lods = MEMIPCHandler.GetLODs(selectedDiagnosticTarget.Game);
@@ -1233,7 +1233,7 @@ namespace ME3TweaksCore.Diagnostics
                 }
                 else
                 {
-                    Log.Warning(@"MEM not available. Multiple collections were skipped");
+                    MLog.Warning(@"MEM not available. Multiple collections were skipped");
 
                     addDiagLine(@"Texture checks skipped", Severity.DIAGSECTION);
                     addDiagLine(@"Mass Effect Modder No Gui was not available for use when this diagnostic was run.", Severity.WARN);
@@ -1245,7 +1245,7 @@ namespace ME3TweaksCore.Diagnostics
                 }
 
                 #region ASI mods
-                Log.Information(@"Collecting ASI mod information");
+                MLog.Information(@"Collecting ASI mod information");
 
                 updateStatusCallback?.Invoke(LC.GetString(LC.string_collectingASIFileInformation));
 
@@ -1312,7 +1312,7 @@ namespace ME3TweaksCore.Diagnostics
                 //TOC SIZE CHECK
                 if (selectedDiagnosticTarget.Game == MEGame.ME3 || selectedDiagnosticTarget.Game.IsLEGame())
                 {
-                    Log.Information(@"Collecting TOC information");
+                    MLog.Information(@"Collecting TOC information");
 
                     updateStatusCallback?.Invoke(@"Collecting TOC file information");
 
@@ -1325,7 +1325,7 @@ namespace ME3TweaksCore.Diagnostics
                     string markerfile = M3Directories.GetTextureMarkerPath(selectedDiagnosticTarget);
                     foreach (string toc in tocs)
                     {
-                        Log.Information($@"Checking TOC file {toc}");
+                        MLog.Information($@"Checking TOC file {toc}");
 
                         TOCBinFile tbf = new TOCBinFile(toc);
                         foreach (TOCBinFile.Entry ent in tbf.GetAllEntries())
@@ -1376,7 +1376,7 @@ namespace ME3TweaksCore.Diagnostics
                 //ME1: LOGS
                 if (selectedDiagnosticTarget.Game == MEGame.ME1)
                 {
-                    Log.Information(@"Collecting ME1 crash logs");
+                    MLog.Information(@"Collecting ME1 crash logs");
 
                     updateStatusCallback?.Invoke(LC.GetString(LC.string_collectingME1ApplicationLogs));
 
@@ -1400,7 +1400,7 @@ namespace ME3TweaksCore.Diagnostics
                                 {
                                     crashLineNumber = currentLineNumber;
                                     reason = @"Log file indicates crash occurred";
-                                    Log.Information(@"Found crash in ME1 log " + file.Name + @" on line " + currentLineNumber);
+                                    MLog.Information(@"Found crash in ME1 log " + file.Name + @" on line " + currentLineNumber);
                                     break;
                                 }
 
@@ -1432,7 +1432,7 @@ namespace ME3TweaksCore.Diagnostics
                 #region Event logs for crashes
 
                 //EVENT LOGS
-                Log.Information(@"Collecting event logs");
+                MLog.Information(@"Collecting event logs");
                 updateStatusCallback?.Invoke(LC.GetString(LC.string_collectingEventLogs));
                 StringBuilder crashLogs = new StringBuilder();
                 var sevenDaysAgo = DateTime.Now.AddDays(-3);
@@ -1465,7 +1465,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 if (selectedDiagnosticTarget.Game == MEGame.ME3)
                 {
-                    Log.Information(@"Collecting ME3Logger session log");
+                    MLog.Information(@"Collecting ME3Logger session log");
                     updateStatusCallback?.Invoke(LC.GetString(LC.string_collectingME3SessionLog));
                     string me3logfilepath = Path.Combine(Directory.GetParent(M3Directories.GetExecutablePath(selectedDiagnosticTarget)).FullName, @"me3log.txt");
                     if (File.Exists(me3logfilepath))
@@ -1673,7 +1673,7 @@ namespace ME3TweaksCore.Diagnostics
             }
             catch (Exception e)
             {
-                Log.Error(@"Error checking LOD settings: " + e.Message);
+                MLog.Error(@"Error checking LOD settings: " + e.Message);
                 addDiagLine($@"Error checking LOD settings: {e.Message}", Severity.INFO);
             }
         }
@@ -1727,7 +1727,7 @@ namespace ME3TweaksCore.Diagnostics
                 }
                 catch (Exception e)
                 {
-                    Log.Error($@"Error reading partition type on {partitionLetter}: {e.Message}");
+                    MLog.Error($@"Error reading partition type on {partitionLetter}: {e.Message}");
                     return -1;
                 }
             }
@@ -1785,7 +1785,7 @@ namespace ME3TweaksCore.Diagnostics
             }
             catch (Exception e)
             {
-                Log.Error($@"Error getting processor information: {e.Message}");
+                MLog.Error($@"Error getting processor information: {e.Message}");
                 return $"Error getting processor information: {e.Message}\n"; //do not localize
             }
         }

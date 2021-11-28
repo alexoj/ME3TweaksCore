@@ -76,6 +76,20 @@ namespace ME3TweaksCore.Diagnostics
         }
 
         /// <summary>
+        /// Logs a string to the log. You can specify a prefix or a boolean that is checked (for making calls easier)
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="prefix"></param>
+        /// <param name="shouldLog"></param>
+        internal static void Fatal(string message, string prefix = null, bool shouldLog = true)
+        {
+            if (shouldLog)
+            {
+                Log.Fatal($"{prefix ?? LoggingPrefix}{message}");
+            }
+        }
+
+        /// <summary>
         /// Calls Log.CloseAndFlush(). This is here just so everything routes through MLog.
         /// </summary>
         public static void CloseAndFlush()

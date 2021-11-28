@@ -49,78 +49,10 @@ namespace ME3TweaksCore.Services.Backup
         /// </summary>
         public const string CMM_VANILLA_FILENAME = "cmm_vanilla";
 
-        public class GameBackupStatus : INotifyPropertyChanged
-        {
-            public string GameName => Game.ToGameName();
-            public MEGame Game { get; internal set; }
-            public bool BackedUp { get; internal set; }
-            public bool BackupActivity { get; internal set; }
-            public string BackupStatus { get; internal set; }
-            public string BackupLocationStatus { get; internal set; }
-            public string LinkActionText { get; internal set; }
-            public string BackupActionText { get; internal set; }
-
-            internal GameBackupStatus(MEGame game)
-            {
-                Game = game;
-            }
-
-            internal void RefreshBackupStatus(bool installed, bool forceCmmVanilla, bool log)
-            {
-
-                var bPath = GetGameBackupPath(Game, forceCmmVanilla);
-                if (bPath != null)
-                {
-                    BackupStatus = "Backed up";
-                    BackupLocationStatus = $"Backup stored at {bPath}";
-
-                    if (log) MLog.Information($@" BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
-                    LinkActionText = "Unlink backup";
-                    BackupActionText = "Restore game";
-                    BackedUp = true;
-                    return;
-                }
-                bPath = GetGameBackupPath(Game, forceCmmVanilla, forceReturnPath: true);
-                if (bPath == null)
-                {
-                    BackedUp = false;
-                    BackupStatus = "Not backed up";
-                    BackupLocationStatus = "Game has not been backed up";
-                    if (log) MLog.Information($@" BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
-                    LinkActionText = "Link existing backup";
-                    BackupActionText = "Create backup"; //This should be disabled if game is not installed. This will be handled by the wrapper
-                    return;
-                }
-                else if (!Directory.Exists(bPath))
-                {
-                    BackedUp = false;
-                    BackupStatus = "Backup unavailable";
-                    BackupLocationStatus = $"Backup path not accessible: {bPath}";
-                    if (log) MLog.Information($@" BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
-
-                    LinkActionText = "Unlink backup";
-                    BackupActionText = "Create new backup";
-                    return;
-                }
-
-                if (!installed)
-                {
-                    //BackedUp = false; // Not sure if this is the right call, maybe we shouldn't modify this
-                    BackupStatus = "Game not installed";
-                    BackupLocationStatus = "Game not installed. Run at least once to ensure game is fully setup";
-                    if (log) MLog.Information($@" BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
-                    LinkActionText = "Link existing backup"; //this seems dangerous to the average user
-                    BackupActionText = "Can't create backup";
-                }
-            }
-
-            public event PropertyChangedEventHandler PropertyChanged;
-        }
-
         /// <summary>
         /// Initializes the backup service.
         /// </summary>
-        public static void InitBackupService(Action<Action> runCodeOnUIThreadCallback, bool refreshStatuses = true)
+        public static void InitBackupService(Action<Action> runCodeOnUIThreadCallback, bool refreshStatuses = true, bool logPaths = false)
         {
             object obj = new object(); //Syncobj to ensure the UI thread method has finished invoking
             void runOnUiThread()
@@ -131,10 +63,32 @@ namespace ME3TweaksCore.Services.Backup
                 GameBackupStatuses.Add(new GameBackupStatus(MEGame.LE1));
                 GameBackupStatuses.Add(new GameBackupStatus(MEGame.LE2));
                 GameBackupStatuses.Add(new GameBackupStatus(MEGame.LE3));
+                GameBackupStatuses.Add(new GameBackupStatus(MEGame.LELauncher));
             }
             runCodeOnUIThreadCallback.Invoke(runOnUiThread);
             if (refreshStatuses)
-                RefreshBackupStatus(null, false, log: true);
+                RefreshBackupStatus(null, log: true);
+
+            /*
+             *                 // Todo: Initialize library here?
+
+                // Build 118 settings migration for backups
+                BackupService.MigrateBackupPaths();
+
+                M3Log.Information(@"The following backup paths are listed in the registry:");
+                M3Log.Information(@"Mass Effect ======");
+                M3Log.Information(BackupService.GetGameBackupPath(MEGame.ME1, true, true));
+                M3Log.Information(@"Mass Effect 2 ====");
+                M3Log.Information(BackupService.GetGameBackupPath(MEGame.ME2, true, true));
+                M3Log.Information(@"Mass Effect 3 ====");
+                M3Log.Information(BackupService.GetGameBackupPath(MEGame.ME3, true, true));
+                M3Log.Information(@"Mass Effect LE ======");
+                M3Log.Information(BackupService.GetGameBackupPath(MEGame.LE1, true, true));
+                M3Log.Information(@"Mass Effect 2 LE ====");
+                M3Log.Information(BackupService.GetGameBackupPath(MEGame.LE2, true, true));
+                M3Log.Information(@"Mass Effect 3 LE ====");
+                M3Log.Information(BackupService.GetGameBackupPath(MEGame.LE3, true, true));
+             */
         }
 
 
@@ -149,13 +103,13 @@ namespace ME3TweaksCore.Services.Backup
         /// <param name="allTargets">List of targets to determine if the game is installed or not. Passing null will assume the game is installed</param>
         /// <param name="forceCmmVanilla">If the backups will be forced to have the cmmVanilla file to be considered valid</param>
         /// <param name="game">What game to refresh. Set to unknown to refresh all.</param>
-        public static void RefreshBackupStatus(List<GameTarget> allTargets = null, bool forceCmmVanilla = true, MEGame game = MEGame.Unknown, bool log = false)
+        public static void RefreshBackupStatus(List<GameTarget> allTargets = null, MEGame game = MEGame.Unknown, bool log = false)
         {
             foreach (var v in GameBackupStatuses)
             {
                 if (v.Game == game || game == MEGame.Unknown)
                 {
-                    v.RefreshBackupStatus(allTargets == null || allTargets.Any(x => x.Game == game), forceCmmVanilla, log);
+                    v.RefreshBackupStatus(allTargets == null || allTargets.Any(x => x.Game == game), log);
                 }
             }
         }
@@ -268,11 +222,20 @@ namespace ME3TweaksCore.Services.Backup
             }
 
             //Super basic validation
-            if (!Directory.Exists(Path.Combine(path, @"BIOGame")) || !Directory.Exists(Path.Combine(path, @"Binaries")))
+            if (game != MEGame.LELauncher && (!Directory.Exists(Path.Combine(path, @"BIOGame")) || !Directory.Exists(Path.Combine(path, @"Binaries"))))
             {
                 if (logReturnedPath)
                 {
-                    MLog.Warning(@" >> {path} is missing BioGame/Binaries subdirectory, invalid backup");
+                    MLog.Warning($@" >> {path} is missing BioGame/Binaries subdirectory, invalid backup");
+                }
+
+                return null;
+            }
+            else if (game == MEGame.LELauncher && !Directory.Exists(Path.Combine(path, @"Content")))
+            {
+                if (logReturnedPath)
+                {
+                    MLog.Warning($@" >> {path} is missing Content directory, invalid backup");
                 }
 
                 return null;
@@ -330,9 +293,9 @@ namespace ME3TweaksCore.Services.Backup
             return MSharedSettings.GetSettingString($"{game}VanillaBackupLocation") != null;
         }
 
-        public static void UpdateBackupStatus(MEGame game, bool forceCmmVanilla)
+        public static void UpdateBackupStatus(MEGame game)
         {
-            GameBackupStatuses.FirstOrDefault(x => x.Game == game)?.RefreshBackupStatus(true, forceCmmVanilla, false);
+            GameBackupStatuses.FirstOrDefault(x => x.Game == game)?.RefreshBackupStatus(true, false);
         }
 
         /// <summary>

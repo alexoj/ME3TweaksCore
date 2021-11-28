@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Text;
+using LegendaryExplorerCore.Gammtek.Collections.ObjectModel;
 using LegendaryExplorerCore.Misc;
 using ME3TweaksCore.Helpers;
 
@@ -14,14 +15,25 @@ namespace ME3TweaksCore.GameFilesystem
         #region Info Prefixes
         public static readonly string PrefixOptionsSelectedOnInstall = @"[INSTALLOPTIONS]";
         public static readonly string PrefixIncompatibleDLC = @"[INCOMPATIBLEDLC]";
+        public static readonly string PrefixExtendedAttributes = @"[EXTENDEDATTRIBUTE]";
         #endregion
 
         public string ModName { get; set; }
         public string Version { get; set; }
         public string InstalledBy { get; set; }
         public string InstallerInstanceGUID { get; set; }
+        /// <summary>
+        /// List of DLC that this one is not compatible with
+        /// </summary>
         public ObservableCollectionExtended<string> IncompatibleDLC { get; } = new ObservableCollectionExtended<string>();
+        /// <summary>
+        /// List of selected install-time options
+        /// </summary>
         public ObservableCollectionExtended<string> OptionsSelectedAtInstallTime { get; } = new ObservableCollectionExtended<string>();
+        /// <summary>
+        /// List of extended attributes that don't have a hardcoded variable in tooling.
+        /// </summary>
+        public CaseInsensitiveDictionary<string> ExtendedAttributes { get; } = new();
 
         public void WriteMetaCMM(string path, string installingAppName)
         {
@@ -45,7 +57,7 @@ namespace ME3TweaksCore.GameFilesystem
         }
 
         public MetaCMM() { }
-        
+
         /// <summary>
         /// Loads a metaCMM file from disk
         /// </summary>
@@ -81,6 +93,12 @@ namespace ME3TweaksCore.GameFilesystem
                         {
                             var parsedline = line.Substring(PrefixIncompatibleDLC.Length);
                             IncompatibleDLC.ReplaceAll(StringStructParser.GetSemicolonSplitList(parsedline));
+                        }
+                        else if (line.StartsWith(PrefixExtendedAttributes))
+                        {
+                            var parsedline = line.Substring(PrefixExtendedAttributes.Length);
+                            var entry = new DuplicatingIni.IniEntry(parsedline);
+                            ExtendedAttributes.Add(entry.Key, entry.Value);
                         }
                         break;
                 }

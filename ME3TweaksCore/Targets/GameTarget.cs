@@ -552,7 +552,7 @@ namespace ME3TweaksCore.Targets
             }
 
             if (validationFiles == null) return null; //Invalid game.
-            Log.Information($@"Validating game target: {TargetPath}");
+            MLog.Information($@"Validating game target: {TargetPath}");
             foreach (var f in validationFiles)
             {
                 if (!File.Exists(f))

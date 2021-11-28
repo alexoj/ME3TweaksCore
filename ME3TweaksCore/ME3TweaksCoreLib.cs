@@ -5,9 +5,12 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using LegendaryExplorerCore;
+using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Services.Backup;
+using ME3TweaksCore.Services.BasegameFileIdentification;
+using ME3TweaksCore.Services.ThirdPartyModIdentification;
 using Serilog;
 
 namespace ME3TweaksCore
@@ -40,27 +43,35 @@ namespace ME3TweaksCore
         /// Initial initialization function for the library. You must call this function before using the library, otherwise it may not reliably work.
         /// </summary>
         /// <param name="createLogger"></param>
-        public static void Initialize(Action<Action> RunOnUiThreadDelegate, Func<ILogger> createLogger = null)
+        public static void Initialize(ME3TweaksCoreLibInitPackage package)
         {
             if (Initialized)
             {
                 return; // Already initialized.
             }
 
-            // Initialize the logger if it is not already initialized
-            LogCollector.CreateLogger = createLogger;
-            Log.Logger ??= LogCollector.CreateLogger?.Invoke();
+            if (package == null)
+            {
+                throw new Exception(@"The ME3TweaksCoreLibInitPackage object was null! This object is required to initialize the library.");
+            }
+
+            package.InstallInitPackage();
 
             MLog.Information($@"Initializing ME3TweaksCore library {MLibraryConsumer.GetLibraryVersion()}");
 
-            // Load Legendary Explorer Core.
-            LegendaryExplorerCoreLib.InitLib(null, logger: Log.Logger);
+            // Load Legendary Explorer Core as we depend on it
+            MEPackageHandler.GlobalSharedCacheEnabled = false; // ME3Tweaks tools (non LEX) do not use the global package cache
+            LegendaryExplorerCoreLib.InitLib(null, logger: Log.Logger, packageSavingFailed: package.LECPackageSaveFailedCallback); // Might need to change off of null for scheduler
 
             // Load our library
-            RunOnUIThread = RunOnUiThreadDelegate;
             MUtilities.DeleteFilesAndFoldersRecursively(MCoreFilesystem.GetTempDirectory(), deleteDirectoryItself: false); // Clear temp but don't delete the directory itself
+            BackupService.InitBackupService(RunOnUIThread, logPaths: true);
 
-            BackupService.InitBackupService(RunOnUIThread);
+            if (package.LoadAuxillaryServices)
+            {
+                BasegameFileIdentificationService.LoadService();
+                TPMIService.LoadService();
+            }
 
             Initialized = true;
         }

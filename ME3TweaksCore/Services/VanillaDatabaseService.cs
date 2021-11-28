@@ -11,6 +11,7 @@ using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using LegendaryExplorerCore.Unreal;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Helpers.ME1;
@@ -106,7 +107,7 @@ namespace ME3TweaksCore.Services
             {
                 if (target != null && !IsFileVanilla(target, sfar, false))
                 {
-                    Log.Error(@"SFAR is not vanilla: " + sfar);
+                    MLog.Error(@"SFAR is not vanilla: " + sfar);
                     return null; //Not vanilla!
                 }
 
@@ -114,7 +115,7 @@ namespace ME3TweaksCore.Services
             }
             else
             {
-                Log.Error($@"SFAR does not exist for requested file fetch: {sfar}");
+                MLog.Error($@"SFAR does not exist for requested file fetch: {sfar}");
             }
             return null;
         }
@@ -251,7 +252,7 @@ namespace ME3TweaksCore.Services
                 else
                 {
                     //ambiguous or file not found
-                    Log.Error($@"Could not find basegame file (or found multiple) in backup for {game}: {filename}");
+                    MLog.Error($@"Could not find basegame file (or found multiple) in backup for {game}: {filename}");
 
                 }
             }
@@ -283,7 +284,7 @@ namespace ME3TweaksCore.Services
             else
             {
                 //ambiguous or file not found
-                Log.Error($@"Could not find {filename} DLC file (or found multiple) in backup for {game}: {filename}");
+                MLog.Error($@"Could not find {filename} DLC file (or found multiple) in backup for {game}: {filename}");
             }
 
             return null;
@@ -431,13 +432,13 @@ namespace ME3TweaksCore.Services
                     }
                     else
                     {
-                        Debug.WriteLine(@"File not in Vanilla DB: " + shortname);
+                        //Debug.WriteLine(@"File not in Vanilla DB: " + shortname);
                     }
                 }
             }
             else
             {
-                Log.Error(@"Directory to validate doesn't exist: " + target.TargetPath);
+                MLog.Error(@"Directory to validate doesn't exist: " + target.TargetPath);
             }
 
             return isVanilla;
@@ -661,9 +662,9 @@ namespace ME3TweaksCore.Services
         /// <param name="game"></param>
         public static void CheckAndTagBackup(MEGame game)
         {
-            Log.Information(@"Validating backup for " + game.ToGameName());
+            MLog.Information(@"Validating backup for " + game.ToGameName());
             var targetPath = BackupService.GetGameBackupPath(game, false);
-            Log.Information(@"Backup location: " + targetPath);
+            MLog.Information(@"Backup location: " + targetPath);
             BackupService.SetStatus(game, LC.GetString(LC.string_checkingBackup), LC.GetString(LC.string_pleaseWait));
             BackupService.SetActivity(game, true);
             GameTarget target = new GameTarget(game, targetPath, false);
@@ -673,7 +674,7 @@ namespace ME3TweaksCore.Services
                 List<string> nonVanillaFiles = new List<string>();
                 void nonVanillaFileFoundCallback(string filepath)
                 {
-                    Log.Error($@"Non-vanilla file found: {filepath}");
+                    MLog.Error($@"Non-vanilla file found: {filepath}");
                     nonVanillaFiles.Add(filepath);
                 }
 
@@ -682,15 +683,15 @@ namespace ME3TweaksCore.Services
                 {
                     if (target.Supported)
                     {
-                        Log.Error($@"DLC is in an inconsistent state: {filepath}");
+                        MLog.Error($@"DLC is in an inconsistent state: {filepath}");
                         inconsistentDLC.Add(filepath);
                     }
                     else
                     {
-                        Log.Error(@"Detected an inconsistent DLC, likely due to an unofficial copy of the game");
+                        MLog.Error(@"Detected an inconsistent DLC, likely due to an unofficial copy of the game");
                     }
                 }
-                Log.Information(@"Validating backup...");
+                MLog.Information(@"Validating backup...");
 
                 VanillaDatabaseService.LoadDatabaseFor(game, target.IsPolishME1);
                 bool isVanilla = VanillaDatabaseService.ValidateTargetAgainstVanilla(target, nonVanillaFileFoundCallback, true);
@@ -703,17 +704,17 @@ namespace ME3TweaksCore.Services
                     //Backup is OK
                     //Tag
                     File.WriteAllText(Path.Combine(targetPath, BackupService.CMM_VANILLA_FILENAME), ME3TweaksCoreLib.CoreLibVersionHR);
-                    Log.Information($@"Wrote {BackupService.CMM_VANILLA_FILENAME} to validated backup");
-                    BackupService.RefreshBackupStatus(null, true, game, true);
+                    MLog.Information($@"Wrote {BackupService.CMM_VANILLA_FILENAME} to validated backup");
+                    BackupService.RefreshBackupStatus(null, game, true);
                 }
                 else
                 {
-                    Log.Warning($@"Backup verification has failed for the backup at {target.TargetPath}. This backup will not be used");
+                    MLog.Warning($@"Backup verification has failed for the backup at {target.TargetPath}. This backup will not be used");
                 }
             }
             else
             {
-                Log.Information(@"Backup target is invalid. This backup cannot not be used. Reason: " + validationFailedReason);
+                MLog.Information(@"Backup target is invalid. This backup cannot not be used. Reason: " + validationFailedReason);
             }
             BackupService.RefreshBackupStatus(null, game: game);
             BackupService.SetActivity(game, false);

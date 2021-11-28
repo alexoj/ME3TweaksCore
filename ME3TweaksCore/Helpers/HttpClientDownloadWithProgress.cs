@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Misc;
 using Serilog;
 
@@ -91,7 +92,7 @@ namespace ME3TweaksCore.Helpers
             }
             catch (OperationCanceledException)
             {
-                Log.Warning("[AICORE] Download canceled");
+                MLog.Warning("Download canceled");
             }
             finally
             {

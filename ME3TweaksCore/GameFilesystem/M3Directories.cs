@@ -6,6 +6,7 @@ using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Targets;
 using Serilog;
@@ -85,7 +86,7 @@ namespace ME3TweaksCore.GameFilesystem
                 }
                 catch (Exception e)
                 {
-                    Log.Error($@"Exception getting mount priority from file: {mountpath}: {e.Message}");
+                    MLog.Error($@"Exception getting mount priority from file: {mountpath}: {e.Message}");
                 }
             }
 
