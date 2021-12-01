@@ -17,7 +17,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <summary>
         /// Logging prefix for ME3TWEAKSCORE logs.
         /// </summary>
-        private const string LoggingPrefix = "[ME3TWEAKSCORE]";
+        private const string LoggingPrefix = "[ME3TWEAKSCORE] ";
 
         /// <summary>
         /// Logs a string to the log. You can specify a prefix or a boolean that is checked (for making calls easier)

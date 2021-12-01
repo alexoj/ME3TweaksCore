@@ -64,11 +64,13 @@ namespace ME3TweaksCore.Helpers.MEM
                     MLog.Warning(@"The local MEMNoGui version is higher than the supported version. We are forcibly downgrading this client.");
                     memVersion = 0;
                 }
-                else if (memVersion > SoakTestingMEMVersion && !bypassSoakGate)
-                {
-                    MLog.Information(@"We are downgrading this client's MEMNoGui version to a supported version for stable");
-                    memVersion = 0;
-                }
+
+                // TODO: THIS HAS TO BE RE-ENABLED FOR ALOT SOMEHOW
+                //else if (memVersion > SoakTestingMEMVersion && !bypassSoakGate)
+                //{
+                //    MLog.Information(@"We are downgrading this client's MEMNoGui version to a supported version for stable");
+                //    memVersion = 0;
+                //}
 
                 Release latestReleaseWithApplicableAsset = null;
                 if (releases.Any())
@@ -193,12 +195,16 @@ namespace ME3TweaksCore.Helpers.MEM
                                 MLog.Error("ERROR EXTRACTING 7z MASSEFFECMODDERNOGUI!!");
                                 return false;
                             }
+
+                            // Copy into place. 
+                            var sourceFile = Path.Combine(MCoreFilesystem.GetTempDirectory(), "MassEffectModderNoGui.exe");
+                            if (File.Exists(MCoreFilesystem.GetMEMNoGuiPath(classicMEM))) File.Delete(MCoreFilesystem.GetMEMNoGuiPath(classicMEM));
+                            File.Move(sourceFile, MCoreFilesystem.GetMEMNoGuiPath(classicMEM));
                         }
                         else if (Path.GetExtension(downloadPath) == ".zip")
                         {
                             var zf = ZipFile.OpenRead(downloadPath);
-                            var zipEntry = zf.Entries.FirstOrDefault(x =>
-                                Path.GetFileNameWithoutExtension(x.FullName) == "MassEffectModderNoGui");
+                            var zipEntry = zf.Entries.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x.FullName) == "MassEffectModderNoGui");
                             if (zipEntry != null)
                             {
                                 if (File.Exists(MCoreFilesystem.GetMEMNoGuiPath(classicMEM))) File.Delete(MCoreFilesystem.GetMEMNoGuiPath(classicMEM));
@@ -227,7 +233,7 @@ namespace ME3TweaksCore.Helpers.MEM
             }
             catch (Exception e)
             {
-                MLog.Error("An error occurred running MassEffectModderNoGui updater: " + e.Message);
+                MLog.Exception(e, "An error occurred running MassEffectModderNoGui updater: ");
                 exceptionUpdating?.Invoke(e);
                 return false;
             }

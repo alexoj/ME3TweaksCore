@@ -18,19 +18,27 @@ namespace ME3TweaksCore.Helpers
         public static string AppDataFolderName { get; set; } = "ME3TweaksCore";
 
         /// <summary>
-        /// Gets the appdata directory for app data storage. The folder name can be changed via AppDataFolderName.
+        /// The delegate declaration for GetAppDataFolder.
         /// </summary>
         /// <param name="createIfMissing"></param>
         /// <returns></returns>
-        public static string GetAppDataFolder(bool createIfMissing = true)
+        public delegate string GetAppDataFolderDelegate(bool createIfMissing = true);
+
+        /// <summary>
+        /// Gets the appdata directory for app data storage. The default implementation's folder name can be changed via AppDataFolderName. This method can be overridden by assigning it a delegate.
+        /// </summary>
+        /// <param name="createIfMissing"></param>
+        /// <returns></returns>
+        public static GetAppDataFolderDelegate GetAppDataFolder = createIfMissing =>
         {
             var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppDataFolderName);
             if (createIfMissing && !Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
             }
+
             return folder;
-        }
+        };
 
         /// <summary>
         /// Gets the directory that holds cached native dlls.
@@ -73,7 +81,11 @@ namespace ME3TweaksCore.Helpers
             return Path.Combine(GetME3TweaksServicesCache(), "thirdpartyidentificationservice.json");
         }
 
-        private static string GetMEMDir()
+        /// <summary>
+        /// Directory that contains MEM executables
+        /// </summary>
+        /// <returns></returns>
+        internal static string GetMEMDir()
         {
             return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "MassEffectModder")).FullName;
         }
@@ -85,10 +97,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string GetMEMNoGuiPath(bool classicMem)
         {
-            if (classicMem)
-                return Path.Combine(GetMEMDir(), "MassEffectModderNoGui.exe");
-            
-            return Path.Combine(GetMEMDir(), "MassEffectModderNoGui_LE.exe");
+            return Path.Combine(GetMEMDir(), GetMEMEXEName(classicMem));
         }
 
         /// <summary>
@@ -126,6 +135,18 @@ namespace ME3TweaksCore.Helpers
         public static string GetLogDir()
         {
             return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "logs")).FullName;
+        }
+        
+        /// <summary>
+        /// Gets the MassEffectModderNoGui executable name for the specified game.
+        /// </summary>
+        /// <param name="classicMem"></param>
+        /// <returns></returns>
+        internal static string GetMEMEXEName(bool classicMem)
+        {
+            if (classicMem)
+                return "MassEffectModderNoGui.exe";
+            return "MassEffectModderNoGui_LE.exe";
         }
     }
 }
