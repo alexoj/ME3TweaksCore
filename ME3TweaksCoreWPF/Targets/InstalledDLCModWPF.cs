@@ -12,23 +12,6 @@ namespace ME3TweaksCoreWPF.Targets
     [AddINotifyPropertyChangedInterface]
     public class InstalledDLCModWPF : InstalledDLCMod
     {
-        // This needs implemented in a application specific way.
-        //private static readonly SolidColorBrush DisabledBrushLightMode = new SolidColorBrush(Color.FromArgb(0xff, 232, 26, 26));
-        //private static readonly SolidColorBrush DisabledBrushDarkMode = new SolidColorBrush(Color.FromArgb(0xff, 247, 88, 77));
-
-        //[DependsOn(nameof(DLCFolderName))]
-        //public SolidColorBrush TextColor
-        //{
-        //    get
-        //    {
-        //        if (DLCFolderName.StartsWith('x'))
-        //        {
-        //            return Settings.DarkTheme ? DisabledBrushDarkMode : DisabledBrushLightMode;
-        //        }
-        //        return MediaTypeNames.Application.Current.FindResource(AdonisUI.Brushes.ForegroundBrush) as SolidColorBrush;
-        //    }
-        //}
-
         public GenericCommand EnableDisableCommand { get; set; }
         public GenericCommand DeleteCommand { get; set; }
 
@@ -61,6 +44,22 @@ namespace ME3TweaksCoreWPF.Targets
                     // Todo: Show a dialog to the user
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Generates the WPF version of an InstalledDLCModObject.
+        /// </summary>
+        /// <param name="dlcfolderpath"></param>
+        /// <param name="game"></param>
+        /// <param name="deleteconfirmationcallback"></param>
+        /// <param name="notifydeleted"></param>
+        /// <param name="notifytoggled"></param>
+        /// <param name="modnamepreferstpmi"></param>
+        /// <returns></returns>
+        private static InstalledDLCMod GenerateInstalledDLCModObject(string dlcfolderpath, MEGame game, Func<InstalledDLCMod, bool> deleteconfirmationcallback, Action notifydeleted, Action notifytoggled, bool modnamepreferstpmi)
+        {
+            return new InstalledDLCModWPF(dlcfolderpath, game, deleteconfirmationcallback, notifydeleted, notifytoggled, modnamepreferstpmi);
         }
     }
 }

@@ -20,5 +20,19 @@ namespace ME3TweaksCoreWPF.Targets
         {
             RestoreCommand = new GenericCommand(RestoreFileWrapper, CanRestoreFile);
         }
+
+        /// <summary>
+        /// Can be used to generate a ModifiedFileObjectWPF, for use in delegates.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="target"></param>
+        /// <param name="restoreBasegamefileConfirmationCallback"></param>
+        /// <param name="notifyRestoringFileCallback"></param>
+        /// <param name="notifyRestoredCallback"></param>
+        /// <returns></returns>
+        public static ModifiedFileObjectWPF GenerateModifiedFileObjectWPF(string filePath, GameTarget target, Func<string, bool> restoreBasegamefileConfirmationCallback, Action notifyRestoringFileCallback, Action<object> notifyRestoredCallback)
+        {
+            return new ModifiedFileObjectWPF(filePath, target, restoreBasegamefileConfirmationCallback, notifyRestoringFileCallback, notifyRestoredCallback);
+        }
     }
 }

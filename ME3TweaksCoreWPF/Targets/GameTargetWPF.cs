@@ -9,6 +9,7 @@ using LegendaryExplorerCore.Packages;
 using ME3TweaksCore;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Targets;
+using ME3TweaksCoreWPF.Targets;
 
 namespace ME3TweaksCoreWPF
 {

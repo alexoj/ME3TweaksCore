@@ -399,8 +399,8 @@ namespace ME3TweaksCore.Targets
             modifiedSfars.AddRange(inconsistentDLC.Select(x => Path.Combine(x, @"CookedPCConsole", @"Default.sfar")));
             modifiedSfars = modifiedSfars.Distinct().ToList(); //filter out if modified + inconsistent
 
-            ModifiedSFARFiles.AddRange(modifiedSfars.Select(file => new SFARObject(file, this, restoreSfarConfirmationCallback, notifySFARRestoringCallback, notifyRestoredCallback)));
-            ModifiedBasegameFiles.AddRange(modifiedFiles.Select(file => new ModifiedFileObject(file.Substring(TargetPath.Length + 1), this,
+            ModifiedSFARFiles.AddRange(modifiedSfars.Select(file => MExtendedClassGenerators.GenerateSFARObject(file, this, restoreSfarConfirmationCallback, notifySFARRestoringCallback, notifyRestoredCallback)));
+            ModifiedBasegameFiles.AddRange(modifiedFiles.Select(file => MExtendedClassGenerators.GenerateModifiedFileObject(file.Substring(TargetPath.Length + 1), this,
                 restoreBasegamefileConfirmationCallback,
                 notifyFileRestoringCallback,
                 notifyRestoredCallback)));
@@ -424,7 +424,15 @@ namespace ME3TweaksCore.Targets
         public ObservableCollectionExtended<InstalledDLCMod> UIInstalledDLCMods { get; } = new();
         public ObservableCollectionExtended<InstalledOfficialDLC> UIInstalledOfficialDLC { get; } = new();
 
-        public void PopulateDLCMods(bool includeDisabled, Func<InstalledDLCMod, bool> deleteConfirmationCallback = null, Action notifyDeleted = null, Action notifyToggled = null, bool modNamePrefersTPMI = false)
+        /// <summary>
+        /// Populates the list of installed mods and official DLCs.
+        /// </summary>
+        /// <param name="includeDisabled"></param>
+        /// <param name="deleteConfirmationCallback"></param>
+        /// <param name="notifyDeleted"></param>
+        /// <param name="notifyToggled"></param>
+        /// <param name="modNamePrefersTPMI"></param>
+        public virtual void PopulateDLCMods(bool includeDisabled, Func<InstalledDLCMod, bool> deleteConfirmationCallback = null, Action notifyDeleted = null, Action notifyToggled = null, bool modNamePrefersTPMI = false)
         {
             if (Game == MEGame.LELauncher) return; // LE Launcher doesn't have DLC mods
             var dlcDir = M3Directories.GetDLCPath(this);
@@ -443,9 +451,14 @@ namespace ME3TweaksCore.Targets
             //Must run on UI thread (if this library is being used in a UI project)
             ME3TweaksCoreLib.RunOnUIThread(() =>
             {
-                UIInstalledDLCMods.ReplaceAll(installedMods.Select(x => new InstalledDLCMod(Path.Combine(dlcDir, x), Game, deleteConfirmationCallback, notifyDeleted, notifyToggled, modNamePrefersTPMI)).ToList().OrderBy(x => x.ModName));
+                UIInstalledDLCMods.ReplaceAll(installedMods.Select(x => MExtendedClassGenerators.GenerateInstalledDlcModObject(Path.Combine(dlcDir, x), Game, deleteConfirmationCallback, notifyDeleted, notifyToggled, modNamePrefersTPMI)).ToList().OrderBy(x => x.ModName));
                 UIInstalledOfficialDLC.ReplaceAll(officialDLC);
             });
+        }
+
+        private InstalledDLCMod InternalGenerateDLCModObject()
+        {
+            throw new NotImplementedException();
         }
 
         public bool IsTargetWritable()
@@ -859,7 +872,7 @@ namespace ME3TweaksCore.Targets
                     ExtraFiles.Remove(ief);
                 }
 
-                ExtraFiles.ReplaceAll(extraDlls.Select(x => new InstalledExtraFile(Path.Combine(exeDir, x), InstalledExtraFile.EFileType.DLL, Game, notifyExtraFileDeleted)));
+                ExtraFiles.ReplaceAll(extraDlls.Select(x => MExtendedClassGenerators.GenerateInstalledExtraFile(Path.Combine(exeDir, x), InstalledExtraFile.EFileType.DLL, Game, notifyExtraFileDeleted)));
             }
             catch (Exception e)
             {
