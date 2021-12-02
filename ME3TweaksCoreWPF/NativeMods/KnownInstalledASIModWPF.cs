@@ -5,14 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.NativeMods;
+using ME3TweaksCore.NativeMods.Interfaces;
 
 namespace ME3TweaksCoreWPF.NativeMods
 {
     /// <summary>
     /// ASI file that is mapped to a known ASI file (WPF extensions). This class mirrors the non WPF version but does NOT subclass its subclasses!
     /// </summary>
-    public class KnownInstalledASIModWPF : InstalledASIModWPF
+    public class KnownInstalledASIModWPF : InstalledASIModWPF, IKnownInstalledASIMod
     {
         private static Brush installedBrush = new SolidColorBrush(Color.FromArgb(0x33, 0, 0xFF, 0));
         private static Brush outdatedBrush = new SolidColorBrush(Color.FromArgb(0x33, 0xFF, 0xFF, 0));
@@ -33,5 +35,24 @@ namespace ME3TweaksCoreWPF.NativeMods
         public bool Outdated => AssociatedManifestItem.OwningMod.Versions.Last() != AssociatedManifestItem;
 
         public override Brush BackgroundColor => Outdated ? outdatedBrush : installedBrush;
+
+        /// <summary>
+        /// The installation status of the ASI
+        /// </summary>
+        public string InstallStatus => Outdated ? LC.GetString(LC.string_outdatedVersionInstalled) : LC.GetString(LC.string_installed);
+
+
+        /// <summary>
+        /// Static constructor which can be used as a delegate
+        /// </summary>
+        /// <param name="asiFile"></param>
+        /// <param name="hash"></param>
+        /// <param name="game"></param>
+        /// <param name="mappedVersion"></param>
+        /// <returns></returns>
+        public static KnownInstalledASIModWPF GenerateKnownInstalledASIModWPF(string asiFile, string hash, MEGame game, ASIModVersion mappedVersion)
+        {
+            return new KnownInstalledASIModWPF(asiFile, hash, game, mappedVersion);
+        }
     }
 }

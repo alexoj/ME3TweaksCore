@@ -9,6 +9,7 @@ using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Targets;
 using PropertyChanged;
@@ -310,7 +311,7 @@ namespace ME3TweaksCore.NativeMods
 
             var installedASIs = target.GetInstalledASIs();
             // Delete existing ASIs from the same group to ensure we don't install the same mod
-            var existingSameGroupMods = installedASIs.OfType<KnownInstalledASIMod>().Where(x => x.AssociatedManifestItem.OwningMod == asi.OwningMod).ToList();
+            var existingSameGroupMods = installedASIs.OfType<IKnownInstalledASIMod>().Where(x => x.AssociatedManifestItem.OwningMod == asi.OwningMod).ToList();
             bool hasExistingVersionOfModInstalled = false;
             if (existingSameGroupMods.Any())
             {
@@ -329,7 +330,7 @@ namespace ME3TweaksCore.NativeMods
             }
 
             // Remove any conflicting ASIs
-            foreach (var v in installedASIs.OfType<KnownInstalledASIMod>())
+            foreach (var v in installedASIs.OfType<IKnownInstalledASIMod>())
             {
                 if (asi.OtherGroupsToDeleteOnInstall.Contains(v.AssociatedManifestItem.OwningMod.UpdateGroupId))
                 {

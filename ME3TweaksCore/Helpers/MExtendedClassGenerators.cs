@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.NativeMods;
+using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Targets;
 
 namespace ME3TweaksCore.Helpers
@@ -79,6 +81,40 @@ namespace ME3TweaksCore.Helpers
         private static SFARObject InternalGenerateSFARObject(string file, GameTarget target, Func<string, bool> restoresfarcallback, Action startingrestorecallback, Action<object> notifynolongermodifiedcallback)
         {
             return new SFARObject(file, target, restoresfarcallback, startingrestorecallback, notifynolongermodifiedcallback);
+        }
+
+
+        public delegate IKnownInstalledASIMod GenerateKnownInstalledASIModDelegate(string asiFile, string hash, MEGame game, ASIModVersion matchingManifestAsi);
+        public static GenerateKnownInstalledASIModDelegate GenerateKnownInstalledASIMod { get; set; } = InternalGenerateKnownInstalledASIMod;
+
+        /// <summary>
+        /// Used if no delegate override exists. Returns a basic KnownInstalledASIMod object.
+        /// </summary>
+        /// <param name="asiFile"></param>
+        /// <param name="hash"></param>
+        /// <param name="game"></param>
+        /// <param name="matchingManifestAsi"></param>
+        /// <returns></returns>
+        private static KnownInstalledASIMod InternalGenerateKnownInstalledASIMod(string asiFile, string hash, MEGame game, ASIModVersion matchingManifestAsi)
+        {
+            return new KnownInstalledASIMod(asiFile, hash, game, matchingManifestAsi);
+        }
+
+
+        public delegate IUnknownInstalledASIMod GenerateUnknownInstalledASIModDelegate(string asiFile, string hash, MEGame game);
+        public static GenerateUnknownInstalledASIModDelegate GenerateUnknownInstalledASIMod { get; set; } = InternalGenerateUnknownInstalledASIMod;
+
+        /// <summary>
+        /// Used if no delegate override exists. Returns a basic UnknownInstalledASIMod object.
+        /// </summary>
+        /// <param name="asiFile"></param>
+        /// <param name="hash"></param>
+        /// <param name="game"></param>
+        /// <param name="matchingManifestAsi"></param>
+        /// <returns></returns>
+        private static UnknownInstalledASIMod InternalGenerateUnknownInstalledASIMod(string asiFile, string hash, MEGame game)
+        {
+            return new UnknownInstalledASIMod(asiFile, hash, game);
         }
     }
 }

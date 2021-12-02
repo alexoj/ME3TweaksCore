@@ -81,6 +81,16 @@ namespace ME3TweaksCore
         /// </summary>
         public MExtendedClassGenerators.GenerateSFARObjectDelegate GenerateSFARObjectDelegate { get; init; }
 
+        /// <summary>
+        /// Delegate that will be called when a KnownInstalledASIMod is generated. You can supply your own extended version such as a WPF version or your own implementation
+        /// </summary>
+        public MExtendedClassGenerators.GenerateKnownInstalledASIModDelegate GenerateKnownInstalledASIModDelegate { get; init; }
+
+        /// <summary>
+        /// Delegate that will be called when a UnknownInstalledASIMod is generated. You can supply your own extended version such as a WPF version or your own implementation
+        /// </summary>
+        public MExtendedClassGenerators.GenerateUnknownInstalledASIModDelegate GenerateUnknownInstalledASIModDelegate { get; init; }
+
 
         /// <summary>
         /// Installs the callbacks specified in this package into ME3TweaksCore.
@@ -111,6 +121,10 @@ namespace ME3TweaksCore
                 MExtendedClassGenerators.GenerateModifiedFileObject = GenerateModifiedFileObjectDelegate;
             if (GenerateSFARObjectDelegate != null)
                 MExtendedClassGenerators.GenerateSFARObject = GenerateSFARObjectDelegate;
+            if (GenerateSFARObjectDelegate != null)
+                MExtendedClassGenerators.GenerateKnownInstalledASIMod = GenerateKnownInstalledASIModDelegate;
+            if (GenerateSFARObjectDelegate != null)
+                MExtendedClassGenerators.GenerateUnknownInstalledASIMod = GenerateUnknownInstalledASIModDelegate;
         }
 
         [Conditional("DEBUG")]
@@ -127,6 +141,8 @@ namespace ME3TweaksCore
             OptionNotSetCheck(GenerateInstalledExtraFileDelegate, nameof(GenerateInstalledExtraFileDelegate));
             OptionNotSetCheck(GenerateModifiedFileObjectDelegate, nameof(GenerateModifiedFileObjectDelegate));
             OptionNotSetCheck(GenerateSFARObjectDelegate, nameof(GenerateSFARObjectDelegate));
+            OptionNotSetCheck(GenerateKnownInstalledASIModDelegate, nameof(GenerateKnownInstalledASIModDelegate));
+            OptionNotSetCheck(GenerateUnknownInstalledASIModDelegate, nameof(GenerateUnknownInstalledASIModDelegate));
         }
 
         [Conditional("DEBUG")]

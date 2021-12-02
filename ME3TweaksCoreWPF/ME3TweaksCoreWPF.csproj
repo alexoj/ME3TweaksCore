@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="FontAwesome5" Version="2.1.6" />
+    <PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
     <PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="2.10.2" />
   </ItemGroup>
 

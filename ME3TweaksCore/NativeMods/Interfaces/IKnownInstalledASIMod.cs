@@ -1,25 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LegendaryExplorerCore.Packages;
+﻿using System.Linq;
 using ME3TweaksCore.Localization;
-using ME3TweaksCore.NativeMods.Interfaces;
 
-namespace ME3TweaksCore.NativeMods
+namespace ME3TweaksCore.NativeMods.Interfaces
 {
     /// <summary>
-    /// ASI file that is mapped to a known ASI file
+    /// Interface for all KnownInstalledASI implementations (as they have to fork for subclassing)
     /// </summary>
-    public class KnownInstalledASIMod : InstalledASIMod, IKnownInstalledASIMod
+    public interface IKnownInstalledASIMod : IInstalledASIMod
     {
-        public KnownInstalledASIMod(string filepath, string hash, MEGame game, ASIModVersion mappedVersion) : base(filepath, hash, game)
-        {
-            AssociatedManifestItem = mappedVersion;
-        }
-
         /// <summary>
         /// The manifest version information about this installed ASI mod
         /// </summary>
@@ -31,7 +19,7 @@ namespace ME3TweaksCore.NativeMods
         public bool Outdated => AssociatedManifestItem.OwningMod.Versions.Last() != AssociatedManifestItem;
 
         /// <summary>
-        /// The installation status string for this ASI
+        /// The installation status string of the ASI
         /// </summary>
         public string InstallStatus => Outdated ? LC.GetString(LC.string_outdatedVersionInstalled) : LC.GetString(LC.string_installed);
     }

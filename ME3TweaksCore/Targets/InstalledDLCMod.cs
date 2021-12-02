@@ -47,11 +47,10 @@ namespace ME3TweaksCore.Targets
         /// Indicates that this mod was installed by ALOT Installer or Mod Manager.
         /// </summary>
         public bool InstalledByManagedSolution { get; private set; }
-        public void OnDLCFolderNameChanged()
+        public virtual void OnDLCFolderNameChanged()
         {
             dlcFolderPath = Path.Combine(Directory.GetParent(dlcFolderPath).FullName, DLCFolderName);
             parseMetaCmm(DLCFolderName.StartsWith('x'), false);
-            //TriggerPropertyChangedFor(nameof(TextColor));
         }
 
         public InstalledDLCMod(string dlcFolderPath, MEGame game, Func<InstalledDLCMod, bool> deleteConfirmationCallback, Action notifyDeleted, Action notifyToggled, bool modNamePrefersTPMI)

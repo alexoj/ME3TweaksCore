@@ -5,6 +5,7 @@ using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Localization;
+using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Targets;
 using PropertyChanged;
 
@@ -64,7 +65,7 @@ namespace ME3TweaksCore.NativeMods
             RefreshBinkStatus();
         }
 
-        private void RefreshBinkStatus()
+        protected void RefreshBinkStatus()
         {
             LoaderInstalled = CurrentGameTarget != null && CurrentGameTarget.CheckIfBinkw32ASIIsInstalled();
             InstallLoaderText = LoaderInstalled ? LC.GetString(LC.string_loaderInstalled) : LC.GetString(LC.string_installLoader);
@@ -77,8 +78,8 @@ namespace ME3TweaksCore.NativeMods
             {
                 var selectedObject = SelectedASI;
                 var installedASIs = CurrentGameTarget.GetInstalledASIs();
-                var installedKnownASIMods = installedASIs.OfType<KnownInstalledASIMod>();
-                var installedUnknownASIMods = installedASIs.OfType<UnknownInstalledASIMod>();
+                var installedKnownASIMods = installedASIs.OfType<IKnownInstalledASIMod>();
+                var installedUnknownASIMods = installedASIs.OfType<IUnknownInstalledASIMod>();
                 var notInstalledASIs = ASIManager.GetASIModsByGame(CurrentGameTarget.Game).Except(installedKnownASIMods.Select(x => x.AssociatedManifestItem.OwningMod));
                 DisplayedASIMods.ReplaceAll(installedKnownASIMods.OrderBy(x => x.AssociatedManifestItem.Name));
                 DisplayedASIMods.AddRange(installedUnknownASIMods.OrderBy(x => x.UnmappedFilename));
@@ -93,7 +94,7 @@ namespace ME3TweaksCore.NativeMods
                 {
                     foreach (var v in DisplayedASIMods)
                     {
-                        if (v is KnownInstalledASIMod kim && kim.AssociatedManifestItem.OwningMod == selectedObject)
+                        if (v is IKnownInstalledASIMod kim && kim.AssociatedManifestItem.OwningMod == selectedObject)
                         {
                             SelectedASI = v;
                             break;
@@ -104,7 +105,7 @@ namespace ME3TweaksCore.NativeMods
         }
 
         //Do not delete - fody will link this
-        public void OnSelectedTargetChanged()
+        public void OnCurrentGameTargetChanged()
         {
             if (CurrentGameTarget != null)
             {

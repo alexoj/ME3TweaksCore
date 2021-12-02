@@ -17,6 +17,7 @@ using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.NativeMods;
+using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Services;
 using PropertyChanged;
 using Serilog;
@@ -908,9 +909,9 @@ namespace ME3TweaksCore.Targets
             }
         }
 
-        public List<InstalledASIMod> GetInstalledASIs()
+        public List<IInstalledASIMod> GetInstalledASIs()
         {
-            List<InstalledASIMod> installedASIs = new List<InstalledASIMod>();
+            var installedASIs = new List<IInstalledASIMod>();
             try
             {
                 string asiDirectory = M3Directories.GetASIPath(this);
@@ -929,11 +930,11 @@ namespace ME3TweaksCore.Targets
                         var matchingManifestASI = ASIManager.GetASIVersionByHash(hash, Game);
                         if (matchingManifestASI != null)
                         {
-                            installedASIs.Add(new KnownInstalledASIMod(asiFile, hash, Game, matchingManifestASI));
+                            installedASIs.Add(MExtendedClassGenerators.GenerateKnownInstalledASIMod(asiFile, hash, Game, matchingManifestASI));
                         }
                         else
                         {
-                            installedASIs.Add(new UnknownInstalledASIMod(asiFile, hash, Game));
+                            installedASIs.Add(MExtendedClassGenerators.GenerateUnknownInstalledASIMod(asiFile, hash, Game));
                         }
                     }
                 }
@@ -1022,6 +1023,10 @@ namespace ME3TweaksCore.Targets
             return false;
         }
 
+        /// <summary>
+        /// Installs the Bink ASI loader to this target.
+        /// </summary>
+        /// <returns></returns>
         public bool InstallBinkBypass()
         {
             var destPath = GetVanillaBinkPath();
@@ -1065,6 +1070,38 @@ namespace ME3TweaksCore.Targets
 
             MLog.Information($@"Installed Bink bypass for {Game}");
             return true;
+        }
+
+        /// <summary>
+        /// Uninstalls the Bink ASI loader from this target (does not do anything to Legendary Edition Launcher)
+        /// </summary>
+        public void UninstallBinkBypass()
+        {
+            var binkPath = GetVanillaBinkPath();
+            if (Game == MEGame.ME1)
+            {
+                var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
+                File.Delete(obinkPath);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw23.dll", binkPath, true);
+            }
+            else if (Game == MEGame.ME2)
+            {
+                var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
+                File.Delete(obinkPath);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw23.dll", binkPath, true);
+            }
+            else if (Game == MEGame.ME3)
+            {
+                var obinkPath = Path.Combine(TargetPath, "Binaries", "win32", "binkw23.dll");
+                File.Delete(obinkPath);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw23.dll", binkPath, true);
+            }
+            else if (Game.IsLEGame())
+            {
+                var obinkPath = Path.Combine(TargetPath, "Binaries", "Win64", "bink2w64_original.dll");
+                File.Delete(obinkPath);
+                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", binkPath, true);
+            }
         }
 
         private string GetVanillaBinkPath()
