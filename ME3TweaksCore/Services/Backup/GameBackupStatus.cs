@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using LegendaryExplorerCore.Gammtek.Extensions;
@@ -26,9 +27,20 @@ namespace ME3TweaksCore.Services.Backup
         public string LinkActionText { get; internal set; }
         public string BackupActionText { get; internal set; }
 
-        public void OnBackupStatusChanged()
+        /// <summary>
+        /// Location where the backup is MARKED to be. This doesn't mean it exists there, only that this is the value read from the settings!
+        /// </summary>
+        public string MarkedBackupLocation { get; internal set; }
+
+        public event EventHandler OnBackupStateChanged;
+        
+        /// <summary>
+        /// Called when the backed up state changes
+        /// </summary>
+        private void OnBackedUpChanged()
         {
-            Debug.WriteLine(BackupStatus);
+            OnBackupStateChanged?.Invoke(this, EventArgs.Empty);
+            //Debug.WriteLine(BackupStatus);
         }
 
         internal GameBackupStatus(MEGame game)

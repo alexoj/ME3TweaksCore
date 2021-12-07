@@ -254,10 +254,7 @@ namespace ME3TweaksCore.Services.Restore
                     if (resetDate)
                     {
                         // Copy data over from backup so robocopy doesn't copy it.
-                        var bi = new FileInfo(Path.Combine(backupPath, relativePath));
-                        File.SetLastWriteTime(fullPath, bi.LastWriteTime);
-                        File.SetCreationTime(fullPath, bi.CreationTime);
-                        File.SetLastAccessTime(fullPath, bi.LastAccessTime);
+                        MUtilities.CopyTimestamps(Path.Combine(backupPath, relativePath), fullPath);
                         numOnlyTexTagged++;
                     }
                     ProgressValue++;

@@ -613,5 +613,18 @@ namespace ME3TweaksCore.Helpers
         {
             return new ComputerInfo().TotalPhysicalMemory;
         }
+
+        /// <summary>
+        /// Copies file time data from the specified source file to the specified dest file.
+        /// </summary>
+        /// <param name="sourceFile"></param>
+        /// <param name="destFile"></param>
+        public static void CopyTimestamps(string sourceFile, string destFile)
+        {
+            var bi = new FileInfo(sourceFile);
+            File.SetLastWriteTime(destFile, bi.LastWriteTime);
+            File.SetCreationTime(destFile, bi.CreationTime);
+            File.SetLastAccessTime(destFile, bi.LastAccessTime);
+        }
     }
 }

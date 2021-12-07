@@ -127,6 +127,22 @@ namespace ME3TweaksCore.GameFilesystem
             return fileListMapping;
         }
 
+        /// <summary>
+        /// Given a game and executable path, returns the basepath of the installation.
+        /// </summary>
+        /// <param name="game">What game this exe is for</param>
+        /// <param name="exe">Executable path</param>
+        /// <returns></returns>
+        public static string GetGamePathFromExe(MEGame game, string exe)
+        {
+            string result = Path.GetDirectoryName(exe);
+            if (game == MEGame.LELauncher)
+                return result;
+            result = Path.GetDirectoryName(result); //binaries, <GAME>
+            if (game == MEGame.ME3 || game.IsLEGame())
+                result = Path.GetDirectoryName(result); //up one more because of win32/win64 directory.
+            return result;
+        }
 
         // Needs moved into a M3 specific class. Probably subclass of GameTarget, like M3GameTarget
         //internal static bool IsOfficialDLCInstalled(ModJob.JobHeader header, GameTarget gameTarget)

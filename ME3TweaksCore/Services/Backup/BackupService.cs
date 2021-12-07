@@ -22,7 +22,11 @@ namespace ME3TweaksCore.Services.Backup
         #region Static Property Changed
 
         public static event PropertyChangedEventHandler StaticPropertyChanged;
-        public static event PropertyChangedEventHandler StaticBackupStateChanged;
+
+        /// <summary>
+        /// Called when a game backup state changes between BackedUp and not BackedUp.
+        /// </summary>
+        public static event EventHandler StaticBackupStateChanged;
 
         /// <summary>
         /// Sets given property and notifies listeners of its change. IGNORES setting the property to same value.
@@ -65,7 +69,14 @@ namespace ME3TweaksCore.Services.Backup
                 GameBackupStatuses.Add(new GameBackupStatus(MEGame.LE3));
                 GameBackupStatuses.Add(new GameBackupStatus(MEGame.LELauncher));
             }
+
             runCodeOnUIThreadCallback.Invoke(runOnUiThread);
+
+            foreach (var v in GameBackupStatuses)
+            {
+                v.OnBackupStateChanged += InternalOnBackupStateChanged;
+            }
+
             if (refreshStatuses)
                 RefreshBackupStatus(null, log: true);
 
@@ -89,6 +100,16 @@ namespace ME3TweaksCore.Services.Backup
                 M3Log.Information(@"Mass Effect 3 LE ====");
                 M3Log.Information(BackupService.GetGameBackupPath(MEGame.LE3, true, true));
              */
+        }
+
+        /// <summary>
+        /// Called when any of the backup status states change.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void InternalOnBackupStateChanged(object? sender, EventArgs e)
+        {
+            StaticBackupStateChanged?.Invoke(sender, EventArgs.Empty);;
         }
 
 
@@ -174,6 +195,7 @@ namespace ME3TweaksCore.Services.Backup
                 }
             }
             BackupService.RemoveBackupPath(meGame);
+            RefreshBackupStatus(game: meGame);
         }
 
         /// <summary>

@@ -75,7 +75,8 @@ namespace ME3TweaksCore.Misc
             int done = 0,
             string[] ignoredExtensions = null,
             bool testrun = false,
-            Action<string, long, long> bigFileProgressCallback = null)
+            Action<string, long, long> bigFileProgressCallback = null,
+            bool copyTimestamps = false)
         {
             if (total == -1)
             {
@@ -139,12 +140,16 @@ namespace ME3TweaksCore.Misc
 
                             FileInfo dest = new FileInfo(destPath);
                             if (dest.IsReadOnly) dest.IsReadOnly = false;
+                            if (copyTimestamps)
+                            {
+                                MUtilities.CopyTimestamps(fi.FullName, destPath);
+                            }
                         }
                     }
                     catch (Exception e)
                     {
                         MLog.Error(@"Error copying file: " + fi + @" -> " + Path.Combine(target.FullName, fi.Name) + @": " + e.Message);
-                        throw e;
+                        throw;
                     }
                 }
 
@@ -158,7 +163,7 @@ namespace ME3TweaksCore.Misc
             foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
             {
                 DirectoryInfo nextTargetSubDir = testrun ? null : target.CreateSubdirectory(diSourceSubDir.Name);
-                numdone = CopyAll_ProgressBar(diSourceSubDir, nextTargetSubDir, totalItemsToCopyCallback, fileCopiedCallback, aboutToCopyCallback, total, numdone, null, testrun, bigFileProgressCallback);
+                numdone = CopyAll_ProgressBar(diSourceSubDir, nextTargetSubDir, totalItemsToCopyCallback, fileCopiedCallback, aboutToCopyCallback, total, numdone, null, testrun, bigFileProgressCallback, copyTimestamps);
             }
             return numdone;
         }
