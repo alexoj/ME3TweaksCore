@@ -1451,7 +1451,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 #endregion
 
-                #region Mass Effect 3 me3logger log
+                #region ME3Logger
 
                 if (package.DiagnosticTarget.Game == MEGame.ME3)
                 {
@@ -1470,6 +1470,51 @@ namespace ME3TweaksCore.Diagnostics
                         foreach (string line in log)
                         {
                             addDiagLine(line, line.Contains(@"I/O failure", StringComparison.InvariantCultureIgnoreCase) ? Severity.FATAL : Severity.INFO);
+                            lineNum++;
+                            if (lineNum > 100)
+                            {
+                                break;
+                            }
+                        }
+
+                        if (lineNum > 200)
+                        {
+                            addDiagLine(@"... log truncated ...");
+                        }
+                    }
+                }
+
+                #endregion
+
+                #region DebugLogger (LE)
+
+                if (package.DiagnosticTarget.Game == MEGame.ME3)
+                {
+                    MLog.Information(@"Collecting DebugLogger session log");
+                    package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingME3SessionLog)); // NEEDS UPDATED
+                    string me3logfilepath = Path.Combine(Directory.GetParent(M3Directories.GetExecutablePath(package.DiagnosticTarget)).FullName, @"DebugLogger.txt");
+                    if (File.Exists(me3logfilepath))
+                    {
+                        FileInfo fi = new FileInfo(me3logfilepath);
+                        addDiagLine($@"{package.DiagnosticTarget.Game.ToGameName()} last session log", Severity.DIAGSECTION);
+                        addDiagLine(@"Last session log has modification date of " + fi.LastWriteTimeUtc.ToShortDateString());
+                        addDiagLine(@"Note that messages from this log can be highly misleading. Do not try to interpret these messages if you don't know what they mean!");
+                        addDiagLine();
+                        var log = MUtilities.WriteSafeReadAllLines(me3logfilepath); //try catch needed?
+                        //log = log.Reverse().ToArray(); // go in reverse so we get the last lines
+                        int lineNum = 0;
+                        foreach (string line in log)
+                        {
+
+                            if (package.DiagnosticTarget.Game == MEGame.LE2)
+                            {
+                                if (line.Contains("Material"))
+                                {
+                                    continue; // These are vanilla and should be ignored
+                                }
+                            }
+
+                            addDiagLine(line, line.Contains(@"appErrorF", StringComparison.InvariantCultureIgnoreCase) ? Severity.FATAL : Severity.INFO);
                             lineNum++;
                             if (lineNum > 100)
                             {
