@@ -1,0 +1,560 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using LegendaryExplorerCore.GameFilesystem;
+using LegendaryExplorerCore.Gammtek.Extensions;
+using LegendaryExplorerCore.Helpers;
+using LegendaryExplorerCore.Misc;
+using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
+using ME3TweaksCore.GameFilesystem;
+using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
+using ME3TweaksCore.Misc;
+using ME3TweaksCore.Objects;
+using ME3TweaksCore.Services.ThirdPartyModIdentification;
+using ME3TweaksCore.Targets;
+using PropertyChanged;
+using Serilog;
+
+namespace ME3TweaksCore.Services.Backup
+{
+    /// <summary>
+    /// Class that handles backing up a game.
+    /// </summary>
+    [AddINotifyPropertyChangedInterface]
+    public class GameBackup
+    {
+        public string GameName => Game.ToGameName();
+        public MEGame Game { get; }
+
+        /// <summary>
+        /// Reports the current progress of the backup
+        /// </summary>
+        public Action<long, long> BackupProgressCallback { get; set; }
+        /// <summary>
+        /// Called when there is a blocking action, such as game running
+        /// </summary>
+        public Action<string, string> BlockingActionCallback { get; set; }
+        /// <summary>
+        /// Called when there is a warning that needs a yes/no answer
+        /// </summary>
+        public Func<string, string, string, string, bool> WarningActionCallback { get; set; }
+        /// <summary>
+        /// Called when the user must select a game executable (for backup). Return null to indicate the user aborted the prompt.
+        /// </summary>
+        public Func<MEGame, string> SelectGameExecutableCallback { get; set; }
+
+        /// <summary>
+        /// Called when the user must select a backup folder destination. Return null to indicate user aborted the prompt.
+        /// </summary>
+        public Func<string, string> SelectGameBackupFolderDestination { get; set; }
+        /// <summary>
+        /// Called when the backup thread has completed.
+        /// </summary>
+        public Action NotifyBackupThreadCompleted { get; set; }
+        /// <summary>
+        /// Called when there is a warning that has a potentially long list of items in it, with a title, top and bottom message, as well as a list of strings. These items should be placed in a scrolling mechanism
+        /// </summary>
+        public Func<string, string, string, List<string>, string, string, bool> WarningListCallback { get; set; }
+
+        /// <summary>
+        /// Called when there is a blcoking error that has a potentially long list of items in it, with a title, top and bottom message, as well as a list of strings. These items should be placed in a scrolling mechanism
+        /// </summary>
+        public Action<string, string, List<string>> BlockingListCallback { get; set; }
+
+        /// <summary>
+        /// Called when there is a new status message that should be displayed, such as what is being backed up.
+        /// </summary>
+        public Action<string> UpdateStatusCallback { get; set; }
+        /// <summary>
+        /// Sets the progressbar (if any) with this backup operation to indeterminate or not.
+        /// </summary>
+        public Action<bool> SetProgressIndeterminateCallback { get; set; }
+
+        /// <summary>
+        /// Invoked when the user should be prompted to select which languages to include in the backup.
+        /// </summary>
+        public Func<string, string, MELanguage[]> SelectGameLanguagesCallback { get; set; }
+
+        /// <summary>
+        /// The backup status for this game, which can be accessed via BackupService.
+        /// </summary>
+        private GameBackupStatus BackupStatus { get; init; }
+
+        public GameBackup(MEGame game, IEnumerable<GameTarget> availableBackupSources)
+        {
+            this.Game = game;
+            BackupStatus = BackupService.GetBackupStatus(game);
+        }
+
+
+        /// <summary>
+        /// Performs a backup for the specified backup target. The application targets list is checked to make sure we aren't backing up into another game's directory.
+        /// </summary>
+        /// <param name="backupSourceTarget"></param>
+        /// <param name="applicationTargets"></param>
+        /// <returns></returns>
+        public bool PerformBackup(GameTarget targetToBackup, List<GameTarget> applicationTargets)
+        {
+            if (targetToBackup == null)
+            {
+                throw new Exception(@"Cannot call PerformBackup() with a null target!");
+            }
+
+            if (!targetToBackup.IsCustomOption)
+            {
+                MLog.Information($@"PerformBackup() on {targetToBackup.TargetPath}");
+                // Backup target
+                if (MUtilities.IsGameRunning(targetToBackup.Game))
+                {
+                    BlockingActionCallback?.Invoke("Cannot backup game", $"Cannot backup while {targetToBackup.Game.ToGameName()} is running.");
+                    return false;
+                }
+            }
+            else
+            {
+                // Point to existing game installation
+                MLog.Information(@"PerformBackup() with IsCustomOption.");
+                var linkOK = WarningActionCallback?.Invoke("Ensure correct game chosen", "The path you specify will be checked if it is a vanilla backup. Once this check is complete it will be marked as a backup and modding tools will refuse to modify it. Ensure this is not your active game path or you will be unable to mod the game.",
+                    "I understand", "Abort linking");
+                if (!linkOK.HasValue || !linkOK.Value)
+                {
+                    MLog.Information(@"User aborted linking due to dialog");
+                    return false;
+                }
+
+                MLog.Information(@"Prompting user to select executable of link target");
+
+                var gameExecutable = SelectGameExecutableCallback?.Invoke(Game);
+
+                if (gameExecutable == null)
+                {
+                    MLog.Warning(@"User did not choose game executable to link as backup. Aborting");
+                    return false;
+                }
+
+                // Initialize the executable target
+                targetToBackup = new GameTarget(Game, M3Directories.GetGamePathFromExe(Game, gameExecutable), false, true);
+
+                if (applicationTargets != null && applicationTargets.Any(x => x.TargetPath.Equals(targetToBackup.TargetPath, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    // Can't point to an existing modding target
+                    MLog.Error(@"This target is not valid to point to as a backup: It is listed a modding target already, it must be removed as a target first");
+                    BlockingActionCallback?.Invoke("Cannot backup game", "Cannot use this target as backup: It is the current game path for this game.");
+                    return false;
+                }
+
+                // Validate it to ensure we can use it for checking
+                var validationFailureReason = targetToBackup.ValidateTarget(ignoreCmmVanilla: true);
+                if (!targetToBackup.IsValid)
+                {
+                    MLog.Error(@"This installation is not valid to point to as a backup: " + validationFailureReason);
+                    BlockingActionCallback?.Invoke("Cannot backup game", $"Cannot use this target as backup: {validationFailureReason}");
+                    return false;
+                }
+            }
+
+
+            MLog.Information(@"Starting the backup thread. Checking path: " + targetToBackup.TargetPath);
+            BackupInProgress = true;
+
+            List<string> nonVanillaFiles = new List<string>();
+
+            void nonVanillaFileFoundCallback(string filepath)
+            {
+                MLog.Error($@"Non-vanilla file found: {filepath}");
+                nonVanillaFiles.Add(filepath.Substring(targetToBackup.TargetPath.Length + 1)); //Oh goody i'm sure this won't cause issues
+            }
+
+            List<string> inconsistentDLC = new List<string>();
+
+            void inconsistentDLCFoundCallback(string filepath)
+            {
+                if (targetToBackup.Supported)
+                {
+                    MLog.Error($@"DLC is in an inconsistent state: {filepath}");
+                    inconsistentDLC.Add(filepath);
+                }
+                else
+                {
+                    MLog.Error(@"Detected an inconsistent DLC, likely due to an unofficial copy of the game");
+                }
+            }
+
+            UpdateStatusCallback?.Invoke(LC.GetString(LC.string_validatingBackupSource));
+            BackupStatus.BackupStatus = LC.GetString(LC.string_validatingBackupSource);
+            SetProgressIndeterminateCallback?.Invoke(true);
+            MLog.Information(@"Checking target is vanilla");
+            bool isVanilla = VanillaDatabaseService.ValidateTargetAgainstVanilla(targetToBackup, nonVanillaFileFoundCallback, false);
+
+            MLog.Information(@"Checking DLC consistency");
+            bool isDLCConsistent = VanillaDatabaseService.ValidateTargetDLCConsistency(targetToBackup, inconsistentDLCCallback: inconsistentDLCFoundCallback);
+
+            MLog.Information(@"Checking only vanilla DLC is installed");
+            List<string> dlcModsInstalled = VanillaDatabaseService.GetInstalledDLCMods(targetToBackup).Select(x =>
+            {
+                var tpmi = TPMIService.GetThirdPartyModInfo(x, targetToBackup.Game);
+                if (tpmi != null) return $@"{x} ({tpmi.modname})";
+                return x;
+            }).ToList();
+            List<string> installedDLC = VanillaDatabaseService.GetInstalledOfficialDLC(targetToBackup);
+            List<string> allOfficialDLC = MEDirectories.OfficialDLC(targetToBackup.Game).ToList();
+
+            MLog.Information(@"Checking for TexturesMEM TFCs");
+            var memTextures = Directory.GetFiles(targetToBackup.TargetPath, @"TexturesMEM*.tfc", SearchOption.AllDirectories);
+
+            if (installedDLC.Count() < allOfficialDLC.Count())
+            {
+                var dlcList = string.Join("\n - ", allOfficialDLC.Except(installedDLC).Select(x => $@"{MEDirectories.OfficialDLCNames(targetToBackup.Game)[x]} ({x})")); //do not localize
+                dlcList = @" - " + dlcList;
+                MLog.Information(@"The following dlc will be missing in the backup if user continues: " + dlcList);
+                string message = LC.GetString(LC.string_dialog_notAllDLCInstalled, dlcList);
+                var okToBackup = WarningActionCallback?.Invoke(LC.GetString(LC.string_someDlcNotInstalled), message, "Continue backing up", "Abort backup");
+                if (!okToBackup.HasValue || !okToBackup.Value)
+                {
+                    MLog.Information(@"User canceled backup due to some missing data");
+                    return false;
+                }
+            }
+
+            if (memTextures.Any())
+            {
+                MLog.Information($@"Cannot backup: Game contains TexturesMEM TFC files ({memTextures.Length})");
+                BlockingActionCallback?.Invoke(LC.GetString(LC.string_leftoverTextureFilesFound), LC.GetString(LC.string_dialog_foundLeftoverTextureFiles));
+                return false;
+            }
+
+            if (!isDLCConsistent)
+            {
+                MLog.Information(@"Cannot backup: Game contains inconsistent DLC");
+                if (targetToBackup.Supported)
+                {
+                    BlockingListCallback?.Invoke(LC.GetString(LC.string_inconsistentDLCDetected), LC.GetString(LC.string_dialogTheFollowingDLCAreInAnInconsistentState), inconsistentDLC);
+                }
+                else
+                {
+                    BlockingListCallback?.Invoke(LC.GetString(LC.string_inconsistentDLCDetected), LC.GetString(LC.string_inconsistentDLCDetectedUnofficialGame), inconsistentDLC);
+                }
+                return false;
+            }
+
+            // Todo: Maybe find a way to skip these?
+            if (dlcModsInstalled.Any())
+            {
+                MLog.Information(@"Cannot backup: Game contains modified game files");
+                BlockingListCallback?.Invoke(LC.GetString(LC.string_cannotBackupModifiedGame), LC.GetString(LC.string_dialogDLCModsWereDetectedCannotBackup), dlcModsInstalled);
+                return false;
+            }
+
+            if (!isVanilla)
+            {
+                // Cannot backup a non-vanilla game
+                MLog.Information(@"Cannot backup: Game is modified");
+                BlockingListCallback?.Invoke(LC.GetString(LC.string_cannotBackupModifiedGame), LC.GetString(LC.string_followingFilesDoNotMatchTheVanillaDatabase), nonVanillaFiles);
+                return false;
+            }
+
+            BackupStatus.BackupStatus = LC.GetString(LC.string_waitingForUserInput);
+
+            string backupPath = null;
+            if (!targetToBackup.IsCustomOption)
+            {
+                // Creating a new backup
+                MLog.Information(@"Prompting user to select backup destination");
+                backupPath = SelectGameBackupFolderDestination?.Invoke("Select empty backup destination directory"); // NEEDS LOCALIZED
+                if (backupPath != null && Directory.Exists(backupPath))
+                {
+                    MLog.Information(@"Backup path chosen: " + backupPath);
+                    bool okToBackup = validateBackupPath(backupPath, targetToBackup, applicationTargets);
+                    if (!okToBackup)
+                    {
+                        EndBackup();
+                        return false;
+                    }
+                }
+                else
+                {
+                    EndBackup();
+                    return false;
+                }
+            }
+            else
+            {
+                MLog.Information(@"Linking existing backup at " + targetToBackup.TargetPath);
+                backupPath = targetToBackup.TargetPath;
+                // Linking existing backup
+                bool okToBackup = validateBackupPath(targetToBackup.TargetPath, targetToBackup, applicationTargets);
+                if (!okToBackup)
+                {
+                    EndBackup();
+                    return false;
+                }
+            }
+
+            if (!targetToBackup.IsCustomOption)
+            {
+                #region callbacks and copy code
+
+                // Todo: Maybe uninstall bink before copying data? So it's more 'vanilla'
+
+                // Copy to new backup
+                void fileCopiedCallback()
+                {
+                    ProgressValue++;
+                    BackupProgressCallback?.Invoke(ProgressValue, ProgressMax);
+                }
+
+                string dlcFolderpath = M3Directories.GetDLCPath(targetToBackup) + Path.DirectorySeparatorChar;
+                int dlcSubStringLen = dlcFolderpath.Length;
+                var officialDLCNames = MEDirectories.OfficialDLCNames(targetToBackup.Game);
+
+                bool aboutToCopyCallback(string file)
+                {
+                    try
+                    {
+                        // TODO: MAYBE WAY TO SKIP DLC MODS? So we can just backup even if user installed ONLY DLC mods
+
+                        if (file.Contains(@"\cmmbackup\")) return false; //do not copy cmmbackup files - these are leftovers from ME3CMM's old backup routines
+                        if (file.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            //It's a DLC!
+                            string dlcname = file.Substring(dlcSubStringLen);
+                            var dlcFolderNameEndPos = dlcname.IndexOf(Path.DirectorySeparatorChar);
+                            if (dlcFolderNameEndPos > 0)
+                            {
+                                dlcname = dlcname.Substring(0, dlcFolderNameEndPos);
+                                if (officialDLCNames.TryGetValue(dlcname, out var hrName))
+                                {
+                                    UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpX, hrName));
+                                    BackupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_backingUpX, hrName);
+                                }
+                                else
+                                {
+                                    UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpX, dlcname));
+                                    BackupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_backingUpX, dlcname);
+                                }
+                            }
+                            else
+                            {
+                                // Loose files in the DLC folder
+                                UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpX, LC.GetString(LC.string_basegame)));
+                                BackupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_backingUpX, LC.GetString(LC.string_basegame));
+                            }
+                        }
+                        else
+                        {
+                            //It's basegame
+                            if (file.EndsWith(@".bik"))
+                            {
+                                UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpX, LC.GetString(LC.string_movies)));
+                                BackupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_backingUpX, LC.GetString(LC.string_movies));
+                            }
+                            else if (new FileInfo(file).Length > 52428800)
+                            {
+                                UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpX, Path.GetFileName(file)));
+                                BackupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_backingUpX, Path.GetFileName(file));
+                            }
+                            else
+                            {
+                                UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpX, LC.GetString(LC.string_basegame)));
+                                BackupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_backingUpX, LC.GetString(LC.string_basegame));
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        MLog.Error($"Error about to copy file: {e.Message}");
+                        TelemetryInterposer.TrackError(e);
+                    }
+
+                    return true;
+                }
+
+                void bigFileProgressCallback(string fileBeingCopied, long dataCopied, long totalDataToCopy)
+                {
+                    if (fileBeingCopied.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        //It's a DLC!
+                        string dlcname = fileBeingCopied.Substring(dlcSubStringLen);
+                        int index = dlcname.IndexOf(Path.DirectorySeparatorChar);
+                        try
+                        {
+                            string postFix = "";
+                            dlcname = dlcname.Substring(0, index);
+                            if (officialDLCNames.TryGetValue(dlcname, out var hrName))
+                            {
+                                postFix = hrName;
+                            }
+                            else
+                            {
+                                postFix = dlcname;
+                            }
+
+                            UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpX, $@"{postFix} {(int)(dataCopied * 100d / totalDataToCopy)}%"));
+                            BackupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_backingUpX, $@"{postFix} {(int)(dataCopied * 100d / totalDataToCopy)}%");
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                    else
+                    {
+                        UpdateStatusCallback?.Invoke($"Backing up {Path.GetFileName(fileBeingCopied)} {(int)(dataCopied * 100d / totalDataToCopy)}%");
+                    }
+                }
+
+
+                void totalFilesToCopyCallback(int total)
+                {
+                    ProgressValue = 0;
+                    ProgressIndeterminate = false;
+                    ProgressMax = total;
+                }
+
+                BackupStatus.BackupStatus = LC.GetString(LC.string_creatingBackup);
+                MLog.Information($@"Backing up {targetToBackup.TargetPath} to {backupPath}");
+                CopyTools.CopyAll_ProgressBar(new DirectoryInfo(targetToBackup.TargetPath),
+                    new DirectoryInfo(backupPath),
+                    totalItemsToCopyCallback: totalFilesToCopyCallback,
+                    aboutToCopyCallback: aboutToCopyCallback,
+                    fileCopiedCallback: fileCopiedCallback,
+                    ignoredExtensions: new[] { @"*.pdf", @"*.mp3", @"*.wav" },
+                    bigFileProgressCallback: bigFileProgressCallback,
+                    copyTimestamps: true);
+                #endregion
+            }
+
+            // Write location
+            SetBackupPath(Game, backupPath);
+
+            // Write vanilla marker
+            if (isVanilla && !Enumerable.Any(dlcModsInstalled))
+            {
+                var cmmvanilla = Path.Combine(backupPath, @"cmm_vanilla");
+                if (!File.Exists(cmmvanilla))
+                {
+                    MLog.Information(@"Writing cmm_vanilla to " + cmmvanilla);
+                    File.Create(cmmvanilla).Close();
+                }
+            }
+            else
+            {
+                MLog.Information("Not writing vanilla marker as this is not a vanilla backup");
+            }
+
+            MLog.Information(@"Backup completed.");
+            TelemetryInterposer.TrackEvent(@"Created a backup", new Dictionary<string, string>()
+                        {
+                                {@"game", Game.ToString()},
+                                {@"Result", @"Success"},
+                                {@"Type", targetToBackup.IsCustomOption ? @"Linked" : @"Copy"}
+                        });
+            EndBackup();
+            return true;
+        }
+
+        private bool validateBackupPath(string backupPath, GameTarget targetToBackup, List<GameTarget> applicableTargets)
+        {
+            //Check empty
+            if (!targetToBackup.IsCustomOption && Directory.Exists(backupPath))
+            {
+                if (Directory.GetFiles(backupPath).Length > 0 ||
+                    Directory.GetDirectories(backupPath).Length > 0)
+                {
+                    //Directory not empty
+                    MLog.Error(@"Selected backup directory is not empty.");
+                    BlockingActionCallback?.Invoke(LC.GetString(LC.string_directoryNotEmpty), LC.GetString(LC.string_directoryIsNotEmptyMustBeEmpty));
+                    return false;
+                }
+            }
+            if (!targetToBackup.IsCustomOption)
+            {
+
+                //Check space
+                DriveInfo di = new DriveInfo(backupPath);
+                var requiredSpace = (long)(MUtilities.GetSizeOfDirectory(new DirectoryInfo(targetToBackup.TargetPath)) * 1.1); //10% buffer
+                MLog.Information($@"Backup space check. Backup size required: {FileSize.FormatSize(requiredSpace)}, free space: {FileSize.FormatSize(di.AvailableFreeSpace)}");
+                if (di.AvailableFreeSpace < requiredSpace)
+                {
+                    //Not enough space.
+                    MLog.Error($@"Not enough disk space to create backup at {backupPath}");
+                    BlockingActionCallback?.Invoke(LC.GetString(LC.string_insufficientDiskSpace), LC.GetString(LC.string_dialogInsufficientDiskSpace, Path.GetPathRoot(backupPath), FileSize.FormatSize(di.AvailableFreeSpace), FileSize.FormatSize(requiredSpace)));
+                    return false;
+                }
+
+                //Check writable
+                var writable = MUtilities.IsDirectoryWritable(backupPath);
+                if (!writable)
+                {
+                    //Not enough space.
+                    MLog.Error($@"Backup destination selected is not writable.");
+                    BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotCreateBackup), LC.GetString(LC.string_dialog_userAccountDoesntHaveWritePermissionsBackup));
+                    return false;
+                }
+            }
+            //Check is Documents folder
+            var docsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"BioWare", targetToBackup.Game.ToGameName());
+            if (backupPath.Equals(docsPath, StringComparison.InvariantCultureIgnoreCase) || backupPath.IsSubPathOf(docsPath))
+            {
+                MLog.Error(@"User chose path in or around the documents path for the game - not allowed as game can load files from here.");
+                BlockingActionCallback?.Invoke(LC.GetString(LC.string_locationNotAllowedForBackup), LC.GetString(LC.string_interp_dialog_linkFailedSubdirectoryOfGameDocumentsFolder));
+                return false;
+            }
+
+
+            //Check it is not subdirectory of a game (we might want to check its not subdir of a target)
+            if (applicableTargets != null)
+            {
+                foreach (var target in applicableTargets)
+                {
+                    if (backupPath.IsSubPathOf(target.TargetPath))
+                    {
+                        //Not enough space.
+                        MLog.Error($@"A backup cannot be created in a subdirectory of a game. {backupPath} is a subdir of {targetToBackup.TargetPath}");
+                        BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotCreateBackup), LC.GetString(LC.string_dialogBackupCannotBeSubdirectoryOfGame));
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+
+        private void EndBackup()
+        {
+            ResetBackupStatus();
+            ProgressIndeterminate = false;
+            ProgressVisible = false;
+            BackupInProgress = false;
+        }
+
+        private void ResetBackupStatus()
+        {
+            BackupService.UpdateBackupStatus(Game);
+        }
+
+        public int ProgressMax { get; set; } = 100;
+        public int ProgressValue { get; set; } = 0;
+        public bool ProgressIndeterminate { get; set; } = true;
+        public bool ProgressVisible { get; set; } = false;
+        public bool BackupInProgress { get; set; }
+
+        /// <summary>
+        /// Sets the path for the backup in the registry
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="path"></param>
+        public static void SetBackupPath(MEGame game, string path)
+        {
+            MSharedSettings.WriteSettingString($@"{game}VanillaBackupLocation", path);
+        }
+    }
+}
