@@ -8,6 +8,7 @@ using LegendaryExplorerCore;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.Services.Backup;
 using ME3TweaksCore.Services.BasegameFileIdentification;
 using ME3TweaksCore.Services.ThirdPartyModIdentification;
@@ -71,6 +72,7 @@ namespace ME3TweaksCore
             {
                 BasegameFileIdentificationService.LoadService();
                 TPMIService.LoadService();
+                ASIManager.LoadManifest();
             }
 
             Initialized = true;
