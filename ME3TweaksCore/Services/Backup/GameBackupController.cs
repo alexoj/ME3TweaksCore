@@ -44,8 +44,8 @@ namespace ME3TweaksCore.Services.Backup
         /// <summary>
         /// Called when there is a warning that needs a yes/no answer
         /// </summary>
-        public Func<string, string, string, string, bool> WarningActionCallback { get; set; }
-        /// <summary>
+        public Func<string, string, bool, string, string, bool> WarningActionYesNoCallback { get; set; }
+        /// <summary> 
         /// Called when the user must select a game executable (for backup). Return null to indicate the user aborted the prompt.
         /// </summary>
         public Func<MEGame, string> SelectGameExecutableCallback { get; set; }
@@ -121,8 +121,8 @@ namespace ME3TweaksCore.Services.Backup
             {
                 // Point to existing game installation
                 MLog.Information(@"PerformBackup() with IsCustomOption.");
-                var linkOK = WarningActionCallback?.Invoke("Ensure correct game chosen", "The path you specify will be checked if it is a vanilla backup. Once this check is complete it will be marked as a backup and modding tools will refuse to modify it. Ensure this is not your active game path or you will be unable to mod the game.",
-                    "I understand", "Abort linking");
+                var linkOK = WarningActionYesNoCallback?.Invoke("Ensure correct game chosen", "The path you specify will be checked if it is a vanilla backup. Once this check is complete it will be marked as a backup and modding tools will refuse to modify it. Ensure this is not your active game path or you will be unable to mod the game.",
+                    false, "I understand", "Abort linking");
                 if (!linkOK.HasValue || !linkOK.Value)
                 {
                     MLog.Information(@"User aborted linking due to dialog");
@@ -139,6 +139,23 @@ namespace ME3TweaksCore.Services.Backup
                     return false;
                 }
 
+                // TODO: Check version number of executable for LE/OT
+                if (Game.IsGame2() || Game.IsGame3())
+                {
+                    var version = FileVersionInfo.GetVersionInfo(gameExecutable);
+                    if (version.FileMajorPart == 2 && Game.IsOTGame())
+                    {
+                        MLog.Error($@"The selected executable is the Legendary Edition of the game, but target for backup is {Game}.");
+                        BlockingActionCallback?.Invoke("Cannot backup game", "Cannot use this target as backup: This is the Legendary Edition version of the game, the target you are trying to link is the Original Trilogy version.");
+                        return false;
+                    } else if (version.FileMajorPart == 1 && Game.IsLEGame())
+                    {
+                        MLog.Error($@"The selected executable is the Original Trilogy of the game, but target for backup is {Game}.");
+                        BlockingActionCallback?.Invoke("Cannot backup game", "Cannot use this target as backup: This is the Original Trilogy version of the game, the target you are trying to link is the Legendary Edition version.");
+                        return false;
+                    }
+                }
+                
                 // Initialize the executable target
                 targetToBackup = new GameTarget(Game, M3Directories.GetGamePathFromExe(Game, gameExecutable), false, true);
 
@@ -215,7 +232,7 @@ namespace ME3TweaksCore.Services.Backup
                 dlcList = @" - " + dlcList;
                 MLog.Information(@"The following dlc will be missing in the backup if user continues: " + dlcList);
                 string message = LC.GetString(LC.string_dialog_notAllDLCInstalled, dlcList);
-                var okToBackup = WarningActionCallback?.Invoke(LC.GetString(LC.string_someDlcNotInstalled), message, "Continue backing up", "Abort backup");
+                var okToBackup = WarningActionYesNoCallback?.Invoke(LC.GetString(LC.string_someDlcNotInstalled), message, false, "Continue backing up", "Abort backup");
                 if (!okToBackup.HasValue || !okToBackup.Value)
                 {
                     MLog.Information(@"User canceled backup due to some missing data");

@@ -28,12 +28,12 @@ namespace ME3TweaksCore.Services.Backup
         public string BackupActionText { get; internal set; }
 
         /// <summary>
-        /// Location where the backup is MARKED to be. This doesn't mean it exists there, only that this is the value read from the settings!
+        /// Location where the backup is MARKED to be. This doesn't mean it exists there, only that this is the value read from the settings! This is used to determine if a backup can be unlinked!
         /// </summary>
         public string MarkedBackupLocation { get; internal set; }
 
         public event EventHandler OnBackupStateChanged;
-        
+
         /// <summary>
         /// Called when the backed up state changes
         /// </summary>
@@ -65,9 +65,11 @@ namespace ME3TweaksCore.Services.Backup
                 LinkActionText = "Unlink backup";
                 BackupActionText = "Restore game";
                 BackedUp = true;
+                MarkedBackupLocation = bPath;
                 return;
             }
             bPath = BackupService.GetGameBackupPath(Game, forceReturnPath: true);
+            MarkedBackupLocation = bPath;
             if (bPath == null)
             {
                 // Backup path doesn't exist, no backup
