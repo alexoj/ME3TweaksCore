@@ -35,7 +35,7 @@ namespace ME3TweaksCore.NativeMods
         public static List<ASIMod> MasterLE1ASIUpdateGroups = new List<ASIMod>();
         public static List<ASIMod> MasterLE2ASIUpdateGroups = new List<ASIMod>();
         public static List<ASIMod> MasterLE3ASIUpdateGroups = new List<ASIMod>();
-        
+
         /// <summary>
         /// Loads the ASI manifest. This should only be done at startup or when the online manifest is refreshed. ForceLocal only works if there is local ASI manifest present
         /// </summary>
@@ -230,7 +230,7 @@ namespace ME3TweaksCore.NativeMods
                                             Game = intToGame((int)e.Attribute(@"game")), // use e element to pull from outer group
                                             _otherGroupsToDeleteOnInstallInternal = z.Element(@"autoremovegroups")?.Value,
 
-                                        }).ToList()
+                                        }).OrderBy(x => x.Version).ToList()
                                     }).ToList();
                 foreach (var v in updateGroups)
                 {
