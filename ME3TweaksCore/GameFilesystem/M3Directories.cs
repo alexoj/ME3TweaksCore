@@ -23,6 +23,12 @@ namespace ME3TweaksCore.GameFilesystem
         public static string GetDLCPath(GameTarget target) => MEDirectories.GetDLCPath(target.Game, target.TargetPath);
         public static string GetCookedPath(GameTarget target) => MEDirectories.GetCookedPath(target.Game, target.TargetPath);
 
+        /// <summary>
+        /// Gets executable path
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="preferRealGameExe">Prefer ME2 game exe (ME2Game.exe) vs MassEffect2.exe</param>
+        /// <returns></returns>
         public static string GetExecutablePath(GameTarget target, bool preferRealGameExe = false)
         {
             if (target.Game == MEGame.ME2 && preferRealGameExe)
