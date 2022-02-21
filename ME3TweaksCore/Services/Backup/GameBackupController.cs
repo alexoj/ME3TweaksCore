@@ -78,9 +78,9 @@ namespace ME3TweaksCore.Services.Backup
         public Action<bool> SetProgressIndeterminateCallback { get; set; }
 
         /// <summary>
-        /// Invoked when the user should be prompted to select which languages to include in the backup.
+        /// Invoked when the user should be prompted to select which languages to include in the backup. Parameters: Title, Message
         /// </summary>
-        public Func<string, string, MELanguage[]> SelectGameLanguagesCallback { get; set; }
+        public Func<string, string, GameLanguage[]> SelectGameLanguagesCallback { get; set; }
 
         /// <summary>
         /// The backup status for this game, which can be accessed via BackupService.
@@ -107,14 +107,26 @@ namespace ME3TweaksCore.Services.Backup
                 throw new Exception(@"Cannot call PerformBackup() with a null target!");
             }
 
+            GameLanguage[] allGameLangauges = targetToBackup.Game != MEGame.LELauncher ? GameLanguage.GetLanguagesForGame(targetToBackup.Game) : null;
+            GameLanguage[] selectedLanguages = null;
+
+
+
             if (!targetToBackup.IsCustomOption)
             {
                 MLog.Information($@"PerformBackup() on {targetToBackup.TargetPath}");
                 // Backup target
                 if (MUtilities.IsGameRunning(targetToBackup.Game))
                 {
+                    EndBackup();
                     BlockingActionCallback?.Invoke("Cannot backup game", $"Cannot backup while {targetToBackup.Game.ToGameName()} is running.");
                     return false;
+                }
+
+                // Language selection
+                if (Game != MEGame.LELauncher)
+                {
+                    selectedLanguages = SelectGameLanguagesCallback?.Invoke(LC.GetString(LC.string_selectLanguages), LC.GetString(LC.string_dialog_selectWhichLanguagesToIncludeInBackup));
                 }
             }
             else
@@ -126,6 +138,7 @@ namespace ME3TweaksCore.Services.Backup
                 if (!linkOK.HasValue || !linkOK.Value)
                 {
                     MLog.Information(@"User aborted linking due to dialog");
+                    EndBackup();
                     return false;
                 }
 
@@ -136,6 +149,7 @@ namespace ME3TweaksCore.Services.Backup
                 if (gameExecutable == null)
                 {
                     MLog.Warning(@"User did not choose game executable to link as backup. Aborting");
+                    EndBackup();
                     return false;
                 }
 
@@ -146,16 +160,19 @@ namespace ME3TweaksCore.Services.Backup
                     if (version.FileMajorPart == 2 && Game.IsOTGame())
                     {
                         MLog.Error($@"The selected executable is the Legendary Edition of the game, but target for backup is {Game}.");
+                        EndBackup();
                         BlockingActionCallback?.Invoke("Cannot backup game", "Cannot use this target as backup: This is the Legendary Edition version of the game, the target you are trying to link is the Original Trilogy version.");
                         return false;
-                    } else if (version.FileMajorPart == 1 && Game.IsLEGame())
+                    }
+                    else if (version.FileMajorPart == 1 && Game.IsLEGame())
                     {
                         MLog.Error($@"The selected executable is the Original Trilogy of the game, but target for backup is {Game}.");
+                        EndBackup();
                         BlockingActionCallback?.Invoke("Cannot backup game", "Cannot use this target as backup: This is the Original Trilogy version of the game, the target you are trying to link is the Legendary Edition version.");
                         return false;
                     }
                 }
-                
+
                 // Initialize the executable target
                 targetToBackup = new GameTarget(Game, M3Directories.GetGamePathFromExe(Game, gameExecutable), false, true);
 
@@ -163,6 +180,7 @@ namespace ME3TweaksCore.Services.Backup
                 {
                     // Can't point to an existing modding target
                     MLog.Error(@"This target is not valid to point to as a backup: It is listed a modding target already, it must be removed as a target first");
+                    EndBackup();
                     BlockingActionCallback?.Invoke("Cannot backup game", "Cannot use this target as backup: It is the current game path for this game.");
                     return false;
                 }
@@ -172,6 +190,7 @@ namespace ME3TweaksCore.Services.Backup
                 if (!targetToBackup.IsValid)
                 {
                     MLog.Error(@"This installation is not valid to point to as a backup: " + validationFailureReason);
+                    EndBackup();
                     BlockingActionCallback?.Invoke("Cannot backup game", $"Cannot use this target as backup: {validationFailureReason}");
                     return false;
                 }
@@ -236,6 +255,7 @@ namespace ME3TweaksCore.Services.Backup
                 if (!okToBackup.HasValue || !okToBackup.Value)
                 {
                     MLog.Information(@"User canceled backup due to some missing data");
+                    EndBackup();
                     return false;
                 }
             }
@@ -243,6 +263,7 @@ namespace ME3TweaksCore.Services.Backup
             if (memTextures.Any())
             {
                 MLog.Information($@"Cannot backup: Game contains TexturesMEM TFC files ({memTextures.Length})");
+                EndBackup();
                 BlockingActionCallback?.Invoke(LC.GetString(LC.string_leftoverTextureFilesFound), LC.GetString(LC.string_dialog_foundLeftoverTextureFiles));
                 return false;
             }
@@ -250,6 +271,7 @@ namespace ME3TweaksCore.Services.Backup
             if (!isDLCConsistent)
             {
                 MLog.Information(@"Cannot backup: Game contains inconsistent DLC");
+                EndBackup();
                 if (targetToBackup.Supported)
                 {
                     BlockingListCallback?.Invoke(LC.GetString(LC.string_inconsistentDLCDetected), LC.GetString(LC.string_dialogTheFollowingDLCAreInAnInconsistentState), inconsistentDLC);
@@ -265,6 +287,7 @@ namespace ME3TweaksCore.Services.Backup
             if (dlcModsInstalled.Any())
             {
                 MLog.Information(@"Cannot backup: Game contains modified game files");
+                EndBackup();
                 BlockingListCallback?.Invoke(LC.GetString(LC.string_cannotBackupModifiedGame), LC.GetString(LC.string_dialogDLCModsWereDetectedCannotBackup), dlcModsInstalled);
                 return false;
             }
@@ -273,6 +296,7 @@ namespace ME3TweaksCore.Services.Backup
             {
                 // Cannot backup a non-vanilla game
                 MLog.Information(@"Cannot backup: Game is modified");
+                EndBackup();
                 BlockingListCallback?.Invoke(LC.GetString(LC.string_cannotBackupModifiedGame), LC.GetString(LC.string_followingFilesDoNotMatchTheVanillaDatabase), nonVanillaFiles);
                 return false;
             }
@@ -338,6 +362,23 @@ namespace ME3TweaksCore.Services.Backup
                         // TODO: MAYBE WAY TO SKIP DLC MODS? So we can just backup even if user installed ONLY DLC mods
 
                         if (file.Contains(@"\cmmbackup\")) return false; //do not copy cmmbackup files - these are leftovers from ME3CMM's old backup routines
+
+                        if (selectedLanguages != null)
+                        {
+                            // Check language of file
+                            var fileName = Path.GetFileNameWithoutExtension(file);
+                            if (fileName != null && fileName.LastIndexOf("_", StringComparison.InvariantCultureIgnoreCase) > 0)
+                            {
+                                var suffix = fileName.Substring(fileName.LastIndexOf("_", StringComparison.InvariantCultureIgnoreCase) + 1); // INT, ESN, PLPC
+                                if (allGameLangauges != null && allGameLangauges.Any(x => x.FileCode.Equals(suffix, StringComparison.InvariantCultureIgnoreCase)) && !selectedLanguages.Any(x => x.FileCode.Equals(suffix, StringComparison.InvariantCultureIgnoreCase)))
+                                {
+                                    Debug.WriteLine($@"Skipping non-selected localized file for backup: {file}");
+                                    return false; // Do not back up this file
+                                }
+                            }
+                        }
+
+
                         if (file.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
                         {
                             //It's a DLC!
@@ -487,6 +528,7 @@ namespace ME3TweaksCore.Services.Backup
                 {
                     //Directory not empty
                     MLog.Error(@"Selected backup directory is not empty.");
+                    EndBackup();
                     BlockingActionCallback?.Invoke(LC.GetString(LC.string_directoryNotEmpty), LC.GetString(LC.string_directoryIsNotEmptyMustBeEmpty));
                     return false;
                 }
@@ -502,6 +544,7 @@ namespace ME3TweaksCore.Services.Backup
                 {
                     //Not enough space.
                     MLog.Error($@"Not enough disk space to create backup at {backupPath}");
+                    EndBackup();
                     BlockingActionCallback?.Invoke(LC.GetString(LC.string_insufficientDiskSpace), LC.GetString(LC.string_dialogInsufficientDiskSpace, Path.GetPathRoot(backupPath), FileSize.FormatSize(di.AvailableFreeSpace), FileSize.FormatSize(requiredSpace)));
                     return false;
                 }
@@ -512,6 +555,7 @@ namespace ME3TweaksCore.Services.Backup
                 {
                     //Not enough space.
                     MLog.Error($@"Backup destination selected is not writable.");
+                    EndBackup();
                     BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotCreateBackup), LC.GetString(LC.string_dialog_userAccountDoesntHaveWritePermissionsBackup));
                     return false;
                 }

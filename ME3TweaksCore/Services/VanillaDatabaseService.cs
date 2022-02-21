@@ -10,6 +10,7 @@ using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
+using LegendaryExplorerCore.Textures;
 using LegendaryExplorerCore.Unreal;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
@@ -328,22 +329,15 @@ namespace ME3TweaksCore.Services
 
         private static readonly string[] BasegameTFCs = { @"CharTextures", @"Movies", @"Textures", @"Lighting" };
 
+        /// <summary>
+        /// Returns if the specified TFC name is a vanilla TFC game TFC name
+        /// </summary>
+        /// <param name="tfcName"></param>
+        /// <param name="game"></param>
+        /// <returns></returns>
         public static bool IsBasegameTFCName(string tfcName, MEGame game)
         {
-            // NEEDS UPDATED FOR LE!!!
-            if (BasegameTFCs.Contains(tfcName)) return true;
-            //Might be DLC.
-            var dlcs = MEDirectories.OfficialDLC(game);
-            foreach (var dlc in dlcs)
-            {
-                string dlcTfcName = @"Textures_" + dlc;
-                if (dlcTfcName == tfcName)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return MEDirectories.BasegameTFCs(game).Contains(tfcName, StringComparer.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
