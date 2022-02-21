@@ -1087,6 +1087,7 @@ namespace ME3TweaksCore.Diagnostics
                         package.UpdateProgressCallback?.Invoke(0);
                         package.UpdateTaskbarProgressStateCallback?.Invoke(MTaskbarState.Progressing);
 
+                        string currentProcessingFile = null;
                         void handleIPC(string command, string param)
                         {
                             switch (command)
@@ -1106,7 +1107,8 @@ namespace ME3TweaksCore.Diagnostics
                                     package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_performingFullTexturesCheckX, param));
                                     break;
                                 case @"PROCESSING_FILE":
-                                    //Don't think there's anything to do with this right now
+                                    // Print this out if MEM dies
+                                    currentProcessingFile = param;
                                     break;
                                 case @"ERROR_REFERENCED_TFC_NOT_FOUND":
                                     //badTFCReferences.Add(param);
@@ -1149,6 +1151,11 @@ namespace ME3TweaksCore.Diagnostics
                         if (exitcode != 0)
                         {
                             addDiagLine($@"MassEffectModderNoGui exited full textures check with code {exitcode}", Severity.ERROR);
+                            if (currentProcessingFile != null)
+                            {
+                                addDiagLine($@"The last file processed by MassEffectModder was: {currentProcessingFile}", Severity.ERROR);
+                            }
+                            addDiagLine();
                         }
 
                         package.UpdateProgressCallback?.Invoke(0);
