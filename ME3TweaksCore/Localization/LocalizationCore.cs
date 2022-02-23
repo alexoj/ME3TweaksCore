@@ -72,6 +72,15 @@ namespace ME3TweaksCore.Localization
         }
 
         /// <summary>
+        /// Returns the current localization lookup dictionary used for localizing strings in ME3TweaksCore. These values can be merged into a WPF resource dictionary, for example.
+        /// </summary>
+        /// <returns></returns>
+        public static IReadOnlyDictionary<string, string> GetLocalizationDictionary()
+        {
+            return LocalizationDictionary;
+        }
+
+        /// <summary>
         /// Fetches a localized string for use in ME3TweaksCore.
         /// </summary>
         /// <param name="resourceKey"></param>
