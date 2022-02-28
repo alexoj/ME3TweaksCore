@@ -55,7 +55,7 @@ namespace ME3TweaksCore.Helpers
         /// </summary>
         /// <param name="exception"></param>
         /// <param name="relevantInfo"></param>
-        internal static void UploadErrorLog(Exception exception, Dictionary<string, string> relevantInfo = null)
+        public static void UploadErrorLog(Exception exception, Dictionary<string, string> relevantInfo = null)
         {
             UploadErrorLogCallback?.Invoke(exception, relevantInfo);
         }

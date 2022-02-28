@@ -53,7 +53,7 @@ namespace ME3TweaksCore.Helpers
         /// Returns the path to where the cached online service responses reside on disk.
         /// </summary>
         /// <returns></returns>
-        internal static string GetME3TweaksServicesCache()
+        public static string GetME3TweaksServicesCache()
         {
             return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "ME3TweaksServicesCache")).FullName;
         }
