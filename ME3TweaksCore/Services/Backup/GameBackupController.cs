@@ -240,7 +240,7 @@ namespace ME3TweaksCore.Services.Backup
                 return x;
             }).ToList();
             List<string> installedDLC = VanillaDatabaseService.GetInstalledOfficialDLC(targetToBackup);
-            List<string> allOfficialDLC = MEDirectories.OfficialDLC(targetToBackup.Game).ToList();
+            List<string> allOfficialDLC = Game == MEGame.LELauncher ? new List<string>() : MEDirectories.OfficialDLC(targetToBackup.Game).ToList();
 
             MLog.Information(@"Checking for TexturesMEM TFCs");
             var memTextures = Directory.GetFiles(targetToBackup.TargetPath, @"TexturesMEM*.tfc", SearchOption.AllDirectories);
