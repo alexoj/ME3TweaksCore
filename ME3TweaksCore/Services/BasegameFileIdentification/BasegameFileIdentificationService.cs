@@ -46,7 +46,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 
         internal static void LoadME3TweaksBasegameIdentificationService(bool forceRefresh)
         {
-            if (LocalDatabase != null) return;
+            if (ME3TweaksDatabase != null) return;
             ME3TweaksDatabase = FetchBasegameFileIdentificationServiceManifest(forceRefresh);
             LoadDatabase(false, ME3TweaksDatabase);
         }
