@@ -18,6 +18,7 @@ using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.NativeMods.Interfaces;
+using ME3TweaksCore.Objects;
 using ME3TweaksCore.Services;
 using PropertyChanged;
 using Serilog;
@@ -315,7 +316,7 @@ namespace ME3TweaksCore.Targets
                                     var fileCount = fs.ReadInt32();
                                     for (int i = 0; i < fileCount; i++)
                                     {
-                                        tmii.InstalledTextureMods.Add(new TextureModInstallationInfo.InstalledTextureMod(fs, tmii.MarkerExtendedVersion));
+                                        tmii.InstalledTextureMods.Add(new InstalledTextureMod(fs, tmii.MarkerExtendedVersion));
                                     }
                                 }
                                 else if (tmii.MarkerExtendedVersion == 0x04)
@@ -326,7 +327,7 @@ namespace ME3TweaksCore.Targets
                                     var fileCount = fs.ReadInt32();
                                     for (int i = 0; i < fileCount; i++)
                                     {
-                                        tmii.InstalledTextureMods.Add(new TextureModInstallationInfo.InstalledTextureMod(fs, tmii.MarkerExtendedVersion));
+                                        tmii.InstalledTextureMods.Add(new InstalledTextureMod(fs, tmii.MarkerExtendedVersion));
                                     }
                                 }
 
@@ -674,7 +675,7 @@ namespace ME3TweaksCore.Targets
             tmii.InstallationTimestamp = DateTime.Now;
             var ran = new Random();
             int i = 10;
-            var fileset = new List<TextureModInstallationInfo.InstalledTextureMod>();
+            var fileset = new List<InstalledTextureMod>();
             string[] authors = { @"Mgamerz", @"Scottina", @"Sil", @"Audemus", @"Jack", @"ThisGuy", @"KitFisto" };
             string[] modnames =
             {
@@ -685,11 +686,11 @@ namespace ME3TweaksCore.Targets
             };
             while (i > 0)
             {
-                fileset.Add(new TextureModInstallationInfo.InstalledTextureMod()
+                fileset.Add(new InstalledTextureMod()
                 {
                     ModName = modnames.RandomElement(),
                     AuthorName = authors.RandomElement(),
-                    ModType = r.Next(6) == 0 ? TextureModInstallationInfo.InstalledTextureMod.InstalledTextureModType.USERFILE : TextureModInstallationInfo.InstalledTextureMod.InstalledTextureModType.MANIFESTFILE
+                    ModType = r.Next(6) == 0 ? InstalledTextureMod.InstalledTextureModType.USERFILE : InstalledTextureMod.InstalledTextureModType.MANIFESTFILE
                 });
                 i--;
             }

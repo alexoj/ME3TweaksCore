@@ -24,6 +24,7 @@ using ME3TweaksCore.Helpers.MEM;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.NativeMods;
+using ME3TweaksCore.Objects;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Services.BasegameFileIdentification;
 using ME3TweaksCore.Services.ThirdPartyModIdentification;
@@ -703,7 +704,7 @@ namespace ME3TweaksCore.Diagnostics
                             foreach (var fi in tmii.InstalledTextureMods)
                             {
                                 var modStr = @" - ";
-                                if (fi.ModType == TextureModInstallationInfo.InstalledTextureMod.InstalledTextureModType.USERFILE)
+                                if (fi.ModType == InstalledTextureMod.InstalledTextureModType.USERFILE)
                                 {
                                     modStr += @"[USERFILE] ";
                                 }
@@ -714,7 +715,7 @@ namespace ME3TweaksCore.Diagnostics
                                     modStr += $@" by {fi.AuthorName}";
                                 }
 
-                                addDiagLine(modStr, fi.ModType == TextureModInstallationInfo.InstalledTextureMod.InstalledTextureModType.USERFILE ? Severity.WARN : Severity.GOOD);
+                                addDiagLine(modStr, fi.ModType == InstalledTextureMod.InstalledTextureModType.USERFILE ? Severity.WARN : Severity.GOOD);
                                 if (fi.ChosenOptions.Any())
                                 {
                                     addDiagLine(@"   Chosen options for install:");
