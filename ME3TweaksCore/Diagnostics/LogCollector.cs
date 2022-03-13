@@ -119,7 +119,8 @@ namespace ME3TweaksCore.Diagnostics
             OFFICIALDLC,
             TPMI,
             SUB,
-            BOLDBLUE
+            BOLDBLUE,
+            SUPERCEDANCE_FILE
         }
 
 
@@ -281,6 +282,9 @@ namespace ME3TweaksCore.Diagnostics
                         break;
                     case Severity.SUB:
                         diagStringBuilder.Append($@"[SUB]{message}");
+                        break;
+                    case Severity.SUPERCEDANCE_FILE:
+                        diagStringBuilder.Append($@"[SSF]{message}");
                         break;
                     default:
                         Debugger.Break();
@@ -563,7 +567,8 @@ namespace ME3TweaksCore.Diagnostics
 
                 MLog.Information(@"Collecting video card information");
 
-                ManagementObjectSearcher objvide = new ManagementObjectSearcher(@"select * from Win32_VideoController");
+                /* OLD CODE HERE
+                                ManagementObjectSearcher objvide = new ManagementObjectSearcher(@"select * from Win32_VideoController");
                 int vidCardIndex = 1;
                 foreach (ManagementObject obj in objvide.Get())
                 {
@@ -612,6 +617,43 @@ namespace ME3TweaksCore.Diagnostics
                     addDiagLine(@"Memory: " + displayVal);
                     addDiagLine(@"DriverVersion: " + obj[@"DriverVersion"]);
                     vidCardIndex++;
+                }*/
+
+                // Enumerate the Display Adapters registry key
+                int vidCardIndex = 1;
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"))
+                {
+                    if (key != null)
+                    {
+                        var subNames = key.GetSubKeyNames();
+                        foreach (string adapterRegistryIndex in subNames)
+                        {
+                            if (!int.TryParse(adapterRegistryIndex, out _)) continue; // Only go into numerical ones
+                            try
+                            {
+                                var videoKey = key.OpenSubKey(adapterRegistryIndex);
+
+                                // Get memory. If memory is not populated then this is not active right now (I think)
+                                long vidCardSizeInBytes = (long)videoKey.GetValue(@"HardwareInformation.qwMemorySize", 0L);
+                                if (vidCardSizeInBytes == 0) continue; // Not defined
+
+                                string vidCardName = (string)videoKey.GetValue(@"HardwareInformation.AdapterString", @"Unable to get adapter name");
+                                string vidDriverVersion = (string)videoKey.GetValue(@"DriverVersion", @"Unable to get driver version");
+                                string vidDriverDate = (string)videoKey.GetValue(@"DriverDate", @"Unable to get driver date");
+
+                                addDiagLine();
+                                addDiagLine($@"Video Card {(vidCardIndex++)}", Severity.BOLD);
+                                addDiagLine($@"Name: {vidCardName}");
+                                addDiagLine($@"Memory: {FileSize.FormatSize(vidCardSizeInBytes)}");
+                                addDiagLine($@"Driver Version: {vidDriverVersion}");
+                                addDiagLine($@"Driver Date: {vidDriverDate}");
+                            }
+                            catch (Exception ex)
+                            {
+                                addDiagLine($@"Error getting video card information: {ex.Message}", Severity.WARN);
+                            }
+                        }
+                    }
                 }
 
                 // Antivirus
@@ -884,7 +926,7 @@ namespace ME3TweaksCore.Diagnostics
                             {
                                 dlctext += @"Installed by " + dlc.Value.InstalledBy;
                             }
-                            if (dlc.Value.Version != null)
+                            if (!string.IsNullOrWhiteSpace(dlc.Value.Version))
                             {
                                 dlctext += @";;" + dlc.Value.Version;
                             }
@@ -903,10 +945,10 @@ namespace ME3TweaksCore.Diagnostics
                         if (dlc.Value != null && dlc.Value.OptionsSelectedAtInstallTime.Any())
                         {
                             // Print options
-                            addDiagLine(@"   > The following options were chosen at install time:");
+                            //addDiagLine(@"   > The following options were chosen at install time:");
                             foreach (var o in dlc.Value.OptionsSelectedAtInstallTime)
                             {
-                                addDiagLine(($@"     > {o}"));
+                                addDiagLine(($@"   > {o}"));
                             }
                         }
                     }
@@ -917,25 +959,25 @@ namespace ME3TweaksCore.Diagnostics
                     SeeIfIncompatibleDLCIsInstalled(package.DiagnosticTarget, addDiagLine);
                 }
 
+                // 03/13/2022: Supercedance list now lists all DLC files even if they don't supercede anything.
                 MLog.Information(@"Collecting supersedance list");
-
-                var supercedanceList = M3Directories.GetFileSupercedances(package.DiagnosticTarget).Where(x => x.Value.Count > 1).ToList();
+                var supercedanceList = M3Directories.GetFileSupercedances(package.DiagnosticTarget).ToList();
                 if (supercedanceList.Any())
                 {
                     addDiagLine();
-                    addDiagLine(@"Superseding files", Severity.BOLD);
-                    addDiagLine(@"The following mod files supersede others due to same-named files. This may mean the mods are incompatible, or that these files are compatibility patches. This information is for developer use only - DO NOT MODIFY YOUR GAME DIRECTORY MANUALLY.");
+                    addDiagLine(@"DLC mod files", Severity.BOLD);
+                    addDiagLine(@"The following DLC mod files are installed, as well as their supercedances (if any). This may mean the mods are incompatible, or that these files are compatibility patches. This information is for developer use only - DO NOT MODIFY YOUR GAME DIRECTORY MANUALLY.");
 
                     bool isFirst = true;
                     addDiagLine(@"Click to view list", Severity.SUB);
-                    foreach (var sl in supercedanceList)
+                    foreach (var sl in supercedanceList.OrderBy(x => x.Key))
                     {
                         if (isFirst)
                             isFirst = false;
                         else
                             addDiagLine();
 
-                        addDiagLine(sl.Key);
+                        addDiagLine(sl.Key, Severity.SUPERCEDANCE_FILE);
                         foreach (var dlc in sl.Value)
                         {
                             addDiagLine(dlc, Severity.TPMI);
@@ -1000,12 +1042,12 @@ namespace ME3TweaksCore.Diagnostics
                                 switch (command)
                                 {
                                     case @"ERROR_REMOVED_FILE":
-                                        //.Add($" - File removed after textures were installed: {param}");
-                                        removedFiles.Add(param);
+                        //.Add($" - File removed after textures were installed: {param}");
+                        removedFiles.Add(param);
                                         break;
                                     case @"ERROR_ADDED_FILE":
-                                        //addedFiles.Add($"File was added after textures were installed" + param + " " + File.GetCreationTimeUtc(Path.Combine(gamePath, param));
-                                        addedFiles.Add(param);
+                        //addedFiles.Add($"File was added after textures were installed" + param + " " + File.GetCreationTimeUtc(Path.Combine(gamePath, param));
+                        addedFiles.Add(param);
                                         break;
                                     case @"ERROR_VANILLA_MOD_FILE":
                                         if (!addedFiles.Contains(param))
@@ -1509,7 +1551,7 @@ namespace ME3TweaksCore.Diagnostics
                         addDiagLine(@"Note that messages from this log can be highly misleading. Do not try to interpret these messages if you don't know what they mean!");
                         addDiagLine();
                         var log = MUtilities.WriteSafeReadAllLines(me3logfilepath); //try catch needed?
-                        //log = log.Reverse().ToArray(); // go in reverse so we get the last lines
+                                                                                    //log = log.Reverse().ToArray(); // go in reverse so we get the last lines
                         int lineNum = 0;
                         foreach (string line in log)
                         {
