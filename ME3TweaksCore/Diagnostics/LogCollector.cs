@@ -86,7 +86,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <returns></returns>
         public static string CollectLatestLog(string logdir, bool restartLogger)
         {
-            MLog.Information(@"Shutting down logger to allow application to pull log file.");
+            MLog.Information(@"Closing application log to allow application to read log file");
             Log.CloseAndFlush();
             var logFile = new DirectoryInfo(logdir)
                                              .GetFiles(@"*.txt")
@@ -95,7 +95,14 @@ namespace ME3TweaksCore.Diagnostics
             string logText = null;
             if (logFile != null && File.Exists(logFile.FullName))
             {
-                logText = File.ReadAllText(logFile.FullName);
+                try
+                {
+                    logText = File.ReadAllText(logFile.FullName);
+                }
+                catch (Exception e)
+                {
+                    MLog.Fatal($@"UNABLE TO READ LOG FILE {logFile.FullName}: {e.Message}");
+                }
             }
 
             if (restartLogger)
@@ -1042,12 +1049,12 @@ namespace ME3TweaksCore.Diagnostics
                                 switch (command)
                                 {
                                     case @"ERROR_REMOVED_FILE":
-                        //.Add($" - File removed after textures were installed: {param}");
-                        removedFiles.Add(param);
+                                        //.Add($" - File removed after textures were installed: {param}");
+                                        removedFiles.Add(param);
                                         break;
                                     case @"ERROR_ADDED_FILE":
-                        //addedFiles.Add($"File was added after textures were installed" + param + " " + File.GetCreationTimeUtc(Path.Combine(gamePath, param));
-                        addedFiles.Add(param);
+                                        //addedFiles.Add($"File was added after textures were installed" + param + " " + File.GetCreationTimeUtc(Path.Combine(gamePath, param));
+                                        addedFiles.Add(param);
                                         break;
                                     case @"ERROR_VANILLA_MOD_FILE":
                                         if (!addedFiles.Contains(param))

@@ -9,13 +9,14 @@ using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.Targets;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ME3TweaksCore.Services
 {
     public partial class MOnlineContent
     {
         /// <summary>
-        /// Basegame File Identification Service URLs
+        /// {ServiceLoggingName} URLs
         /// </summary>
         public static FallbackLink BasegameFileIdentificationServiceURL { get; } = new FallbackLink()
         {
@@ -29,13 +30,27 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 {
     public class BasegameFileIdentificationService
     {
+        /// <summary>
+        /// Database of locally installed files
+        /// </summary>
         private static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> LocalDatabase;
+        /// <summary>
+        /// Database of known hashes from ME3Tweaks. This list is not well maintained due to the amount of work it requires.
+        /// </summary>
         private static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> ME3TweaksDatabase;
 
         /// <summary>
         /// If the BasegameFileIdentificationService has been initially loaded
         /// </summary>
         public static bool ServiceLoaded { get; private set; }
+
+        /// <summary>
+        /// Service name for logging
+        /// </summary>
+        private const string ServiceLoggingName = @"Basegame File Identification Service";
+
+        private static string GetME3TweaksServiceCacheFile() => MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile();
+
 
         private static void LoadLocalBasegameIdentificationService()
         {
@@ -44,17 +59,16 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             LoadDatabase(true, LocalDatabase);
         }
 
-        internal static void LoadME3TweaksBasegameIdentificationService(bool forceRefresh)
+        private static bool LoadME3TweaksBasegameIdentificationService(JToken data)
         {
-            if (ME3TweaksDatabase != null) return;
-            ME3TweaksDatabase = FetchBasegameFileIdentificationServiceManifest(forceRefresh);
-            LoadDatabase(false, ME3TweaksDatabase);
+            // ServiceLoader for online content
+            return InternalLoadME3TweaksService(data);
         }
 
-        private static void LoadDatabase(bool local, Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> database)
+        private static void LoadDatabase(bool local, Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> database, JToken serverData = null)
         {
             var typeStr = local ? "Local" : "ME3Tweaks";
-            var file = local ? MCoreFilesystem.GetLocalBasegameIdentificationServiceFile() : MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile();
+            var file = local ? MCoreFilesystem.GetLocalBasegameIdentificationServiceFile() : GetME3TweaksServiceCacheFile();
             if (File.Exists(file))
             {
                 try
@@ -65,18 +79,18 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
                                     List<BasegameFileRecord>>>>(
                                 File.ReadAllText(file));
                     database.ReplaceAll(db);
-                    MLog.Information($@"Loaded {typeStr} Basegame File Identification Service");
+                    MLog.Information($@"Loaded {typeStr} {ServiceLoggingName}");
                 }
                 catch (Exception e)
                 {
-                    MLog.Error($@"Error loading {typeStr} Basegame File Identification Service: {e.Message}");
+                    MLog.Error($@"Error loading {typeStr} {ServiceLoggingName}: {e.Message}");
                     var db = getBlankBGFIDB();
                     database.ReplaceAll(db);
                 }
             }
             else
             {
-                MLog.Information($@"Loaded blank {typeStr} Basegame File Identification Service");
+                MLog.Information($@"Loaded blank {typeStr} {ServiceLoggingName}");
                 var db = getBlankBGFIDB();
                 database.ReplaceAll(db);
             }
@@ -122,7 +136,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
                 try
                 {
                     File.WriteAllText(MCoreFilesystem.GetLocalBasegameIdentificationServiceFile(), outText);
-                    MLog.Information(@"Updated Local Basegame File Identification Service");
+                    MLog.Information(@"Updated Local {ServiceLoggingName}");
 
                 }
                 catch (Exception e)
@@ -133,13 +147,13 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             }
             else
             {
-                MLog.Information(@"Local Basegame File Identification Service did not need updating");
+                MLog.Information(@"Local {ServiceLoggingName} did not need updating");
 
             }
         }
 
         /// <summary>
-        /// Looks up information about a basegame file using the Basegame File Identification Service
+        /// Looks up information about a basegame file using the {ServiceLoggingName}
         /// </summary>
         /// <param name="target"></param>
         /// <param name="fullfilepath"></param>
@@ -197,68 +211,66 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             return false;
         }
 
-        public static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> FetchBasegameFileIdentificationServiceManifest(bool overrideThrottling = false)
+        private static bool InternalLoadME3TweaksService(JToken serviceData)
         {
-            MLog.Information(@"Fetching basegame file identification manifest");
-
-            //read cached first.
-            string cached = null;
-            if (File.Exists(MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile()))
+            // Online first
+            if (serviceData != null)
             {
                 try
                 {
-                    cached = File.ReadAllText(MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile());
+                    ME3TweaksDatabase = serviceData.ToObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>();
+                    ServiceLoaded = true;
+#if DEBUG
+                    File.WriteAllText(GetME3TweaksServiceCacheFile(), serviceData.ToString(Formatting.Indented));
+#else
+                    File.WriteAllText(M3Filesystem.GetME3TweaksServiceCacheFile(), serviceData.ToString(Formatting.None));
+#endif
+                    MLog.Information($@"Loaded online {ServiceLoggingName}");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    if (ServiceLoaded)
+                    {
+                        MLog.Error($@"Loaded online {ServiceLoggingName}, but failed to cache to disk: {ex.Message}");
+                        return true;
+                    }
+                    else
+                    {
+                        MLog.Error($@"Failed to load {ServiceLoggingName}: {ex.Message}");
+                        return false;
+                    }
+                }
+            }
+
+            // Use cached if online is not available
+            if (File.Exists(GetME3TweaksServiceCacheFile()))
+            {
+                try
+                {
+                    var cached = File.ReadAllText(GetME3TweaksServiceCacheFile());
+                    ME3TweaksDatabase = JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>(cached);
+                    ServiceLoaded = true;
+                    MLog.Information($@"Loaded cached {ServiceLoggingName}");
+                    return true;
                 }
                 catch (Exception e)
                 {
-                    TelemetryInterposer.TrackErrorWithLog(e, new Dictionary<string, string>()
+                    MLog.Error($@"Failed to load cached {ServiceLoggingName}: {e.Message}");
+                    var relevantInfo = new Dictionary<string, string>()
                     {
-                        {@"Error type", @"Error reading cached online content" },
-                        {@"Service", @"Basegame File Identification Service" },
-                        {@"Message", e.Message }
-                    });
+                        {@"Error type", @"Error reading cached online content"},
+                        {@"Service", ServiceLoggingName},
+                        {@"Message", e.Message}
+                    };
+                    TelemetryInterposer.UploadErrorLog(e, relevantInfo);
                 }
             }
 
-
-            if (!File.Exists(MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile()) || overrideThrottling || MOnlineContent.CanFetchContentThrottleCheck())
-            {
-                foreach (var staticurl in MOnlineContent.BasegameFileIdentificationServiceURL.GetAllLinks())
-                {
-                    Uri myUri = new Uri(staticurl);
-                    string host = myUri.Host;
-                    try
-                    {
-                        using var wc = new ShortTimeoutWebClient();
-                        string json = MOnlineContent.FetchRemoteString(staticurl);
-                        File.WriteAllText(MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile(), json);
-                        return JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>(json);
-                    }
-                    catch (Exception e)
-                    {
-                        //Unable to fetch latest help.
-                        MLog.Error($@"Error fetching online basegame file identification service from endpoint {host}: {e.Message}");
-                    }
-                }
-
-                if (cached == null)
-                {
-                    MLog.Error(@"Unable to load basegame file identification service and local file doesn't exist. Returning a blank copy.");
-                    return getBlankBGFIDB();
-                }
-            }
-            MLog.Information(@"Using cached BGFIS instead");
-
-            try
-            {
-                return JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>(cached);
-            }
-            catch (Exception e)
-            {
-                MLog.Error(@"Could not parse cached basegame file identification service file. Returning blank BFIS data instead. Reason: " + e.Message);
-                return getBlankBGFIDB();
-            }
+            MLog.Information($@"Unable to load {ServiceLoggingName} service: No cached content or online content was available to load");
+            return false;
         }
+
 
         /// <summary>
         /// Returns a blank Basegame Identification Database
@@ -278,12 +290,12 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             };
         }
 
-        public static bool LoadService(bool forceRefresh = false)
+        public static bool LoadService(JToken data)
         {
             LoadLocalBasegameIdentificationService();
-            LoadME3TweaksBasegameIdentificationService(forceRefresh);
+            var result = LoadME3TweaksBasegameIdentificationService(data);
             ServiceLoaded = true;
-            return true;
+            return result;
         }
 
         public static IReadOnlyDictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> GetAllServerEntries()

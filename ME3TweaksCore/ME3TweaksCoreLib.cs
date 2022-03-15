@@ -8,7 +8,9 @@ using LegendaryExplorerCore;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.ME3Tweaks.Online;
 using ME3TweaksCore.NativeMods;
+using ME3TweaksCore.Services;
 using ME3TweaksCore.Services.Backup;
 using ME3TweaksCore.Services.BasegameFileIdentification;
 using ME3TweaksCore.Services.ThirdPartyModIdentification;
@@ -34,7 +36,7 @@ namespace ME3TweaksCore
         /// The CoreLibVersion version
         /// </summary>
         public static Version CoreLibVersion => Assembly.GetExecutingAssembly().GetName().Version;
-            
+
         /// <summary>
         /// The CoreLibrary version, in Human Readable form.
         /// </summary>
@@ -68,10 +70,16 @@ namespace ME3TweaksCore
             MUtilities.DeleteFilesAndFoldersRecursively(MCoreFilesystem.GetTempDirectory(), deleteDirectoryItself: false); // Clear temp but don't delete the directory itself
             BackupService.InitBackupService(RunOnUIThread, logPaths: true);
 
-            if (package.LoadAuxillaryServices)
+            if (package.LoadAuxiliaryServices)
             {
-                BasegameFileIdentificationService.LoadService();
-                TPMIService.LoadService();
+                if (package.AuxiliaryCombinedOnlineServicesEndpoint != null)
+                {
+                    MCoreServiceLoader.LoadServices(package.AuxiliaryCombinedOnlineServicesEndpoint);
+                }
+                else
+                {
+                    MLog.Warning(@"ME3TweaksCoreLib.Initialize() was called with LoadAuxiliaryServices but did not specify a AuxiliaryCombinedOnlineServicesEndpoint! Some services were not loaded.");
+                }
                 ASIManager.LoadManifest();
             }
 

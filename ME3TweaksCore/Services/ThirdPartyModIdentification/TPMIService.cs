@@ -11,6 +11,7 @@ using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Misc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PropertyChanged;
 using Serilog;
 
@@ -23,94 +24,162 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
 
         private const string ThirdPartyIdentificationServiceURL = @"https://me3tweaks.com/modmanager/services/thirdpartyidentificationservice?highprioritysupport=true&allgames=true";
 
+        /// <summary>
+        /// Service name for logging
+        /// </summary>
+        private const string ServiceLoggingName = @"Third Party Importing Service";
+
+        private static string GetServiceCacheFile() => MCoreFilesystem.GetThirdPartyIdentificationCachedFile();
 
         /// <summary>
         /// Accesses the third party identification server. Key is the game enum as a string, results are dictionary of DLCName => Info.
         /// </summary>
         internal static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> Database;
 
-        #region ONLINE FETCH AND LOAD
+        //public static bool LoadService(bool forceRefresh = false)
+        //{
+        //    Database = FetchThirdPartyIdentificationManifest(forceRefresh);
+        //    ServiceLoaded = true;
+        //    return true;
+        //}
 
-        public static bool LoadService(bool forceRefresh = false)
+        public static bool LoadService(JToken data)
         {
-            Database = FetchThirdPartyIdentificationManifest(forceRefresh);
-            ServiceLoaded = true;
-            return true;
+            return InternalLoadService(data);
         }
 
-        private static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> FetchThirdPartyIdentificationManifest(bool overrideThrottling = false)
+        private static bool InternalLoadService(JToken serviceData)
         {
-            string cached = null;
-            if (File.Exists(MCoreFilesystem.GetThirdPartyIdentificationCachedFile()))
+            // Online first
+            if (serviceData != null)
             {
                 try
                 {
-                    cached = File.ReadAllText(MCoreFilesystem.GetThirdPartyIdentificationCachedFile());
+                    Database = serviceData.ToObject<Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>>>();
+                    ServiceLoaded = true;
+#if DEBUG
+                    File.WriteAllText(GetServiceCacheFile(), serviceData.ToString(Formatting.Indented));
+#else
+                    File.WriteAllText(GetServiceCacheFile(), serviceData.ToString(Formatting.None));
+#endif
+                    MLog.Information($@"Loaded online {ServiceLoggingName}");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    if (ServiceLoaded)
+                    {
+                        MLog.Error($@"Loaded online {ServiceLoggingName}, but failed to cache to disk: {ex.Message}");
+                        return true;
+                    }
+                    else
+                    {
+                        MLog.Error($@"Failed to load {ServiceLoggingName}: {ex.Message}");
+                        return false;
+                    }
+                }
+            }
+
+            // Use cached if online is not available
+            if (File.Exists(GetServiceCacheFile()))
+            {
+                try
+                {
+                    var cached = File.ReadAllText(GetServiceCacheFile());
+                    Database = JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>>>(cached);
+                    ServiceLoaded = true;
+                    MLog.Information($@"Loaded cached {ServiceLoggingName}");
+                    return true;
                 }
                 catch (Exception e)
                 {
+                    MLog.Error($@"Failed to load cached {ServiceLoggingName}: {e.Message}");
                     var relevantInfo = new Dictionary<string, string>()
                     {
                         {@"Error type", @"Error reading cached online content"},
-                        {@"Service", @"Third Party Identification Service"},
+                        {@"Service", ServiceLoggingName},
                         {@"Message", e.Message}
                     };
                     TelemetryInterposer.UploadErrorLog(e, relevantInfo);
                 }
             }
 
-
-            if (!File.Exists(MCoreFilesystem.GetThirdPartyIdentificationCachedFile()) || overrideThrottling || MOnlineContent.CanFetchContentThrottleCheck())
-            {
-                try
-                {
-                    using var wc = new ShortTimeoutWebClient();
-
-                    string json = wc.DownloadStringAwareOfEncoding(ThirdPartyIdentificationServiceURL);
-                    File.WriteAllText(MCoreFilesystem.GetThirdPartyIdentificationCachedFile(), json);
-                    return JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>>>(json);
-                }
-                catch (Exception e)
-                {
-                    //Unable to fetch latest help.
-                    MLog.Error(@"Error fetching online third party identification service: " + e.Message);
-
-                    if (cached != null)
-                    {
-                        MLog.Warning(@"Using cached third party identification service  file instead");
-                    }
-                    else
-                    {
-                        MLog.Error(@"Unable to load third party identification service and local file doesn't exist. Returning a blank copy.");
-                        return getBlankTPIS();
-                    }
-                }
-            }
-
-            try
-            {
-                return JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>>>(cached);
-            }
-            catch (Exception e)
-            {
-                MLog.Error(@"Could not parse cached third party identification service file. Returning blank TPMI data instead. Reason: " + e.Message);
-                return getBlankTPIS();
-            }
+            MLog.Information($@"Unable to load {ServiceLoggingName} service: No cached content or online content was available to load");
+            return false;
         }
 
-        private static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> getBlankTPIS()
-        {
-            return new Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>>
-            {
-                [@"ME1"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
-                [@"ME2"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
-                [@"ME3"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
-                [@"LE1"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
-                [@"LE2"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
-                [@"LE3"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>()
-            };
-        }
-        #endregion
+        //private static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> FetchThirdPartyIdentificationManifest(bool overrideThrottling = false)
+        //{
+        //    string cached = null;
+        //    if (File.Exists(MCoreFilesystem.GetThirdPartyIdentificationCachedFile()))
+        //    {
+        //        try
+        //        {
+        //            cached = File.ReadAllText(MCoreFilesystem.GetThirdPartyIdentificationCachedFile());
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            var relevantInfo = new Dictionary<string, string>()
+        //            {
+        //                {@"Error type", @"Error reading cached online content"},
+        //                {@"Service", @"Third Party Identification Service"},
+        //                {@"Message", e.Message}
+        //            };
+        //            TelemetryInterposer.UploadErrorLog(e, relevantInfo);
+        //        }
+        //    }
+
+
+        //    if (!File.Exists(MCoreFilesystem.GetThirdPartyIdentificationCachedFile()) || overrideThrottling || MOnlineContent.CanFetchContentThrottleCheck())
+        //    {
+        //        try
+        //        {
+        //            using var wc = new ShortTimeoutWebClient();
+
+        //            string json = wc.DownloadStringAwareOfEncoding(ThirdPartyIdentificationServiceURL);
+        //            File.WriteAllText(MCoreFilesystem.GetThirdPartyIdentificationCachedFile(), json);
+        //            return JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>>>(json);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            //Unable to fetch latest help.
+        //            MLog.Error(@"Error fetching online third party identification service: " + e.Message);
+
+        //            if (cached != null)
+        //            {
+        //                MLog.Warning(@"Using cached third party identification service  file instead");
+        //            }
+        //            else
+        //            {
+        //                MLog.Error(@"Unable to load third party identification service and local file doesn't exist. Returning a blank copy.");
+        //                return getBlankTPIS();
+        //            }
+        //        }
+        //    }
+
+        //    try
+        //    {
+        //        return JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>>>(cached);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        MLog.Error(@"Could not parse cached third party identification service file. Returning blank TPMI data instead. Reason: " + e.Message);
+        //        return getBlankTPIS();
+        //    }
+        //}
+
+        //private static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> getBlankTPIS()
+        //{
+        //    return new Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>>
+        //    {
+        //        [@"ME1"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
+        //        [@"ME2"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
+        //        [@"ME3"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
+        //        [@"LE1"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
+        //        [@"LE2"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>(),
+        //        [@"LE3"] = new CaseInsensitiveDictionary<ThirdPartyModInfo>()
+        //    };
+        //}
 
 
         /// <summary>

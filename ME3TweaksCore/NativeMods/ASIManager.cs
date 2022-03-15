@@ -39,12 +39,15 @@ namespace ME3TweaksCore.NativeMods
         /// <summary>
         /// Loads the ASI manifest. This should only be done at startup or when the online manifest is refreshed. ForceLocal only works if there is local ASI manifest present
         /// </summary>
-        public static void LoadManifest(bool forceLocal = false, bool overrideThrottling = false)
+        /// <param name="forceLocal">If the manifest should be force-loaded from the local cache</param>
+        /// <param name="overrideThrottling">If the manifest should be updated regardless of content check throttle</param>
+        /// <param name="preloadedManifestData">Preloaded data if it was loaded from something else, such as a combined manifest</param>
+        public static void LoadManifest(bool forceLocal = false, bool overrideThrottling = false, string preloadedManifestData = null)
         {
-            MLog.Information(@"Loading ASI Manager manifest");
+            MLog.Information(@"Loading ASI manifest");
             try
             {
-                internalLoadManifest(forceLocal, overrideThrottling);
+                internalLoadManifest(forceLocal, overrideThrottling, preloadedManifestData);
             }
             catch (Exception e)
             {
@@ -52,19 +55,29 @@ namespace ME3TweaksCore.NativeMods
             }
         }
 
-        private static void internalLoadManifest(bool forceLocal = false, bool overrideThrottling = false)
+        private static void internalLoadManifest(bool forceLocal = false,bool overrideThrottling = false, string preloadedManifestData = null)
         {
             if (File.Exists(ManifestLocation) && (forceLocal || (!MOnlineContent.CanFetchContentThrottleCheck() && !overrideThrottling))) //Force local, or we can't online check and cannot override throttle
             {
                 LoadManifestFromDisk(ManifestLocation);
+                MLog.Information(@"Loaded cached ASI manifest");
                 return;
             }
 
             var shouldNotFetch = forceLocal || (!overrideThrottling && !MOnlineContent.CanFetchContentThrottleCheck()) && File.Exists(ManifestLocation);
             if (!shouldNotFetch) //this cannot be triggered if forceLocal is true
             {
-                MLog.Information(@"Fetching ASI manifest from online source");
-                var onlineManifest = MOnlineContent.FetchRemoteString(@"https://me3tweaks.com/mods/asi/getmanifest?AllGames=1");
+                string onlineManifest;
+                if (preloadedManifestData == null)
+                {
+                    MLog.Information(@"Fetching ASI manifest from online source");
+                    onlineManifest = MOnlineContent.FetchRemoteString(@"https://me3tweaks.com/mods/asi/getmanifest?AllGames=1");
+                }
+                else
+                {
+                    onlineManifest = preloadedManifestData;
+                }
+
                 onlineManifest = onlineManifest.Trim();
                 try
                 {
@@ -81,14 +94,15 @@ namespace ME3TweaksCore.NativeMods
                 }
                 catch (Exception e)
                 {
-                    MLog.Error(@"Error parsing online manifest: " + e.Message);
+                    MLog.Error(@"Error parsing online ASI manifest: " + e.Message);
                     internalLoadManifest(true); //force local load instead
                 }
             }
             else if (File.Exists(ManifestLocation))
             {
-                MLog.Information(@"Loading ASI local manifest");
+                MLog.Information(@"Loading local ASI manifest");
                 LoadManifestFromDisk(ManifestLocation, false);
+                MLog.Information(@"Loaded local ASI manifest");
             }
             else
             {

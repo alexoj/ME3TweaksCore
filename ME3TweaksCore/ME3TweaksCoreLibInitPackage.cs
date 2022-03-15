@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Misc;
 using ME3TweaksCore.Services;
 using Serilog;
 
@@ -18,10 +19,10 @@ namespace ME3TweaksCore
     public class ME3TweaksCoreLibInitPackage
     {
         /// <summary>
-        /// Specifies if auxillary services such as BasegameFileIdentificationService, ThirdPartyIdentificationService, etc, should initialize with the library. Setting this to false
+        /// Specifies if auxiliary services such as BasegameFileIdentificationService, ThirdPartyIdentificationService, etc, should initialize with the library. Setting this to false
         /// means that the consuming library will manually initialize them.
         /// </summary>
-        public bool LoadAuxillaryServices { get; set; } = true;
+        public bool LoadAuxiliaryServices { get; set; } = true;
 
         /// <summary>
         /// The run on ui thread delegate. If you are not using WPF, this should just return a thread.
@@ -91,6 +92,11 @@ namespace ME3TweaksCore
         /// </summary>
         public MExtendedClassGenerators.GenerateUnknownInstalledASIModDelegate GenerateUnknownInstalledASIModDelegate { get; init; }
 
+        /// <summary>
+        /// The list of endpoints to use for loading online services on initial boot. If this is not set, auxillary services will not be loaded. This is not used if LoadAuxiliaryServices is false.
+        /// </summary>
+        public FallbackLink AuxiliaryCombinedOnlineServicesEndpoint { get; init; }
+
 
         /// <summary>
         /// Installs the callbacks specified in this package into ME3TweaksCore.
@@ -131,6 +137,7 @@ namespace ME3TweaksCore
         private void CheckOptions()
         {
             OptionNotSetCheck(RunOnUiThreadDelegate, nameof(RunOnUiThreadDelegate));
+            OptionNotSetCheck(AuxiliaryCombinedOnlineServicesEndpoint, nameof(AuxiliaryCombinedOnlineServicesEndpoint));
             OptionNotSetCheck(CreateLogger, nameof(CreateLogger));
             OptionNotSetCheck(CanFetchContentThrottleCheck, nameof(CanFetchContentThrottleCheck));
             OptionNotSetCheck(TrackEventCallback, nameof(TrackEventCallback));
