@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Misc;
@@ -61,8 +62,10 @@ namespace ME3TweaksCore.ME3Tweaks.Online
                     try
                     {
                         using var wc = new ShortTimeoutWebClient();
+                        Stopwatch sw = Stopwatch.StartNew();
                         serviceData = wc.DownloadString(fetchUrl);
-                        MLog.Information($@"Fetched combined services data from endpoint {host}");
+                        sw.Stop();
+                        MLog.Information($@"Fetched combined services data from endpoint {host} in {sw.ElapsedMilliseconds}ms");
                         break;
                     }
                     catch (Exception e)

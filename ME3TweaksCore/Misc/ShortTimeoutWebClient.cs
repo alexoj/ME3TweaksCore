@@ -12,7 +12,9 @@ namespace ME3TweaksCore.Misc
     {
         protected override WebRequest GetWebRequest(Uri uri)
         {
-            WebRequest w = base.GetWebRequest(uri);
+            var w = base.GetWebRequest(uri) as HttpWebRequest;
+            w.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate"); // We accept gzip, deflate
+            w.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
             w.Timeout = MSharedSettings.WebClientTimeout * 1000;
             return w;
         }
