@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CliWrap;
 using CliWrap.EventStream;
 
+// License: Do whatever you want with this.
 namespace ME3TweaksCore.Helpers
 {
     /// <summary>
