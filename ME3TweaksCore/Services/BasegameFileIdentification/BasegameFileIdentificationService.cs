@@ -223,7 +223,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 #if DEBUG
                     File.WriteAllText(GetME3TweaksServiceCacheFile(), serviceData.ToString(Formatting.Indented));
 #else
-                    File.WriteAllText(M3Filesystem.GetME3TweaksServiceCacheFile(), serviceData.ToString(Formatting.None));
+                    File.WriteAllText(GetME3TweaksServiceCacheFile(), serviceData.ToString(Formatting.None));
 #endif
                     MLog.Information($@"Loaded online {ServiceLoggingName}");
                     return true;
