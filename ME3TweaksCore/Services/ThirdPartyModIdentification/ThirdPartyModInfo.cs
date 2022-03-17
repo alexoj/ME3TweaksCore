@@ -26,7 +26,7 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
         /// </summary>
         public string outdated { get; set; }
 
-        public bool IsOutdated => string.IsNullOrWhiteSpace(outdated) || int.Parse(outdated) != 0;
+        public bool IsOutdated => !string.IsNullOrWhiteSpace(outdated) && int.Parse(outdated) != 0;
 
         #region MOD MANAGER SPECIFIC
 

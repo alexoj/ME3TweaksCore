@@ -32,6 +32,12 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
         private static string GetServiceCacheFile() => MCoreFilesystem.GetThirdPartyIdentificationCachedFile();
 
         /// <summary>
+        /// Used for unit testing
+        /// </summary>
+        public static int EntryCount => ServiceLoaded ? Database.Sum(x => x.Value.Count) : 0;
+
+
+        /// <summary>
         /// Accesses the third party identification server. Key is the game enum as a string, results are dictionary of DLCName => Info.
         /// </summary>
         internal static Dictionary<string, CaseInsensitiveDictionary<ThirdPartyModInfo>> Database;

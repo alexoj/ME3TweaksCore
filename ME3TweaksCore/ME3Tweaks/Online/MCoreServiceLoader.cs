@@ -25,6 +25,15 @@ namespace ME3TweaksCore.ME3Tweaks.Online
         /// <returns></returns>
         public delegate bool OnlineServiceLoader(JToken data);
 
+        // SERVICE KEYS
+
+        /// <summary>
+        /// Key for combined fetch
+        /// </summary>
+        public const string ASI_MANIFEST_KEY = @"asimanifest";
+        public const string BGFI_SERVICE_KEY = @"basegamefileidentificationservice";
+        public const string TPMI_SERVICE_KEY = @"thirdpartyidentificationservice";
+
         /// <summary>
         /// If this is the first content check for this session, we will check throttling for online fetch. If we are not able to use online, we will use cached instead
         /// </summary>
@@ -34,8 +43,8 @@ namespace ME3TweaksCore.ME3Tweaks.Online
         private static Dictionary<string, OnlineServiceLoader> ServiceLoaders = new()
         {
             // Identifies mods by DLC name per game
-            { @"thirdpartyidentificationservice", TPMIService.LoadService },
-            { @"basegamefileidentificationservice", BasegameFileIdentificationService.LoadService },
+            { TPMI_SERVICE_KEY, TPMIService.LoadService },
+            { BGFI_SERVICE_KEY, BasegameFileIdentificationService.LoadService },
         };
 
         /// <summary>

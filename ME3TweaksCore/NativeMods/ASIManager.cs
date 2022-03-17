@@ -12,6 +12,7 @@ using ME3TweaksCore.Helpers;
 using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Targets;
+using Newtonsoft.Json.Linq;
 using PropertyChanged;
 using Serilog;
 
@@ -55,7 +56,7 @@ namespace ME3TweaksCore.NativeMods
             }
         }
 
-        private static void internalLoadManifest(bool forceLocal = false,bool overrideThrottling = false, string preloadedManifestData = null)
+        private static void internalLoadManifest(bool forceLocal = false, bool overrideThrottling = false, string preloadedManifestData = null)
         {
             if (File.Exists(ManifestLocation) && (forceLocal || (!MOnlineContent.CanFetchContentThrottleCheck() && !overrideThrottling))) //Force local, or we can't online check and cannot override throttle
             {
@@ -110,6 +111,19 @@ namespace ME3TweaksCore.NativeMods
                 //Todo: some sort of handling here as we are running in panel startup
                 MLog.Error(@"Cannot load ASI manifest: Could not fetch online manifest and no local manifest exists");
             }
+        }
+
+        /// <summary>
+        /// Loads the data using a ServiceLoader system. This is treated like an online fetch.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public static bool LoadService(JToken data)
+        {
+            // The data is just the xml string.
+            LoadManifest(overrideThrottling: data != null, preloadedManifestData: data?.ToObject<string>());
+            return true; // ??
         }
 
         ///// <summary>
