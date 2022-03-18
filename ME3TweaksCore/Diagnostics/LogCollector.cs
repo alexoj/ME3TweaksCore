@@ -1397,7 +1397,7 @@ namespace ME3TweaksCore.Diagnostics
                         foreach (var logF in logFiles)
                         {
                             addDiagLine(logF.Key, Severity.BOLD);
-                            addDiagLine(@"Click to view list", Severity.SUB);
+                            addDiagLine(@"Click to view log", Severity.SUB);
                             addDiagLine(logF.Value);
                             addDiagLine(@"[/SUB]");
                         }
