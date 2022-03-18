@@ -14,6 +14,7 @@ using LegendaryExplorerCore.Compression;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Helpers;
+using LegendaryExplorerCore.ME1.Unreal.UnhoodBytecode;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using LegendaryExplorerCore.Unreal;
@@ -24,6 +25,7 @@ using ME3TweaksCore.Helpers.MEM;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.NativeMods;
+using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Objects;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Services.BasegameFileIdentification;
@@ -306,9 +308,10 @@ namespace ME3TweaksCore.Diagnostics
             MLog.Information(@"Beginning to build diagnostic output");
 
             addDiagLine(package.DiagnosticTarget.Game.ToGameNum().ToString(), Severity.GAMEID);
-            addDiagLine($@"ME3TweaksCore {Assembly.GetExecutingAssembly().GetName().Version} Game Diagnostic");
+            addDiagLine($@"{MLibraryConsumer.GetHostingProcessname()} {MLibraryConsumer.GetAppVersion()} Game Diagnostic");
+            addDiagLine($@"ME3TweaksCore version: {MLibraryConsumer.GetLibraryVersion()}");
             addDiagLine($@"Diagnostic for {package.DiagnosticTarget.Game.ToGameName()}");
-            addDiagLine($@"Diagnostic generated on {DateTime.Now.ToShortDateString()}");
+            addDiagLine($@"Diagnostic generated at {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}");
             #endregion
 
             #region MEM Setup
@@ -374,7 +377,6 @@ namespace ME3TweaksCore.Diagnostics
             }
             #endregion
 
-            addDiagLine($@"System culture: {CultureInfo.InstalledUICulture.Name}");
             try
             {
                 #region Game Information
@@ -486,13 +488,28 @@ namespace ME3TweaksCore.Diagnostics
                     //BINK
                     MLog.Information(@"Checking if Bink ASI loader is installed");
 
+
                     if (package.DiagnosticTarget.CheckIfBinkw32ASIIsInstalled())
                     {
-                        addDiagLine(@"binkw32 ASI bypass is installed");
+                        if (package.DiagnosticTarget.Game.IsOTGame())
+                        {
+                            addDiagLine(@"binkw32 ASI bypass is installed");
+                        }
+                        else
+                        {
+                            addDiagLine(@"bink2w64 ASI loader is installed");
+                        }
                     }
                     else
                     {
-                        addDiagLine(@"binkw32 ASI bypass is not installed. DLC mods, ASI mods, and modified DLC will not load", Severity.WARN);
+                        if (package.DiagnosticTarget.Game.IsOTGame())
+                        {
+                            addDiagLine(@"binkw32 ASI bypass is not installed. ASI mods, DLC mods, and modified DLC will not load", Severity.WARN);
+                        }
+                        else
+                        {
+                            addDiagLine(@"bink2w64 ASI loader is not installed. ASI mods will not load", Severity.WARN);
+                        }
                     }
 
                     if (package.DiagnosticTarget.Game == MEGame.ME1)
@@ -555,6 +572,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 addDiagLine(verLine, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? Severity.ERROR : Severity.INFO);
                 addDiagLine(@"Version " + osBuildVersion, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? Severity.ERROR : Severity.INFO);
+                addDiagLine($@"System culture: {CultureInfo.InstalledUICulture.Name}");
 
                 addDiagLine();
                 MLog.Information(@"Collecting memory information");
@@ -563,6 +581,17 @@ namespace ME3TweaksCore.Diagnostics
                 var computerInfo = new ComputerInfo();
                 long ramInBytes = (long)computerInfo.TotalPhysicalMemory;
                 addDiagLine($@"Total memory available: {FileSize.FormatSize(ramInBytes)}");
+                var memSpeed = computerInfo.MemorySpeed;
+                if (memSpeed > 0)
+                {
+                    addDiagLine($@"Memory speed: {memSpeed}Mhz");
+                }
+                else
+                {
+                    addDiagLine($@"Could not get memory speed", Severity.WARN);
+                }
+
+
                 addDiagLine(@"Processors", Severity.BOLD);
                 MLog.Information(@"Collecting processor information");
 
@@ -1310,13 +1339,13 @@ namespace ME3TweaksCore.Diagnostics
                     {
                         var installedASIs = package.DiagnosticTarget.GetInstalledASIs();
                         var nonUniqueItems = installedASIs.OfType<KnownInstalledASIMod>().SelectMany(
-                            x => installedASIs.OfType<KnownInstalledASIMod>().Where(
+                            x => installedASIs.OfType<IKnownInstalledASIMod>().Where(
                                 y => x != y
                                      && x.AssociatedManifestItem.OwningMod ==
                                      y.AssociatedManifestItem.OwningMod)
                             ).Distinct().ToList();
 
-                        foreach (var knownAsiMod in installedASIs.OfType<KnownInstalledASIMod>().Except(nonUniqueItems))
+                        foreach (var knownAsiMod in installedASIs.OfType<IKnownInstalledASIMod>().Except(nonUniqueItems))
                         {
                             var str = $@" - {knownAsiMod.AssociatedManifestItem.Name} v{knownAsiMod.AssociatedManifestItem.Version} ({Path.GetFileName(knownAsiMod.InstalledPath)})";
                             if (knownAsiMod.Outdated)
@@ -1326,7 +1355,7 @@ namespace ME3TweaksCore.Diagnostics
                             addDiagLine(str, knownAsiMod.Outdated ? Severity.WARN : Severity.GOOD);
                         }
 
-                        foreach (var unknownAsiMod in installedASIs.OfType<UnknownInstalledASIMod>())
+                        foreach (var unknownAsiMod in installedASIs.OfType<IUnknownInstalledASIMod>())
                         {
                             addDiagLine($@" - {Path.GetFileName(unknownAsiMod.InstalledPath)} - Unknown ASI mod", Severity.WARN);
                         }
@@ -1354,6 +1383,32 @@ namespace ME3TweaksCore.Diagnostics
 
                 #endregion
 
+                #region ASI Logs
+                if (package.DiagnosticTarget.Game.IsLEGame())
+                {
+                    MLog.Information(@"Collecting ASI log files");
+                    package.UpdateStatusCallback?.Invoke("Collecting ASI log files");
+
+                    var logFiles = GetASILogs(package.DiagnosticTarget);
+                    addDiagLine(@"ASI log files", Severity.DIAGSECTION);
+                    addDiagLine(@"These are log files from installed ASI mods (within the past day). These are >>highly<< technical; only advanced developers should attempt to interpret these logs.");
+                    if (logFiles.Any())
+                    {
+                        foreach (var logF in logFiles)
+                        {
+                            addDiagLine(logF.Key, Severity.BOLD);
+                            addDiagLine(@"Click to view list", Severity.SUB);
+                            addDiagLine(logF.Value);
+                            addDiagLine(@"[/SUB]");
+                        }
+                    }
+                    else
+                    {
+                        addDiagLine(@"No recent ASI logs were found.");
+                    }
+                }
+                #endregion
+
                 #region ME3/LE: TOC check
 
                 //TOC SIZE CHECK
@@ -1363,10 +1418,8 @@ namespace ME3TweaksCore.Diagnostics
 
                     package.UpdateStatusCallback?.Invoke(@"Collecting TOC file information");
 
-                    addDiagLine(@"File Table of Contents (TOC) size check", Severity.DIAGSECTION);
-                    addDiagLine(@"PCConsoleTOC.bin files list the size of each file the game can load.");
-                    addDiagLine(@"If the size is smaller than the actual file, the game will not allocate enough memory to load the file.");
-                    addDiagLine(@"These hangs typically occur at loading screens and are the result of manually modifying files without running AutoTOC afterwards.");
+                    addDiagLine(@"File Table of Contents (TOC) check", Severity.DIAGSECTION);
+                    addDiagLine(@"PCConsoleTOC.bin files list all files the can can normally access.");
                     bool hadTocError = false;
                     string[] tocs = Directory.GetFiles(Path.Combine(gamePath, @"BIOGame"), @"PCConsoleTOC.bin", SearchOption.AllDirectories);
                     string markerfile = M3Directories.GetTextureMarkerPath(package.DiagnosticTarget);
@@ -1412,7 +1465,6 @@ namespace ME3TweaksCore.Diagnostics
                     else
                     {
                         addDiagLine(@"Some files are larger than the listed TOC size. This typically won't happen unless you manually installed some files or an ALOT installation failed.", Severity.ERROR);
-                        addDiagLine(@"The game will always hang while loading these files." + (package.DiagnosticTarget.Supported ? @" You can regenerate the TOC files by using AutoTOC from the tools menu. If installation failed due a crash, this won't fix it." : ""));
                     }
                 }
 
@@ -1543,50 +1595,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 #endregion
 
-                #region DebugLogger (LE)
-
-                if (package.DiagnosticTarget.Game == MEGame.ME3)
-                {
-                    MLog.Information(@"Collecting DebugLogger session log");
-                    package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingME3SessionLog)); // NEEDS UPDATED
-                    string me3logfilepath = Path.Combine(Directory.GetParent(M3Directories.GetExecutablePath(package.DiagnosticTarget)).FullName, @"DebugLogger.txt");
-                    if (File.Exists(me3logfilepath))
-                    {
-                        FileInfo fi = new FileInfo(me3logfilepath);
-                        addDiagLine($@"{package.DiagnosticTarget.Game.ToGameName()} last session log", Severity.DIAGSECTION);
-                        addDiagLine(@"Last session log has modification date of " + fi.LastWriteTimeUtc.ToShortDateString());
-                        addDiagLine(@"Note that messages from this log can be highly misleading. Do not try to interpret these messages if you don't know what they mean!");
-                        addDiagLine();
-                        var log = MUtilities.WriteSafeReadAllLines(me3logfilepath); //try catch needed?
-                                                                                    //log = log.Reverse().ToArray(); // go in reverse so we get the last lines
-                        int lineNum = 0;
-                        foreach (string line in log)
-                        {
-
-                            if (package.DiagnosticTarget.Game == MEGame.LE2)
-                            {
-                                if (line.Contains("Material"))
-                                {
-                                    continue; // These are vanilla and should be ignored
-                                }
-                            }
-
-                            addDiagLine(line, line.Contains(@"appErrorF", StringComparison.InvariantCultureIgnoreCase) ? Severity.FATAL : Severity.INFO);
-                            lineNum++;
-                            if (lineNum > 100)
-                            {
-                                break;
-                            }
-                        }
-
-                        if (lineNum > 200)
-                        {
-                            addDiagLine(@"... log truncated ...");
-                        }
-                    }
-                }
-
-                #endregion
+                // LE logs are collected by ASI logs above.
             }
             catch (Exception ex)
             {
@@ -1635,6 +1644,11 @@ namespace ME3TweaksCore.Diagnostics
         private static void addLODStatusToDiag(GameTarget selectedDiagnosticTarget, Dictionary<string, string> lods, Action<string, Severity> addDiagLine)
         {
             addDiagLine(@"Texture Level of Detail (LOD) settings", Severity.DIAGSECTION);
+            if (selectedDiagnosticTarget.Game.IsLEGame())
+            {
+                addDiagLine(@"These should always be blank for Legendary Edition games. Legendary Edition modding does not modify LODs due engine changes.", Severity.INFO);
+            }
+
             string iniPath = M3Directories.GetLODConfigFile(selectedDiagnosticTarget);
             if (!File.Exists(iniPath))
             {
@@ -1770,6 +1784,13 @@ namespace ME3TweaksCore.Diagnostics
             }
         }
 
+        private static string getSignerSubject(string subject)
+        {
+            // Get Common Name (CN)
+            var props = StringStructParser.GetCommaSplitValues($"({subject})");
+            return props[@"CN"];
+        }
+
         private static void diagPrintSignatures(FileInspector info, Action<string, Severity> addDiagLine)
         {
             foreach (var sig in info.GetSignatures())
@@ -1777,18 +1798,19 @@ namespace ME3TweaksCore.Diagnostics
                 var signingTime = sig.TimestampSignatures.FirstOrDefault()?.TimestampDateTime?.UtcDateTime;
                 addDiagLine(@" > Signed on " + signingTime, Severity.INFO);
 
+                bool isFirst = true;
                 foreach (var signChain in sig.AdditionalCertificates)
                 {
                     try
                     {
-                        var outStr = signChain.Subject.Substring(3); //remove CN=
-                        outStr = outStr.Substring(0, outStr.IndexOf(','));
-                        addDiagLine(@" >> Signed by " + outStr, Severity.INFO);
+                        addDiagLine($@" >> {(isFirst ? "Signed" : "Countersigned")} by {getSignerSubject(signChain.Subject)}", Severity.INFO);
                     }
                     catch
                     {
-                        addDiagLine(@"  >> Signed by " + signChain.Subject, Severity.INFO);
+                        addDiagLine($@"  >> {(isFirst ? "Signed" : "Countersigned")} by " + signChain.Subject, Severity.INFO);
                     }
+
+                    isFirst = false;
                 }
             }
         }
@@ -1823,6 +1845,66 @@ namespace ME3TweaksCore.Diagnostics
                     return -1;
                 }
             }
+        }
+
+        // ASIs began changing over to .log 03/17/2022
+        // KismetLogger uses .txt still (we don't care)
+        private static string[] asilogExtensions = new[] { @".log" };
+
+        /// <summary>
+        /// Gets the contents of log files in the same directory as the game executable. This only returns logs for LE, OT doesn't really have any debug loggers beyond one.
+        /// </summary>
+        /// <returns>Dictionary of logs, mapped filename to contents. Will return null if not an LE game</returns>
+        private static Dictionary<string, string> GetASILogs(GameTarget target)
+        {
+            if (!target.Game.IsLEGame()) return null;
+            var logs = new Dictionary<string, string>();
+            var directory = M3Directories.GetExecutableDirectory(target);
+            if (Directory.Exists(directory))
+            {
+                foreach (var f in Directory.GetFiles(directory, "*"))
+                {
+                    var fi = new FileInfo(f);
+                    var timeDelta = DateTime.Now - fi.LastWriteTime;
+                    if (timeDelta < TimeSpan.FromDays(1))
+                    {
+                        // If the log was written within the last day.
+                        var extension = Path.GetExtension(f);
+                        if (asilogExtensions.Contains(extension))
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            var fileContents = File.ReadAllLines(f);
+
+                            int lastIndexRead = 0;
+                            // Read first 30 lines.
+                            for (int i = 0; i < 30 && i < fileContents.Length - 1; i++)
+                            {
+                                sb.AppendLine(fileContents[i]);
+                                lastIndexRead = i;
+                            }
+
+                            // Read last 30 lines.
+                            if (lastIndexRead < fileContents.Length)
+                            {
+                                sb.AppendLine("...");
+                                var startIndex = Math.Max(lastIndexRead, fileContents.Length - 30);
+                                for (int i = startIndex; i < fileContents.Length - 1; i++)
+                                {
+                                    sb.AppendLine(fileContents[i]);
+                                }
+                            }
+
+                            logs[Path.GetFileName(f)] = sb.ToString();
+                        }
+                    }
+                    else
+                    {
+                        MLog.Information($@"Skipping log: {Path.GetFileName(f)}. Last write time was {fi.LastWriteTime}. Only files written within last day are included");
+                    }
+                }
+            }
+
+            return logs;
         }
 
         public static string GetProcessorInformationForDiag()

@@ -1007,6 +1007,10 @@ namespace ME3TweaksCore.Targets
         private const string ME3ASILoaderHash = "1acccbdae34e29ca7a50951999ed80d5";
         private const string LEASILoaderHash = "2026e1cb78b5c7d95477395ac8c9979a"; // Will need changed as game is updated // bink 2005 by d00t
 
+        /// <summary>
+        /// Determines if the bink ASI loader/bypass is installed (both OT and LE)
+        /// </summary>
+        /// <returns></returns>
         public bool CheckIfBinkw32ASIIsInstalled()
         {
             string binkPath = GetVanillaBinkPath();

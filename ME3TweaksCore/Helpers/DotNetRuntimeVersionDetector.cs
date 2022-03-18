@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CliWrap;
 using CliWrap.EventStream;
+using ME3TweaksCore.Diagnostics;
 
 // License: Do whatever you want with this.
 namespace ME3TweaksCore.Helpers
@@ -19,38 +20,46 @@ namespace ME3TweaksCore.Helpers
         /// <returns>List of versions matching the specified version</returns>
         public static async Task<Version[]> GetInstalledRuntimeVersions(bool desktopVersion)
         {
-            // No validation. Make sure exit code is checked in the calling process.
-            var cmd = Cli.Wrap(@"dotnet.exe").WithArguments(@"--list-runtimes").WithValidation(CommandResultValidation.None);
-            var runtimes = new List<Version>();
-            await foreach (var cmdEvent in cmd.ListenAsync())
+            try
             {
-                switch (cmdEvent)
+                var cmd = Cli.Wrap(@"dotnet.exe").WithArguments(@"--list-runtimes").WithValidation(CommandResultValidation.None);
+                var runtimes = new List<Version>();
+                await foreach (var cmdEvent in cmd.ListenAsync())
                 {
-                    case StartedCommandEvent started:
-                        break;
-                    case StandardOutputCommandEvent stdOut:
-                        if (string.IsNullOrWhiteSpace(stdOut.Text))
-                        {
-                            continue;
-                        }
+                    switch (cmdEvent)
+                    {
+                        case StartedCommandEvent started:
+                            break;
+                        case StandardOutputCommandEvent stdOut:
+                            if (string.IsNullOrWhiteSpace(stdOut.Text))
+                            {
+                                continue;
+                            }
 
-                        if (stdOut.Text.StartsWith(@"Microsoft.NETCore.App") && !desktopVersion)
-                        {
-                            runtimes.Add(parseVersion(stdOut.Text));
-                        }
-                        else if (stdOut.Text.StartsWith(@"Microsoft.WindowsDesktop.App") && desktopVersion)
-                        {
-                            runtimes.Add(parseVersion(stdOut.Text));
-                        }
-                        break;
-                    case StandardErrorCommandEvent stdErr:
-                        break;
-                    case ExitedCommandEvent exited:
-                        break;
+                            if (stdOut.Text.StartsWith(@"Microsoft.NETCore.App") && !desktopVersion)
+                            {
+                                runtimes.Add(parseVersion(stdOut.Text));
+                            }
+                            else if (stdOut.Text.StartsWith(@"Microsoft.WindowsDesktop.App") && desktopVersion)
+                            {
+                                runtimes.Add(parseVersion(stdOut.Text));
+                            }
+
+                            break;
+                        case StandardErrorCommandEvent stdErr:
+                            break;
+                        case ExitedCommandEvent exited:
+                            break;
+                    }
                 }
+                return runtimes.ToArray();
+            }
+            catch (Exception e)
+            {
+                MLog.Error($@"Error determining installed dotnet runtimes: {e.Message}");
+                return Array.Empty<Version>();
             }
 
-            return runtimes.ToArray();
         }
 
         private static Version parseVersion(string stdOutText)
