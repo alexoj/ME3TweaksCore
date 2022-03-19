@@ -39,8 +39,13 @@ namespace ME3TweaksCore.Localization
         /// <returns></returns>
         private static bool LoadLanguage(string langcode)
         {
+            Stopwatch sw = Stopwatch.StartNew();
             var localizationXaml = LoadLocalizationXaml($"{langcode.ToLower()}.xaml.lzma");
-            if (localizationXaml == null) return false;
+            if (localizationXaml == null)
+            {
+                sw.Stop();
+                return false;
+            }
             XDocument localizationDoc = XDocument.Parse(localizationXaml);
 
             // Dumb stuff to get NAmeTable so it can read the xml... sigh
@@ -54,12 +59,15 @@ namespace ME3TweaksCore.Localization
             namespaceManager.AddNamespace("system", "clr-namespace:System;assembly=System.Runtime");
             var x = XNamespace.Get("http://schemas.microsoft.com/winfx/2006/xaml");
             var strings = localizationDoc.XPathSelectElements("//system:String", namespaceManager);
+            LocalizationDictionary ??= new Dictionary<string, string>(); // Assign if null
             foreach (var str in strings)
             {
                 LocalizationDictionary[str.Attribute(x + "Key").Value] = str.Value;
             }
+            sw.Stop();
+            MLog.Information($@"Language changed to {langcode}, took {sw.ElapsedMilliseconds}ms");
+            // Is this still required?
             // Todo: Parse and install strings.
-
             return true;
         }
 

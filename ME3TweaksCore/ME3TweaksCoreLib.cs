@@ -8,6 +8,7 @@ using LegendaryExplorerCore;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.ME3Tweaks.Online;
 using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.Services;
@@ -67,6 +68,8 @@ namespace ME3TweaksCore
             LegendaryExplorerCoreLib.InitLib(null, logger: Log.Logger, packageSavingFailed: package.LECPackageSaveFailedCallback); // Might need to change off of null for scheduler
 
             // Load our library
+            LC.SetLanguage(@"int"); // Load INT as it is the default language. Non-INT can be loaded later over the top of this
+
             MUtilities.DeleteFilesAndFoldersRecursively(MCoreFilesystem.GetTempDirectory(), deleteDirectoryItself: false); // Clear temp but don't delete the directory itself
             BackupService.InitBackupService(RunOnUIThread, logPaths: true);
 
