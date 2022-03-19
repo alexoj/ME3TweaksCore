@@ -137,7 +137,6 @@ namespace ME3TweaksCore
         private void CheckOptions()
         {
             OptionNotSetCheck(RunOnUiThreadDelegate, nameof(RunOnUiThreadDelegate));
-            OptionNotSetCheck(AuxiliaryCombinedOnlineServicesEndpoint, nameof(AuxiliaryCombinedOnlineServicesEndpoint));
             OptionNotSetCheck(CreateLogger, nameof(CreateLogger));
             OptionNotSetCheck(CanFetchContentThrottleCheck, nameof(CanFetchContentThrottleCheck));
             OptionNotSetCheck(TrackEventCallback, nameof(TrackEventCallback));
@@ -150,6 +149,8 @@ namespace ME3TweaksCore
             OptionNotSetCheck(GenerateSFARObjectDelegate, nameof(GenerateSFARObjectDelegate));
             OptionNotSetCheck(GenerateKnownInstalledASIModDelegate, nameof(GenerateKnownInstalledASIModDelegate));
             OptionNotSetCheck(GenerateUnknownInstalledASIModDelegate, nameof(GenerateUnknownInstalledASIModDelegate));
+            if (LoadAuxiliaryServices)
+                OptionNotSetCheck(AuxiliaryCombinedOnlineServicesEndpoint, nameof(AuxiliaryCombinedOnlineServicesEndpoint));
         }
 
         [Conditional("DEBUG")]
