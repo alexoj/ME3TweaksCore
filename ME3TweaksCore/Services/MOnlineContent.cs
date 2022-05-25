@@ -85,8 +85,17 @@ namespace ME3TweaksCore.Services
                 Debug.WriteLine("Downloading to memory: " + url);
             }
 
+            try
+            {
+                wc.StartDownload().Wait();
+            }
+            catch (Exception e)
+            {
+                // Error downloading
+                downloadError = e.Message;
+                return (responseStream, downloadError);
+            }
 
-            wc.StartDownload().Wait();
             if (cancellationTokenSource != null && cancellationTokenSource.Token.IsCancellationRequested)
             {
                 return (null, null);
