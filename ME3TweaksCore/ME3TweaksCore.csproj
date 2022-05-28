@@ -42,6 +42,6 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="powershell &quot;$(ProjectDir)\Build\preparelocalizations.ps1&quot;" />
+    <Exec Command="powershell &quot;&amp; &quot;&quot;$(ProjectDir)\Build\preparelocalizations.ps1&quot;&quot;&quot;" />
   </Target>
 </Project>
