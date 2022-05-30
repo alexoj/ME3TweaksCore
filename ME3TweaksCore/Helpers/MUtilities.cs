@@ -33,7 +33,7 @@ namespace ME3TweaksCore.Helpers
                 using var md5 = MD5.Create();
                 using var stream = File.OpenRead(filename);
                 var hash = md5.ComputeHash(stream);
-                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                return BitConverter.ToString(hash).Replace(@"-", "").ToLowerInvariant();
             }
             catch (IOException e)
             {
@@ -51,7 +51,7 @@ namespace ME3TweaksCore.Helpers
                 stream.Position = 0;
                 var hash = md5.ComputeHash(stream);
                 stream.Position = 0; // reset stream
-                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                return BitConverter.ToString(hash).Replace(@"-", "").ToLowerInvariant();
             }
             catch (Exception e)
             {
@@ -68,12 +68,12 @@ namespace ME3TweaksCore.Helpers
             using (var searcher = new ManagementObjectSearcher(@"\\" +
                                                                Environment.MachineName +
                                                                @"\root\SecurityCenter2",
-                "SELECT * FROM AntivirusProduct"))
+                @"SELECT * FROM AntivirusProduct"))
             {
                 var searcherInstance = searcher.Get();
                 foreach (var instance in searcherInstance)
                 {
-                    av.Add(instance["displayName"].ToString());
+                    av.Add(instance[@"displayName"].ToString());
                 }
             }
 
@@ -285,7 +285,7 @@ namespace ME3TweaksCore.Helpers
                 DeleteEmptySubdirectories(directory);
                 if (!Directory.EnumerateFileSystemEntries(directory).Any())
                 {
-                    MLog.Information("Deleting empty directory: " + directory);
+                    MLog.Information(@"Deleting empty directory: " + directory);
                     Directory.Delete(directory, false);
                 }
             }
@@ -437,28 +437,28 @@ namespace ME3TweaksCore.Helpers
             catch (UnauthorizedAccessException uae)
             {
                 //Must have admin rights.
-                MLog.Information("We need admin rights to create this directory");
+                MLog.Information(@"We need admin rights to create this directory");
 
                 // This works because the executable is extracted as part of the published single file package
                 // This method would NOT work on Linux single file as it doesn't extract!
-                var permissionsGranterExe = MCoreFilesystem.GetCachedExecutable("PermissionsGranter.exe");
+                var permissionsGranterExe = MCoreFilesystem.GetCachedExecutable(@"PermissionsGranter.exe");
                 if (!File.Exists(permissionsGranterExe))
                 {
-                    MUtilities.ExtractInternalFile("ME3TweaksCore.Assets.PermissionsGranter.exe", permissionsGranterExe, true);
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.Assets.PermissionsGranter.exe", permissionsGranterExe, true);
                 }
 
-                string args = "\"" + System.Security.Principal.WindowsIdentity.GetCurrent().Name + "\" -create-directory \"" + directoryPath.TrimEnd('\\') + "\"";
+                string args = "\"" + System.Security.Principal.WindowsIdentity.GetCurrent().Name + "\" -create-directory \"" + directoryPath.TrimEnd('\\') + "\""; //do not localize
                 try
                 {
                     int result = MUtilities.RunProcess(permissionsGranterExe, args, waitForProcess: true, requireAdmin: true, noWindow: true);
                     if (result == 0)
                     {
-                        MLog.Information("Elevated process returned code 0, restore directory is hopefully writable now.");
+                        MLog.Information(@"Elevated process returned code 0, restore directory is hopefully writable now.");
                         return true;
                     }
                     else
                     {
-                        MLog.Error("Elevated process returned code " + result + ", directory likely is not writable");
+                        MLog.Error($@"Elevated process returned code {result}, directory likely is not writable");
                         return false;
                     }
                 }
@@ -473,7 +473,7 @@ namespace ME3TweaksCore.Helpers
                         }
                     }
 
-                    MLog.Error("Error creating directory with PermissionsGranter: " + e.Message);
+                    MLog.Error($@"Error creating directory with PermissionsGranter: {e.Message}");
                     return false;
 
                 }
@@ -498,7 +498,7 @@ namespace ME3TweaksCore.Helpers
                 argsStr = "";
                 foreach (var arg in argsL)
                 {
-                    if (arg != "") argsStr += " ";
+                    if (arg != "") argsStr += @" "; //do not localize
                     if (arg.Contains(" "))
                     {
                         argsStr += $"\"{arg}\"";
@@ -526,7 +526,7 @@ namespace ME3TweaksCore.Helpers
                     }
 
                     p.StartInfo.Arguments = argsStr;
-                    p.StartInfo.Verb = "runas";
+                    p.StartInfo.Verb = @"runas";
                     p.Start();
                     if (waitForProcess)
                     {
@@ -583,7 +583,7 @@ namespace ME3TweaksCore.Helpers
                             }
 
                             p.StartInfo.Arguments = argsStr;
-                            p.StartInfo.Verb = "runas";
+                            p.StartInfo.Verb = @"runas";
                             p.Start();
                             if (waitForProcess)
                             {

@@ -1002,10 +1002,10 @@ namespace ME3TweaksCore.Targets
             return metamap;
         }
 
-        private const string ME1ASILoaderHash = "30660f25ab7f7435b9f3e1a08422411a";
-        private const string ME2ASILoaderHash = "a5318e756893f6232284202c1196da13";
-        private const string ME3ASILoaderHash = "1acccbdae34e29ca7a50951999ed80d5";
-        private const string LEASILoaderHash = "2026e1cb78b5c7d95477395ac8c9979a"; // Will need changed as game is updated // bink 2005 by d00t
+        private const string ME1ASILoaderHash = @"30660f25ab7f7435b9f3e1a08422411a";
+        private const string ME2ASILoaderHash = @"a5318e756893f6232284202c1196da13";
+        private const string ME3ASILoaderHash = @"1acccbdae34e29ca7a50951999ed80d5";
+        private const string LEASILoaderHash = @"2026e1cb78b5c7d95477395ac8c9979a"; // Will need changed as game is updated // bink 2005 by d00t
 
         /// <summary>
         /// Determines if the bink ASI loader/bypass is installed (both OT and LE)
@@ -1035,37 +1035,37 @@ namespace ME3TweaksCore.Targets
         public bool InstallBinkBypass()
         {
             var destPath = GetVanillaBinkPath();
-            Log.Information($"Installing Bink bypass for {Game} to {destPath}");
+            MLog.Information($@"Installing Bink bypass for {Game} to {destPath}");
             if (Game == MEGame.ME1)
             {
-                var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw32.dll", destPath, true);
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw23.dll", obinkPath, true);
+                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"binkw23.dll");
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw32.dll", destPath, true);
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw23.dll", obinkPath, true);
             }
             else if (Game == MEGame.ME2)
             {
-                var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw32.dll", destPath, true);
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw23.dll", obinkPath, true);
+                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"binkw23.dll");
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw32.dll", destPath, true);
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw23.dll", obinkPath, true);
 
             }
             else if (Game == MEGame.ME3)
             {
-                var obinkPath = Path.Combine(TargetPath, "Binaries", "win32", "binkw23.dll");
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw32.dll", destPath, true);
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw23.dll", obinkPath, true);
+                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"win32", @"binkw23.dll");
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw32.dll", destPath, true);
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw23.dll", obinkPath, true);
             }
             else if (Game.IsLEGame())
             {
-                var obinkPath = Path.Combine(TargetPath, "Binaries", "Win64", "bink2w64_original.dll"); // Where the original bink should go
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true);  // Bypass proxy
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
+                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"Win64", @"bink2w64_original.dll"); // Where the original bink should go
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true);  // Bypass proxy
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
             }
             else if (Game == MEGame.LELauncher)
             {
-                var obinkPath = Path.Combine(TargetPath, "bink2w64_original.dll"); // Where the original bink should go
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true);  // Bypass proxy
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
+                var obinkPath = Path.Combine(TargetPath, @"bink2w64_original.dll"); // Where the original bink should go
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true);  // Bypass proxy
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
             }
             else
             {
@@ -1085,36 +1085,36 @@ namespace ME3TweaksCore.Targets
             var binkPath = GetVanillaBinkPath();
             if (Game == MEGame.ME1)
             {
-                var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
+                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"binkw23.dll");
                 File.Delete(obinkPath);
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw23.dll", binkPath, true);
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw23.dll", binkPath, true);
             }
             else if (Game == MEGame.ME2)
             {
-                var obinkPath = Path.Combine(TargetPath, "Binaries", "binkw23.dll");
+                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"binkw23.dll");
                 File.Delete(obinkPath);
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw23.dll", binkPath, true);
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw23.dll", binkPath, true);
             }
             else if (Game == MEGame.ME3)
             {
-                var obinkPath = Path.Combine(TargetPath, "Binaries", "win32", "binkw23.dll");
+                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"win32", @"binkw23.dll");
                 File.Delete(obinkPath);
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw23.dll", binkPath, true);
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw23.dll", binkPath, true);
             }
             else if (Game.IsLEGame())
             {
-                var obinkPath = Path.Combine(TargetPath, "Binaries", "Win64", "bink2w64_original.dll");
+                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"Win64", @"bink2w64_original.dll");
                 File.Delete(obinkPath);
-                MUtilities.ExtractInternalFile("ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", binkPath, true);
+                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", binkPath, true);
             }
         }
 
         private string GetVanillaBinkPath()
         {
-            if (Game == MEGame.ME1 || Game == MEGame.ME2) return Path.Combine(TargetPath, "Binaries", "binkw32.dll");
-            if (Game == MEGame.ME3) return Path.Combine(TargetPath, "Binaries", "win32", "binkw32.dll");
-            if (Game.IsLEGame()) return Path.Combine(TargetPath, "Binaries", "Win64", "bink2w64.dll");
-            if (Game == MEGame.LELauncher) return Path.Combine(TargetPath, "bink2w64.dll");
+            if (Game == MEGame.ME1 || Game == MEGame.ME2) return Path.Combine(TargetPath, @"Binaries", @"binkw32.dll");
+            if (Game == MEGame.ME3) return Path.Combine(TargetPath, @"Binaries", @"win32", @"binkw32.dll");
+            if (Game.IsLEGame()) return Path.Combine(TargetPath, @"Binaries", @"Win64", @"bink2w64.dll");
+            if (Game == MEGame.LELauncher) return Path.Combine(TargetPath, @"bink2w64.dll");
             return null;
         }
     }

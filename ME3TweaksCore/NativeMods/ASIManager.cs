@@ -177,7 +177,7 @@ namespace ME3TweaksCore.NativeMods
                 case 6:
                     return MEGame.LE3;
                 default:
-                    throw new Exception($"Unsupported game id in manifest: {i}");
+                    throw new Exception($"Unsupported game id in asi manifest: {i}");
             }
         }
 

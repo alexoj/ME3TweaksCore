@@ -29,7 +29,7 @@ namespace ME3TweaksCore.Diagnostics
         {
             if (shouldLog)
             {
-                Log.Information($"{LoggingPrefix}{message}");
+                Log.Information($@"{LoggingPrefix}{message}");
             }
         }
 
@@ -43,7 +43,7 @@ namespace ME3TweaksCore.Diagnostics
         {
             if (shouldLog)
             {
-                Log.Warning($"{LoggingPrefix}{message}");
+                Log.Warning($@"{LoggingPrefix}{message}");
             }
         }
 
@@ -57,7 +57,7 @@ namespace ME3TweaksCore.Diagnostics
         {
             if (shouldLog)
             {
-                Log.Error($"{prefix ?? LoggingPrefix}{message}");
+                Log.Error($@"{prefix ?? LoggingPrefix}{message}");
             }
         }
 
@@ -71,7 +71,7 @@ namespace ME3TweaksCore.Diagnostics
         {
             if (shouldLog)
             {
-                Log.Error($"{LoggingPrefix}{ex.FlattenException()}");
+                Log.Error($@"{LoggingPrefix}{ex.FlattenException()}");
             }
         }
 
@@ -85,7 +85,7 @@ namespace ME3TweaksCore.Diagnostics
         {
             if (shouldLog)
             {
-                Log.Fatal($"{prefix ?? LoggingPrefix}{message}");
+                Log.Fatal($@"{prefix ?? LoggingPrefix}{message}");
             }
         }
 
@@ -100,7 +100,7 @@ namespace ME3TweaksCore.Diagnostics
 
         public static void Exception(Exception exception, string preMessage, bool fatal = false)
         {
-            Log.Error($"{LoggingPrefix}{preMessage}");
+            Log.Error($@"{LoggingPrefix}{preMessage}");
 
             // Log exception
             while (exception != null)

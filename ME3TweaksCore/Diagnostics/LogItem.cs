@@ -20,7 +20,7 @@ namespace ME3TweaksCore.Diagnostics
         {
             if (!Selectable)
                 return filepath; // Do nothing on this.
-            return $"{Path.GetFileName(filepath)} - {FileSize.FormatSize(new FileInfo(filepath).Length)}";
+            return $@"{Path.GetFileName(filepath)} - {FileSize.FormatSize(new FileInfo(filepath).Length)}";
         }
     }
 }

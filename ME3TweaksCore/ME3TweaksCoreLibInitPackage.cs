@@ -133,7 +133,7 @@ namespace ME3TweaksCore
                 MExtendedClassGenerators.GenerateUnknownInstalledASIMod = GenerateUnknownInstalledASIModDelegate;
         }
 
-        [Conditional("DEBUG")]
+        [Conditional(@"DEBUG")]
         private void CheckOptions()
         {
             OptionNotSetCheck(RunOnUiThreadDelegate, nameof(RunOnUiThreadDelegate));
@@ -153,7 +153,7 @@ namespace ME3TweaksCore
                 OptionNotSetCheck(AuxiliaryCombinedOnlineServicesEndpoint, nameof(AuxiliaryCombinedOnlineServicesEndpoint));
         }
 
-        [Conditional("DEBUG")]
+        [Conditional(@"DEBUG")]
         private void OptionNotSetCheck(object obj, string optionName)
         {
             if (obj == null)

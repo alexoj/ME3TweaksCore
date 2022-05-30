@@ -21,7 +21,7 @@ namespace ME3TweaksCoreWPF.UI
                 case MTaskbarState.Progressing:
                     return TaskbarProgressBarState.Normal;
                 default:
-                    throw new Exception($"MTaskBarState: Undefined conversion from {taskbarState} to WPF");
+                    throw new Exception($@"MTaskBarState: Undefined conversion from {taskbarState} to WPF");
             }
         }
     }

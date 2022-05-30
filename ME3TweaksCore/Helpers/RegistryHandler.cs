@@ -38,14 +38,15 @@ namespace ME3TweaksCore.Helpers
             int i = 0;
             List<string> subkeys = subpath.Split('\\').ToList();
             RegistryKey subkey;
-            if (subkeys[0] == "HKEY_CURRENT_USER")
+            if (subkeys[0] == @"HKEY_CURRENT_USER")
             {
                 subkeys.RemoveAt(0);
                 subkey = Registry.CurrentUser;
             }
             else
             {
-                throw new Exception("Currently only HKEY_CURRENT_USER keys are supported for writing.");
+                // This is dev only so we don't localize it
+                throw new Exception(@"Currently only HKEY_CURRENT_USER keys are supported for writing.");
             }
 
             while (i < subkeys.Count)
@@ -77,15 +78,15 @@ namespace ME3TweaksCore.Helpers
         /// <param name="valuename"></param>
         public static void DeleteRegistryKey(string fullkeypath, string valuename)
         {
-            if (fullkeypath.StartsWith("HKEY_"))
+            if (fullkeypath.StartsWith(@"HKEY_"))
             {
-                if (!fullkeypath.StartsWith("HKEY_CURRENT_USER\\"))
+                if (!fullkeypath.StartsWith(@"HKEY_CURRENT_USER\"))
                 {
-                    throw new Exception("Cannot delete registry keys outside of HKEY_CURRENT_USER!");
+                    throw new Exception(@"Cannot delete registry keys outside of HKEY_CURRENT_USER!");
                 }
                 else
                 {
-                    fullkeypath = fullkeypath.Substring(fullkeypath.IndexOf("\\") + 1);
+                    fullkeypath = fullkeypath.Substring(fullkeypath.IndexOf('\\') + 1);
                 }
             }
 

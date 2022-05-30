@@ -82,7 +82,7 @@ namespace ME3TweaksCore.Services
             }
             else
             {
-                Debug.WriteLine("Downloading to memory: " + url);
+                Debug.WriteLine(@"Downloading to memory: " + url);
             }
 
             try
@@ -107,8 +107,7 @@ namespace ME3TweaksCore.Services
             if (md5 != hash)
             {
                 responseStream = null;
-                downloadError =
-                    $"Hash of downloaded item ({url}) does not match expected hash. Expected: {hash}, got: {md5}"; //needs localized
+                downloadError = $"Hash of downloaded item ({url}) does not match expected hash. Expected: {hash}, got: {md5}";
             }
 
             return (responseStream, downloadError);

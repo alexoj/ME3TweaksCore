@@ -81,7 +81,7 @@ namespace ME3TweaksCore.Helpers
         /// </summary>
         public static async void PerformGithubAppUpdateCheck(AppUpdateInteropPackage interopPackage)
         {
-            MLog.Information($"Checking for application updates from github. Mode: {(interopPackage.AllowPrereleaseBuilds ? "Beta" : "Stable")}");
+            MLog.Information($@"Checking for application updates from github. Mode: {(interopPackage.AllowPrereleaseBuilds ? @"Beta" : @"Stable")}");
             var currentAppVersionInfo = MLibraryConsumer.GetAppVersion();
             var client = new GitHubClient(new ProductHeaderValue(interopPackage.RequestHeader));
             try
@@ -90,11 +90,11 @@ namespace ME3TweaksCore.Helpers
                 var releases = client.Repository.Release.GetAll(interopPackage.GithubOwner, interopPackage.GithubReponame).Result;
                 if (releases.Count > 0)
                 {
-                    MLog.Information("Fetched application releases from github");
+                    MLog.Information(@"Fetched application releases from github");
 
                     //The release we want to check is always the latest
                     Release latest = null;
-                    Version latestVer = new Version("0.0.0.0");
+                    Version latestVer = new Version(@"0.0.0.0");
                     bool betaAvailableButOnStable = false;
                     foreach (Release onlineRelease in releases)
                     {
@@ -133,13 +133,13 @@ namespace ME3TweaksCore.Helpers
 
                     if (latest != null)
                     {
-                        MLog.Information("Latest available applicable update: " + latest.TagName);
+                        MLog.Information(@"Latest available applicable update: " + latest.TagName);
                         Version releaseName = new Version(latest.TagName);
                         if (currentAppVersionInfo < releaseName)
                         {
                             bool upgrade = false;
                             bool canCancel = true;
-                            MLog.Information("Latest release is applicable to us.");
+                            MLog.Information(@"Latest release is applicable to us.");
                             if (interopPackage.ForcedUpgradeMaxReleaseAge > 0 && myReleaseAge > interopPackage.ForcedUpgradeMaxReleaseAge)
                             {
                                 MLog.Warning("This is an old release. We are force upgrading the application.");
@@ -173,12 +173,12 @@ namespace ME3TweaksCore.Helpers
 
                                 var message = latest.Body;
                                 var msgLines = latest.Body.Split('\n');
-                                message = string.Join('\n', msgLines.Where(x => !x.StartsWith("hash: "))).Trim();
+                                message = string.Join('\n', msgLines.Where(x => !x.StartsWith(@"hash: "))).Trim();
                                 upgrade = interopPackage.ShowUpdatePromptCallback != null && interopPackage.ShowUpdatePromptCallback.Invoke(title, $"You are currently using version {currentAppVersionInfo}.{uiVersionInfo}\n\n{message}", "Update", "Later");
                             }
                             if (upgrade)
                             {
-                                MLog.Information("Downloading update for application");
+                                MLog.Information(@"Downloading update for application");
                                 //there's an update
                                 string message = $"Downloading update for {interopPackage.ApplicationName}...";
                                 if (!canCancel)
@@ -244,14 +244,14 @@ namespace ME3TweaksCore.Helpers
                             }
                             else
                             {
-                                MLog.Warning("Application update was declined by user");
-                                interopPackage.ShowMessageCallback?.Invoke("Old versions are not supported", $"Outdated versions of {interopPackage.ApplicationName} Installer are not supported and may not work in the future.");
+                                MLog.Warning(@"Application update was declined by user");
+                                interopPackage.ShowMessageCallback?.Invoke("Old versions are not supported", $"Outdated versions of {interopPackage.ApplicationName} are not supported and may not work in the future.");
                             }
                         }
                         else
                         {
                             //up to date
-                            MLog.Information("Application is up to date.");
+                            MLog.Information(@"Application is up to date.");
                             interopPackage.NotifyBetaAvailable?.Invoke(); // Beta is available but we are on Stable
                         }
                     }
@@ -259,7 +259,7 @@ namespace ME3TweaksCore.Helpers
             }
             catch (Exception e)
             {
-                MLog.Error("Error checking for update: " + e);
+                MLog.Error(@"Error checking for update: " + e);
             }
         }
 
@@ -277,7 +277,7 @@ namespace ME3TweaksCore.Helpers
                 if (destMd5.Length != 32)
                 {
                     MLog.Warning(
-                        $"Release {latestRelease.TagName} has invalid hash length in body, cannot use patch update strategy");
+                        $@"Release {latestRelease.TagName} has invalid hash length in body, cannot use patch update strategy");
                     return false; //no hash
                 }
 
@@ -287,7 +287,7 @@ namespace ME3TweaksCore.Helpers
                 var localExecutableHash = MUtilities.CalculateMD5(MLibraryConsumer.GetExecutablePath());
 
                 // Find applicable patch
-                foreach (var asset in latestRelease.Assets.Where(x => x.Name.StartsWith("upd-")))
+                foreach (var asset in latestRelease.Assets.Where(x => x.Name.StartsWith(@"upd-")))
                 {
                     var updateinfo = asset.Name.Split(@"-");
                     if (updateinfo.Length >= 4)
@@ -340,12 +340,12 @@ namespace ME3TweaksCore.Helpers
                 }
                 else
                 {
-                    MLog.Warning($"No patch is applicable to bridge our current hash {localExecutableHash} to the destination hash {destMd5}");
+                    MLog.Warning($@"No patch is applicable to bridge our current hash {localExecutableHash} to the destination hash {destMd5}");
                 }
             }
             else
             {
-                MLog.Warning($"Release {latestRelease.TagName} is missing hash in body, cannot use patch update strategy");
+                MLog.Warning($@"Release {latestRelease.TagName} is missing hash in body, cannot use patch update strategy");
                 return false; //no hash
             }
             return false;
@@ -374,7 +374,7 @@ namespace ME3TweaksCore.Helpers
                     MLog.Information(@"Patch application successful: Writing new executable to disk");
                     var outDirectory = Directory.CreateDirectory(Path.Combine(MCoreFilesystem.GetTempDirectory(), @"update"))
                         .FullName;
-                    var updateFile = Path.Combine(outDirectory, $"{MLibraryConsumer.GetHostingProcessname()}.exe");
+                    var updateFile = Path.Combine(outDirectory, $@"{MLibraryConsumer.GetHostingProcessname()}.exe");
                     outStream.WriteToFile(updateFile);
 
                     if (long.TryParse(fileTimestamp, out var buildDateLong) && buildDateLong > 0)
@@ -468,7 +468,7 @@ namespace ME3TweaksCore.Helpers
 
             setDialogText?.Invoke($"Restarting application");
             Thread.Sleep(2000);
-            args = $"--update-dest-path \"{MLibraryConsumer.GetExecutablePath()}\"";
+            args = $"--update-dest-path \"{MLibraryConsumer.GetExecutablePath()}\""; //do not localize
             MLog.Information($@"Running proxy update: {newExecutable} {args}");
 
             process = new Process();

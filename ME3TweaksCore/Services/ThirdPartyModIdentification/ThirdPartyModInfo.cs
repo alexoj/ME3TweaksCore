@@ -40,9 +40,10 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
         /// </summary>
         public bool IsSelected { get; set; }
 
-        public bool PreventImport => preventimport == "1" ? true : false;
+        public bool PreventImport => preventimport == @"1" ? true : false;
 
-        public string StarterKitString => $"{MountPriorityInt} - {modname}{(modulenumber != null ? " - Module # " + modulenumber : "")}"; //not worth localizing
+        // Not worth localizing.
+        public string StarterKitString => $"{MountPriorityInt} - {modname}{(modulenumber != null ? " - Module # " + modulenumber : "")}"; // do not localize
         #endregion
     }
 }

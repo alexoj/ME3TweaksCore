@@ -67,7 +67,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 
         private static void LoadDatabase(bool local, Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> database, JToken serverData = null)
         {
-            var typeStr = local ? "Local" : "ME3Tweaks";
+            var typeStr = local ? @"Local" : @"ME3Tweaks";
             var file = local ? MCoreFilesystem.GetLocalBasegameIdentificationServiceFile() : GetME3TweaksServiceCacheFile();
             if (File.Exists(file))
             {

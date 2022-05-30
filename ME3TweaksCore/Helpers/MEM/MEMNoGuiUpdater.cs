@@ -50,14 +50,14 @@ namespace ME3TweaksCore.Helpers.MEM
 
             try
             {
-                MLog.Information("Checking for updates to MassEffectModderNoGui. The local version is " + memVersion);
+                MLog.Information(@"Checking for updates to MassEffectModderNoGui. The local version is " + memVersion);
                 if (bypassSoakGate)
                 {
-                    MLog.Information("Beta mode enabled, will include prerelease builds");
+                    MLog.Information(@"Beta mode enabled, will include prerelease builds");
                 }
-                var client = new GitHubClient(new ProductHeaderValue("ALOTInstaller"));
-                var releases = client.Repository.Release.GetAll("MassEffectModder", "MassEffectModder").Result;
-                MLog.Information("Fetched MEMNOGui releases from github...");
+                var client = new GitHubClient(new ProductHeaderValue(@"METweaksCore"));
+                var releases = client.Repository.Release.GetAll(@"MassEffectModder", @"MassEffectModder").Result;
+                MLog.Information(@"Fetched MEMNOGui releases from github...");
                 if (classicMEM && memVersion >= 500)
                 {
                     // Force downgrade
@@ -111,7 +111,7 @@ namespace ME3TweaksCore.Helpers.MEM
                                     int soakTestReleaseAge = (comparisonAge).Days;
                                     if (soakTestReleaseAge >= SoakThresholds.Length)
                                     {
-                                        MLog.Information("New MassEffectModderNoGui update is past soak period, accepting this release as an update");
+                                        MLog.Information(@"New MassEffectModderNoGui update is past soak period, accepting this release as an update");
                                         latestReleaseWithApplicableAsset = r;
                                         break;
                                     }
@@ -121,12 +121,12 @@ namespace ME3TweaksCore.Helpers.MEM
                                     //Soak gating
                                     if (applicableAsset.DownloadCount > soakThreshold)
                                     {
-                                        MLog.Information($"New MassEffectModderNoGui update is soak testing and has reached the daily soak threshold of {soakThreshold}. This update is not applicable to us today, threshold will expand tomorrow.");
+                                        MLog.Information($@"New MassEffectModderNoGui update is soak testing and has reached the daily soak threshold of {soakThreshold}. This update is not applicable to us today, threshold will expand tomorrow.");
                                         continue;
                                     }
                                     else
                                     {
-                                        MLog.Information("New MassEffectModderNoGui update is available and soaking, this client will participate in this soak test.");
+                                        MLog.Information(@"New MassEffectModderNoGui update is available and soaking, this client will participate in this soak test.");
                                         latestReleaseWithApplicableAsset = r;
                                         break;
                                     }
@@ -135,20 +135,20 @@ namespace ME3TweaksCore.Helpers.MEM
                                 // Check if this build is approved for stable
                                 if (!bypassSoakGate && releaseNameInt > HighestSupportedMEMVersion)
                                 {
-                                    MLog.Information("New MassEffectModderNoGui update is available, but is not yet approved for stable channel: " + releaseNameInt);
+                                    MLog.Information(@"New MassEffectModderNoGui update is available, but is not yet approved for stable channel: " + releaseNameInt);
                                     continue;
                                 }
 
                                 if (releaseNameInt > memVersion)
                                 {
-                                    MLog.Information($"New MassEffectModderNoGui update is available: {releaseNameInt}");
+                                    MLog.Information($@"New MassEffectModderNoGui update is available: {releaseNameInt}");
                                     latestReleaseWithApplicableAsset = r;
                                     break;
                                 }
                             }
                             else if (releaseNameInt <= memVersion)
                             {
-                                MLog.Information("Latest release that is available and has been approved for use is v" + releaseNameInt + " - no update available for us");
+                                MLog.Information(@"Latest release that is available and has been approved for use is v" + releaseNameInt + " - no update available for us");
                                 break;
                             }
                         }
@@ -157,29 +157,29 @@ namespace ME3TweaksCore.Helpers.MEM
                     //No local version, no latest, but we have asset available somehwere
                     if (memVersion == 0 && latestReleaseWithApplicableAsset == null)
                     {
-                        MLog.Information("MassEffectModderNoGui does not exist locally, and no applicable version can be found, force pulling latest from github");
+                        MLog.Information(@"MassEffectModderNoGui does not exist locally, and no applicable version can be found, force pulling latest from github");
                         latestReleaseWithApplicableAsset = releases.FirstOrDefault(x => getApplicableAssetForPlatform(x) != null);
                     }
                     else if (memVersion == 0 && latestReleaseWithApplicableAsset == null)
                     {
                         //No local version, and we have no server version
-                        MLog.Error("Cannot pull a copy of MassEffectModderNoGui from server, could not find one with assets. ME3TweaksCore may not work properly!");
+                        MLog.Error(@"Cannot pull a copy of MassEffectModderNoGui from server, could not find one with assets. ME3TweaksCore may not work properly!");
                         return false;
                     }
                     else if (memVersion == 0)
                     {
-                        MLog.Information("MassEffectModderNoGui does not exist locally. Pulling a copy from Github.");
+                        MLog.Information(@"MassEffectModderNoGui does not exist locally. Pulling a copy from Github.");
                     }
 
                     if (latestReleaseWithApplicableAsset != null)
                     {
                         ReleaseAsset asset = getApplicableAssetForPlatform(latestReleaseWithApplicableAsset);
-                        MLog.Information("MassEffectModderNoGui update available: " + latestReleaseWithApplicableAsset.TagName);
+                        MLog.Information("@MassEffectModderNoGui update available: " + latestReleaseWithApplicableAsset.TagName);
                         //there's an update
                         var downloadClient = new WebClient();
-                        downloadClient.Headers["Accept"] = "application/vnd.github.v3+json";
-                        downloadClient.Headers["user-agent"] = MCoreFilesystem.AppDataFolderName; // Use the appdata folder name as the user agent
-                        string downloadPath = Path.Combine(MCoreFilesystem.GetTempDirectory(), "MEM_Update" + Path.GetExtension(asset.BrowserDownloadUrl));
+                        downloadClient.Headers[@"Accept"] = @"application/vnd.github.v3+json";
+                        downloadClient.Headers[@"user-agent"] = MCoreFilesystem.AppDataFolderName; // Use the appdata folder name as the user agent
+                        string downloadPath = Path.Combine(MCoreFilesystem.GetTempDirectory(), @"MEM_Update" + Path.GetExtension(asset.BrowserDownloadUrl));
                         DownloadHelper.DownloadFile(new Uri(asset.BrowserDownloadUrl), downloadPath, (bytesReceived, totalBytes) =>
                         {
                             downloadProgressChanged?.Invoke(bytesReceived, totalBytes);
@@ -187,24 +187,24 @@ namespace ME3TweaksCore.Helpers.MEM
 
                         // Handle unzip code here.
                         statusMessageUpdate?.Invoke("Extracting MassEffectModderNoGui");
-                        if (Path.GetExtension(downloadPath) == ".7z")
+                        if (Path.GetExtension(downloadPath) == @".7z")
                         {
                             var res = LZMA.ExtractSevenZipArchive(downloadPath, MCoreFilesystem.GetTempDirectory(), true);
                             if (!res)
                             {
-                                MLog.Error("ERROR EXTRACTING 7z MASSEFFECMODDERNOGUI!!");
+                                MLog.Error(@"ERROR EXTRACTING 7z MASSEFFECMODDERNOGUI!!");
                                 return false;
                             }
 
                             // Copy into place. 
-                            var sourceFile = Path.Combine(MCoreFilesystem.GetTempDirectory(), "MassEffectModderNoGui.exe");
+                            var sourceFile = Path.Combine(MCoreFilesystem.GetTempDirectory(), @"MassEffectModderNoGui.exe");
                             if (File.Exists(MCoreFilesystem.GetMEMNoGuiPath(classicMEM))) File.Delete(MCoreFilesystem.GetMEMNoGuiPath(classicMEM));
                             File.Move(sourceFile, MCoreFilesystem.GetMEMNoGuiPath(classicMEM));
                         }
-                        else if (Path.GetExtension(downloadPath) == ".zip")
+                        else if (Path.GetExtension(downloadPath) == @".zip")
                         {
                             var zf = ZipFile.OpenRead(downloadPath);
-                            var zipEntry = zf.Entries.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x.FullName) == "MassEffectModderNoGui");
+                            var zipEntry = zf.Entries.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x.FullName) == @"MassEffectModderNoGui");
                             if (zipEntry != null)
                             {
                                 if (File.Exists(MCoreFilesystem.GetMEMNoGuiPath(classicMEM))) File.Delete(MCoreFilesystem.GetMEMNoGuiPath(classicMEM));
@@ -215,7 +215,7 @@ namespace ME3TweaksCore.Helpers.MEM
 #if LINUX
                                 Utilities.MakeFileExecutable(Locations.MEMPath());
 #endif
-                                MLog.Information($"Updated MassEffectModderNoGui to version {MEMIPCHandler.GetMemVersion(true)}");
+                                MLog.Information($@"Updated MassEffectModderNoGui to version {MEMIPCHandler.GetMemVersion(true)}");
                             }
                             else
                             {
@@ -227,13 +227,13 @@ namespace ME3TweaksCore.Helpers.MEM
                     else
                     {
                         //up to date
-                        MLog.Information("No updates for MassEffectModderNoGui are available");
+                        MLog.Information(@"No updates for MassEffectModderNoGui are available");
                     }
                 }
             }
             catch (Exception e)
             {
-                MLog.Exception(e, "An error occurred running MassEffectModderNoGui updater: ");
+                MLog.Exception(e, @"An error occurred running MassEffectModderNoGui updater: ");
                 exceptionUpdating?.Invoke(e);
                 return false;
             }
@@ -265,11 +265,11 @@ namespace ME3TweaksCore.Helpers.MEM
             foreach (var a in r.Assets)
             {
 #if WINDOWS
-                if (a.Name.StartsWith("MassEffectModderNoGui-v")) return a;
+                if (a.Name.StartsWith(@"MassEffectModderNoGui-v")) return a;
 #elif LINUX
-                if (a.Name.StartsWith("MassEffectModderNoGui-Linux-v")) return a;
+                if (a.Name.StartsWith(@"MassEffectModderNoGui-Linux-v")) return a;
 #elif MACOS
-                if (a.Name.StartsWith("MassEffectModderNoGui-macOS-v")) return a;
+                if (a.Name.StartsWith(@"MassEffectModderNoGui-macOS-v")) return a;
 #endif
             }
 

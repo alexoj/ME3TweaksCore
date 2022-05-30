@@ -892,17 +892,17 @@ namespace ME3TweaksCore.Diagnostics
                     args = $@"--detect-bad-mods --gameid {gameID} --ipc";
                     var blacklistedMods = new List<string>();
                     MEMIPCHandler.RunMEMIPCUntilExit(package.DiagnosticTarget.Game.IsOTGame(), args, setMEMCrashLog: memExceptionOccured, ipcCallback: (string command, string param) =>
-                     {
-                         switch (command)
-                         {
-                             case @"ERROR":
-                                 blacklistedMods.Add(param);
-                                 break;
-                             default:
-                                 Debug.WriteLine(@"oof?");
-                                 break;
-                         }
-                     }, applicationExited: x => exitcode = x);
+                    {
+                        switch (command)
+                        {
+                            case @"ERROR":
+                                blacklistedMods.Add(param);
+                                break;
+                            default:
+                                Debug.WriteLine(@"oof?");
+                                break;
+                        }
+                    }, applicationExited: x => exitcode = x);
 
                     if (exitcode != 0)
                     {
@@ -1386,7 +1386,7 @@ namespace ME3TweaksCore.Diagnostics
                 if (package.DiagnosticTarget.Game.IsLEGame())
                 {
                     MLog.Information(@"Collecting ASI log files");
-                    package.UpdateStatusCallback?.Invoke("Collecting ASI log files");
+                    package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingASILogFiles));
 
                     var logFiles = GetASILogs(package.DiagnosticTarget);
                     addDiagLine(@"ASI log files", Severity.DIAGSECTION);

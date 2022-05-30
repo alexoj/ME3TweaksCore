@@ -15,7 +15,7 @@ namespace ME3TweaksCore.Helpers
         /// <summary>
         /// The appdata folder for ME3TweaksCore. Change this if you want to segregate your consuming application's data from other instances. CHANGE THIS BEFORE BOOTING THE LIBRARY.
         /// </summary>
-        public static string AppDataFolderName { get; set; } = "ME3TweaksCore";
+        public static string AppDataFolderName { get; set; } = @"ME3TweaksCore";
 
         /// <summary>
         /// The delegate declaration for GetAppDataFolder.
@@ -46,7 +46,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         internal static string GetDllDirectory()
         {
-            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "dlls")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), @"dlls")).FullName;
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string GetME3TweaksServicesCache()
         {
-            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "ME3TweaksServicesCache")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), @"ME3TweaksServicesCache")).FullName;
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string GetLocalBasegameIdentificationServiceFile()
         {
-            return Path.Combine(GetME3TweaksServicesCache(), "localbasegamefileidentificationservice.json");
+            return Path.Combine(GetME3TweaksServicesCache(), @"localbasegamefileidentificationservice.json");
         }
 
         /// <summary>
@@ -73,12 +73,12 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string GetME3TweaksBasegameFileIdentificationServiceFile()
         {
-            return Path.Combine(GetME3TweaksServicesCache(), "me3tweaksbasegamefileidentificationservice.json");
+            return Path.Combine(GetME3TweaksServicesCache(), @"me3tweaksbasegamefileidentificationservice.json");
         }
 
         public static string GetThirdPartyIdentificationCachedFile()
         {
-            return Path.Combine(GetME3TweaksServicesCache(), "thirdpartyidentificationservice.json");
+            return Path.Combine(GetME3TweaksServicesCache(), @"thirdpartyidentificationservice.json");
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         internal static string GetMEMDir()
         {
-            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "MassEffectModder")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), @"MassEffectModder")).FullName;
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string GetTempDirectory()
         {
-            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "Temp")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), @"Temp")).FullName;
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string GetCachedExecutablesDirectory()
         {
-            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "CachedExecutables")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), @"CachedExecutables")).FullName;
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string GetLogDir()
         {
-            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), "logs")).FullName;
+            return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), @"logs")).FullName;
         }
         
         /// <summary>
@@ -145,8 +145,8 @@ namespace ME3TweaksCore.Helpers
         internal static string GetMEMEXEName(bool classicMem)
         {
             if (classicMem)
-                return "MassEffectModderNoGui.exe";
-            return "MassEffectModderNoGui_LE.exe";
+                return @"MassEffectModderNoGui.exe";
+            return @"MassEffectModderNoGui_LE.exe";
         }
     }
 }

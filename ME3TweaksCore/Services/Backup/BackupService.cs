@@ -51,7 +51,7 @@ namespace ME3TweaksCore.Services.Backup
         /// <summary>
         /// Vanilla backup marker filename
         /// </summary>
-        public const string CMM_VANILLA_FILENAME = "cmm_vanilla";
+        public const string CMM_VANILLA_FILENAME = @"cmm_vanilla";
 
         /// <summary>
         /// Initializes the backup service.
@@ -187,10 +187,10 @@ namespace ME3TweaksCore.Services.Backup
             var gbPath = BackupService.GetGameBackupPath(meGame, forceReturnPath: true);
             if (gbPath != null)
             {
-                var cmmVanilla = Path.Combine(gbPath, "cmm_vanilla");
+                var cmmVanilla = Path.Combine(gbPath, CMM_VANILLA_FILENAME);
                 if (File.Exists(cmmVanilla))
                 {
-                    MLog.Information("Deleting cmm_vanilla file: " + cmmVanilla);
+                    MLog.Information($@"Deleting {CMM_VANILLA_FILENAME} file: {cmmVanilla}");
                     File.Delete(cmmVanilla);
                 }
             }
@@ -312,7 +312,7 @@ namespace ME3TweaksCore.Services.Backup
 
         public static bool HasGameEverBeenBackedUp(MEGame game)
         {
-            return MSharedSettings.GetSettingString($"{game}VanillaBackupLocation") != null;
+            return MSharedSettings.GetSettingString($@"{game}VanillaBackupLocation") != null;
         }
 
         public static void UpdateBackupStatus(MEGame game)

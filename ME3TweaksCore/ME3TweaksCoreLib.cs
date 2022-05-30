@@ -41,7 +41,7 @@ namespace ME3TweaksCore
         /// <summary>
         /// The CoreLibrary version, in Human Readable form.
         /// </summary>
-        public static string CoreLibVersionHR => $"ME3TweaksCore {CoreLibVersion}"; // Needs checked this outputs proper string.
+        public static string CoreLibVersionHR => $@"ME3TweaksCore {CoreLibVersion}"; // Needs checked this outputs proper string.
 
         /// <summary>
         /// Initial initialization function for the library. You must call this function before using the library, otherwise it may not reliably work.

@@ -45,7 +45,7 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
 #if (!WINDOWS && DEBUG)
         // running process will be 'dotnet' in this mode
-        public static string GetHostingProcessname() => "ME3TweaksCore";
+        public static string GetHostingProcessname() => @"ME3TweaksCore";
 #else
         public static string GetHostingProcessname() => Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.ModuleName);
 #endif

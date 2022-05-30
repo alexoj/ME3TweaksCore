@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
@@ -15,6 +16,7 @@ namespace ME3TweaksCore.Localization
     /// <summary>
     /// Localization Core for ME3Tweaks Core
     /// </summary>
+    [Localizable(false)]
     public partial class LC
     {
         private static string CurrentLanguage;
@@ -113,7 +115,9 @@ namespace ME3TweaksCore.Localization
             catch (Exception e)
             {
                 MLog.Error($@"Error fetching string with key {resourceKey}: {e.ToString()}.");
-                return $@"Error fetching string with key {resourceKey}: {e.ToString()}! Please report this to the developer";
+                TelemetryInterposer.TrackError(e, new Dictionary<string, string>() { { @"Key", resourceKey } });
+                // String can't be localized, so use hardcoded
+                return $"Error fetching string with key {resourceKey}: {e.ToString()}! Please report this to the developer"; // do not localize
             }
         }
 
@@ -124,6 +128,7 @@ namespace ME3TweaksCore.Localization
                 return foundString;
             }
 
+            TelemetryInterposer.TrackEvent("M3C NonLocalized String", new Dictionary<string, string>() { { @"Key", resourceKey } });
             return null;
         }
     }
