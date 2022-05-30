@@ -386,8 +386,6 @@
     <system:String x:Key="string_dialogTheFollowingDLCAreInAnInconsistentState">The following DLC are in an inconsistent state; they have a packed SFAR file but contain unpacked game files. The configuration of these DLC are not supported, the unpacked files must be manually removed.</system:String>
     <system:String x:Key="string_dlcModsAreInstalled">DLC mods are installed</system:String>
     <system:String x:Key="string_dialogDLCModsWereDetectedCannotBackup">The following DLC folders were detected that are not part of the official game by BioWare. Backups cannot include DLC mods - the game must be unmodified.</system:String>
-    <system:String x:Key="string_backedUp">Backed up</system:String>
-    <system:String x:Key="string_notBackedUp">Not backed up</system:String>
     <system:String x:Key="string_inconsistentDLCDetectedUnofficialGame">Inconsistent DLC was detected. This may be due to using an unofficial copy of the game.</system:String>
     <system:String x:Key="string_movies">Movies</system:String>
     <system:String x:Key="string_basegame">Basegame</system:String>
@@ -413,7 +411,6 @@
     <system:String x:Key="string_leftoverTextureFilesFound">Leftover texture files found</system:String>
     <system:String x:Key="string_dialog_foundLeftoverTextureFiles">Additional files from a previous texture installation were found. A backup cannot be taken with leftover texture files in the game directory. This is a sign the game directory was not fully deleted when restoring the game to vanilla.\n\nYou should delete your entire game directory, install the game fresh, and then take the backup.</system:String>
     <system:String  x:Key="string_tooltip_unlinkBackupButton">Converts the backup to a regular installation and makes modding tools no longer think there is a backup for this game</system:String>
-    <system:String  x:Key="string_unlinkBackup">Unlink backup</system:String>
     <system:String xml:space="preserve" x:Key="string_dialog_unlinkingBackup">Unlinking your backup for {0} will make modding programs, including Legendary Explorer, ALOT Installer, and ME3Tweaks Mod Manager unable to find a backup for this game. These programs use this backup for various features. Unlinking a backup will not delete your existing backup. You can link to another existing backup once you've unlinked this one.\n\nBackup Path: {1}\n\nUnlink your backup for {0}?</system:String>
     <!-- 0=game name (e.g. Mass Effect 2) 1=Backup file path -->
     <system:String x:Key="string_unlinkingBackup">Unlinking backup</system:String>
@@ -583,13 +580,11 @@
     <system:String x:Key="string_interp_dialogCannotRestoreXWhileItIsRunning">Cannot restore {0} while it is running.</system:String>
     <!-- 0 = game name-->
     <system:String x:Key="string_backup">Backup</system:String>
-    <system:String x:Key="string_deletingExistingGameInstallation">Deleting existing game installation</system:String>
     <system:String x:Key="string_restoringGameFromBackup">Restoring game from backup</system:String>
     <system:String x:Key="string_interp_restoringXpercent">Restoring {0}%</system:String>
     <!-- 0 = number -->
     <system:String x:Key="string_interp_restoringX">Restoring {0}</system:String>
     <!-- 0 = filename or item like DLC name -->
-    <system:String x:Key="string_restoringMovies">Restoring Movies</system:String>
     <system:String x:Key="string_restoringBasegame">Restoring Basegame</system:String>
     <system:String x:Key="string_restoringGame">Restoring game</system:String>
     <system:String x:Key="string_dialogCouldNotCreateGameDirectoryAfterDeletion">Could not create the game directory after it was deleted due to an error. You can try to restore to a custom location to restore the game to the original location. View the logs from the help menu for more information.</system:String>
@@ -674,8 +669,6 @@
 
     <!--  Backup Service -->
     <system:String x:Key="string_interp_backupStatusStoredAt">Backup stored at {0}</system:String>
-    <system:String x:Key="string_gameHasNotBeenBackedUp">Game has not been backed up</system:String>
-    <system:String x:Key="string_backupUnavailable">Backup unavailable</system:String>
     <system:String xml:space="preserve" x:Key="string_interp_backupStatusNotAccessible">Backup stored at {0}\nBackup path is not accessible, was the folder renamed or moved?</system:String>
     <!-- 0={Backup Path} -->
     <system:String x:Key="string_backupNotVanilla">Backup not vanilla</system:String>
@@ -737,4 +730,102 @@
     <system:String x:Key="string_loaderInstalled">Loader installed</system:String>
     <system:String x:Key="string_aSILoaderInstalledASIModsWillLoad">ASI loader installed. ASI mods will load</system:String>
     <system:String x:Key="string_aSILoaderNotInstalledASIModsWillNotLoad">ASI loader not installed. ASI mods will not load</system:String>
+    <system:String x:Key="string_interp_unsupportedGameIdInAsiManifest">Unsupported game id in asi manifest: {0}</system:String>
+    <!-- 0={Number} -->
+
+    <system:String x:Key="string_interp_productNameX">Product: {0}</system:String>
+    <!-- 0={info.ProductName.Trim()} -->
+    <system:String x:Key="string_interp_descriptionX">Description: {0}</system:String>
+    <!-- 0={info.FileDescription.Trim()} -->
+    <system:String x:Key="string_interp_companyX">Company: {0}</system:String>
+    <!-- 0={info.CompanyName.Trim()} -->
+
+    <!-- App Updater -->
+    <system:String x:Key="string_upd_betaBuildNotificationString">This update is a beta build. You are receiving this update because you have opted into Beta Mode in the settings.</system:String>
+    <system:String x:Key="string_upd_1DayAgo">1 day ago</system:String>
+    <system:String x:Key="string_upd_today">Today</system:String>
+    <system:String x:Key="string_upd_interp_daysAgoDaysAgo">{0} days ago</system:String>
+    <!-- 0={Number - try to localize as best you can. This is only shown when the value is 2 or more days ago.} -->
+    <system:String xml:space="preserve" x:Key="string_upd_interp_releasedX">\nReleased: {0}</system:String>
+    <!-- 0={X days ago (as shown above)} -->
+    <system:String x:Key="string_upd_interp_XYisAvailable">{0} {1} is available</system:String>
+    <!-- 0={app name} 1={version number} -->
+    <system:String xml:space="preserve" x:Key="string_upd_interp_youAreCurrentlyUsingXWithSubInfo">You are currently using version {0}.{1}\n\n{2}</system:String>
+    <!-- 0={currentAppVersionInfo} 1={uiVersionInfo} 2={message} -->
+    <system:String x:Key="string_upd_update">Update</system:String>
+    <system:String x:Key="string_upd_later">Later</system:String>
+    <system:String x:Key="string_upd_interp_downloadingUpdateForX">Downloading update for {0}...</system:String>
+    <!-- 0={interopPackage.ApplicationName} -->
+    <system:String x:Key="string_upd_interp_forcedUpdateOutOfDate">This copy of {0} is outdated and must be updated.</system:String>
+    <!-- 0={interopPackage.ApplicationName} -->
+    <system:String x:Key="string_upd_interp_updatingX">Updating {0}</system:String>
+    <!-- 0={interopPackage.ApplicationName} -->
+    <system:String x:Key="string_upd_updateFailed">Update failed</system:String>
+    <system:String x:Key="string_upd_interp_errorDownloadingUpdateX">There was an error downloading the update: {0}</system:String>
+    <!-- 0={downloadResult.errorMessage} -->
+    <system:String x:Key="string_upd_downloadWasIncomplete">The downloaded file was incomplete.</system:String>
+    <system:String x:Key="string_upd_preparingToApplyUpdate">Preparing to apply update</system:String>
+    <system:String x:Key="string_upd_interp_applyingUpdateFailed">Applying the update failed: {0}</system:String>
+    <!-- 0={updateFailedResult} -->
+    <system:String x:Key="string_upd_oldVersionsAreNotSupportedTitle">Old versions are not supported</system:String>
+    <system:String x:Key="string_upd_interp_outdatedVersionsAreNotSupportedMsg">Outdated versions of {0} are not supported and may not work in the future.</system:String>
+    <!-- 0={interopPackage.ApplicationName} -->
+    <system:String x:Key="string_upd_buildingNewExecutable">Building new executable</system:String>
+    <system:String x:Key="string_upd_extractingUpdate">Extracting update</system:String>
+    <system:String x:Key="string_upd_interp_couldNotFindUpdateFileInArchive">Could not find {0} in the downloaded archive.</system:String>
+    <!-- 0={updateFileName} -->
+    <system:String x:Key="string_upd_updateExtractionFailed">The update archive failed to extract.</system:String>
+    <system:String x:Key="string_upd_verifyingUpdate">Verifying update</system:String>
+    <system:String x:Key="string_upd_invalidSignature">The update file has an invalid signature. See the application log for more details.</system:String>
+    <system:String x:Key="string_upd_applyingUpdate">Applying update</system:String>
+    <system:String x:Key="string_upd_restartingApplication">Restarting application</system:String>
+
+    <!-- MEM Updater -->
+    <system:String x:Key="string_extractingMassEffectModderNoGui">Extracting MassEffectModderNoGui</system:String>
+
+    <!-- Backup Status -->
+    <system:String x:Key="string_backedUp">Backed up</system:String>
+    <system:String x:Key="string_interp_backupStoredAtX">Backup stored at {0}</system:String>
+    <!-- 0={bPath} -->
+    <system:String x:Key="string_unlinkBackup">Unlink backup</system:String>
+    <system:String x:Key="string_restoreGame">Restore game</system:String>
+    <system:String x:Key="string_notBackedUp">Not backed up</system:String>
+    <system:String x:Key="string_gameHasNotBeenBackedUp">Game has not been backed up</system:String>
+    <system:String x:Key="string_linkExistingBackup">Link existing backup</system:String>
+    <system:String x:Key="string_createBackup">Create backup</system:String>
+    <system:String x:Key="string_backupUnavailable">Backup unavailable</system:String>
+    <system:String x:Key="string_interp_backupPathNotAccessibleX">Backup path not accessible: {0}</system:String>
+    <!-- 0={bPath} -->
+    <system:String x:Key="string_createNewBackup">Create new backup</system:String>
+    <system:String x:Key="string_gameNotInstalled">Game not installed</system:String>
+    <system:String x:Key="string_gameNotInstalledRunOnce">Game not installed. Run at least once to ensure game is fully setup</system:String>
+    <system:String x:Key="string_cantCreateBackup">Can't create backup</system:String>
+
+    <!-- Game restore controller -->
+    <system:String x:Key="string_cannotRestoreGame">Cannot restore game</system:String>
+    <system:String x:Key="string_interp_cannotRestoreGameToGameWhileRunning">Cannot restore {0} while an instance of it is running.</system:String>
+    <!-- 0={Game.ToGameName()} -->
+    <system:String x:Key="string_interp_restoringWillDeleteEverythingTitle">Restoring {0} will delete existing installation</system:String>
+    <!-- 0={Game.ToGameName()} -->
+    <system:String x:Key="string_interp_restoringWillDeleteEverythingMessage">Restoring {0} will delete the existing installation, copy your backup to its original location, and reset the texture Level of Detail (LOD) settings for your game.</system:String>
+    <!-- 0={Game.ToGameName()} -->
+    <system:String x:Key="string_selectDestinationLocationForRestore">Select destination location for restore</system:String>
+    <system:String x:Key="string_selectADirectoryToRestoreTheGameToThisDirectoryMustBeEmpty">Select a directory to restore the game to. This directory must be empty.</system:String>
+    <system:String x:Key="string_restoreDestinationNotEmpty">The destination directory for restores must be an empty directory. Remove the files and folders in this directory, or choose another directory.</system:String>
+    <system:String x:Key="string_deletingExistingGameInstallation">Deleting existing game installation</system:String>
+    <system:String x:Key="string_couldNotDeleteGameDirectory">Could not delete game directory</system:String>
+    <system:String x:Key="string_interp_couldNotFullyDeleteGameDirectory">Could not delete the game directory for {0}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.</system:String>
+    <!-- 0={Game.ToGameName()} -->
+    <system:String x:Key="string_errorDeletingGameDirectory">Error deleting game directory</system:String>
+    <system:String x:Key="string_interp_couldNotFullyDeleteGameDirectoryException">Could not delete the game directory for {0}: {1}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.</system:String>
+    <!-- 0={Game.ToGameName()} 1={ex.Message} -->
+    <system:String x:Key="string_preparingGameDirectory">Preparing game directory</system:String>
+    <system:String x:Key="string_errorCreatingGameDirectory">Error creating game directory</system:String>
+    <system:String x:Key="string_interp_couldNotCreateGameDirectoryNoPermission">Could not create the game directory for {0}. You may not have permissions to create folders in the directory that contains the game directory.</system:String>
+    <!-- 0={Game.ToGameName()} -->
+    <system:String x:Key="string_analyzingGameFiles">Analyzing game files</system:String>
+    <system:String x:Key="string_checkingTexturetaggedPackages">Checking texture-tagged packages</system:String>
+    <system:String x:Key="string_restoringFromBackup">Restoring from backup</system:String>
+    <system:String x:Key="string_restoringMovies">Restoring movies</system:String>
+    <system:String x:Key="string_calculatingHowManyFilesWillBeRestored">Calculating how many files will be restored</system:String>
 </ResourceDictionary>

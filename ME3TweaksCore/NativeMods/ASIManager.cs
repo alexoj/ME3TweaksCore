@@ -9,6 +9,7 @@ using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Targets;
@@ -177,7 +178,7 @@ namespace ME3TweaksCore.NativeMods
                 case 6:
                     return MEGame.LE3;
                 default:
-                    throw new Exception($"Unsupported game id in asi manifest: {i}");
+                    throw new Exception(LC.GetString(LC.string_interp_unsupportedGameIdInAsiManifest, i));
             }
         }
 

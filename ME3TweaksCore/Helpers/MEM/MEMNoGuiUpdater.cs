@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using LegendaryExplorerCore.Compression;
 using ME3TweaksCore.Diagnostics;
+using ME3TweaksCore.Localization;
 using Octokit;
 using Serilog;
 
@@ -186,7 +187,7 @@ namespace ME3TweaksCore.Helpers.MEM
                         });
 
                         // Handle unzip code here.
-                        statusMessageUpdate?.Invoke("Extracting MassEffectModderNoGui");
+                        statusMessageUpdate?.Invoke(LC.GetString(LC.string_extractingMassEffectModderNoGui));
                         if (Path.GetExtension(downloadPath) == @".7z")
                         {
                             var res = LZMA.ExtractSevenZipArchive(downloadPath, MCoreFilesystem.GetTempDirectory(), true);

@@ -36,17 +36,17 @@ namespace ME3TweaksCore.NativeMods
             var info = FileVersionInfo.GetVersionInfo(filepath);
             if (!string.IsNullOrWhiteSpace(info.ProductName))
             {
-                retInfo += '\n' + $"Product: {info.ProductName.Trim()}";
+                retInfo += '\n' + LC.GetString(LC.string_interp_productNameX, info.ProductName.Trim());
             }
 
             if (!string.IsNullOrWhiteSpace(info.FileDescription))
             {
-                retInfo += '\n' + $"Description: {info.FileDescription.Trim()}";
+                retInfo += '\n' + LC.GetString(LC.string_interp_descriptionX, info.FileDescription.Trim());
             }
 
             if (!string.IsNullOrWhiteSpace(info.CompanyName))
             {
-                retInfo += '\n' + $"Company: {info.CompanyName.Trim()}";
+                retInfo += '\n' + LC.GetString(LC.string_interp_companyX, info.CompanyName.Trim());
             }
 
             return retInfo;

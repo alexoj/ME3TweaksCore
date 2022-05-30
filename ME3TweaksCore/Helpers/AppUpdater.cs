@@ -8,6 +8,7 @@ using AuthenticodeExaminer;
 using LegendaryExplorerCore.Compression;
 using LegendaryExplorerCore.Helpers;
 using ME3TweaksCore.Diagnostics;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Services;
 using Octokit;
 using Serilog;
@@ -151,45 +152,45 @@ namespace ME3TweaksCore.Helpers
                                 string uiVersionInfo = "";
                                 if (latest.Prerelease)
                                 {
-                                    uiVersionInfo += " This update is a beta build. You are receiving this update because you have opted into Beta Mode in the settings.";
+                                    uiVersionInfo += @" " + LC.GetString(LC.string_upd_betaBuildNotificationString);
                                 }
                                 int daysAgo = (DateTime.Now - latest.PublishedAt.Value).Days;
                                 string ageStr = "";
                                 if (daysAgo == 1)
                                 {
-                                    ageStr = "1 day ago";
+                                    ageStr = LC.GetString(LC.string_upd_1DayAgo);
                                 }
                                 else if (daysAgo == 0)
                                 {
-                                    ageStr = "Today";
+                                    ageStr = LC.GetString(LC.string_upd_today);
                                 }
                                 else
                                 {
-                                    ageStr = $"{daysAgo} days ago";
+                                    ageStr = LC.GetString(LC.string_upd_interp_daysAgoDaysAgo, daysAgo);
                                 }
 
-                                uiVersionInfo += $"\nReleased: {ageStr}";
-                                string title = $"{interopPackage.ApplicationName} {releaseName} is available";
+                                uiVersionInfo += LC.GetString(LC.string_upd_interp_releasedX, ageStr);
+                                string title = LC.GetString(LC.string_upd_interp_XYisAvailable, interopPackage.ApplicationName, releaseName);
 
                                 var message = latest.Body;
                                 var msgLines = latest.Body.Split('\n');
                                 message = string.Join('\n', msgLines.Where(x => !x.StartsWith(@"hash: "))).Trim();
-                                upgrade = interopPackage.ShowUpdatePromptCallback != null && interopPackage.ShowUpdatePromptCallback.Invoke(title, $"You are currently using version {currentAppVersionInfo}.{uiVersionInfo}\n\n{message}", "Update", "Later");
+                                upgrade = interopPackage.ShowUpdatePromptCallback != null && interopPackage.ShowUpdatePromptCallback.Invoke(title, LC.GetString(LC.string_upd_interp_youAreCurrentlyUsingXWithSubInfo, currentAppVersionInfo, uiVersionInfo, message), LC.GetString(LC.string_upd_update), LC.GetString(LC.string_upd_later));
                             }
                             if (upgrade)
                             {
                                 MLog.Information(@"Downloading update for application");
                                 //there's an update
-                                string message = $"Downloading update for {interopPackage.ApplicationName}...";
+                                string message = LC.GetString(LC.string_upd_interp_downloadingUpdateForX, interopPackage.ApplicationName);
                                 if (!canCancel)
                                 {
                                     if (!interopPackage.AllowPrereleaseBuilds)
                                     {
-                                        message = $"This copy of {interopPackage.ApplicationName} is outdated and must be updated.";
+                                        message = LC.GetString(LC.string_upd_interp_forcedUpdateOutOfDate, interopPackage.ApplicationName);
                                     }
                                 }
 
-                                interopPackage.ShowUpdateProgressDialogCallback?.Invoke($"Updating {interopPackage.ApplicationName}", message, canCancel);
+                                interopPackage.ShowUpdateProgressDialogCallback?.Invoke(LC.GetString(LC.string_upd_interp_updatingX, interopPackage.ApplicationName), message, canCancel);
                                 // First here should be OK since we checked it above...
 
                                 // PATCH UPDATE
@@ -216,7 +217,7 @@ namespace ME3TweaksCore.Helpers
                                 if (downloadResult.errorMessage != null)
                                 {
                                     // There was an error downloading the update.
-                                    interopPackage.ShowMessageCallback?.Invoke("Update failed", $"There was an error downloading the update: {downloadResult.errorMessage}");
+                                    interopPackage.ShowMessageCallback?.Invoke(LC.GetString(LC.string_upd_updateFailed), LC.GetString(LC.string_upd_interp_errorDownloadingUpdateX, downloadResult.errorMessage));
                                     return;
                                 }
 
@@ -225,27 +226,27 @@ namespace ME3TweaksCore.Helpers
                                 {
                                     // The download is wrong size
                                     MLog.Error($@"The downloaded file was incomplete. Downloaded size: {downloadResult.result.Length}, expected size: {asset.Size}");
-                                    interopPackage.ShowMessageCallback?.Invoke("Update failed", "The downloaded file was incomplete.");
+                                    interopPackage.ShowMessageCallback?.Invoke(LC.GetString(LC.string_upd_updateFailed), LC.GetString(LC.string_upd_downloadWasIncomplete));
                                     return;
                                 }
 
                                 // Download is OK
                                 interopPackage.DownloadCompleted?.Invoke();
                                 interopPackage.ProgressIndeterminateCallback?.Invoke();
-                                interopPackage.ShowUpdateProgressDialogCallback?.Invoke($"Updating {interopPackage.ApplicationName}", "Preparing to apply update", false);
+                                interopPackage.ShowUpdateProgressDialogCallback?.Invoke(LC.GetString(LC.string_upd_interp_updatingX, interopPackage.ApplicationName), LC.GetString(LC.string_upd_preparingToApplyUpdate), false);
                                 var updateFailedResult = extractUpdate(downloadResult.result, Path.GetFileName(asset.Name), interopPackage.UpdateFilenameInArchive, interopPackage.SetUpdateDialogTextCallback);
                                 if (updateFailedResult != null)
                                 {
                                     // The download is wrong size
                                     MLog.Error($@"Applying the update failed: {updateFailedResult}");
-                                    interopPackage.ShowMessageCallback?.Invoke("Update failed", $"Applying the update failed: {updateFailedResult}");
+                                    interopPackage.ShowMessageCallback?.Invoke(LC.GetString(LC.string_upd_updateFailed), LC.GetString(LC.string_upd_interp_applyingUpdateFailed, updateFailedResult));
                                     return;
                                 }
                             }
                             else
                             {
                                 MLog.Warning(@"Application update was declined by user");
-                                interopPackage.ShowMessageCallback?.Invoke("Old versions are not supported", $"Outdated versions of {interopPackage.ApplicationName} are not supported and may not work in the future.");
+                                interopPackage.ShowMessageCallback?.Invoke(LC.GetString(LC.string_upd_oldVersionsAreNotSupportedTitle), LC.GetString(LC.string_upd_interp_outdatedVersionsAreNotSupportedMsg, interopPackage.ApplicationName));
                             }
                         }
                         else
@@ -269,7 +270,7 @@ namespace ME3TweaksCore.Helpers
             Action downloadCompletedCallback,
             CancellationTokenSource cancellationTokenSource)
         {
-            var hashLine = latestRelease.Body.Split('\n').FirstOrDefault(x => x.StartsWith("hash: "));
+            var hashLine = latestRelease.Body.Split('\n').FirstOrDefault(x => x.StartsWith(@"hash: "));
 
             if (hashLine != null)
             {
@@ -328,7 +329,7 @@ namespace ME3TweaksCore.Helpers
                         }
                         downloadCompletedCallback?.Invoke();
                         MLog.Information(@"Download OK: Building new executable");
-                        setUpdateDialogTextCallback?.Invoke("Building new executable");
+                        setUpdateDialogTextCallback?.Invoke(LC.GetString(LC.string_upd_buildingNewExecutable));
                         progressIndeterminateCallback?.Invoke();
                         var newExecutable = BuildUpdateFromPatch(patchUpdate.result, destMd5, downloadInfo.timetamp);
                         if (newExecutable != null)
@@ -411,7 +412,7 @@ namespace ME3TweaksCore.Helpers
             var outDir = Path.Combine(MCoreFilesystem.GetTempDirectory(), Path.GetFileNameWithoutExtension(assetFilename));
             var archiveFile = Path.Combine(MCoreFilesystem.GetTempDirectory(), assetFilename);
             ms.WriteToFile(archiveFile);
-            setDialogText?.Invoke("Extracting update");
+            setDialogText?.Invoke(LC.GetString(LC.string_upd_extractingUpdate));
             if (LZMA.ExtractSevenZipArchive(archiveFile, outDir))
             {
                 // Extraction complete
@@ -423,29 +424,29 @@ namespace ME3TweaksCore.Helpers
                 else
                 {
                     // Could not find update in archive!
-                    return $"Could not find {updateFileName} in the downloaded archive.";
+                    return LC.GetString(LC.string_upd_interp_couldNotFindUpdateFileInArchive, updateFileName);
                 }
             }
 
-            return "The update archive failed to extract.";
+            return LC.GetString(LC.string_upd_updateExtractionFailed);
         }
 
         private static string ValidateUpdate(string fileToValidate, Action<string> setDialogText = null)
         {
 #if WINDOWS
-            setDialogText?.Invoke("Verifying update");
+            setDialogText?.Invoke(LC.GetString(LC.string_upd_verifyingUpdate));
             // Signature check
             var authenticodeInspector = new FileInspector(fileToValidate);
             var validationResult = authenticodeInspector.Validate();
             if (validationResult != SignatureCheckResult.Valid)
             {
                 MLog.Error($@"The update file does not have a valid signature: {validationResult}. Update will be aborted.");
-                return "The update file has an invalid signature. See the application log for more details.";
+                return LC.GetString(LC.string_upd_invalidSignature);
             }
 #endif
 
             // Validated
-            setDialogText?.Invoke("Applying update");
+            setDialogText?.Invoke(LC.GetString(LC.string_upd_applyingUpdate));
             applyUpdate(fileToValidate, setDialogText);
             return null;
         }
@@ -466,7 +467,7 @@ namespace ME3TweaksCore.Helpers
             process.Start();
             process.WaitForExit();
 
-            setDialogText?.Invoke($"Restarting application");
+            setDialogText?.Invoke(LC.GetString(LC.string_upd_restartingApplication));
             Thread.Sleep(2000);
             args = $"--update-dest-path \"{MLibraryConsumer.GetExecutablePath()}\""; //do not localize
             MLog.Information($@"Running proxy update: {newExecutable} {args}");

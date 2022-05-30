@@ -5,6 +5,7 @@ using System.IO;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
+using ME3TweaksCore.Localization;
 using PropertyChanged;
 
 namespace ME3TweaksCore.Services.Backup
@@ -59,11 +60,11 @@ namespace ME3TweaksCore.Services.Backup
             if (bPath != null)
             {
                 // Backup is available
-                BackupStatus = "Backed up";
-                BackupLocationStatus = $"Backup stored at {bPath}";
+                BackupStatus = LC.GetString(LC.string_backedUp);
+                BackupLocationStatus = LC.GetString(LC.string_interp_backupStoredAtX, bPath);
                 if (log) MLog.Information($@"BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
-                LinkActionText = "Unlink backup";
-                BackupActionText = "Restore game";
+                LinkActionText = LC.GetString(LC.string_unlinkBackup);
+                BackupActionText = LC.GetString(LC.string_restoreGame);
                 BackedUp = true;
                 MarkedBackupLocation = bPath;
                 return;
@@ -74,33 +75,33 @@ namespace ME3TweaksCore.Services.Backup
             {
                 // Backup path doesn't exist, no backup
                 BackedUp = false;
-                BackupStatus = "Not backed up";
-                BackupLocationStatus = "Game has not been backed up";
+                BackupStatus = LC.GetString(LC.string_notBackedUp);
+                BackupLocationStatus = LC.GetString(LC.string_gameHasNotBeenBackedUp);
                 if (log) MLog.Information($@"BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
-                LinkActionText = "Link existing backup";
-                BackupActionText = "Create backup"; //This should be disabled if game is not installed. This will be handled by the wrapper
+                LinkActionText = LC.GetString(LC.string_linkExistingBackup);
+                BackupActionText = LC.GetString(LC.string_createBackup); //This should be disabled if game is not installed. This will be handled by the wrapper
                 return;
             }
             else if (!Directory.Exists(bPath))
             {
                 // Backup path value DOES exist but the directory is not found
                 BackedUp = false;
-                BackupStatus = "Backup unavailable";
-                BackupLocationStatus = $"Backup path not accessible: {bPath}";
+                BackupStatus = LC.GetString(LC.string_backupUnavailable);
+                BackupLocationStatus = LC.GetString(LC.string_interp_backupPathNotAccessibleX, bPath);
                 if (log) MLog.Information($@"BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
-                LinkActionText = "Unlink backup";
-                BackupActionText = "Create new backup";
+                LinkActionText = LC.GetString(LC.string_unlinkBackup);
+                BackupActionText = LC.GetString(LC.string_createNewBackup);
                 return;
             }
 
             if (!installed)
             {
                 //BackedUp = false; // Not sure if this is the right call, maybe we shouldn't modify this
-                BackupStatus = "Game not installed";
-                BackupLocationStatus = "Game not installed. Run at least once to ensure game is fully setup";
+                BackupStatus = LC.GetString(LC.string_gameNotInstalled);
+                BackupLocationStatus = LC.GetString(LC.string_gameNotInstalledRunOnce);
                 if (log) MLog.Information($@"BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
-                LinkActionText = "Link existing backup"; //this seems dangerous to the average user
-                BackupActionText = "Can't create backup";
+                LinkActionText = LC.GetString(LC.string_linkExistingBackup); //this seems dangerous to the average user
+                BackupActionText = LC.GetString(LC.string_cantCreateBackup);
             }
         }
     }

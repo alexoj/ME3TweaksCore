@@ -81,14 +81,14 @@ namespace ME3TweaksCore.Services.Restore
 
             if (MUtilities.IsGameRunning(Game))
             {
-                BlockingErrorCallback?.Invoke("Cannot restore game", $"Cannot restore {Game.ToGameName()} while an instance of it is running.");
+                BlockingErrorCallback?.Invoke(LC.GetString(LC.string_cannotRestoreGame), LC.GetString(LC.string_interp_cannotRestoreGameToGameWhileRunning, Game.ToGameName()));
                 return false;
             }
 
             bool restore = destinationDirectory == null; // Restore to custom location
             if (!restore)
             {
-                var confirmDeletion = ConfirmationCallback?.Invoke($"Restoring {Game.ToGameName()} will delete existing installation", $"Restoring {Game.ToGameName()} will delete the existing installation, copy your backup to its original location, and reset the texture Level of Detail (LOD) settings for your game.");
+                var confirmDeletion = ConfirmationCallback?.Invoke(LC.GetString(LC.string_interp_restoringWillDeleteEverythingTitle, Game.ToGameName()), LC.GetString(LC.string_interp_restoringWillDeleteEverythingMessage, Game.ToGameName()));
                 restore |= confirmDeletion.HasValue && confirmDeletion.Value;
             }
 
@@ -102,7 +102,7 @@ namespace ME3TweaksCore.Services.Restore
 
                 if (destinationDirectory == null)
                 {
-                    destinationDirectory = SelectDestinationDirectoryCallback?.Invoke("Select destination location for restore", "Select a directory to restore the game to. This directory must be empty.");
+                    destinationDirectory = SelectDestinationDirectoryCallback?.Invoke(LC.GetString(LC.string_selectDestinationLocationForRestore), LC.GetString(LC.string_selectADirectoryToRestoreTheGameToThisDirectoryMustBeEmpty));
                     if (destinationDirectory != null)
                     {
                         //Check empty
@@ -111,7 +111,7 @@ namespace ME3TweaksCore.Services.Restore
                             if (Directory.GetFiles(destinationDirectory).Length > 0 || Directory.GetDirectories(destinationDirectory).Length > 0)
                             {
                                 //Directory not empty
-                                BlockingErrorCallback?.Invoke("Cannot restore game", "The destination directory for restores must be an empty directory. Remove the files and folders in this directory, or choose another directory.");
+                                BlockingErrorCallback?.Invoke(LC.GetString(LC.string_cannotRestoreGame), LC.GetString(LC.string_restoreDestinationNotEmpty));
                                 return false;
                             }
 
@@ -133,10 +133,11 @@ namespace ME3TweaksCore.Services.Restore
 
                 if (useFullCopyMethod)
                 {
-                    backupStatus.BackupStatus = "Deleting existing game installation";
+                    // Leftover unused code for now
+                    backupStatus.BackupStatus = LC.GetString(LC.string_deletingExistingGameInstallation);
                     if (Directory.Exists(destinationDirectory))
                     {
-                        if (Enumerable.Any(Directory.GetFiles(destinationDirectory)) || Enumerable.Any(Directory.GetDirectories(destinationDirectory)))
+                        if (Directory.GetFiles(destinationDirectory).Any() || Directory.GetDirectories(destinationDirectory).Any())
                         {
                             MLog.Information(@"Deleting existing game directory: " + destinationDirectory);
                             try
@@ -144,7 +145,7 @@ namespace ME3TweaksCore.Services.Restore
                                 bool deletedDirectory = MUtilities.DeleteFilesAndFoldersRecursively(destinationDirectory);
                                 if (deletedDirectory != true)
                                 {
-                                    RestoreErrorCallback?.Invoke("Could not delete game directory", $"Could not delete the game directory for {Game.ToGameName()}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.");
+                                    RestoreErrorCallback?.Invoke(LC.GetString(LC.string_couldNotDeleteGameDirectory), LC.GetString(LC.string_interp_couldNotFullyDeleteGameDirectory, Game.ToGameName()));
                                     //b.Result = RestoreResult.ERROR_COULD_NOT_DELETE_GAME_DIRECTORY;
                                     return false;
                                 }
@@ -153,7 +154,7 @@ namespace ME3TweaksCore.Services.Restore
                             {
                                 //todo: handle this better
                                 MLog.Error($@"Exception deleting game directory: {destinationDirectory}: {ex.Message}");
-                                RestoreErrorCallback?.Invoke("Error deleting game directory", $"Could not delete the game directory for {Game.ToGameName()}: {ex.Message}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.");
+                                RestoreErrorCallback?.Invoke(LC.GetString(LC.string_errorDeletingGameDirectory), LC.GetString(LC.string_interp_couldNotFullyDeleteGameDirectoryException, Game.ToGameName(), ex.Message));
                                 //b.Result = RestoreResult.EXCEPTION_DELETING_GAME_DIRECTORY;
                                 return false;
                             }
@@ -165,11 +166,11 @@ namespace ME3TweaksCore.Services.Restore
                     }
                 }
 
-                backupStatus.BackupLocationStatus = "Preparing game directory";
+                backupStatus.BackupLocationStatus = LC.GetString(LC.string_preparingGameDirectory);
                 var created = MUtilities.CreateDirectoryWithWritePermission(destinationDirectory);
                 if (!created)
                 {
-                    RestoreErrorCallback?.Invoke("Error creating game directory", $"Could not create the game directory for {Game.ToGameName()}. You may not have permissions to create folders in the directory that contains the game directory.");
+                    RestoreErrorCallback?.Invoke(LC.GetString(LC.string_errorCreatingGameDirectory), LC.GetString(LC.string_interp_couldNotCreateGameDirectoryNoPermission, Game.ToGameName()));
                     //b.Result = RestoreResult.ERROR_COULD_NOT_CREATE_DIRECTORY;
                     return false;
                 }
@@ -210,7 +211,7 @@ namespace ME3TweaksCore.Services.Restore
         {
             if (destTarget != null && destTarget.TextureModded)
             {
-                backupStatus.BackupLocationStatus = "Analyzing game files";
+                backupStatus.BackupLocationStatus = LC.GetString(LC.string_analyzingGameFiles);
                 // Game is texture modded.
                 var packagesToCheck = new List<string>();
 
@@ -223,7 +224,7 @@ namespace ME3TweaksCore.Services.Restore
                 VanillaDatabaseService.ValidateTargetAgainstVanilla(destTarget, addNonVanillaFile, false);
 
                 // For each package that failed validation, we should check the size.
-                backupStatus.BackupLocationStatus = "Checking texture-tagged packages";
+                backupStatus.BackupLocationStatus = LC.GetString(LC.string_checkingTexturetaggedPackages);
                 int numOnlyTexTagged = 0;
                 SetProgressIndeterminateCallback?.Invoke(false);
                 ProgressValue = 0;
@@ -259,11 +260,11 @@ namespace ME3TweaksCore.Services.Restore
                     }
                     ProgressValue++;
                 }
-                Debug.WriteLine($"Files only texture tagged: {numOnlyTexTagged}");
+                Debug.WriteLine($@"Files only texture tagged: {numOnlyTexTagged}");
             }
 
 
-            backupStatus.BackupStatus = "Restoring from backup";
+            backupStatus.BackupStatus = LC.GetString(LC.string_restoringFromBackup);
 
             string currentRoboCopyFile = null;
             RoboCommand rc = new RoboCommand();
@@ -285,7 +286,7 @@ namespace ME3TweaksCore.Services.Restore
                     backupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_copyingX, currentRoboCopyFile);
                 }
             };
-            MLog.Information($"Beginning robocopy restore: {backupPath} -> {destTarget.TargetPath}");
+            MLog.Information($@"Beginning robocopy restore: {backupPath} -> {destTarget.TargetPath}");
             rc.Start().Wait();
         }
 
@@ -326,11 +327,11 @@ namespace ME3TweaksCore.Services.Restore
                             dlcname = dlcname.Substring(0, index);
                             if (officialDLCNames.TryGetValue(dlcname, out var hrName))
                             {
-                                UpdateStatusCallback?.Invoke($"Restoring {hrName}");
+                                UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_restoringX, hrName));
                             }
                             else
                             {
-                                UpdateStatusCallback?.Invoke($"Restoring {dlcname}");
+                                UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_restoringX, dlcname));
                             }
                         }
                         catch (Exception e)
@@ -349,15 +350,15 @@ namespace ME3TweaksCore.Services.Restore
                     //It's basegame
                     if (fileBeingCopied.EndsWith(@".bik"))
                     {
-                        UpdateStatusCallback?.Invoke("Restoring movies");
+                        UpdateStatusCallback?.Invoke(LC.GetString(LC.string_restoringMovies));
                     }
                     else if (new FileInfo(fileBeingCopied).Length > 52428800)
                     {
-                        UpdateStatusCallback?.Invoke($"Restoring {Path.GetFileName(fileBeingCopied)}");
+                        UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_restoringX, Path.GetFileName(fileBeingCopied)));
                     }
                     else
                     {
-                        UpdateStatusCallback?.Invoke($"Restoring basegame");
+                        UpdateStatusCallback?.Invoke(LC.GetString(LC.string_restoringBasegame));
                     }
                 }
 
@@ -380,7 +381,7 @@ namespace ME3TweaksCore.Services.Restore
                     int index = dlcname.IndexOf(Path.DirectorySeparatorChar);
                     try
                     {
-                        string prefix = "Restoring ";
+                        string prefix = LC.GetString(LC.string_restoring) + @" ";
                         dlcname = dlcname.Substring(0, index);
                         if (officialDLCNames.TryGetValue(dlcname, out var hrName))
                         {
@@ -391,7 +392,7 @@ namespace ME3TweaksCore.Services.Restore
                             prefix += dlcname;
                         }
 
-                        UpdateStatusCallback?.Invoke($"{prefix} {(int)(dataCopied * 100d / totalDataToCopy)}%");
+                        UpdateStatusCallback?.Invoke($@"{prefix} {(int)(dataCopied * 100d / totalDataToCopy)}%");
                     }
                     catch
                     {
@@ -400,13 +401,13 @@ namespace ME3TweaksCore.Services.Restore
                 }
                 else
                 {
-                    UpdateStatusCallback?.Invoke($"Restoring {Path.GetFileName(fileBeingCopied)} {(int)(dataCopied * 100d / totalDataToCopy)}%");
+                    UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_restoringX, Path.GetFileName(fileBeingCopied), (int)(dataCopied * 100d / totalDataToCopy)));
                 }
             }
 
             #endregion
 
-            UpdateStatusCallback?.Invoke("Calculating how many files will be restored");
+            UpdateStatusCallback?.Invoke(LC.GetString(LC.string_calculatingHowManyFilesWillBeRestored));
             MLog.Information($@"Copying backup to game directory: {backupPath} -> {destinationDirectory}");
             CopyTools.CopyAll_ProgressBar(new DirectoryInfo(backupPath), new DirectoryInfo(destinationDirectory),
                 totalItemsToCopyCallback: totalFilesToCopyCallback,
