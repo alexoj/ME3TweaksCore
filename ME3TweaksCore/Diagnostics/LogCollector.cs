@@ -41,7 +41,7 @@ namespace ME3TweaksCore.Diagnostics
     {
         public static List<LogItem> GetLogsList()
         {
-            var logs = Directory.GetFiles(MCoreFilesystem.GetLogDir(), "*.txt");
+            var logs = Directory.GetFiles(MCoreFilesystem.GetLogDir(), @"*.txt");
             return logs.Select(x => new LogItem(x)).ToList();
         }
 
@@ -1382,7 +1382,6 @@ namespace ME3TweaksCore.Diagnostics
                 }
 
                 #endregion
-
                 #region ASI Logs
                 if (package.DiagnosticTarget.Game.IsLEGame())
                 {
@@ -1787,7 +1786,7 @@ namespace ME3TweaksCore.Diagnostics
         private static string getSignerSubject(string subject)
         {
             // Get Common Name (CN)
-            var props = StringStructParser.GetCommaSplitValues($"({subject})");
+            var props = StringStructParser.GetCommaSplitValues($"({subject})"); // do not localize
             return props[@"CN"];
         }
 
@@ -1803,11 +1802,11 @@ namespace ME3TweaksCore.Diagnostics
                 {
                     try
                     {
-                        addDiagLine($@" >> {(isFirst ? "Signed" : "Countersigned")} by {getSignerSubject(signChain.Subject)}", Severity.INFO);
+                        addDiagLine($@" >> {(isFirst ? @"Signed" : @"Countersigned")} by {getSignerSubject(signChain.Subject)}", Severity.INFO); // do not localize
                     }
                     catch
                     {
-                        addDiagLine($@"  >> {(isFirst ? "Signed" : "Countersigned")} by " + signChain.Subject, Severity.INFO);
+                        addDiagLine($@"  >> {(isFirst ? "Signed" : "Countersigned")} by " + signChain.Subject, Severity.INFO); // do not localize
                     }
 
                     isFirst = false;
@@ -1886,7 +1885,7 @@ namespace ME3TweaksCore.Diagnostics
                             // Read last 30 lines.
                             if (lastIndexRead < fileContents.Length)
                             {
-                                sb.AppendLine("...");
+                                sb.AppendLine(@"...");
                                 var startIndex = Math.Max(lastIndexRead, fileContents.Length - 30);
                                 for (int i = startIndex; i < fileContents.Length - 1; i++)
                                 {
@@ -1967,7 +1966,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <summary>
         /// Log session divider. Should always be the very first line of a new session
         /// </summary>
-        public static string SessionStartString { get; } = "============================SESSION START============================";
+        public static string SessionStartString { get; } = @"============================SESSION START============================";
 
         /// <summary>
         /// Creates a document ready for upload to ME3Tweaks Log Viewing Service.

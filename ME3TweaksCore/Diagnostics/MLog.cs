@@ -17,7 +17,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <summary>
         /// Logging prefix for ME3TWEAKSCORE logs.
         /// </summary>
-        private const string LoggingPrefix = "[ME3TWEAKSCORE] ";
+        private const string LoggingPrefix = @"[ME3TWEAKSCORE] ";
 
         /// <summary>
         /// Logs a string to the log. You can specify a prefix or a boolean that is checked (for making calls easier)
@@ -105,8 +105,8 @@ namespace ME3TweaksCore.Diagnostics
             // Log exception
             while (exception != null)
             {
-                var line1 = exception.GetType().Name + ": " + exception.Message;
-                foreach (var line in line1.Split("\n"))
+                var line1 = exception.GetType().Name + @": " + exception.Message;
+                foreach (var line in line1.Split("\n")) // do not localize
                 {
                     if (fatal)
                         Log.Fatal(LoggingPrefix + line);
@@ -117,7 +117,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 if (exception.StackTrace != null)
                 {
-                    foreach (var line in exception.StackTrace.Split("\n"))
+                    foreach (var line in exception.StackTrace.Split("\n")) // do not localize
                     {
                         if (fatal)
                             Log.Fatal(LoggingPrefix + line);

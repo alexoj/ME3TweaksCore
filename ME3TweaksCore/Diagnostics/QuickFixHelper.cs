@@ -4,7 +4,7 @@ using ME3TweaksCore.Helpers;
 namespace ME3TweaksCore.Diagnostics
 {
     /// <summary>
-    /// Helper class for enabling debug 
+    /// Helper class for enabling debug features - USED BY ALOT INSTALLER DO NOT REMOVE
     /// </summary>
     public static class QuickFixHelper
     {
@@ -30,6 +30,6 @@ namespace ME3TweaksCore.Diagnostics
         /// </summary>
         /// <param name="fixname">Filename, WITHOUT THE UNDERSCORE</param>
         /// <returns></returns>
-        public static bool IsQuickFixEnabled(QuickFixName fixname) => File.Exists(Path.Combine(MLibraryConsumer.GetExecutingAssemblyFolder(), $"_{fixname}"));
+        public static bool IsQuickFixEnabled(QuickFixName fixname) => File.Exists(Path.Combine(MLibraryConsumer.GetExecutingAssemblyFolder(), $@"_{fixname}"));
     }
 }

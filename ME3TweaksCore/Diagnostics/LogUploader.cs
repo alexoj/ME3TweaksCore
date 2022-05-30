@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using LegendaryExplorerCore.Compression;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 using Serilog;
 
 namespace ME3TweaksCore.Diagnostics
@@ -32,10 +33,10 @@ namespace ME3TweaksCore.Diagnostics
                 using var client = new HttpClient();
                 using var formData = new MultipartFormDataContent();
                 // <input type="file" name="file2" />
-                formData.Add(new StringContent(MLibraryConsumer.GetAppVersion().ToString()), "toolversion");
-                formData.Add(new StringContent(MLibraryConsumer.GetHostingProcessname()), "tool");
-                formData.Add(new StringContent(lzmamd5), "lzmamd5");
-                formData.Add(bytesContent, "lzmafile", "lzmafile.lzma");
+                formData.Add(new StringContent(MLibraryConsumer.GetAppVersion().ToString()), @"toolversion");
+                formData.Add(new StringContent(MLibraryConsumer.GetHostingProcessname()), @"tool");
+                formData.Add(new StringContent(lzmamd5), @"lzmamd5");
+                formData.Add(bytesContent, @"lzmafile", @"lzmafile.lzma");
                 // Invoke the request to the server
 
                 // equivalent to pressing the submit button on
@@ -45,7 +46,7 @@ namespace ME3TweaksCore.Diagnostics
                 // ensure the request was a success
                 if (!response.IsSuccessStatusCode)
                 {
-                    return (false, $"Error uploading log: Response code {response.StatusCode.ToString()}");
+                    return (false, LC.GetString(LC.string_errorUploadingLogResponse, response.StatusCode.ToString()));
                 }
                 var resultStream = response.Content.ReadAsStreamAsync().Result;
                 var responseString = new StreamReader(resultStream).ReadToEnd();
@@ -62,14 +63,14 @@ namespace ME3TweaksCore.Diagnostics
                     return (true, responseString);
                 }
                 MLog.Error(@"Error uploading log. The server responded with: " + responseString);
-                return (false, $"The server rejected the upload: {responseString}");
+                return (false, LC.GetString(LC.string_interp_serverRejectedLogUpload, responseString));
             }
             catch (Exception ex)
             {
                 // ex.Message contains rich details, including the URL, verb, response status,
                 // and request and response bodies (if available)
-                MLog.Exception(ex, $@"Handled error uploading log");
-                return (false, $"Error uploading log: {ex.Message}");
+                MLog.Exception(ex, @"Handled error uploading log");
+                return (false, LC.GetString(LC.string_interp_errorUploadingLog, ex.Message));
             }
         }
     }
