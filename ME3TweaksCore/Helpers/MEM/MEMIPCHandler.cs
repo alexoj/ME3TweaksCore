@@ -538,7 +538,7 @@ namespace ME3TweaksCore.Helpers.MEM
                                         break;
                                     // Non-texture modded files are tagged as belonging to a texture mod installation so they cannot be moved across installs
                                     case @"STAGE_MARKERS":
-                                        currentActionCallback?.Invoke("Setting texture installation markers");
+                                        currentActionCallback?.Invoke("Installing markers");
                                         break;
                                     
                                 }
