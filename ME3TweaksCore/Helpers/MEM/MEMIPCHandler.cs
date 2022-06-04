@@ -524,7 +524,7 @@ namespace ME3TweaksCore.Helpers.MEM
                                     case @"STAGE_PRESCAN":
                                         currentActionCallback?.Invoke("Checking game data");
                                         break;
-                                    // The files that differ from precomputer texture map are inspected and merged into the used texture map
+                                    // The files that differ from precomputed texture map are inspected and merged into the used texture map
                                     case @"STAGE_SCAN":
                                         currentActionCallback?.Invoke("Scanning game textures");
                                         break;
@@ -532,7 +532,7 @@ namespace ME3TweaksCore.Helpers.MEM
                                     case @"STAGE_INSTALLTEXTURES":
                                         currentActionCallback?.Invoke("Installing textures");
                                         break;
-                                    // Textures that were installed are checked for correct magic headers
+                                    // Textures that were installed are checked for correct magic numbers
                                     case @"STAGE_VERIFYTEXTURES":
                                         currentActionCallback?.Invoke("Verifying textures");
                                         break;
