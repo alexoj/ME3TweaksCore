@@ -12,6 +12,7 @@ using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
 using Serilog;
 
@@ -34,6 +35,7 @@ namespace ME3TweaksCore.Helpers.MEM
     public static class MEMIPCHandler
     {
         #region Static Property Changed
+
         public static event PropertyChangedEventHandler StaticPropertyChanged;
 
         /// <summary>
@@ -52,9 +54,11 @@ namespace ME3TweaksCore.Helpers.MEM
             StaticPropertyChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
             return true;
         }
+
         #endregion
 
         private static short _memNoGuiVersionOT = -1;
+
         public static short MassEffectModderNoGuiVersionOT
         {
             get => _memNoGuiVersionOT;
@@ -62,6 +66,7 @@ namespace ME3TweaksCore.Helpers.MEM
         }
 
         private static short _memNoGuiVersionLE = -1;
+
         public static short MassEffectModderNoGuiVersionLE
         {
             get => _memNoGuiVersionLE;
@@ -104,12 +109,14 @@ namespace ME3TweaksCore.Helpers.MEM
         {
 
             object lockObject = new object();
+
             void appStart(int processID)
             {
                 applicationStarted?.Invoke(processID);
                 // This might need to be waited on after method is called.
                 Debug.WriteLine(@"Process launched. Process ID: " + processID);
             }
+
             void appExited(int code)
             {
                 Debug.WriteLine($@"Process exited with code {code}");
@@ -128,7 +135,8 @@ namespace ME3TweaksCore.Helpers.MEM
             }
 
             // Run MEM
-            MEMIPCHandler.RunMEMIPC(classicMEM, arguments, appStart, ipcCallback, applicationStdErr, appExited, memCrashLogOutput,
+            MEMIPCHandler.RunMEMIPC(classicMEM, arguments, appStart, ipcCallback, applicationStdErr, appExited,
+                memCrashLogOutput,
                 cancellationToken);
 
             // Wait until exit
@@ -143,10 +151,14 @@ namespace ME3TweaksCore.Helpers.MEM
             }
         }
 
-        private static async void RunMEMIPC(bool classicMEM, string arguments, Action<int> applicationStarted = null, Action<string, string> ipcCallback = null, Action<string> applicationStdErr = null, Action<int> applicationExited = null, Action<string> memCrashLine = null, CancellationToken cancellationToken = default)
+        private static async void RunMEMIPC(bool classicMEM, string arguments, Action<int> applicationStarted = null,
+            Action<string, string> ipcCallback = null, Action<string> applicationStdErr = null,
+            Action<int> applicationExited = null, Action<string> memCrashLine = null,
+            CancellationToken cancellationToken = default)
         {
             bool exceptionOcurred = false;
             DateTime lastCacheoutput = DateTime.Now;
+
             void internalHandleIPC(string command, string parm)
             {
                 switch (command)
@@ -157,6 +169,7 @@ namespace ME3TweaksCore.Helpers.MEM
                             MLog.Information($@"MEM cache usage: {FileSize.FormatSize(long.Parse(parm))}");
                             lastCacheoutput = DateTime.Now;
                         }
+
                         break;
                     case @"EXCEPTION_OCCURRED": //An exception has occurred and MEM is going to crash
                         exceptionOcurred = true;
@@ -176,7 +189,8 @@ namespace ME3TweaksCore.Helpers.MEM
 
             // GET MEM ENCODING
             FileVersionInfo mvi = FileVersionInfo.GetVersionInfo(memPath);
-            Encoding encoding = mvi.FileMajorPart > 421 ? Encoding.Unicode : Encoding.UTF8; //? Is UTF8 the default for windows console
+            Encoding encoding =
+                mvi.FileMajorPart > 421 ? Encoding.Unicode : Encoding.UTF8; //? Is UTF8 the default for windows console
 
             await foreach (var cmdEvent in cmd.ListenAsync(encoding, cancellationToken))
 
@@ -206,6 +220,7 @@ namespace ME3TweaksCore.Helpers.MEM
                                 memCrashLine?.Invoke(stdOut.Text);
                             }
                         }
+
                         break;
                     case StandardErrorCommandEvent stdErr:
                         Debug.WriteLine(@"STDERR " + stdErr.Text);
@@ -217,6 +232,7 @@ namespace ME3TweaksCore.Helpers.MEM
                         {
                             applicationStdErr?.Invoke(stdErr.Text);
                         }
+
                         break;
                     case ExitedCommandEvent exited:
                         applicationExited?.Invoke(exited.ExitCode);
@@ -252,12 +268,14 @@ namespace ME3TweaksCore.Helpers.MEM
         public static bool SetGamePath(bool classicMEM, MEGame targetGame, string targetPath)
         {
             int exitcode = 0;
-            string args = $"--set-game-data-path --gameid {targetGame.ToMEMGameNum()} --path \"{targetPath}\""; //do not localize
+            string args =
+                $"--set-game-data-path --gameid {targetGame.ToMEMGameNum()} --path \"{targetPath}\""; //do not localize
             MEMIPCHandler.RunMEMIPCUntilExit(classicMEM, args, applicationExited: x => exitcode = x);
             if (exitcode != 0)
             {
                 MLog.Error($@"Non-zero MassEffectModderNoGui exit code setting game path: {exitcode}");
             }
+
             return exitcode == 0;
         }
 
@@ -274,6 +292,7 @@ namespace ME3TweaksCore.Helpers.MEM
                 MLog.Error(@"Cannot set LODs for LE games! This is a bug.");
                 return false;
             }
+
             string args = $@"--apply-lods-gfx --gameid {game.ToGameNum()}";
             if (setting.HasFlag(LodSetting.SoftShadows))
             {
@@ -333,8 +352,10 @@ namespace ME3TweaksCore.Helpers.MEM
                 x => exitcode = x); //Change to catch exit code of non zero.        
             if (exitcode != 0)
             {
-                MLog.Error($@"MassEffectModderNoGui had error getting file listing of archive {file}, exit code {exitcode}");
+                MLog.Error(
+                    $@"MassEffectModderNoGui had error getting file listing of archive {file}, exit code {exitcode}");
             }
+
             return fileListing;
         }
 
@@ -349,26 +370,26 @@ namespace ME3TweaksCore.Helpers.MEM
             var args = $@"--print-lods --gameid {game.ToMEMGameNum()} --ipc";
             int exitcode = -1;
             MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(), args, ipcCallback: (command, param) =>
-            {
-                switch (command)
                 {
-                    case @"LODLINE":
-                        var lodSplit = param.Split(@"=");
-                        try
-                        {
-                            lods[lodSplit[0]] = param.Substring(lodSplit[0].Length + 1);
-                        }
-                        catch (Exception e)
-                        {
-                            MLog.Error($@"Error reading LOD line output from MEM: {param}, {e.Message}");
-                        }
+                    switch (command)
+                    {
+                        case @"LODLINE":
+                            var lodSplit = param.Split(@"=");
+                            try
+                            {
+                                lods[lodSplit[0]] = param.Substring(lodSplit[0].Length + 1);
+                            }
+                            catch (Exception e)
+                            {
+                                MLog.Error($@"Error reading LOD line output from MEM: {param}, {e.Message}");
+                            }
 
-                        break;
-                    default:
-                        //Debug.WriteLine(@"oof?");
-                        break;
-                }
-            },
+                            break;
+                        default:
+                            //Debug.WriteLine(@"oof?");
+                            break;
+                    }
+                },
                 applicationExited: x => exitcode = x
             );
             if (exitcode != 0)
@@ -402,44 +423,47 @@ namespace ME3TweaksCore.Helpers.MEM
         public static Dictionary<GameDirPath, string> GetGameLocations(bool originalTrilogy)
         {
             Dictionary<GameDirPath, string> result = new Dictionary<GameDirPath, string>();
-            MEMIPCHandler.RunMEMIPCUntilExit(originalTrilogy, $@"--get-game-paths --ipc", ipcCallback: (command, param) =>
-            {
-                // THIS CODE ONLY WORKS ON OT
-                // LE REPORTS DIFFERENTLY
-                var spitIndex = param.IndexOf(' ');
-                if (spitIndex < 0) return; // This is nothing
-                var gameId = param.Substring(0, spitIndex);
-                var path = Path.GetFullPath(param.Substring(spitIndex + 1, param.Length - (spitIndex + 1)));
-                switch (command)
+            MEMIPCHandler.RunMEMIPCUntilExit(originalTrilogy, $@"--get-game-paths --ipc",
+                ipcCallback: (command, param) =>
                 {
-                    case @"GAMEPATH":
-                        {
-                            var keyname = Enum.Parse<GameDirPath>($@"ME{gameId}GamePath");
-                            if (param.Length > 1)
+                    // THIS CODE ONLY WORKS ON OT
+                    // LE REPORTS DIFFERENTLY
+                    var spitIndex = param.IndexOf(' ');
+                    if (spitIndex < 0) return; // This is nothing
+                    var gameId = param.Substring(0, spitIndex);
+                    var path = Path.GetFullPath(param.Substring(spitIndex + 1, param.Length - (spitIndex + 1)));
+                    switch (command)
+                    {
+                        case @"GAMEPATH":
                             {
-                                result[keyname] = path;
+                                var keyname = Enum.Parse<GameDirPath>($@"ME{gameId}GamePath");
+                                if (param.Length > 1)
+                                {
+                                    result[keyname] = path;
+                                }
+                                else
+                                {
+                                    result[keyname] = null;
+                                }
+
+                                break;
                             }
-                            else
+                        case @"GAMECONFIGPATH":
                             {
-                                result[keyname] = null;
+                                var keyname = Enum.Parse<GameDirPath>($@"ME{gameId}ConfigPath");
+                                if (param.Length > 1)
+                                {
+                                    result[keyname] = path;
+                                }
+                                else
+                                {
+                                    result[keyname] = null;
+                                }
+
+                                break;
                             }
-                            break;
-                        }
-                    case @"GAMECONFIGPATH":
-                        {
-                            var keyname = Enum.Parse<GameDirPath>($@"ME{gameId}ConfigPath");
-                            if (param.Length > 1)
-                            {
-                                result[keyname] = path;
-                            }
-                            else
-                            {
-                                result[keyname] = null;
-                            }
-                            break;
-                        }
-                }
-            });
+                    }
+                });
             return result;
         }
 
@@ -448,7 +472,8 @@ namespace ME3TweaksCore.Helpers.MEM
                 public static bool SetConfigPath(MEGame game, string itemValue)
                 {
                     int exitcode = 0;
-                    string args = $"--set-game-user-path --gameid {game.ToGameNum()} --path \"{itemValue}\""; //do not localize
+                    string args =
+ $"--set-game-user-path --gameid {game.ToGameNum()} --path \"{itemValue}\""; //do not localize
                     MEMIPCHandler.RunMEMIPCUntilExit(args, applicationExited: x => exitcode = x);
                     if (exitcode != 0)
                     {
@@ -457,5 +482,81 @@ namespace ME3TweaksCore.Helpers.MEM
                     return exitcode == 0;
                 }
 #endif
+
+        /// <summary>
+        /// Installs a MEM file to the game the mem is for
+        /// </summary>
+        /// <param name="mFileName"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public static void InstallMEMFile(string memFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
+        {
+            var game = ModFileFormats.GetGameMEMFileIsFor(memFile);
+            // MEM command line only supports install from folder
+            // Move file to subfolder
+
+            var subfolder = Path.Combine(Directory.GetParent(memFile).FullName, @"MEMInstall");
+            var memSubfile = Path.Combine(subfolder, Path.GetFileName(memFile));
+            if (!Directory.Exists(subfolder))
+            {
+                Directory.CreateDirectory(subfolder);
+                File.Move(memFile, memSubfile);
+            }
+
+            MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(),
+                $"--install-mods --gameid {game.ToMEMGameNum()} --input \"{subfolder}\" --verify --ipc",
+
+                ipcCallback: (command, param) =>
+                {
+                    switch (command)
+                    {
+                        // Stage context switch
+                        case @"STAGE_CONTEXT":
+                            {
+                                MLog.Information($@"MEM stage context switch to: {param}");
+
+                                switch (param)
+                                {
+                                    // OT-ME3 ONLY - DLC is unpacked for use
+                                    case @"STAGE_UNPACKDLC":
+                                        currentActionCallback?.Invoke("Unpacking DLC");
+                                        break;
+                                    // The game file sizes are compared against the precomputed texture map
+                                    case @"STAGE_PRESCAN":
+                                        currentActionCallback?.Invoke("Checking game data");
+                                        break;
+                                    // The files that differ from precomputer texture map are inspected and merged into the used texture map
+                                    case @"STAGE_SCAN":
+                                        currentActionCallback?.Invoke("Scanning game textures");
+                                        break;
+                                    // Package files are updated and data is stored in them for the lower mips
+                                    case @"STAGE_INSTALLTEXTURES":
+                                        currentActionCallback?.Invoke("Installing textures");
+                                        break;
+                                    // Textures that were installed are checked for correct magic headers
+                                    case @"STAGE_VERIFYTEXTURES":
+                                        currentActionCallback?.Invoke("Verifying textures");
+                                        break;
+                                    // Non-texture modded files are tagged as belonging to a texture mod installation so they cannot be moved across installs
+                                    case @"STAGE_MARKERS":
+                                        currentActionCallback?.Invoke("Setting texture installation markers");
+                                        break;
+                                    
+                                }
+                            }
+                            break;
+                        case @"PROCESSING_FILE":
+                            MLog.Information($@"MEM processing file: {param}");
+                            break;
+                        case @"TASK_PROGRESS":
+                            {
+                                progressCallback?.Invoke(int.Parse(param));
+                                break;
+                            }
+                        default:
+                            Debug.WriteLine($@"{command}: {param}");
+                            break;
+                    }
+                });
+        }
     }
 }
