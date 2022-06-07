@@ -489,7 +489,7 @@ namespace ME3TweaksCore.Diagnostics
                     MLog.Information(@"Checking if Bink ASI loader is installed");
 
 
-                    if (package.DiagnosticTarget.CheckIfBinkw32ASIIsInstalled())
+                    if (package.DiagnosticTarget.IsBinkBypassInstalled())
                     {
                         if (package.DiagnosticTarget.Game.IsOTGame())
                         {

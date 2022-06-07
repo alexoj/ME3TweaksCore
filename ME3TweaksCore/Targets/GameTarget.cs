@@ -902,11 +902,11 @@ namespace ME3TweaksCore.Targets
         {
             if (Game is MEGame.ME2 or MEGame.ME3)
             {
-                Binkw32StatusText = CheckIfBinkw32ASIIsInstalled() ? LC.GetString(LC.string_bypassInstalledASIAndDLCModsWillBeAbleToLoad) : LC.GetString(LC.string_bypassNotInstalledASIAndDLCModsWillBeUnableToLoad);
+                Binkw32StatusText = IsBinkBypassInstalled() ? LC.GetString(LC.string_bypassInstalledASIAndDLCModsWillBeAbleToLoad) : LC.GetString(LC.string_bypassNotInstalledASIAndDLCModsWillBeUnableToLoad);
             }
             else if (Game is MEGame.ME1 || Game.IsLEGame())
             {
-                Binkw32StatusText = CheckIfBinkw32ASIIsInstalled() ? LC.GetString(LC.string_bypassInstalledASIModsWillBeAbleToLoad) : LC.GetString(LC.string_bypassNotInstalledASIModsWillBeUnableToLoad);
+                Binkw32StatusText = IsBinkBypassInstalled() ? LC.GetString(LC.string_bypassInstalledASIModsWillBeAbleToLoad) : LC.GetString(LC.string_bypassNotInstalledASIModsWillBeUnableToLoad);
             }
         }
 
@@ -1011,7 +1011,7 @@ namespace ME3TweaksCore.Targets
         /// Determines if the bink ASI loader/bypass is installed (both OT and LE)
         /// </summary>
         /// <returns></returns>
-        public bool CheckIfBinkw32ASIIsInstalled()
+        public bool IsBinkBypassInstalled()
         {
             string binkPath = GetVanillaBinkPath();
             string expectedHash = null;

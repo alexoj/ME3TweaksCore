@@ -67,7 +67,7 @@ namespace ME3TweaksCore.NativeMods
 
         protected void RefreshBinkStatus()
         {
-            LoaderInstalled = CurrentGameTarget != null && CurrentGameTarget.CheckIfBinkw32ASIIsInstalled();
+            LoaderInstalled = CurrentGameTarget != null && CurrentGameTarget.IsBinkBypassInstalled();
             InstallLoaderText = LoaderInstalled ? LC.GetString(LC.string_loaderInstalled) : LC.GetString(LC.string_installLoader);
         }
 
