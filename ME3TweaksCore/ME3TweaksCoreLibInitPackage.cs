@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Misc;
+using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.Services;
 using Serilog;
 
@@ -97,6 +98,11 @@ namespace ME3TweaksCore
         /// </summary>
         public FallbackLink AuxiliaryCombinedOnlineServicesEndpoint { get; init; }
 
+        /// <summary>
+        /// If beta features should be enabled 
+        /// </summary>
+        public bool BetaMode { get; init; }
+
 
         /// <summary>
         /// Installs the callbacks specified in this package into ME3TweaksCore.
@@ -131,6 +137,9 @@ namespace ME3TweaksCore
                 MExtendedClassGenerators.GenerateKnownInstalledASIMod = GenerateKnownInstalledASIModDelegate;
             if (GenerateSFARObjectDelegate != null)
                 MExtendedClassGenerators.GenerateUnknownInstalledASIMod = GenerateUnknownInstalledASIModDelegate;
+
+            // BETA FEATURES - These will require a reboot of the consuming app to properly fully work if changed during runtime
+            ASIManager.SetUsingBeta(BetaMode);
         }
 
         [Conditional(@"DEBUG")]

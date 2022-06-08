@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using LegendaryExplorerCore.Packages;
 using PropertyChanged;
 
@@ -8,6 +9,7 @@ namespace ME3TweaksCore.NativeMods
     /// Object containing information about a single version of an ASI mod in the ASI mod manifest
     /// </summary>
     [AddINotifyPropertyChangedInterface]
+    [DebuggerDisplay(@"{Name} - v{Version}")]
     public class ASIModVersion
     {
         /// <summary>
@@ -26,7 +28,7 @@ namespace ME3TweaksCore.NativeMods
         /// <summary>
         /// Version of this ASI mod
         /// </summary>
-        public string Version { get; internal set; }
+        public int Version { get; internal set; }
         /// <summary>
         /// Developer of the ASI
         /// </summary>
@@ -48,10 +50,13 @@ namespace ME3TweaksCore.NativeMods
         /// </summary>
         public string Description { get; internal set; }
         /// <summary>
+        /// If this ASI version is marked as not being production ready - users of the library will need to filter this as appropriate
+        /// </summary>
+        public bool IsBeta { get; set; }
+        /// <summary>
         /// The owning mod of this version
         /// </summary>
         public ASIMod OwningMod { get; set; }
-
         /// <summary>
         /// List of other groups to delete on install. This is for ASIs that have multiple differing update groups (like autoload)
         /// </summary>
@@ -79,6 +84,9 @@ namespace ME3TweaksCore.NativeMods
             }
         }
 
-
+        public override string ToString()
+        {
+            return $@"{Name} - v{Version}";
+        }
     }
 }

@@ -28,7 +28,7 @@ namespace ME3TweaksCore.NativeMods
         /// <summary>
         /// If this installed ASI mod is outdated
         /// </summary>
-        public bool Outdated => AssociatedManifestItem.OwningMod.Versions.Last() != AssociatedManifestItem;
+        public bool Outdated => AssociatedManifestItem.OwningMod.LatestVersion.Version > AssociatedManifestItem.Version;
 
         /// <summary>
         /// The installation status string for this ASI

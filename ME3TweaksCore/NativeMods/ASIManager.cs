@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -30,13 +31,34 @@ namespace ME3TweaksCore.NativeMods
         public static readonly string ManifestLocation = Path.Combine(CachedASIsFolder, @"manifest.xml");
         public static readonly string StagedManifestLocation = Path.Combine(CachedASIsFolder, @"manifest_staged.xml");
 
-        public static List<ASIMod> MasterME1ASIUpdateGroups = new List<ASIMod>();
-        public static List<ASIMod> MasterME2ASIUpdateGroups = new List<ASIMod>();
-        public static List<ASIMod> MasterME3ASIUpdateGroups = new List<ASIMod>();
+        public static readonly List<ASIMod> MasterME1ASIUpdateGroups = new List<ASIMod>();
+        public static readonly List<ASIMod> MasterME2ASIUpdateGroups = new List<ASIMod>();
+        public static readonly List<ASIMod> MasterME3ASIUpdateGroups = new List<ASIMod>();
 
-        public static List<ASIMod> MasterLE1ASIUpdateGroups = new List<ASIMod>();
-        public static List<ASIMod> MasterLE2ASIUpdateGroups = new List<ASIMod>();
-        public static List<ASIMod> MasterLE3ASIUpdateGroups = new List<ASIMod>();
+        public static readonly List<ASIMod> MasterLE1ASIUpdateGroups = new List<ASIMod>();
+        public static readonly List<ASIMod> MasterLE2ASIUpdateGroups = new List<ASIMod>();
+        public static readonly List<ASIMod> MasterLE3ASIUpdateGroups = new List<ASIMod>();
+
+        /// <summary>
+        /// Returns an enumeration of all master update groups for all games
+        /// </summary>
+        public static IEnumerable<ASIMod> AllASIMods => MasterLE1ASIUpdateGroups.Concat(MasterLE2ASIUpdateGroups).Concat(MasterLE3ASIUpdateGroups).Concat(MasterME1ASIUpdateGroups).Concat(MasterME2ASIUpdateGroups).Concat(MasterME3ASIUpdateGroups);
+        
+        /// <summary>
+        /// If ASI Manager is using Beta ASI mods
+        /// </summary>
+        public static bool UsingBeta { get; private set; }
+
+        /// <summary>
+        /// Use to set if ASI mods should use beta
+        /// </summary>
+        /// <param name="usingBeta"></param>
+        public static void SetUsingBeta(bool usingBeta)
+        {
+            UsingBeta = usingBeta;
+            
+            // Other logic here
+        }
 
         /// <summary>
         /// Loads the ASI manifest. This should only be done at startup or when the online manifest is refreshed. ForceLocal only works if there is local ASI manifest present
@@ -46,7 +68,7 @@ namespace ME3TweaksCore.NativeMods
         /// <param name="preloadedManifestData">Preloaded data if it was loaded from something else, such as a combined manifest</param>
         public static void LoadManifest(bool forceLocal = false, bool overrideThrottling = false, string preloadedManifestData = null)
         {
-            MLog.Information(@"Loading ASI manifest");
+            MLog.Information($@"Loading ASI manifest. Using beta ASIs: {UsingBeta}");
             try
             {
                 internalLoadManifest(forceLocal, overrideThrottling, preloadedManifestData);
@@ -177,6 +199,9 @@ namespace ME3TweaksCore.NativeMods
                     return MEGame.LE2;
                 case 6:
                     return MEGame.LE3;
+                case 7:
+                    // Not used currently but this is how ME3Tweaks Server identifies LELauncher
+                    return MEGame.LELauncher;
                 default:
                     throw new Exception(LC.GetString(LC.string_interp_unsupportedGameIdInAsiManifest, i));
             }
@@ -216,7 +241,7 @@ namespace ME3TweaksCore.NativeMods
 
             if (relevantGroups.Any())
             {
-                return relevantGroups.FirstOrDefault(x => x.HashMatchingHash(hash))?.Versions.First(x => x.Hash == hash);
+                return relevantGroups.FirstOrDefault(x => x.HasMatchingHash(hash))?.Versions.First(x => x.Hash == hash);
             }
 
             return null;
@@ -240,29 +265,33 @@ namespace ME3TweaksCore.NativeMods
                 XElement rootElement = XElement.Parse(xmlText.Trim());
 
                 //I Love Linq
-                var updateGroups = (from e in rootElement.Elements(@"updategroup")
+                var updateGroups = (from ugroup in rootElement.Elements(@"updategroup")
                                     select new ASIMod
                                     {
-                                        UpdateGroupId = (int)e.Attribute(@"groupid"),
-                                        Game = intToGame((int)e.Attribute(@"game")),
-                                        IsHidden = e.Attribute(@"hidden") != null && (bool)e.Attribute(@"hidden"),
-                                        Versions = e.Elements(@"asimod").Select(z => new ASIModVersion
+                                        UpdateGroupId = (int)ugroup.Attribute(@"groupid"),
+                                        Game = intToGame((int)ugroup.Attribute(@"game")),
+                                        IsHidden = TryConvert.ToBool(ugroup.Attribute(@"hidden")?.Value, false),
+                                        Versions = ugroup.Elements(@"asimod").Select(version => new ASIModVersion
                                         {
-                                            Name = (string)z.Element(@"name"),
-                                            InstalledPrefix = (string)z.Element(@"installedname"),
-                                            Author = (string)z.Element(@"author"),
-                                            Version = (string)z.Element(@"version"),
-                                            Description = (string)z.Element(@"description"),
-                                            Hash = (string)z.Element(@"hash"),
-                                            SourceCodeLink = (string)z.Element(@"sourcecode"),
-                                            DownloadLink = (string)z.Element(@"downloadlink"),
-                                            Game = intToGame((int)e.Attribute(@"game")), // use e element to pull from outer group
-                                            _otherGroupsToDeleteOnInstallInternal = z.Element(@"autoremovegroups")?.Value,
-
+                                            Name = (string)version.Element(@"name"),
+                                            InstalledPrefix = (string)version.Element(@"installedname"),
+                                            Author = (string)version.Element(@"author"),
+                                            Version = TryConvert.ToInt32(version.Element(@"version")?.Value, 1), // This could hide errors pretty easily if something is wrong with ASI manifest!
+                                            Description = (string)version.Element(@"description"),
+                                            Hash = (string)version.Element(@"hash"),
+                                            SourceCodeLink = (string)version.Element(@"sourcecode"),
+                                            DownloadLink = (string)version.Element(@"downloadlink"),
+                                            IsBeta = TryConvert.ToBoolFromInt(version.Element(@"beta")?.Value),
+                                            _otherGroupsToDeleteOnInstallInternal = version.Element(@"autoremovegroups")?.Value,
+                                            
+                                            Game = intToGame((int)ugroup.Attribute(@"game")), // use ugroup element to pull from outer group
                                         }).OrderBy(x => x.Version).ToList()
                                     }).ToList();
                 foreach (var v in updateGroups)
                 {
+#if DEBUG
+                    Debug.WriteLine($@"Read {v.Game} ASI group {v.UpdateGroupId}: {v.LatestVersion}. Beta: {v.LatestVersion.IsBeta}");
+#endif
                     switch (v.Game)
                     {
                         case MEGame.ME1:
@@ -289,7 +318,7 @@ namespace ME3TweaksCore.NativeMods
                     foreach (var m in v.Versions)
                     {
                         m.OwningMod = v;
-                        m.OtherGroupsToDeleteOnInstall.Remove(v.UpdateGroupId); // Ensure we don' delete ourself on install
+                        m.OtherGroupsToDeleteOnInstall.Remove(v.UpdateGroupId); // Ensure we don't delete ourself on install
                     }
                 }
 
@@ -449,23 +478,38 @@ namespace ME3TweaksCore.NativeMods
         }
 
         /// <summary>
-        /// Installs the latest version of an ASI to the specified target. If there is an existing version installed, it is updated
+        /// Installs an ASI to the specified target. If there is an existing version installed, it is updated. If no version is specified, the latest version is installed.
         /// </summary>
-        /// <param name="mod"></param>
-        /// <param name="target"></param>
+        /// <param name="mod">The ASI mod to install</param>
+        /// <param name="target">The target to install to</param>
+        /// <param name="version">The version to install. The default is 0, which means the latest</param>
         /// <returns></returns>
-        public static bool InstallASIToTarget(ASIMod mod, GameTarget target)
+        public static bool InstallASIToTarget(ASIMod mod, GameTarget target, int version = 0)
         {
-            return InstallASIToTarget(mod.LatestVersion, target);
+            ASIModVersion modV = null;
+            if (version == 0)
+            {
+                modV = mod.LatestVersion;
+            }
+            else
+            {
+                modV = mod.Versions.FirstOrDefault(x => x.Version == version);
+            }
+
+            if (modV == null)
+                return false; // Did not install
+
+            return InstallASIToTarget(modV, target);
         }
 
         /// <summary>
-        /// Installs the latest version of the specified ASI (by update group ID) to the target
+        /// Installs the specified ASI (by update group ID) to the target. If a version is not specified, the latest version is installed.
         /// </summary>
         /// <param name="updateGroup"></param>
         /// <param name="nameForLogging"></param>
         /// <param name="gameTarget"></param>
-        public static bool InstallASIToTargetByGroupID(int updateGroup, string nameForLogging, GameTarget gameTarget)
+        /// <param name="version">The versio nto install. The default is 0, which means the latest</param>
+        public static bool InstallASIToTargetByGroupID(int updateGroup, string nameForLogging, GameTarget gameTarget, int version = 0)
         {
             var group = GetASIModsByGame(gameTarget.Game).FirstOrDefault(x => x.UpdateGroupId == updateGroup);
             if (group == null)
@@ -475,7 +519,7 @@ namespace ME3TweaksCore.NativeMods
                 return false;
             }
 
-            return InstallASIToTarget(group, gameTarget);
+            return InstallASIToTarget(group, gameTarget, version);
         }
 
         /// <summary>

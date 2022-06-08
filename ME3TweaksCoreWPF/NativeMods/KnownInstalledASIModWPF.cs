@@ -32,7 +32,7 @@ namespace ME3TweaksCoreWPF.NativeMods
         /// <summary>
         /// If this installed ASI mod is outdated
         /// </summary>
-        public bool Outdated => AssociatedManifestItem.OwningMod.Versions.Last() != AssociatedManifestItem;
+        public bool Outdated => AssociatedManifestItem.OwningMod.LatestVersion.Version > AssociatedManifestItem.Version;
 
         public override Brush BackgroundColor => Outdated ? outdatedBrush : installedBrush;
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using LegendaryExplorerCore.Gammtek.Extensions;
@@ -81,8 +82,14 @@ namespace ME3TweaksCore.NativeMods
                 var installedKnownASIMods = installedASIs.OfType<IKnownInstalledASIMod>();
                 var installedUnknownASIMods = installedASIs.OfType<IUnknownInstalledASIMod>();
                 var notInstalledASIs = ASIManager.GetASIModsByGame(CurrentGameTarget.Game).Except(installedKnownASIMods.Select(x => x.AssociatedManifestItem.OwningMod));
+
+                // Known
                 DisplayedASIMods.ReplaceAll(installedKnownASIMods.OrderBy(x => x.AssociatedManifestItem.Name));
+                
+                // Unknown
                 DisplayedASIMods.AddRange(installedUnknownASIMods.OrderBy(x => x.UnmappedFilename));
+
+                // Not installed
                 DisplayedASIMods.AddRange(notInstalledASIs.OrderBy(x => x.LatestVersion.Name));
 
                 // Attempt to re-select the existing object
@@ -92,6 +99,7 @@ namespace ME3TweaksCore.NativeMods
                 }
                 else
                 {
+                    // Reselect if we updated and the ASI object changed (e.g. v3 to v4)
                     foreach (var v in DisplayedASIMods)
                     {
                         if (v is IKnownInstalledASIMod kim && kim.AssociatedManifestItem.OwningMod == selectedObject)
