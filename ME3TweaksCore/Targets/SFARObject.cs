@@ -143,10 +143,6 @@ namespace ME3TweaksCore.Targets
                 };
                 nbw.RunWorkerCompleted += (a, b) =>
                 {
-                    if (b.Error != null)
-                    {
-                        Log.Error($@"Exception occurred in {nbw.Name} thread: {b.Error.Message}");
-                    }
                     //File.Copy(backupFile, targetFile, true);
                     //if (!batchRestore)
                     //{
