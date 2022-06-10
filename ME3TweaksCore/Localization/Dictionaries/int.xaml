@@ -161,30 +161,6 @@
     <system:String x:Key="string_showInstalledOptions">Show installed options</system:String>
     <system:String x:Key="string_hideInstalledOptions">Hide installed options</system:String>
 
-    <!-- Log uploader-->
-    <system:String x:Key="string_selectALogToView">Select a log to view on log viewing service</system:String>
-    <system:String x:Key="string_collectingLogInformation">Collecting log information</system:String>
-    <system:String x:Key="string_interp_serverRejectedTheUpload">The server rejected the upload. The response was: {0}</system:String>
-    <!-- 0 = error message-->
-    <system:String xml:space="preserve" x:Key="string_interp_logWasUnableToUpload">The log was unable to upload:\n{0}.\nPlease come to the ME3Tweaks Discord for assistance.</system:String>
-    <!-- 0 = error message-->
-    <system:String x:Key="string_interp_requestTimedOutUploading">Request timed out while uploading log.</system:String>
-    <system:String x:Key="string_logUploadFailed">Log upload failed</system:String>
-    <system:String x:Key="string_logsAndDiagnostics">Logs and Diagnostics</system:String>
-    <system:String x:Key="string_uploadToLogViewer">Upload to log viewer</system:String>
-    <system:String x:Key="string_selectWhatDataToCollect">Select what data to collect. You can select one or both options.</system:String>
-    <system:String x:Key="string_modManagerApplicationLog">Mod Manager application log</system:String>
-    <system:String x:Key="string_applicationLogDescription">The application log details what occurred during a Mod Manager session and can be used to troubleshoot the application. If you are trying to identify why something occurred in Mod Manager, select an application log.</system:String>
-    <system:String x:Key="string_gameDiagnostic">Game diagnostic</system:String>
-    <system:String x:Key="string_gameDiagnosticDescription">A game diagnostic collects information about a specific game target, including data on texture mod status, installed DLC, game version, crash logs (if any), texture issues, and more. If you are having an issue with a game, please select it.</system:String>
-    <system:String xml:space="preserve" x:Key="string_tooltip_checkAllTexturesInGameDescription">Selecting this option checks all textures in the game.&#10;The texture check step can take several minutes</system:String>
-    <system:String x:Key="string_fullTexturesCheck">Full textures check</system:String>
-    <system:String x:Key="string_diagShareTheLink">Share the resulting link of your log/diagnostic with your recipient. If you aren't sure what options to pick, simply select one from both.</system:String>
-    <system:String x:Key="string_selectAnApplicationLog">Select an application log</system:String>
-    <system:String x:Key="string_selectAGameTargetToGenerateDiagnosticsFor">Select a game target to generate diagnostics for</system:String>
-    <system:String x:Key="string_compressingForUpload">Compressing for upload</system:String>
-    <system:String x:Key="string_uploadingToME3Tweaks">Uploading to ME3Tweaks</system:String>
-
     <!-- Program updater -->
     <system:String x:Key="string_anUpdateToME3TweaksModManagerIsAvailable">An update to ME3Tweaks Mod Manager is available.</system:String>
     <system:String x:Key="string_downloadingUpdate">Downloading update</system:String>
@@ -333,13 +309,36 @@
     <system:String x:Key="string_gettingTextureInfo">Getting texture mod installation info</system:String>
     <system:String x:Key="string_collectingASILogFiles">Collecting ASI log files</system:String>
 
-<!-- Log Uploader -->
+    <!-- Log Uploader -->
     <system:String x:Key="string_errorUploadingLogResponse">Error uploading log: Response code {0}</system:String>
-    <!-- 0={response.StatusCode.ToString()} -->
+    <!-- 0={number} -->
     <system:String x:Key="string_interp_serverRejectedLogUpload">The server rejected the upload: {0}</system:String>
-    <!-- 0={responseString} -->
+    <!-- 0={response string from server} -->
     <system:String x:Key="string_interp_errorUploadingLog">Error uploading log: {0}</system:String>
-    <!-- 0={ex.Message} -->
+    <!-- 0={error message} -->
+    <system:String x:Key="string_selectALogToView">Select a log to view on log viewing service</system:String>
+    <system:String x:Key="string_collectingLogInformation">Collecting log information</system:String>
+    <system:String x:Key="string_interp_serverRejectedTheUpload">The server rejected the upload. The response was: {0}</system:String>
+    <!-- 0 = error message-->
+    <system:String xml:space="preserve" x:Key="string_interp_logWasUnableToUpload">The log was unable to upload:\n{0}.\nPlease come to the ME3Tweaks Discord for assistance.</system:String>
+    <!-- 0 = error message-->
+    <system:String x:Key="string_interp_requestTimedOutUploading">Request timed out while uploading log.</system:String>
+    <system:String x:Key="string_logUploadFailed">Log upload failed</system:String>
+    <system:String x:Key="string_logsAndDiagnostics">Logs and Diagnostics</system:String>
+    <system:String x:Key="string_uploadToLogViewer">Upload to log viewer</system:String>
+    <system:String x:Key="string_selectWhatDataToCollect">Select what data to collect. You can select one or both options.</system:String>
+    <system:String x:Key="string_modManagerApplicationLog">Mod Manager application log</system:String>
+    <system:String x:Key="string_applicationLogDescription">The application log details what occurred during a Mod Manager session and can be used to troubleshoot the application. If you are trying to identify why something occurred in Mod Manager, select an application log.</system:String>
+    <system:String x:Key="string_gameDiagnostic">Game diagnostic</system:String>
+    <system:String x:Key="string_gameDiagnosticDescription">A game diagnostic collects information about a specific game target, including data on texture mod status, installed DLC, game version, crash logs (if any), texture issues, and more. If you are having an issue with a game, please select it.</system:String>
+    <system:String xml:space="preserve" x:Key="string_tooltip_checkAllTexturesInGameDescription">Selecting this option checks all textures in the game.&#10;The texture check step can take several minutes</system:String>
+    <system:String x:Key="string_fullTexturesCheck">Full textures check</system:String>
+    <system:String x:Key="string_diagShareTheLink">Share the resulting link of your log/diagnostic with your recipient. If you aren't sure what options to pick, simply select one from both.</system:String>
+    <system:String x:Key="string_selectAnApplicationLog">Select an application log</system:String>
+    <system:String x:Key="string_selectAGameTargetToGenerateDiagnosticsFor">Select a game target to generate diagnostics for</system:String>
+    <system:String x:Key="string_compressingForUpload">Compressing for upload</system:String>
+    <system:String x:Key="string_uploadingToME3Tweaks">Uploading to ME3Tweaks</system:String>
+
 
     <!-- Texture2D -->
     <system:String x:Key="string_error_couldNotFetchTextureData">Could not fetch texture data for texture {0} in file {1}</system:String>
