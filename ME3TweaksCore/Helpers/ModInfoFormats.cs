@@ -58,17 +58,17 @@ namespace ME3TweaksCore.Helpers
                 }
                 var numEntries = modFile.ReadUInt32();
                 string desc = modFile.ReadUnrealString();
-                var script = modFile.ReadUnrealString().Split("\n").Select(x => x.Trim()).ToList();
+                var script = modFile.ReadUnrealString().Split("\n").Select(x => x.Trim()).ToList(); // do not localize
                 ApplicableGame game = ApplicableGame.None;
-                if (script.Any(x => x.StartsWith("using ME1Explorer")))
+                if (script.Any(x => x.StartsWith(@"using ME1Explorer")))
                 {
                     game |= ApplicableGame.ME1;
                 }
-                else if (script.Any(x => x.StartsWith("using ME2Explorer")))
+                else if (script.Any(x => x.StartsWith(@"using ME2Explorer")))
                 {
                     game |= ApplicableGame.ME2;
                 }
-                else if (script.Any(x => x.StartsWith("using ME3Explorer")))
+                else if (script.Any(x => x.StartsWith(@"using ME3Explorer")))
                 {
                     game |= ApplicableGame.ME3;
                 }
@@ -85,9 +85,9 @@ namespace ME3TweaksCore.Helpers
                 }
 
                 var biogame = M3Directories.GetBioGamePath(target);
-                foreach (var pcc in script.Where(x => x.StartsWith("pccs.Add(")))
+                foreach (var pcc in script.Where(x => x.StartsWith(@"pccs.Add(")))  // do not localize
                 {
-                    var subBioPath = pcc.Substring("pccs.Add(\"".Length);
+                    var subBioPath = pcc.Substring("pccs.Add(\"".Length); // do not localize
                     subBioPath = subBioPath.Substring(0, subBioPath.Length - 3);
                     var targetFile = Path.Combine(biogame, subBioPath);
                     if (!File.Exists(targetFile))

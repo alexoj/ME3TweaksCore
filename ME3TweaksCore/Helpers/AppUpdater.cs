@@ -210,7 +210,7 @@ namespace ME3TweaksCore.Helpers
                                 if (downloadResult.result == null & downloadResult.errorMessage == null)
                                 {
                                     // Canceled
-                                    MLog.Warning("The download was canceled.");
+                                    MLog.Warning(@"The download was canceled.");
                                     return;
                                 }
 

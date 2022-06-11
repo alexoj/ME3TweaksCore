@@ -3,15 +3,8 @@
                       xmlns:system="clr-namespace:System;assembly=System.Runtime">
     
     <!-- Backup Creator-->
-    <system:String x:Key="string_backupsAreShared">Backups are shared across various modding tools including Mass Effect Randomizer, ALOT Installer, and Legendary Explorer.</system:String>
-    <system:String x:Key="string_backupsMustBeCreatedFresh">Backups must be created from a fresh, unmodified copy of the game. Modified backups are not supported.</system:String>
-    <system:String x:Key="string_backUp">Back up</system:String>
-    <system:String xml:space="preserve" x:Key="string_backupsAreUsedToRestoreYourGame">Backups are used to restore your game files and are an important step in the modding process. To unlink a backup and make modding tools forget about it, click the 'Unlink backup' button. To restore from backup, use the Restore option in the Backup &amp; Restore menu, or click the Manage Target button from the main window.&#10;&#10;Backups are also used for as a file source for certain operations. Some advanced features require a backup as an unmodified file must be available.</system:String>
-    <system:String x:Key="string_interp_cannotBackupGameWhileRunning">Cannot backup {0} while it is running.</system:String>
-    <!-- 0 = game name-->
     <system:String x:Key="string_validatingBackupSource">Validating backup source</system:String>
     <system:String x:Key="string_waitingForUserInput">Waiting for user input</system:String>
-    <system:String x:Key="string_selectBackupDestination">Select backup destination (must be empty)</system:String>
     <system:String x:Key="string_directoryIsNotEmptyMustBeEmpty">Directory is not empty. A backup destination must be empty.</system:String>
     <system:String x:Key="string_directoryNotEmpty">Directory not empty</system:String>
     <system:String x:Key="string_interp_backingUpX">Backing up {0}</system:String>
@@ -21,7 +14,6 @@
     <system:String x:Key="string_followingFilesDoNotMatchTheVanillaDatabase">The following files do not match the vanilla database and appear to be modified. Due to these files being modified, a backup cannot be taken of this installation.</system:String>
     <system:String x:Key="string_inconsistentDLCDetected">Inconsistent DLC detected</system:String>
     <system:String x:Key="string_dialogTheFollowingDLCAreInAnInconsistentState">The following DLC are in an inconsistent state; they have a packed SFAR file but contain unpacked game files. The configuration of these DLC are not supported, the unpacked files must be manually removed.</system:String>
-    <system:String x:Key="string_dlcModsAreInstalled">DLC mods are installed</system:String>
     <system:String x:Key="string_dialogDLCModsWereDetectedCannotBackup">The following DLC folders were detected that are not part of the official game by BioWare. Backups cannot include DLC mods - the game must be unmodified.</system:String>
     <system:String x:Key="string_inconsistentDLCDetectedUnofficialGame">Inconsistent DLC was detected. This may be due to using an unofficial copy of the game.</system:String>
     <system:String x:Key="string_movies">Movies</system:String>
@@ -34,192 +26,72 @@
     <system:String x:Key="string_someDlcNotInstalled">Some DLC not installed</system:String>
     <system:String x:Key="string_dialog_notAllDLCInstalled" xml:space="preserve">This target does not have have all OFFICIAL DLC installed. Ensure you have installed all OFFICIAL DLC you want to include in your backup, otherwise a game restore will not include all of it.\n\nThe following DLC is not installed:\n{0}\n\nNote that you don't need all DLC in a backup (such as DLC you have not purchased), however some Mod Manager features depend on specific DLC being installed, such as ME3Tweaks ModMaker.\n\nMake a backup of this target?</system:String>
     <!-- 0 = bulleted list of DLC -->
-    <system:String x:Key="string_linkBackupToAnExistingGameCopy">Link to an existing backup</system:String>
-    <system:String x:Key="string_interp_dialog_linkFailedAlreadyATarget">This installation cannot be linked as a backup as it is already in the list of available modding targets. To link this installation as a backup, first remove the target from the Installation Information panel, under 'Manage Target'.</system:String>
-    <system:String x:Key="string_cannotLinkGameCopy">Cannot link game copy</system:String>
-    <system:String x:Key="string_interp_dialog_linkFailedInvalidTarget">The selected installation cannot be linked to for a backup due to validation errors: {0}.</system:String>
-    <!-- 0=Validation failure reason -->
-    <system:String x:Key="string_invalidGameCopy">Invalid game copy</system:String>
     <system:String x:Key="string_interp_dialog_linkFailedSubdirectoryOfGameDocumentsFolder">The Documents/BioWare/ directory (and its descendants) cannot be used as a backup location, as the game can load files from it. Please choose another directory.</system:String>
     <system:String x:Key="string_locationNotAllowedForBackup">Location not allowed for backup</system:String>
     <system:String x:Key="string_dialog_userAccountDoesntHaveWritePermissionsBackup">Your user account doesn't have write permissions to the selected destination directory. Choose a different directory.</system:String>
-    <system:String x:Key="string_dialog_linkTargetWontBeModdable">The game copy you link to will not be available for modding. Ensure this is a backup copy of the game and not your main installation, or you will be unable to mod your game.</system:String>
-    <system:String x:Key="string_linkWarning">Link warning</system:String>
     <system:String x:Key="string_leftoverTextureFilesFound">Leftover texture files found</system:String>
     <system:String x:Key="string_dialog_foundLeftoverTextureFiles">Additional files from a previous texture installation were found. A backup cannot be taken with leftover texture files in the game directory. This is a sign the game directory was not fully deleted when restoring the game to vanilla.\n\nYou should delete your entire game directory, install the game fresh, and then take the backup.</system:String>
-    <system:String  x:Key="string_tooltip_unlinkBackupButton">Converts the backup to a regular installation and makes modding tools no longer think there is a backup for this game</system:String>
-    <system:String xml:space="preserve" x:Key="string_dialog_unlinkingBackup">Unlinking your backup for {0} will make modding programs, including Legendary Explorer, ALOT Installer, and ME3Tweaks Mod Manager unable to find a backup for this game. These programs use this backup for various features. Unlinking a backup will not delete your existing backup. You can link to another existing backup once you've unlinked this one.\n\nBackup Path: {1}\n\nUnlink your backup for {0}?</system:String>
-    <!-- 0=game name (e.g. Mass Effect 2) 1=Backup file path -->
-    <system:String x:Key="string_unlinkingBackup">Unlinking backup</system:String>
     <system:String x:Key="string_dialog_selectWhichLanguagesToIncludeInBackup">Select which languages to include in the backup. Languages not selected will not be backed up; if you choose to repair the game, these languages will be redownloaded.</system:String>
     <system:String x:Key="string_selectLanguages">Select languages</system:String>
 
-    <!-- External tool launcher-->
-    <system:String x:Key="string_interp_downloadingX">Downloading {0}</system:String>
-    <system:String x:Key="string_interp_extractingX">Extracting {0}</system:String>
-    <system:String x:Key="string_checkingForUpdates">Checking for updates</system:String>
-    <system:String xml:space="preserve" x:Key="string_interp_dialogUnableToDownloadX">Unable to download {0}.\nPlease check your network connection and try again.\nIf the issue persists, please come to the ME3Tweaks Discord.</system:String>
-    <system:String x:Key="string_interp_failedToDownloadX">Failed to download {0}: {1}</system:String>
-    <!-- 0 = toolname, 1 = reason -->
-    <system:String x:Key="string_interp_errorDownloadingAndLaunchingTool">Error downloading and launching tool: {0}</system:String>
-    <!-- 0 = error message -->
-    <system:String x:Key="string_errorLaunchingTool">Error launching tool</system:String>
-    <system:String xml:space="preserve" x:Key="string_interp_errorLaunchingToolX">Error launching tool:\n{0}</system:String>
-    <!-- 0=exception message -->
-    <system:String x:Key="string_interp_unsupportedExtensionX">Unsupported extension: {0}</system:String>
-    <!-- 0={extension} -->
-    <system:String x:Key="string_interp_prerequisiteNotMetX">Prerequisite not met: {0}</system:String>
-    <!-- 0={string saying why preqrequesite was not met} -->
-    <system:String x:Key="string_downloadFailed">Download failed</system:String>
-    <system:String x:Key="string_error_cantDownloadNotEnoughInfoInStartupManifest">ME3Tweaks Mod Manager booted without network or could not fetch startup manifest - reboot application with network access to fetch required information to download this program</system:String>
-    <system:String x:Key="string_error_net5RuntimeMissing">The .NET 5 x64 runtime is not installed</system:String>
+    <!-- Game Backup Controller -->
+    <system:String x:Key="string_cannotBackupGame">Cannot backup game</system:String>
+    <system:String x:Key="string_interp_cannotBackupGameIsRunning">Cannot backup while {0} is running.</system:String>
+    <!-- 0={game name (mass effect, mass effect 2...)} -->
+    <system:String x:Key="string_ensureCorrectGameChosen">Ensure correct game chosen</system:String>
+    <system:String x:Key="string_warningLinkedTargetWillNotLoad">The path you specify will be checked if it is a vanilla backup. Once this check is complete it will be marked as a backup and modding tools will refuse to modify it. Ensure this is not your active game path or you will be unable to mod the game.</system:String>
+    <system:String x:Key="string_iUnderstand">I understand</system:String>
+    <system:String x:Key="string_abortLinking">Abort linking</system:String>
+    <system:String x:Key="string_cannotLinkTargetWrongGenerationLEneedOT">Cannot use this target as backup: This is the Legendary Edition version of the game, the target you are trying to link is the Original Trilogy version.</system:String>
+    <system:String x:Key="string_cannotLinkTargetWrongGenerationOTneedLE">Cannot use this target as backup: This is the Original Trilogy version of the game, the target you are trying to link is the Legendary Edition version.</system:String>
+    <system:String x:Key="string_interp_cannotBackupThisIsTheCurrentGamePath">Cannot use this target as backup: It is the current game path for this game.</system:String>
+    <system:String x:Key="string_interp_cannotBackupTargetReason">Cannot use this target as backup: {0}</system:String>
+    <!-- 0={validationFailureReason} -->
+    <system:String x:Key="string_continueBackingUp">Continue backing up</system:String>
+    <system:String x:Key="string_abortBackup">Abort backup</system:String>
+    <system:String x:Key="string_selectEmptyBackupDestinationDirectory">Select empty backup destination directory</system:String>
+    <system:String x:Key="string_interp_backingUpSinglePercentage">Backing up {0} {1}%</system:String>
+    <!-- 0={filename} 1={number percent} -->
 
     <!-- Installation Information -->
-    <system:String x:Key="string_dialogRestoringFilesWhileAlotIsInstalledNotAllowed">Restoring files on a texture modded target is not allowed as it will introduce invalid texture pointers into the installation. Only full game restores are allowed while a game is texture modded.</system:String>
-    <system:String x:Key="string_cannotRestoreSfarFiles">Cannot restore SFAR files</system:String>
-    <system:String x:Key="string_dialogRestoringFilesWhileAlotIsInstalledNotAllowedDevMode">Restoring files on a texture modded target will introduce invalid texture pointers into the installation, which will cause black textures and possibly cause the game to crash. Please ensure you know what you are doing before continuing.</system:String>
-    <system:String x:Key="string_invalidTexturePointersWarning">Invalid texture pointers warning</system:String>
-    <system:String x:Key="string_restoreAllModifiedFilesQuestion">Restore all modified files?</system:String>
-    <system:String x:Key="string_confirmRestoration">Confirm restoration</system:String>
-    <system:String x:Key="string_restoringSfarsAlotBlocked">Restoring SFAR files on a texture modded target is not allowed, as it will introduce invalid texture pointers into the installation.</system:String>
-    <system:String x:Key="string_restoringSfarsAlotDevMode">Restoring SFARs on a texture modded target will introduce invalid texture pointers into the installation, which will cause black textures and possibly cause the game to crash. This operation will also delete all unpacked files from the directory. Please ensure you know what you are doing before continuing.</system:String>
-    <system:String x:Key="string_restoreAllModifiedSfarsQuestion">Restore all modified SFARs?</system:String>
-    <system:String x:Key="string_restoreSPSfarsQuestion">Restore all modified singleplayer SFARs?</system:String>
-    <system:String x:Key="string_restoreMPSfarsQuestion">Restore all modified multiplayer SFARs?</system:String>
-    <system:String x:Key="string_interp_backupAtX">Backup at {0}</system:String>
-    <!-- 0 = filepath -->
-    <system:String x:Key="string_noBackupForThisGame">No backup for this game</system:String>
-    <system:String x:Key="string_interp_cannotDeleteModsWhileXIsRunning">Cannot delete mods while {0} is running.</system:String>
-    <!-- 0 = gamename -->
-    <system:String xml:space="preserve" x:Key="string_interp_deletingXwhileAlotInstalledUnsupported">Deleting {0} while ALOT is installed will not cause the game to become broken, however you will not be able to install updates to ALOT without a full reinstallation (unsupported configuration).\n\nAre you sure you want to delete the DLC mod?</system:String>
-    <!-- 0 = mod name-->
-    <system:String x:Key="string_deletingWillPutAlotInUnsupportedConfig">Deleting will put game in unsupported configuration</system:String>
-    <system:String x:Key="string_interp_removeXFromTheGameInstallationQuestion">Remove {0} from the game installation?</system:String>
-    <!-- 0 = modname of dlc -->
-    <system:String x:Key="string_interp_cannotRestoreFilesWhileXIsRunning">Cannot restore files while {0} is running.</system:String>
-    <!-- 0 = game name-->
-    <system:String x:Key="string_interp_restoringXWhileAlotInstalledIsNotAllowed">Restoring {0} on a texture modded target is installed is not allowed, as it will introduce invalid texture pointers into the installation.</system:String>
-    <!-- 0 = filename-->
-    <system:String x:Key="string_cannotRestorePackageFiles">Cannot restore package files</system:String>
-    <system:String x:Key="string_interp_restoringXwhileAlotInstalledLikelyBreaksThingsDevMode">Restoring {0} on a texture modded target will very likely introduce invalid texture pointers into the installation, which may cause black textures or game crashes due to empty mips. Please ensure you know what you are doing before continuing.</system:String>
-    <!-- 0 = filename-->
-    <system:String x:Key="string_interp_restoreXquestion">Restore {0}?</system:String>
-    <!-- 0 = item (filename, dlc name)-->
     <system:String x:Key="string_installedByModManager">Installed by Mod Manager</system:String>
     <system:String x:Key="string_interp_installedByX">Installed by {0}</system:String>
     <!-- 0 = noun of tool (alot installer, mod manager, etc)-->
     <system:String x:Key="string_notInstalledByModManager">Not installed by Mod Manager</system:String>
     <system:String x:Key="string_installationInformation">Installation Information</system:String>
-    <system:String x:Key="string_installationInformationSubheader">Files installed into the basegame and official DLC directories are tracked on a best-effort system. The data may not be 100% accurate.</system:String>
-    <system:String x:Key="string_installedDLCmods">Installed DLC mods</system:String>
     <system:String x:Key="string_delete">Delete</system:String>
-    <system:String x:Key="string_modifiedBasegameFiles">Modified basegame files</system:String>
-    <system:String x:Key="string_willAttemptToRestoreAllModifiedBasegameUnpackedFiles">Will attempt to restore all modified basegame + unpacked DLC (ME2) files.</system:String>
-    <system:String x:Key="string_restoreallmodifiedbasegamefiles">Restore all modified basegame files</system:String>
-    <system:String x:Key="string_modifiedDLCarchivesSFAR">Modified DLC archives (SFAR)</system:String>
-    <system:String x:Key="string_willAttemptToRestoreAllModifiedSFARs">Will attempt to restore all modified SFARs. Will delete unpacked files too</system:String>
-    <system:String x:Key="string_willAttemptToRestoreSPModifiedSFARs">Will attempt to restore all modified singleplayer SFARs. Will delete unpacked files too</system:String>
-    <system:String x:Key="string_willAttemptToRestoreMPModifiedSFARs">Will attempt to restore all modified multiplayer SFARs. Will delete unpacked files too</system:String>
-    <system:String x:Key="string_restoreAllModifiedSFARs">Restore all modified SFARs</system:String>
-    <system:String x:Key="string_restoreMPModifiedSFARs">Restore modified MP SFARs</system:String>
-    <system:String x:Key="string_restoreSPModifiedSFARs">Restore modified SP SFARs</system:String>
-    <system:String x:Key="string_inconsistencyDetected">Inconsistency detected</system:String>
-    <system:String x:Key="string_removeTargetFromM3">Remove target</system:String>
-    <system:String x:Key="string_openInExplorer">Open in Explorer</system:String>
-    <system:String x:Key="string_clickToOpenALOTInstaller">Click to open ALOT Installer</system:String>
-    <system:String x:Key="string_manageTexturesWithALOTInstaller">Manage textures with ALOT Installer</system:String>
     <system:String x:Key="string_enable">Enable</system:String>
     <system:String x:Key="string_disable">Disable</system:String>
     <system:String x:Key="string_disabled">Disabled</system:String>
     <system:String xml:space="preserve" x:Key="string_tooltip_disableDLC">Disables this DLC mod from loading.&#10;This does not modify any files and can be safely done after texture mods have been installed</system:String>
     <system:String xml:space="preserve" x:Key="string_tooltip_enableDLC">Enables this DLC mod to load in the game</system:String>
-    <system:String xml:space="preserve" x:Key="string_tooltip_deleteDLC">Remove this DLC mod from the game.&#10;Hold SHIFT to bypass the confirmation dialog (if there are no warnings)</system:String>
-    <system:String  x:Key="string_tooltip_openTargetInExplorer">Opens this game target directory in File Explorer</system:String>
     <system:String  x:Key="string_other">Other</system:String>
-    <system:String  x:Key="string_extraDllsFound">Additional dlls</system:String>
-    <system:String  x:Key="string_noExtraDllsWereFound">No additional dlls were found</system:String>
-    <system:String  x:Key="string_installedASIs">Installed ASIs</system:String>
-    <system:String  x:Key="string_tooltip_clickToOpenASIManager">Click to open ASI Manager</system:String>
-    <system:String  x:Key="string_manageASIsWithASIManager">Manage ASIs with ASI Manager</system:String>
-    <system:String  x:Key="string_binkw32DLCBypass">Binkw32 DLC Bypass</system:String>
-    <system:String x:Key="string_dialog_restoringSFARWithoutBackup">Restoring SFARs without a backup will only delete unpacked files, as there is no backup file that can be copied in. This will leave the DLC in a broken, unusable state. You need to make a backup from an unmodified version of the game before you can properly restore DLC SFARs.</system:String>
-    <system:String x:Key="string_backupNotAvailable">Backup not available</system:String>
-    <system:String  x:Key="string_textures">Textures</system:String>
-    <system:String  x:Key="string_manageTextures">Install textures with ALOT Installer</system:String>
-    <system:String xml:space="preserve" x:Key="string_tooltip_manageTextures">Textures for the original trilogy are installed using ALOT Installer.&#10;Texture mods must be installed last</system:String>
-    <system:String  x:Key="string_manageTexturesLE">Install textures with Mass Effect Modder</system:String>
-    <system:String xml:space="preserve" x:Key="string_tooltip_manageTexturesLE">Textures for Legendary Edition are installed using Mass Effect Modder.&#10;Texture mods must be installed last or they will not work properly</system:String>
-    <system:String  x:Key="string_filesInstalledInSession">Files installed in session:</system:String>
-    <system:String  x:Key="string_interp_textureInstallationDate">Texture installation - {0}</system:String>
-    <!-- 0 = date -->
-    <system:String  x:Key="string_interp_versioningInfoX">Texture installation - {0}</system:String>
-    <!-- 0 = texture version string, like 'ALOT 12.0, MEUITM v3' -->
-    <system:String  x:Key="string_addModToDeployment">Add mod to deployment</system:String>
-    <system:String  x:Key="string_validationTargets">Validation targets</system:String>
-    <system:String  x:Key="string_tooltip_rerunCheckOnMod">Re-run check on mod</system:String>
-    <system:String x:Key="string_cannotShowModifiedBasegameFilesTextureModded">Cannot show modified basegame files on a texture modded target as all files will be modified</system:String>
-    <system:String x:Key="string_showInstalledOptions">Show installed options</system:String>
-    <system:String x:Key="string_hideInstalledOptions">Hide installed options</system:String>
 
-    <!-- Program updater -->
-    <system:String x:Key="string_anUpdateToME3TweaksModManagerIsAvailable">An update to ME3Tweaks Mod Manager is available.</system:String>
-    <system:String x:Key="string_downloadingUpdate">Downloading update</system:String>
-    <system:String x:Key="string_preparingToApplyUpdate">Preparing to apply update</system:String>
-    <system:String x:Key="string_errorDownloadingUpdate">Error downloading update</system:String>
-    <system:String x:Key="string_update">Update</system:String>
-    <system:String x:Key="string_verifyingUpdate">Verifying update</system:String>
-    <system:String x:Key="string_unableToApplyUpdateNotSigned">Unable to apply update: ME3TweaksModManager.exe in the update archive is not signed and is therefore not trusted.</system:String>
-    <system:String x:Key="string_errorApplyingUpdate">Error applying update</system:String>
-    <system:String x:Key="string_applyingUpdate">Applying update</system:String>
-    <system:String x:Key="string_restartingModManager">Restarting Mod Manager</system:String>
-    <system:String x:Key="string_unableToApplyUpdateME3TweaksExeNotFound">Unable to apply update: ME3TweaksModManager.exe was not found in the archive.</system:String>
-    <system:String x:Key="string_updateAvailable">Update available</system:String>
-    <system:String x:Key="string_currentVersion">Current version:</system:String>
-    <system:String x:Key="string_updateVersion">Update version:</system:String>
-    <system:String x:Key="string_releaseNotes">Release notes</system:String>
-    <system:String x:Key="string_updateInProgress">Update in progress</system:String>
-    <system:String x:Key="string_modManagerWillAutomaticallyRestart">Mod Manager will automatically restart to apply the update. It may take a few seconds once the window has closed.</system:String>
-    <system:String x:Key="string_notNow">Not now</system:String>
-    <system:String x:Key="string_viewChangelog">View changelog</system:String>
-    <system:String x:Key="string_installUpdate">Install update</system:String>
-    <system:String x:Key="string_applyingPatch">Applying patch</system:String>
-    <!-- When a patch file is being applied to the existing executable to produce new executable file -->
-    <system:String x:Key="string_theDownloadedUpdateFileIsNotSignedByME3TweaksAndIsNotTrusted">The downloaded update file is not signed by ME3Tweaks and is not trusted.</system:String>
-    <!-- The downloaded file is not signed by ME3Tweaks and is therefore not trusted. This can help protect against hijack of me3tweaks.com -->
+    <!-- Log Uploader-->
+    <system:String x:Key="string_interp_serverRejectedTheUpload">The server rejected the upload. The response was: {0}</system:String>
+    <!-- 0 = error message-->
+    <system:String xml:space="preserve" x:Key="string_interp_logWasUnableToUpload">The log was unable to upload:\n{0}.\nPlease come to the ME3Tweaks Discord for assistance.</system:String>
+    <!-- 0 = error message-->
+    <system:String x:Key="string_interp_requestTimedOutUploading">Request timed out while uploading log.</system:String>
+    <system:String x:Key="string_compressingForUpload">Compressing for upload</system:String>
+    <system:String x:Key="string_uploadingToME3Tweaks">Uploading to ME3Tweaks</system:String>
+    <system:String x:Key="string_errorUploadingLogResponse">Error uploading log: Response code {0}</system:String>
+    <!-- 0={response.StatusCode.ToString()} -->
+    <system:String x:Key="string_interp_serverRejectedLogUpload">The server rejected the upload: {0}</system:String>
+    <!-- 0={responseString} -->
+    <system:String x:Key="string_interp_errorUploadingLog">Error uploading log: {0}</system:String>
+    <!-- 0={ex.Message} -->
 
     <!-- Restore panel -->
     <system:String x:Key="string_insufficientDiskSpace">Insufficient disk space</system:String>
-    <system:String x:Key="string_restoreToCustomLocation">Restore to custom location</system:String>
-    <system:String x:Key="string_interp_dialogCannotRestoreXWhileItIsRunning">Cannot restore {0} while it is running.</system:String>
-    <!-- 0 = game name-->
-    <system:String x:Key="string_backup">Backup</system:String>
-    <system:String x:Key="string_restoringGameFromBackup">Restoring game from backup</system:String>
     <system:String x:Key="string_interp_restoringXpercent">Restoring {0}%</system:String>
     <!-- 0 = number -->
     <system:String x:Key="string_interp_restoringX">Restoring {0}</system:String>
     <!-- 0 = filename or item like DLC name -->
     <system:String x:Key="string_restoringBasegame">Restoring Basegame</system:String>
-    <system:String x:Key="string_restoringGame">Restoring game</system:String>
-    <system:String x:Key="string_dialogCouldNotCreateGameDirectoryAfterDeletion">Could not create the game directory after it was deleted due to an error. You can try to restore to a custom location to restore the game to the original location. View the logs from the help menu for more information.</system:String>
-    <system:String x:Key="string_errorRestoringGame">Error restoring game</system:String>
-    <system:String x:Key="string_dialogcouldNotFullyDeleteGameDirectory">Could not fully delete the game directory. It may have files or folders still open from various programs. Part of the game may have been deleted, but you can try again using the restore to custom location option after manually removing the rest of the game directory. View the logs from the help menu for more information.</system:String>
-    <system:String x:Key="string_dialogErrorOccuredDeletingGameDirectory">An error occurred while deleting the game directory. View the logs from the help menu for more information.</system:String>
-    <system:String x:Key="string_selectNewRestoreDestination">Select new restore destination</system:String>
-    <system:String x:Key="string_dialogDirectoryIsNotEmptyLocationToRestoreToMustBeEmpty">Directory is not empty. Location to restore to must be empty.</system:String>
-    <system:String x:Key="string_cannotRestoreToThisLocation">Cannot restore to this location</system:String>
-    <system:String x:Key="string_restoreThisTarget">Restore this target</system:String>
-    <system:String x:Key="string_selectTarget">Select target</system:String>
     <system:String x:Key="string_noBackup">No backup</system:String>
     <system:String x:Key="string_error">Error!</system:String>
     <system:String x:Key="string_fullGameRestore">Full game restore</system:String>
-    <system:String x:Key="string_restoringTextureLODs">Restoring from backup will reset your texture quality settings back to the defaults. Make sure you run the game through Mod Manager so the correct texture LODs are set.</system:String>
-    <system:String x:Key="string_entireGameDirectoryWillBeDeleted">The entirety of the game directory will be deleted. If you are trying to do granular restoration, including removing DLC mods or restoring specific files/SFARs, use the restore options from the Manage Target button instead.</system:String>
-    <system:String x:Key="string_youMaySeeElevationPromptOnRestore">You may see an elevation prompt when trying to restore your game. This is ME3Tweaks Mod Manager granting your user account permission to the new game directory after the old one has been deleted.</system:String>
-    <system:String xml:space="preserve" x:Key="string_dialog_restoringXWillDeleteGameDir">Restoring {0} will completely delete the game directory and then copy the backup into the original location.\n\nDelete this installation and restore it from backup?</system:String>
-    <!-- 0=Utilities.GetGameName(Game) -->
-    <system:String x:Key="string_gameTargetWillBeDeleted">Game target will be deleted</system:String>
-    <system:String x:Key="string_beta_useNewRestoreMethod">Use the experimental new restore method? It is faster but is not yet battle tested.</system:String>
-    <system:String x:Key="string_useBetaFeatureQuestion">Use beta feature?</system:String>
     <system:String x:Key="string_interp_copyingX">Copying {0}</system:String>
     <!-- 0={File} -->
     <system:String x:Key="string_interp_directoryNotEmptyWillDeleteEverything">The selected directory is not empty: {0}. ALL NON-GAME FILES AND FOLDERS IN THIS DIRECTORY WILL BE DELETED. Are you sure you want to continue?</system:String>
@@ -255,14 +127,7 @@
     <system:String x:Key="string_binkw32ASIBypass">Binkw32 ASI Bypass</system:String>
     <system:String x:Key="string_bink2w64ASILoader">Bink2w64 ASI Loader</system:String>
 
-    <!-- List Dialog -->
-    <system:String xml:space="preserve" x:Key="string_dialogCouldNotSetDataToClipboard">Could not set data to clipboard:\n</system:String>
-    <system:String x:Key="string_errorCopyingDataToClipboard">Error copying data to clipboard</system:String>
-    <system:String x:Key="string_copyItemsToClipboard">Copy items to clipboard</system:String>
-    <system:String x:Key="string_copiedToClipboard">Copied to clipboard</system:String>
-
     <!-- Online Content -->
-    <system:String x:Key="string_theDownloadWasCanceled">The download was canceled</system:String>
     <system:String x:Key="string_interp_onlineContentHashWrong">Hash of downloaded item ({0}) does not match expected hash. Expected: {1}, got: {2}</system:String>
     <!-- 0={url} 1={expected hash} 2={calculated hash} -->
 
@@ -271,25 +136,11 @@
     <system:String x:Key="string_interp_modNameByAuthorName">{0} by {1}</system:String>
     <!-- 0={ModName} 1={AuthorName} -->
 
-    <!-- TLK Transpiler -->
-    <system:String x:Key="string_interp_exceptionOccuredWhileCompilingTLKSubfileTankmaster">Exception occurred while compiling TLK subfile {0}: {1}</system:String>
-    <!-- 0=sub file 1=exception message. This method uses multiple files so it lists what file failed -->
-    <system:String x:Key="string_interp_exceptionOccuredWhileCompilingTLKFileME3Exp">Exception occurred while compiling TLK file: {0}</system:String>
-    <!-- 0=exception message. This method is single file so there's no point showing what file failed to compile -->
-
     <!-- Vanilla Database Service -->
     <system:String x:Key="string_checkingBackup">Checking backup</system:String>
 
     <!--  Backup Service -->
-    <system:String x:Key="string_interp_backupStatusStoredAt">Backup stored at {0}</system:String>
-    <system:String xml:space="preserve" x:Key="string_interp_backupStatusNotAccessible">Backup stored at {0}\nBackup path is not accessible, was the folder renamed or moved?</system:String>
-    <!-- 0={Backup Path} -->
-    <system:String x:Key="string_backupNotVanilla">Backup not vanilla</system:String>
-    <system:String xml:space="preserve" x:Key="string_interp_backupStatusNotVanilla">Backup stored at {0}\nBackup is not vanilla and will not be used</system:String>
-    <!-- 0={Backup Path} -->
-    <system:String x:Key="string_gameNotInstalledHasItBeenRunOnce">Game does not appear to be installed, or is not yet a moddable target in Mod Manager.&#10;If game is from Steam, ensure it has been run at least once</system:String>
     <system:String x:Key="string_pleaseWait">Please wait</system:String>
-
 
     <!-- Log Collector -->
     <system:String x:Key="string_preparingToCollectDiagnosticInfo">Preparing to collect diagnostic info</system:String>
@@ -308,49 +159,6 @@
     <system:String x:Key="string_collectingME3SessionLog">Collecting ME3 session log</system:String>
     <system:String x:Key="string_gettingTextureInfo">Getting texture mod installation info</system:String>
     <system:String x:Key="string_collectingASILogFiles">Collecting ASI log files</system:String>
-
-    <!-- Log Uploader -->
-    <system:String x:Key="string_errorUploadingLogResponse">Error uploading log: Response code {0}</system:String>
-    <!-- 0={number} -->
-    <system:String x:Key="string_interp_serverRejectedLogUpload">The server rejected the upload: {0}</system:String>
-    <!-- 0={response string from server} -->
-    <system:String x:Key="string_interp_errorUploadingLog">Error uploading log: {0}</system:String>
-    <!-- 0={error message} -->
-    <system:String x:Key="string_selectALogToView">Select a log to view on log viewing service</system:String>
-    <system:String x:Key="string_collectingLogInformation">Collecting log information</system:String>
-    <system:String x:Key="string_interp_serverRejectedTheUpload">The server rejected the upload. The response was: {0}</system:String>
-    <!-- 0 = error message-->
-    <system:String xml:space="preserve" x:Key="string_interp_logWasUnableToUpload">The log was unable to upload:\n{0}.\nPlease come to the ME3Tweaks Discord for assistance.</system:String>
-    <!-- 0 = error message-->
-    <system:String x:Key="string_interp_requestTimedOutUploading">Request timed out while uploading log.</system:String>
-    <system:String x:Key="string_logUploadFailed">Log upload failed</system:String>
-    <system:String x:Key="string_logsAndDiagnostics">Logs and Diagnostics</system:String>
-    <system:String x:Key="string_uploadToLogViewer">Upload to log viewer</system:String>
-    <system:String x:Key="string_selectWhatDataToCollect">Select what data to collect. You can select one or both options.</system:String>
-    <system:String x:Key="string_modManagerApplicationLog">Mod Manager application log</system:String>
-    <system:String x:Key="string_applicationLogDescription">The application log details what occurred during a Mod Manager session and can be used to troubleshoot the application. If you are trying to identify why something occurred in Mod Manager, select an application log.</system:String>
-    <system:String x:Key="string_gameDiagnostic">Game diagnostic</system:String>
-    <system:String x:Key="string_gameDiagnosticDescription">A game diagnostic collects information about a specific game target, including data on texture mod status, installed DLC, game version, crash logs (if any), texture issues, and more. If you are having an issue with a game, please select it.</system:String>
-    <system:String xml:space="preserve" x:Key="string_tooltip_checkAllTexturesInGameDescription">Selecting this option checks all textures in the game.&#10;The texture check step can take several minutes</system:String>
-    <system:String x:Key="string_fullTexturesCheck">Full textures check</system:String>
-    <system:String x:Key="string_diagShareTheLink">Share the resulting link of your log/diagnostic with your recipient. If you aren't sure what options to pick, simply select one from both.</system:String>
-    <system:String x:Key="string_selectAnApplicationLog">Select an application log</system:String>
-    <system:String x:Key="string_selectAGameTargetToGenerateDiagnosticsFor">Select a game target to generate diagnostics for</system:String>
-    <system:String x:Key="string_compressingForUpload">Compressing for upload</system:String>
-    <system:String x:Key="string_uploadingToME3Tweaks">Uploading to ME3Tweaks</system:String>
-
-
-    <!-- Texture2D -->
-    <system:String x:Key="string_error_couldNotFetchTextureData">Could not fetch texture data for texture {0} in file {1}</system:String>
-    <!-- Shown when checking textures during deployment. 0 = export object name, so just a long string ID. 1 = filepath-->
-    <system:String x:Key="string_error_me1TextureFileNotFound">Externally referenced texture package not found in game: {0}.</system:String>
-    <!-- 0= filepath -->
-    <system:String x:Key="string_error_me23TextureTFCNotFound">Externally referenced texture cache not found: {0}.</system:String>
-    <!-- 0=filepath -->
-    <system:String xml:space="preserve" x:Key="string_interp_error_textureExceptionExternal">{0}\nFile: {1}\nStorageType: {2}\nExternal file offset: {3}</system:String>
-    <!-- This technical string is shown when there is error loading texture data. 0=exception message. 1=filepath. 2=string (pccUnc, extLZO...) 3=file offset 0xhhhhhhhh -->
-    <system:String xml:space="preserve" x:Key="string_interp_error_textureExceptionInternal">{0}\nStorageType: {1}\n</system:String>
-    <!-- 0={exception message} 1={storage type (pccUnc, pccLZO, pccZLib)} -->
 
     <!-- StringStructParser-->
     <system:String x:Key="string_interp_ssp_unopenedParenthsisFound">Error parsing parenthesis split list: Found closing parenthesis that does not match open parenthesis at position {0} in string {1}</system:String>
