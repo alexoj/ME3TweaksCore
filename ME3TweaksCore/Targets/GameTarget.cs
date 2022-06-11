@@ -979,11 +979,12 @@ namespace ME3TweaksCore.Targets
         /// <summary>
         /// Maps each DLC folder to it's MetaCMM file, if one exists. Otherwise it is mapped to null
         /// </summary>
-        /// <param name="target"></param>
+        /// <param name="target">Target to get data from</param>
+        /// <param name="installedDLC">The list of DLC in the target, to prevent multiple filesystem enumeration if done externally to method</param>
         /// <returns></returns>
-        public Dictionary<string, MetaCMM> GetMetaMappedInstalledDLC(bool includeOfficial = true)
+        public Dictionary<string, MetaCMM> GetMetaMappedInstalledDLC(bool includeOfficial = true, List<string> installedDLC = null)
         {
-            var installedDLC = GetInstalledDLC();
+            installedDLC ??= GetInstalledDLC();
             var metamap = new Dictionary<string, MetaCMM>();
             var dlcpath = M3Directories.GetDLCPath(this);
             foreach (var v in installedDLC)
