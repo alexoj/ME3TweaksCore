@@ -503,7 +503,7 @@ namespace ME3TweaksCore.Helpers.MEM
             }
 
             MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(),
-                $"--install-mods --gameid {game.ToMEMGameNum()} --input \"{subfolder}\" --verify --ipc",
+                $"--install-mods --gameid {game.ToMEMGameNum()} --input \"{subfolder}\" --verify --ipc", // do not localize
 
                 ipcCallback: (command, param) =>
                 {

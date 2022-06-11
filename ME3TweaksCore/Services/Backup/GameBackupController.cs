@@ -119,7 +119,7 @@ namespace ME3TweaksCore.Services.Backup
                 if (MUtilities.IsGameRunning(targetToBackup.Game))
                 {
                     EndBackup();
-                    BlockingActionCallback?.Invoke("Cannot backup game", $"Cannot backup while {targetToBackup.Game.ToGameName()} is running.");
+                    BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotBackupGame), LC.GetString(LC.string_interp_cannotBackupGameIsRunning, targetToBackup.Game.ToGameName()));
                     return false;
                 }
 
@@ -133,8 +133,8 @@ namespace ME3TweaksCore.Services.Backup
             {
                 // Point to existing game installation
                 MLog.Information(@"PerformBackup() with IsCustomOption.");
-                var linkOK = WarningActionYesNoCallback?.Invoke("Ensure correct game chosen", "The path you specify will be checked if it is a vanilla backup. Once this check is complete it will be marked as a backup and modding tools will refuse to modify it. Ensure this is not your active game path or you will be unable to mod the game.",
-                    false, "I understand", "Abort linking");
+                var linkOK = WarningActionYesNoCallback?.Invoke(LC.GetString(LC.string_ensureCorrectGameChosen), LC.GetString(LC.string_warningLinkedTargetWillNotLoad),
+                    false, LC.GetString(LC.string_iUnderstand), LC.GetString(LC.string_abortLinking));
                 if (!linkOK.HasValue || !linkOK.Value)
                 {
                     MLog.Information(@"User aborted linking due to dialog");
@@ -161,14 +161,14 @@ namespace ME3TweaksCore.Services.Backup
                     {
                         MLog.Error($@"The selected executable is the Legendary Edition of the game, but target for backup is {Game}.");
                         EndBackup();
-                        BlockingActionCallback?.Invoke("Cannot backup game", "Cannot use this target as backup: This is the Legendary Edition version of the game, the target you are trying to link is the Original Trilogy version.");
+                        BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotBackupGame), LC.GetString(LC.string_cannotLinkTargetWrongGenerationLEneedOT));
                         return false;
                     }
                     else if (version.FileMajorPart == 1 && Game.IsLEGame())
                     {
                         MLog.Error($@"The selected executable is the Original Trilogy of the game, but target for backup is {Game}.");
                         EndBackup();
-                        BlockingActionCallback?.Invoke("Cannot backup game", "Cannot use this target as backup: This is the Original Trilogy version of the game, the target you are trying to link is the Legendary Edition version.");
+                        BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotBackupGame), LC.GetString(LC.string_cannotLinkTargetWrongGenerationOTneedLE));
                         return false;
                     }
                 }
@@ -181,7 +181,7 @@ namespace ME3TweaksCore.Services.Backup
                     // Can't point to an existing modding target
                     MLog.Error(@"This target is not valid to point to as a backup: It is listed a modding target already, it must be removed as a target first");
                     EndBackup();
-                    BlockingActionCallback?.Invoke("Cannot backup game", "Cannot use this target as backup: It is the current game path for this game.");
+                    BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotBackupGame), LC.GetString(LC.string_interp_cannotBackupThisIsTheCurrentGamePath));
                     return false;
                 }
 
@@ -191,7 +191,7 @@ namespace ME3TweaksCore.Services.Backup
                 {
                     MLog.Error(@"This installation is not valid to point to as a backup: " + validationFailureReason);
                     EndBackup();
-                    BlockingActionCallback?.Invoke("Cannot backup game", $"Cannot use this target as backup: {validationFailureReason}");
+                    BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotBackupGame), LC.GetString(LC.string_interp_cannotBackupTargetReason, validationFailureReason));
                     return false;
                 }
             }
@@ -251,7 +251,7 @@ namespace ME3TweaksCore.Services.Backup
                 dlcList = @" - " + dlcList;
                 MLog.Information(@"The following dlc will be missing in the backup if user continues: " + dlcList);
                 string message = LC.GetString(LC.string_dialog_notAllDLCInstalled, dlcList);
-                var okToBackup = WarningActionYesNoCallback?.Invoke(LC.GetString(LC.string_someDlcNotInstalled), message, false, "Continue backing up", "Abort backup");
+                var okToBackup = WarningActionYesNoCallback?.Invoke(LC.GetString(LC.string_someDlcNotInstalled), message, false, LC.GetString(LC.string_continueBackingUp), LC.GetString(LC.string_abortBackup));
                 if (!okToBackup.HasValue || !okToBackup.Value)
                 {
                     MLog.Information(@"User canceled backup due to some missing data");
@@ -308,7 +308,7 @@ namespace ME3TweaksCore.Services.Backup
             {
                 // Creating a new backup
                 MLog.Information(@"Prompting user to select backup destination");
-                backupPath = SelectGameBackupFolderDestination?.Invoke("Select empty backup destination directory"); // NEEDS LOCALIZED
+                backupPath = SelectGameBackupFolderDestination?.Invoke(LC.GetString(LC.string_selectEmptyBackupDestinationDirectory)); // NEEDS LOCALIZED
                 if (backupPath != null && Directory.Exists(backupPath))
                 {
                     MLog.Information(@"Backup path chosen: " + backupPath);
@@ -464,7 +464,7 @@ namespace ME3TweaksCore.Services.Backup
                     }
                     else
                     {
-                        UpdateStatusCallback?.Invoke($"Backing up {Path.GetFileName(fileBeingCopied)} {(int)(dataCopied * 100d / totalDataToCopy)}%");
+                        UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpSinglePercentage, Path.GetFileName(fileBeingCopied), (int)(dataCopied * 100d / totalDataToCopy)));
                     }
                 }
 

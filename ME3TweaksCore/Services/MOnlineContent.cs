@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
 using Serilog;
 
@@ -107,7 +108,7 @@ namespace ME3TweaksCore.Services
             if (md5 != hash)
             {
                 responseStream = null;
-                downloadError = $"Hash of downloaded item ({url}) does not match expected hash. Expected: {hash}, got: {md5}";
+                downloadError = LC.GetString(LC.string_interp_onlineContentHashWrong, url, hash, md5);
             }
 
             return (responseStream, downloadError);
