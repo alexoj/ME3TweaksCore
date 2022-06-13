@@ -93,6 +93,21 @@ namespace ME3TweaksCore.Objects
             };
         }
 
+        /// <summary>
+        /// Serializes this requirement back to the moddesc.ini format
+        /// </summary>
+        /// <returns>Moddesc.ini format of a DLC requirement</returns>
+        public string Serialize(bool isSingle)
+        {
+            // Singles have a ? prefix
+            if (isSingle)
+                return $"?{Serialize(false)}"; // do not localize
+
+            if (MinVersion != null)
+                return $@"{DLCFolderName}({MinVersion})";
+            return DLCFolderName;
+        }
+
         public override string ToString()
         {
             if (MinVersion != null)
