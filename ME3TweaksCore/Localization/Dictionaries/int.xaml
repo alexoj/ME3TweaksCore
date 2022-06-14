@@ -76,11 +76,11 @@
     <system:String x:Key="string_compressingForUpload">Compressing for upload</system:String>
     <system:String x:Key="string_uploadingToME3Tweaks">Uploading to ME3Tweaks</system:String>
     <system:String x:Key="string_errorUploadingLogResponse">Error uploading log: Response code {0}</system:String>
-    <!-- 0={response.StatusCode.ToString()} -->
+    <!-- 0={Number} -->
     <system:String x:Key="string_interp_serverRejectedLogUpload">The server rejected the upload: {0}</system:String>
-    <!-- 0={responseString} -->
+    <!-- 0={server response string} -->
     <system:String x:Key="string_interp_errorUploadingLog">Error uploading log: {0}</system:String>
-    <!-- 0={ex.Message} -->
+    <!-- 0={Exception message} -->
 
     <!-- Restore panel -->
     <system:String x:Key="string_insufficientDiskSpace">Insufficient disk space</system:String>
@@ -176,13 +176,12 @@
     <system:String x:Key="string_aSILoaderNotInstalledASIModsWillNotLoad">ASI loader not installed. ASI mods will not load</system:String>
     <system:String x:Key="string_interp_unsupportedGameIdInAsiManifest">Unsupported game id in asi manifest: {0}</system:String>
     <!-- 0={Number} -->
-
     <system:String x:Key="string_interp_productNameX">Product: {0}</system:String>
-    <!-- 0={info.ProductName.Trim()} -->
+    <!-- 0={Dll Product String} -->
     <system:String x:Key="string_interp_descriptionX">Description: {0}</system:String>
-    <!-- 0={info.FileDescription.Trim()} -->
+    <!-- 0={Dll Description String} -->
     <system:String x:Key="string_interp_companyX">Company: {0}</system:String>
-    <!-- 0={info.CompanyName.Trim()} -->
+    <!-- 0={Dll Company String} -->
 
     <!-- App Updater -->
     <system:String x:Key="string_upd_betaBuildNotificationString">This update is a beta build. You are receiving this update because you have opted into Beta Mode in the settings.</system:String>
@@ -195,15 +194,15 @@
     <system:String x:Key="string_upd_interp_XYisAvailable">{0} {1} is available</system:String>
     <!-- 0={app name} 1={version number} -->
     <system:String xml:space="preserve" x:Key="string_upd_interp_youAreCurrentlyUsingXWithSubInfo">You are currently using version {0}.{1}\n\n{2}</system:String>
-    <!-- 0={currentAppVersionInfo} 1={uiVersionInfo} 2={message} -->
+    <!-- 0={version string} 1={version string} 2={message} -->
     <system:String x:Key="string_upd_update">Update</system:String>
     <system:String x:Key="string_upd_later">Later</system:String>
     <system:String x:Key="string_upd_interp_downloadingUpdateForX">Downloading update for {0}...</system:String>
-    <!-- 0={interopPackage.ApplicationName} -->
+    <!-- 0={app name string} -->
     <system:String x:Key="string_upd_interp_forcedUpdateOutOfDate">This copy of {0} is outdated and must be updated.</system:String>
-    <!-- 0={interopPackage.ApplicationName} -->
+    <!-- 0={app name string} -->
     <system:String x:Key="string_upd_interp_updatingX">Updating {0}</system:String>
-    <!-- 0={interopPackage.ApplicationName} -->
+    <!-- 0={app name string} -->
     <system:String x:Key="string_upd_updateFailed">Update failed</system:String>
     <system:String x:Key="string_upd_interp_errorDownloadingUpdateX">There was an error downloading the update: {0}</system:String>
     <!-- 0={downloadResult.errorMessage} -->
@@ -213,7 +212,7 @@
     <!-- 0={updateFailedResult} -->
     <system:String x:Key="string_upd_oldVersionsAreNotSupportedTitle">Old versions are not supported</system:String>
     <system:String x:Key="string_upd_interp_outdatedVersionsAreNotSupportedMsg">Outdated versions of {0} are not supported and may not work in the future.</system:String>
-    <!-- 0={interopPackage.ApplicationName} -->
+    <!-- 0={app name string} -->
     <system:String x:Key="string_upd_buildingNewExecutable">Building new executable</system:String>
     <system:String x:Key="string_upd_extractingUpdate">Extracting update</system:String>
     <system:String x:Key="string_upd_interp_couldNotFindUpdateFileInArchive">Could not find {0} in the downloaded archive.</system:String>
@@ -248,25 +247,25 @@
     <!-- Game restore controller -->
     <system:String x:Key="string_cannotRestoreGame">Cannot restore game</system:String>
     <system:String x:Key="string_interp_cannotRestoreGameToGameWhileRunning">Cannot restore {0} while an instance of it is running.</system:String>
-    <!-- 0={Game.ToGameName()} -->
+    <!-- 0={Game name (Mass Effect, Mass Effect 2, etc)} -->
     <system:String x:Key="string_interp_restoringWillDeleteEverythingTitle">Restoring {0} will delete existing installation</system:String>
-    <!-- 0={Game.ToGameName()} -->
+    <!-- 0={Game name (Mass Effect, Mass Effect 2, etc)} -->
     <system:String x:Key="string_interp_restoringWillDeleteEverythingMessage">Restoring {0} will delete the existing installation, copy your backup to its original location, and reset the texture Level of Detail (LOD) settings for your game.</system:String>
-    <!-- 0={Game.ToGameName()} -->
+    <!-- 0={Game name (Mass Effect, Mass Effect 2, etc)} -->
     <system:String x:Key="string_selectDestinationLocationForRestore">Select destination location for restore</system:String>
     <system:String x:Key="string_selectADirectoryToRestoreTheGameToThisDirectoryMustBeEmpty">Select a directory to restore the game to. This directory must be empty.</system:String>
     <system:String x:Key="string_restoreDestinationNotEmpty">The destination directory for restores must be an empty directory. Remove the files and folders in this directory, or choose another directory.</system:String>
     <system:String x:Key="string_deletingExistingGameInstallation">Deleting existing game installation</system:String>
     <system:String x:Key="string_couldNotDeleteGameDirectory">Could not delete game directory</system:String>
     <system:String x:Key="string_interp_couldNotFullyDeleteGameDirectory">Could not delete the game directory for {0}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.</system:String>
-    <!-- 0={Game.ToGameName()} -->
+    <!-- 0={Game name (Mass Effect, Mass Effect 2, etc)} -->
     <system:String x:Key="string_errorDeletingGameDirectory">Error deleting game directory</system:String>
     <system:String x:Key="string_interp_couldNotFullyDeleteGameDirectoryException">Could not delete the game directory for {0}: {1}. The game will be in a semi deleted state, please manually delete it and then restore to the same location as the game to fully restore the game.</system:String>
-    <!-- 0={Game.ToGameName()} 1={ex.Message} -->
+    <!-- 0={Game name (Mass Effect, Mass Effect 2, etc)} 1={ex.Message} -->
     <system:String x:Key="string_preparingGameDirectory">Preparing game directory</system:String>
     <system:String x:Key="string_errorCreatingGameDirectory">Error creating game directory</system:String>
     <system:String x:Key="string_interp_couldNotCreateGameDirectoryNoPermission">Could not create the game directory for {0}. You may not have permissions to create folders in the directory that contains the game directory.</system:String>
-    <!-- 0={Game.ToGameName()} -->
+    <!-- 0={Game name (Mass Effect, Mass Effect 2, etc)} -->
     <system:String x:Key="string_analyzingGameFiles">Analyzing game files</system:String>
     <system:String x:Key="string_checkingTexturetaggedPackages">Checking texture-tagged packages</system:String>
     <system:String x:Key="string_restoringFromBackup">Restoring from backup</system:String>
@@ -277,5 +276,13 @@
     <system:String x:Key="string_dlcRequirementInvalidParenthesis">DLCRequirement input is invalid: Version must be enclosed in parenthesis</system:String>
     <system:String x:Key="string_interp_dlcRequirementInvalidBadVersion">DLCRequirement input is invalid: Invalid version string '{0}'</system:String>
     <!-- 0={invalid string value} -->
+
+    <!-- MEM IPC Handler -->
+    <system:String x:Key="string_unpackingDLC">Unpacking DLC</system:String>
+    <system:String x:Key="string_checkingGameData">Checking game data</system:String>
+    <system:String x:Key="string_scanningGameTextures">Scanning game textures</system:String>
+    <system:String x:Key="string_installingTextures">Installing textures</system:String>
+    <system:String x:Key="string_verifyingTextures">Verifying textures</system:String>
+    <system:String x:Key="string_installingMarkers">Installing markers</system:String>
 
 </ResourceDictionary>

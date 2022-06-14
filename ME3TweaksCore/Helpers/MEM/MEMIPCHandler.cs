@@ -370,26 +370,26 @@ namespace ME3TweaksCore.Helpers.MEM
             var args = $@"--print-lods --gameid {game.ToMEMGameNum()} --ipc";
             int exitcode = -1;
             MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(), args, ipcCallback: (command, param) =>
+            {
+                switch (command)
                 {
-                    switch (command)
-                    {
-                        case @"LODLINE":
-                            var lodSplit = param.Split(@"=");
-                            try
-                            {
-                                lods[lodSplit[0]] = param.Substring(lodSplit[0].Length + 1);
-                            }
-                            catch (Exception e)
-                            {
-                                MLog.Error($@"Error reading LOD line output from MEM: {param}, {e.Message}");
-                            }
+                    case @"LODLINE":
+                        var lodSplit = param.Split(@"=");
+                        try
+                        {
+                            lods[lodSplit[0]] = param.Substring(lodSplit[0].Length + 1);
+                        }
+                        catch (Exception e)
+                        {
+                            MLog.Error($@"Error reading LOD line output from MEM: {param}, {e.Message}");
+                        }
 
-                            break;
-                        default:
-                            //Debug.WriteLine(@"oof?");
-                            break;
-                    }
-                },
+                        break;
+                    default:
+                        //Debug.WriteLine(@"oof?");
+                        break;
+                }
+            },
                 applicationExited: x => exitcode = x
             );
             if (exitcode != 0)
@@ -518,29 +518,29 @@ namespace ME3TweaksCore.Helpers.MEM
                                 {
                                     // OT-ME3 ONLY - DLC is unpacked for use
                                     case @"STAGE_UNPACKDLC":
-                                        currentActionCallback?.Invoke("Unpacking DLC");
+                                        currentActionCallback?.Invoke(LC.GetString(LC.string_unpackingDLC));
                                         break;
                                     // The game file sizes are compared against the precomputed texture map
                                     case @"STAGE_PRESCAN":
-                                        currentActionCallback?.Invoke("Checking game data");
+                                        currentActionCallback?.Invoke(LC.GetString(LC.string_checkingGameData));
                                         break;
                                     // The files that differ from precomputed texture map are inspected and merged into the used texture map
                                     case @"STAGE_SCAN":
-                                        currentActionCallback?.Invoke("Scanning game textures");
+                                        currentActionCallback?.Invoke(LC.GetString(LC.string_scanningGameTextures));
                                         break;
                                     // Package files are updated and data is stored in them for the lower mips
                                     case @"STAGE_INSTALLTEXTURES":
-                                        currentActionCallback?.Invoke("Installing textures");
+                                        currentActionCallback?.Invoke(LC.GetString(LC.string_installingTextures));
                                         break;
                                     // Textures that were installed are checked for correct magic numbers
                                     case @"STAGE_VERIFYTEXTURES":
-                                        currentActionCallback?.Invoke("Verifying textures");
+                                        currentActionCallback?.Invoke(LC.GetString(LC.string_verifyingTextures));
                                         break;
                                     // Non-texture modded files are tagged as belonging to a texture mod installation so they cannot be moved across installs
                                     case @"STAGE_MARKERS":
-                                        currentActionCallback?.Invoke("Installing markers");
+                                        currentActionCallback?.Invoke(LC.GetString(LC.string_installingMarkers));
                                         break;
-                                    
+
                                 }
                             }
                             break;

@@ -194,5 +194,11 @@ namespace ME3TweaksCore.Localization
 		public const string string_calculatingHowManyFilesWillBeRestored = "string_calculatingHowManyFilesWillBeRestored";
 		public const string string_dlcRequirementInvalidParenthesis = "string_dlcRequirementInvalidParenthesis";
 		public const string string_interp_dlcRequirementInvalidBadVersion = "string_interp_dlcRequirementInvalidBadVersion";
+		public const string string_unpackingDLC = "string_unpackingDLC";
+		public const string string_checkingGameData = "string_checkingGameData";
+		public const string string_scanningGameTextures = "string_scanningGameTextures";
+		public const string string_installingTextures = "string_installingTextures";
+		public const string string_verifyingTextures = "string_verifyingTextures";
+		public const string string_installingMarkers = "string_installingMarkers";
 	}
 }
