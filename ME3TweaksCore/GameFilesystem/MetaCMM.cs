@@ -78,7 +78,7 @@ namespace ME3TweaksCore.GameFilesystem
                 sb.AppendLine($@"{PrefixModDescPath}{ModdescSourcePath}");
             }
 
-            if (PrefixRequiredDLC != null)
+            if (RequiredDLC.Any())
             {
                 sb.AppendLine($@"{PrefixRequiredDLC}{string.Join(';', RequiredDLC)}");
             }
