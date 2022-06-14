@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ME3TweaksCore.Diagnostics;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Targets;
 
 namespace ME3TweaksCore.Objects
@@ -76,14 +77,14 @@ namespace ME3TweaksCore.Objects
 
             if (verStart == -1 || verEnd == -1 || verStart > verEnd)
             {
-                throw new Exception("DLCRequirement input is invalid: Version must be enclosed in parenthesis");
+                throw new Exception(LC.GetString(LC.string_dlcRequirementInvalidParenthesis));
             }
 
             string verString = inputString.Substring(verStart + 1, verEnd - (verStart + 1));
             Version minVer;
             if (!Version.TryParse(verString, out minVer))
             {
-                throw new Exception($"DLCRequirement input is invalid: Invalid version string '{verString}'");
+                throw new Exception(LC.GetString(LC.string_interp_dlcRequirementInvalidBadVersion, verString));
             }
 
             return new DLCRequirement()

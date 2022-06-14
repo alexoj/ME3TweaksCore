@@ -272,4 +272,10 @@
     <system:String x:Key="string_restoringFromBackup">Restoring from backup</system:String>
     <system:String x:Key="string_restoringMovies">Restoring movies</system:String>
     <system:String x:Key="string_calculatingHowManyFilesWillBeRestored">Calculating how many files will be restored</system:String>
+
+    <!-- DLC Requirement -->
+    <system:String x:Key="string_dlcRequirementInvalidParenthesis">DLCRequirement input is invalid: Version must be enclosed in parenthesis</system:String>
+    <system:String x:Key="string_interp_dlcRequirementInvalidBadVersion">DLCRequirement input is invalid: Invalid version string '{0}'</system:String>
+    <!-- 0={invalid string value} -->
+
 </ResourceDictionary>
