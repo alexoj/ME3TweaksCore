@@ -95,6 +95,7 @@ namespace ME3TweaksCore.ME3Tweaks.Online
             {
                 if (combinedServicesManifest != null)
                 {
+                    // if service is not defined in combined manifest, this just returns null
                     serviceLoader.Value.Invoke(combinedServicesManifest[serviceLoader.Key]);
                 }
                 else
