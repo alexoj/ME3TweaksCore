@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.Services;
@@ -72,7 +73,7 @@ namespace ME3TweaksCore.ME3Tweaks.Online
                     {
                         using var wc = new ShortTimeoutWebClient();
                         Stopwatch sw = Stopwatch.StartNew();
-                        serviceData = wc.DownloadString(fetchUrl);
+                        serviceData = wc.DownloadStringAwareOfEncoding(fetchUrl);
                         sw.Stop();
                         MLog.Information($@"Fetched combined services data from endpoint {host} in {sw.ElapsedMilliseconds}ms");
                         break;
