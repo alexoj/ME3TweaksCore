@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.Services;

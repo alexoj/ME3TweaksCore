@@ -11,21 +11,6 @@ using ME3TweaksCore.Targets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ME3TweaksCore.Services
-{
-    public partial class MOnlineContent
-    {
-        /// <summary>
-        /// {ServiceLoggingName} URLs
-        /// </summary>
-        public static FallbackLink BasegameFileIdentificationServiceURL { get; } = new FallbackLink()
-        {
-            MainURL = @"https://me3tweaks.com/modmanager/services/basegamefileidentificationservice",
-            FallbackURL = @"https://raw.githubusercontent.com/ME3Tweaks/ME3TweaksModManager/master/MassEffectModManagerCore/staticfiles/basegamefileidentificationservice.json"
-        };
-    }
-}
-
 namespace ME3TweaksCore.Services.BasegameFileIdentification
 {
     public class BasegameFileIdentificationService
@@ -34,10 +19,6 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
         /// Database of locally installed files
         /// </summary>
         private static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> LocalDatabase;
-        /// <summary>
-        /// Database of known hashes from ME3Tweaks. This list is not well maintained due to the amount of work it requires.
-        /// </summary>
-        private static Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> ME3TweaksDatabase;
 
         /// <summary>
         /// If the BasegameFileIdentificationService has been initially loaded
@@ -49,26 +30,18 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
         /// </summary>
         private const string ServiceLoggingName = @"Basegame File Identification Service";
 
-        private static string GetME3TweaksServiceCacheFile() => MCoreFilesystem.GetME3TweaksBasegameFileIdentificationServiceFile();
-
-
         private static void LoadLocalBasegameIdentificationService()
         {
             if (LocalDatabase != null) return;
             LocalDatabase = new CaseInsensitiveDictionary<CaseInsensitiveDictionary<List<BasegameFileRecord>>>();
             LoadDatabase(true, LocalDatabase);
         }
-
-        private static bool LoadME3TweaksBasegameIdentificationService(JToken data)
-        {
-            // ServiceLoader for online content
-            return InternalLoadME3TweaksService(data);
-        }
+        
 
         private static void LoadDatabase(bool local, Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> database, JToken serverData = null)
         {
-            var typeStr = local ? @"Local" : @"ME3Tweaks";
-            var file = local ? MCoreFilesystem.GetLocalBasegameIdentificationServiceFile() : GetME3TweaksServiceCacheFile();
+            var typeStr = @"Local";
+            var file = MCoreFilesystem.GetLocalBasegameIdentificationServiceFile() ;
             if (File.Exists(file))
             {
                 try
@@ -160,7 +133,6 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
         /// <returns></returns>
         public static BasegameFileRecord GetBasegameFileSource(GameTarget target, string fullfilepath, string md5 = null)
         {
-            // Check local first
             LoadLocalBasegameIdentificationService();
             if (LocalDatabase.TryGetValue(target.Game.ToString(), out var infosForGameL))
             {
@@ -177,101 +149,9 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
                 }
             }
 
-
-            // Local not found. Try server version instead.
-            if (TryGetServerBasegameRecordsForGame(target.Game.ToString(), out var infosForGame))
-            {
-                var relativeFilename = fullfilepath.Substring(target.TargetPath.Length + 1).ToUpper();
-
-                if (infosForGame.TryGetValue(relativeFilename, out var items))
-                {
-                    md5 ??= MUtilities.CalculateMD5(fullfilepath);
-                    return items.FirstOrDefault(x => x.hash == md5);
-                }
-            }
-
             return null;
         }
-
-        /// <summary>
-        /// Gets the list of basegame records from the ME3Tweaks database for the specified game
-        /// </summary>
-        /// <param name="gameAsString"></param>
-        /// <param name="infosForGame"></param>
-        /// <returns></returns>
-        private static bool TryGetServerBasegameRecordsForGame(string gameAsString, out CaseInsensitiveDictionary<List<BasegameFileRecord>> infosForGame)
-        {
-            if (ME3TweaksDatabase != null && ME3TweaksDatabase.TryGetValue(gameAsString, out var recordsList))
-            {
-                infosForGame = recordsList;
-                return true;
-            }
-
-            infosForGame = new CaseInsensitiveDictionary<List<BasegameFileRecord>>(0); // None
-            return false;
-        }
-
-        private static bool InternalLoadME3TweaksService(JToken serviceData)
-        {
-            // Online first
-            if (serviceData != null)
-            {
-                try
-                {
-                    ME3TweaksDatabase = serviceData.ToObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>();
-                    ServiceLoaded = true;
-#if DEBUG
-                    File.WriteAllText(GetME3TweaksServiceCacheFile(), serviceData.ToString(Formatting.Indented));
-#else
-                    File.WriteAllText(GetME3TweaksServiceCacheFile(), serviceData.ToString(Formatting.None));
-#endif
-                    MLog.Information($@"Loaded online {ServiceLoggingName}");
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    if (ServiceLoaded)
-                    {
-                        MLog.Error($@"Loaded online {ServiceLoggingName}, but failed to cache to disk: {ex.Message}");
-                        return true;
-                    }
-                    else
-                    {
-                        MLog.Error($@"Failed to load {ServiceLoggingName}: {ex.Message}");
-                        return false;
-                    }
-                }
-            }
-
-            // Use cached if online is not available
-            if (File.Exists(GetME3TweaksServiceCacheFile()))
-            {
-                try
-                {
-                    var cached = File.ReadAllText(GetME3TweaksServiceCacheFile());
-                    ME3TweaksDatabase = JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>(cached);
-                    ServiceLoaded = true;
-                    MLog.Information($@"Loaded cached {ServiceLoggingName}");
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    MLog.Error($@"Failed to load cached {ServiceLoggingName}: {e.Message}");
-                    var relevantInfo = new Dictionary<string, string>()
-                    {
-                        {@"Error type", @"Error reading cached online content"},
-                        {@"Service", ServiceLoggingName},
-                        {@"Message", e.Message}
-                    };
-                    TelemetryInterposer.UploadErrorLog(e, relevantInfo);
-                }
-            }
-
-            MLog.Information($@"Unable to load {ServiceLoggingName} service: No cached content or online content was available to load");
-            return false;
-        }
-
-
+        
         /// <summary>
         /// Returns a blank Basegame Identification Database
         /// </summary>
@@ -290,18 +170,12 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             };
         }
 
+        // This service doesn't take any data but uses the service loader model.
         public static bool LoadService(JToken data)
         {
             LoadLocalBasegameIdentificationService();
-            var result = LoadME3TweaksBasegameIdentificationService(data);
             ServiceLoaded = true;
-            return result;
-        }
-
-        public static IReadOnlyDictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> GetAllServerEntries()
-        {
-            // Would prefer way to make it all read only but... ... ...
-            return ME3TweaksDatabase;
+            return true;
         }
     }
 }
