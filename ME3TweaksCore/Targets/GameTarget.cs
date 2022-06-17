@@ -402,10 +402,15 @@ namespace ME3TweaksCore.Targets
             modifiedSfars = modifiedSfars.Distinct().ToList(); //filter out if modified + inconsistent
 
             ModifiedSFARFiles.AddRange(modifiedSfars.Select(file => MExtendedClassGenerators.GenerateSFARObject(file, this, restoreSfarConfirmationCallback, notifySFARRestoringCallback, notifyRestoredCallback)));
-            ModifiedBasegameFiles.AddRange(modifiedFiles.Select(file => MExtendedClassGenerators.GenerateModifiedFileObject(file.Substring(TargetPath.Length + 1), this,
+
+            // Filter out packages and TFCs if game is texture modded
+            var modifiedBasegameFiles = modifiedFiles.Where(x=> !TextureModded || (!x.RepresentsPackageFilePath() && Path.GetExtension(x) != @".tfc"))
+                .Select(file => MExtendedClassGenerators.GenerateModifiedFileObject(file.Substring(TargetPath.Length + 1), this,
                 restoreBasegamefileConfirmationCallback,
                 notifyFileRestoringCallback,
-                notifyRestoredCallback)));
+                notifyRestoredCallback));
+
+            ModifiedBasegameFiles.AddRange(modifiedBasegameFiles);
         }
 
         /// <summary>

@@ -513,7 +513,7 @@ namespace ME3TweaksCore.Helpers.MEM
                         case @"STAGE_CONTEXT":
                             {
                                 MLog.Information($@"MEM stage context switch to: {param}");
-
+                                progressCallback?.Invoke(0); // Reset progress to 0
                                 switch (param)
                                 {
                                     // OT-ME3 ONLY - DLC is unpacked for use

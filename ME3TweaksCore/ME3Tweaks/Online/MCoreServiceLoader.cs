@@ -73,7 +73,7 @@ namespace ME3TweaksCore.ME3Tweaks.Online
                     {
                         using var wc = new ShortTimeoutWebClient();
                         Stopwatch sw = Stopwatch.StartNew();
-                        serviceData = wc.DownloadString(fetchUrl);
+                        serviceData = wc.DownloadStringAwareOfEncoding(fetchUrl);
                         sw.Stop();
                         MLog.Information($@"Fetched combined services data from endpoint {host} in {sw.ElapsedMilliseconds}ms");
                         break;
