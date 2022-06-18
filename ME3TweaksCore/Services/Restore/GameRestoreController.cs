@@ -76,7 +76,6 @@ namespace ME3TweaksCore.Services.Restore
         /// <returns></returns>
         public bool PerformRestore(GameTarget restoreTarget, string destinationDirectory)
         {
-            // Todo: Localize this to LocalizationCore
             var useFullCopyMethod = false;  // Prefer robocopy for now.
 
             if (MUtilities.IsGameRunning(Game))
@@ -225,6 +224,7 @@ namespace ME3TweaksCore.Services.Restore
 
                 // For each package that failed validation, we should check the size.
                 backupStatus.BackupLocationStatus = LC.GetString(LC.string_checkingTexturetaggedPackages);
+                UpdateStatusCallback?.Invoke(backupStatus.BackupLocationStatus);
                 int numOnlyTexTagged = 0;
                 SetProgressIndeterminateCallback?.Invoke(false);
                 ProgressValue = 0;
@@ -259,12 +259,14 @@ namespace ME3TweaksCore.Services.Restore
                         numOnlyTexTagged++;
                     }
                     ProgressValue++;
+                    UpdateProgressCallback?.Invoke(ProgressValue, ProgressMax);
                 }
                 Debug.WriteLine($@"Files only texture tagged: {numOnlyTexTagged}");
             }
 
 
             backupStatus.BackupStatus = LC.GetString(LC.string_restoringFromBackup);
+            UpdateStatusCallback?.Invoke(backupStatus.BackupStatus);
 
             string currentRoboCopyFile = null;
             RoboCommand rc = new RoboCommand();
@@ -277,6 +279,7 @@ namespace ME3TweaksCore.Services.Restore
                 SetProgressIndeterminateCallback?.Invoke(false);
                 ProgressValue = (int)args.CurrentFileProgress;
                 ProgressMax = 100;
+                UpdateProgressCallback?.Invoke(ProgressValue, ProgressMax);
             };
             rc.OnFileProcessed += (sender, args) =>
             {
@@ -284,6 +287,8 @@ namespace ME3TweaksCore.Services.Restore
                 {
                     currentRoboCopyFile = args.ProcessedFile.Name.Substring(backupPath.Length + 1);
                     backupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_copyingX, currentRoboCopyFile);
+                    UpdateStatusCallback?.Invoke(backupStatus.BackupLocationStatus);
+
                 }
             };
             MLog.Information($@"Beginning robocopy restore: {backupPath} -> {destTarget.TargetPath}");
