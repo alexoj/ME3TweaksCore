@@ -27,7 +27,7 @@ namespace ME3TweaksCore
         /// <summary>
         /// If the library has already been initialized.
         /// </summary>
-        private static bool Initialized;
+        public static bool Initialized { get; private set; }
 
         public static Action<Action> RunOnUIThread;
 
@@ -59,17 +59,14 @@ namespace ME3TweaksCore
                 throw new Exception(@"The ME3TweaksCoreLibInitPackage object was null! This object is required to initialize the library.");
             }
 
+            MLog.Information($@"Initializing ME3TweaksCore library {MLibraryConsumer.GetLibraryVersion()}");
             package.InstallInitPackage();
 
-            MLog.Information($@"Initializing ME3TweaksCore library {MLibraryConsumer.GetLibraryVersion()}");
 
             // Load Legendary Explorer Core as we depend on it
             MEPackageHandler.GlobalSharedCacheEnabled = false; // ME3Tweaks tools (non LEX) do not use the global package cache
             LegendaryExplorerCoreLib.InitLib(null, logger: Log.Logger, packageSavingFailed: package.LECPackageSaveFailedCallback); // Might need to change off of null for scheduler
-
-            // Load our library
-            LC.SetLanguage(@"int"); // Load INT as it is the default language. Non-INT can be loaded later over the top of this
-
+            
             MUtilities.DeleteFilesAndFoldersRecursively(MCoreFilesystem.GetTempDirectory(), deleteDirectoryItself: false); // Clear temp but don't delete the directory itself
             BackupService.InitBackupService(RunOnUIThread, logPaths: true);
 
