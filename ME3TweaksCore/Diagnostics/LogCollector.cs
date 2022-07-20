@@ -1043,7 +1043,9 @@ namespace ME3TweaksCore.Diagnostics
                     {
                         var metaMappedDLC = dlc.Value;
                         dlcStruct.InstalledBy = metaMappedDLC?.InstalledBy;
-                        dlcStruct.VersionInstalled
+                        dlcStruct.VersionInstalled = metaMappedDLC?.Version;
+                        dlcStruct.InstalledOptions = metaMappedDLC?.OptionsSelectedAtInstallTime;
+                        dlcStruct.NexusUpdateCode = metaMappedDLC?.NexusCode;
                     }
                     else
                     {

@@ -20,6 +20,7 @@ namespace ME3TweaksCore.GameFilesystem
         public static readonly string PrefixRequiredDLC = @"[REQUIREDDLC]";
         public static readonly string PrefixExtendedAttributes = @"[EXTENDEDATTRIBUTE]";
         public static readonly string PrefixModDescPath = @"[SOURCEMODDESC]";
+        public static readonly string PrefixNexusUpdateCode = @"[NEXUSUPDATECODE]";
         #endregion
 
         public string ModName { get; set; }
@@ -47,6 +48,11 @@ namespace ME3TweaksCore.GameFilesystem
         /// List of extended attributes that don't have a hardcoded variable in tooling.
         /// </summary>
         public CaseInsensitiveDictionary<string> ExtendedAttributes { get; } = new();
+
+        /// <summary>
+        /// The code used to check for nexus updates - this is not for updating the mod, but just checking the installed version against the server version, mostly for logging.
+        /// </summary>
+        public int NexusUpdateCode { get; }
 
         /// <summary>
         /// Writes the metacmm file to the specified filepath.
@@ -81,6 +87,12 @@ namespace ME3TweaksCore.GameFilesystem
             if (RequiredDLC.Any())
             {
                 sb.AppendLine($@"{PrefixRequiredDLC}{string.Join(';', RequiredDLC)}");
+            }
+
+            // Mod Manager 8: Write nexus update code so we can check for updates in diags on the serverside
+            if (NexusUpdateCode != 0)
+            {
+                sb.AppendLine($@"{PrefixNexusUpdateCode}{NexusUpdateCode}");
             }
 
             File.WriteAllText(path, sb.ToString());
@@ -149,6 +161,18 @@ namespace ME3TweaksCore.GameFilesystem
                                 {
                                     MLog.Warning($@"Failed to read DLC requirement: {s} in metacmm file {metaFile}");
                                 }
+                            }
+                        }
+                        else if (line.StartsWith(PrefixNexusUpdateCode))
+                        {
+                            var parsedline = line.Substring(PrefixNexusUpdateCode.Length);
+                            if (int.TryParse(parsedline, out var nc))
+                            {
+                                NexusUpdateCode = nc;
+                            }
+                            else
+                            {
+                                MLog.Warning($@"Failed to read NexusUpdateCode: Invalid value: {parsedline}");
                             }
                         }
                         break;
