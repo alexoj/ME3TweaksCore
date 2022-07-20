@@ -37,6 +37,107 @@ using Serilog;
 
 namespace ME3TweaksCore.Diagnostics
 {
+    /// <summary>
+    /// Contains classes and information used by the ME3Tweaks Log Viewer service on the website
+    /// </summary>
+    internal class ME3TweaksLogViewer
+    {
+        /// <summary>
+        /// Used to colorize the log
+        /// </summary>
+        public enum LogSeverity
+        {
+            INFO,
+            WARN,
+            ERROR,
+            FATAL,
+            GOOD,
+            DIAGSECTION,
+            BOLD,
+            DLC,
+            GAMEID,
+            OFFICIALDLC,
+            TPMI,
+            SUB,
+            BOLDBLUE,
+            SUPERCEDANCE_FILE
+        }
+        public class InstalledDLCStruct
+        {
+            // Used to tell log viewer which version we have to parse
+            private const int SERVERCODE_VER = 3;
+
+            public string DLCFolderName { get; set; }
+            public int NexusUpdateCode { get; set; }
+            public string InstalledBy { get; set; }
+            public string VersionInstalled { get; set; }
+            public IEnumerable<string> InstalledOptions { get; set; }
+            public bool IsOfficialDLC { get; set; }
+
+            public void PrintToDiag(Action<string, LogSeverity> printToDiagFunc)
+            {
+                StringBuilder sb = new StringBuilder();
+                LogSeverity severity;
+                if (IsOfficialDLC)
+                {
+                    severity = LogSeverity.OFFICIALDLC;
+                    sb.Append(DLCFolderName);
+                    printToDiagFunc(sb.ToString(), severity);
+                }
+                else
+                {
+                    severity = LogSeverity.DLC;
+                    sb.Append(SERVERCODE_VER);
+                    sb.Append(";;");
+                    sb.Append(DLCFolderName);
+
+                    // Mod Version
+                    sb.Append(";;");
+                    if (VersionInstalled != null)
+                    {
+                        sb.Append(VersionInstalled);
+                    }
+                    else
+                    {
+                        sb.Append("0.0");
+                    }
+
+                    // Installed By
+                    sb.Append(";;");
+
+                    // It's a modded DLC
+                    if (string.IsNullOrWhiteSpace(InstalledBy))
+                    {
+                        sb.Append($@"Not installed by managed installer"); // Invalid metacmm or not present
+                    }
+                    else if (int.TryParse(InstalledBy, out var _))
+                    {
+                        sb.Append($@"Installed by Mod Manager Build {InstalledBy}"); // Legacy (and M3) - only list build number
+                    }
+                    else
+                    {
+                        sb.Append($@"Installed by {InstalledBy}"); // The metacmm lists the string
+                    }
+
+                    // Nexus Update Code
+                    sb.Append(";;");
+                    sb.Append(NexusUpdateCode);
+                    printToDiagFunc(sb.ToString(), severity);
+
+                    // SELECTED OPTIONS
+                    if (InstalledOptions.Any())
+                    {
+                        severity = LogSeverity.INFO;
+                        foreach (var o in InstalledOptions)
+                        {
+                            printToDiagFunc($@"   > {o}", severity);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public class LogCollector
     {
         public static List<LogItem> GetLogsList()
@@ -67,7 +168,6 @@ namespace ME3TweaksCore.Diagnostics
         /// </summary>
         internal static Func<ILogger> CreateLogger { get; set; }
 
-
         // Following is an example CreateLogger call that can be used in consuming applications.
         //        internal static void CreateLogger()
         //        {
@@ -79,6 +179,7 @@ namespace ME3TweaksCore.Diagnostics
         //#endif
         //                .CreateLogger();
         //        }
+
 
         /// <summary>
         /// Collects the latest log file and reopens the logger when complete (if specified)
@@ -114,23 +215,7 @@ namespace ME3TweaksCore.Diagnostics
             return logText;
         }
 
-        private enum Severity
-        {
-            INFO,
-            WARN,
-            ERROR,
-            FATAL,
-            GOOD,
-            DIAGSECTION,
-            BOLD,
-            DLC,
-            GAMEID,
-            OFFICIALDLC,
-            TPMI,
-            SUB,
-            BOLDBLUE,
-            SUPERCEDANCE_FILE
-        }
+
 
 
         //private static void runMassEffectModderNoGuiIPC(string operationName, string exe, string args, object lockObject, Action<string, string> exceptionOccuredCallback, Action<int?> setExitCodeCallback = null, Action<string, string> ipcCallback = null)
@@ -236,7 +321,7 @@ namespace ME3TweaksCore.Diagnostics
             package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingGameInformation));
             var diagStringBuilder = new StringBuilder();
 
-            void addDiagLines(IEnumerable<string> strings, Severity sev = Severity.INFO)
+            void addDiagLines(IEnumerable<string> strings, ME3TweaksLogViewer.LogSeverity sev = ME3TweaksLogViewer.LogSeverity.INFO)
             {
                 foreach (var s in strings)
                 {
@@ -244,7 +329,7 @@ namespace ME3TweaksCore.Diagnostics
                 }
             }
 
-            void addDiagLine(string message = "", Severity sev = Severity.INFO)
+            void addDiagLine(string message = "", ME3TweaksLogViewer.LogSeverity sev = ME3TweaksLogViewer.LogSeverity.INFO)
             {
                 if (diagStringBuilder == null)
                 {
@@ -253,46 +338,46 @@ namespace ME3TweaksCore.Diagnostics
 
                 switch (sev)
                 {
-                    case Severity.INFO:
+                    case ME3TweaksLogViewer.LogSeverity.INFO:
                         diagStringBuilder.Append(message);
                         break;
-                    case Severity.WARN:
+                    case ME3TweaksLogViewer.LogSeverity.WARN:
                         diagStringBuilder.Append($@"[WARN]{message}");
                         break;
-                    case Severity.ERROR:
+                    case ME3TweaksLogViewer.LogSeverity.ERROR:
                         diagStringBuilder.Append($@"[ERROR]{message}");
                         break;
-                    case Severity.FATAL:
+                    case ME3TweaksLogViewer.LogSeverity.FATAL:
                         diagStringBuilder.Append($@"[FATAL]{message}");
                         break;
-                    case Severity.DIAGSECTION:
+                    case ME3TweaksLogViewer.LogSeverity.DIAGSECTION:
                         diagStringBuilder.Append($@"[DIAGSECTION]{message}");
                         break;
-                    case Severity.GOOD:
+                    case ME3TweaksLogViewer.LogSeverity.GOOD:
                         diagStringBuilder.Append($@"[GREEN]{message}");
                         break;
-                    case Severity.BOLD:
+                    case ME3TweaksLogViewer.LogSeverity.BOLD:
                         diagStringBuilder.Append($@"[BOLD]{message}");
                         break;
-                    case Severity.BOLDBLUE:
+                    case ME3TweaksLogViewer.LogSeverity.BOLDBLUE:
                         diagStringBuilder.Append($@"[BOLDBLUE]{message}");
                         break;
-                    case Severity.DLC:
+                    case ME3TweaksLogViewer.LogSeverity.DLC:
                         diagStringBuilder.Append($@"[DLC]{message}");
                         break;
-                    case Severity.OFFICIALDLC:
+                    case ME3TweaksLogViewer.LogSeverity.OFFICIALDLC:
                         diagStringBuilder.Append($@"[OFFICIALDLC]{message}");
                         break;
-                    case Severity.GAMEID:
+                    case ME3TweaksLogViewer.LogSeverity.GAMEID:
                         diagStringBuilder.Append($@"[GAMEID]{message}");
                         break;
-                    case Severity.TPMI:
+                    case ME3TweaksLogViewer.LogSeverity.TPMI:
                         diagStringBuilder.Append($@"[TPMI]{message}");
                         break;
-                    case Severity.SUB:
+                    case ME3TweaksLogViewer.LogSeverity.SUB:
                         diagStringBuilder.Append($@"[SUB]{message}");
                         break;
-                    case Severity.SUPERCEDANCE_FILE:
+                    case ME3TweaksLogViewer.LogSeverity.SUPERCEDANCE_FILE:
                         diagStringBuilder.Append($@"[SSF]{message}");
                         break;
                     default:
@@ -307,7 +392,7 @@ namespace ME3TweaksCore.Diagnostics
             var gameID = package.DiagnosticTarget.Game.ToMEMGameNum().ToString();
             MLog.Information(@"Beginning to build diagnostic output");
 
-            addDiagLine(package.DiagnosticTarget.Game.ToGameNum().ToString(), Severity.GAMEID);
+            addDiagLine(package.DiagnosticTarget.Game.ToGameNum().ToString(), ME3TweaksLogViewer.LogSeverity.GAMEID);
             addDiagLine($@"{MLibraryConsumer.GetHostingProcessname()} {MLibraryConsumer.GetAppVersion()} Game Diagnostic");
             addDiagLine($@"ME3TweaksCore version: {MLibraryConsumer.GetLibraryVersion()}");
             addDiagLine($@"Diagnostic for {package.DiagnosticTarget.Game.ToGameName()}");
@@ -353,7 +438,7 @@ namespace ME3TweaksCore.Diagnostics
                     else
                     {
                         MLog.Error($@"Invalid game directory: {gamePath} is not part of an overall LE install");
-                        addDiagLine($@"MEM diagnostics skipped: Game directory is not part of an overall LE install", Severity.ERROR);
+                        addDiagLine($@"MEM diagnostics skipped: Game directory is not part of an overall LE install", ME3TweaksLogViewer.LogSeverity.ERROR);
                         hasMEM = false;
                     }
                 }
@@ -373,7 +458,7 @@ namespace ME3TweaksCore.Diagnostics
             }
             else
             {
-                addDiagLine(@"Mass Effect Modder No Gui was not available for use when this diagnostic was generated.", Severity.ERROR);
+                addDiagLine(@"Mass Effect Modder No Gui was not available for use when this diagnostic was generated.", ME3TweaksLogViewer.LogSeverity.ERROR);
             }
             #endregion
 
@@ -383,7 +468,7 @@ namespace ME3TweaksCore.Diagnostics
                 MLog.Information(@"Collecting basic game information");
 
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingGameInformation));
-                addDiagLine(@"Basic game information", Severity.DIAGSECTION);
+                addDiagLine(@"Basic game information", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                 addDiagLine($@"Game is installed at {gamePath}");
 
                 MLog.Information(@"Reloading target for most up to date information");
@@ -402,7 +487,7 @@ namespace ME3TweaksCore.Diagnostics
                     pathroot = pathroot.Substring(0, 1);
                     if (pathroot == @"\")
                     {
-                        addDiagLine(@"Installation appears to be on a network drive (first character in path is \)", Severity.WARN);
+                        addDiagLine(@"Installation appears to be on a network drive (first character in path is \)", ME3TweaksLogViewer.LogSeverity.WARN);
                     }
                     else
                     {
@@ -429,11 +514,11 @@ namespace ME3TweaksCore.Diagnostics
 
                     if (package.DiagnosticTarget.Supported)
                     {
-                        addDiagLine($@"Game source: {package.DiagnosticTarget.GameSource}", Severity.GOOD);
+                        addDiagLine($@"Game source: {package.DiagnosticTarget.GameSource}", ME3TweaksLogViewer.LogSeverity.GOOD);
                     }
                     else
                     {
-                        addDiagLine($@"Game source: Unknown/Unsupported - {package.DiagnosticTarget.ExecutableHash}", Severity.FATAL);
+                        addDiagLine($@"Game source: Unknown/Unsupported - {package.DiagnosticTarget.ExecutableHash}", ME3TweaksLogViewer.LogSeverity.FATAL);
                     }
 
                     if (package.DiagnosticTarget.Game == MEGame.ME1)
@@ -442,9 +527,9 @@ namespace ME3TweaksCore.Diagnostics
                         var exeInfo = ME1ExecutableInfo.GetExecutableInfo(M3Directories.GetExecutablePath(package.DiagnosticTarget), false);
                         if (avi != null)
                         {
-                            addDiagLine($@"Large Address Aware: {exeInfo.HasLAAApplied}", exeInfo.HasLAAApplied ? Severity.GOOD : Severity.FATAL);
-                            addDiagLine($@"No-admin patched: {exeInfo.HasLAAApplied}", exeInfo.HasProductNameChanged ? Severity.GOOD : Severity.WARN);
-                            addDiagLine($@"enableLocalPhysXCore patched: {exeInfo.HasPhysXCoreChanged}", exeInfo.HasLAAApplied ? Severity.GOOD : Severity.WARN);
+                            addDiagLine($@"Large Address Aware: {exeInfo.HasLAAApplied}", exeInfo.HasLAAApplied ? ME3TweaksLogViewer.LogSeverity.GOOD : ME3TweaksLogViewer.LogSeverity.FATAL);
+                            addDiagLine($@"No-admin patched: {exeInfo.HasLAAApplied}", exeInfo.HasProductNameChanged ? ME3TweaksLogViewer.LogSeverity.GOOD : ME3TweaksLogViewer.LogSeverity.WARN);
+                            addDiagLine($@"enableLocalPhysXCore patched: {exeInfo.HasPhysXCoreChanged}", exeInfo.HasLAAApplied ? ME3TweaksLogViewer.LogSeverity.GOOD : ME3TweaksLogViewer.LogSeverity.WARN);
                         }
                         else
                         {
@@ -461,7 +546,7 @@ namespace ME3TweaksCore.Diagnostics
                     var certOK = info.Validate();
                     if (certOK == SignatureCheckResult.NoSignature)
                     {
-                        addDiagLine(@"This executable is not signed", Severity.ERROR);
+                        addDiagLine(@"This executable is not signed", ME3TweaksLogViewer.LogSeverity.ERROR);
                     }
                     else
                     {
@@ -474,7 +559,7 @@ namespace ME3TweaksCore.Diagnostics
                             }
                             else
                             {
-                                addDiagLine(@"The signature for this executable is not valid. The executable has been modified", Severity.ERROR);
+                                addDiagLine(@"The signature for this executable is not valid. The executable has been modified", ME3TweaksLogViewer.LogSeverity.ERROR);
                                 diagPrintSignatures(info, addDiagLine);
                             }
                         }
@@ -504,11 +589,11 @@ namespace ME3TweaksCore.Diagnostics
                     {
                         if (package.DiagnosticTarget.Game.IsOTGame())
                         {
-                            addDiagLine(@"binkw32 ASI bypass is not installed. ASI mods, DLC mods, and modified DLC will not load", Severity.WARN);
+                            addDiagLine(@"binkw32 ASI bypass is not installed. ASI mods, DLC mods, and modified DLC will not load", ME3TweaksLogViewer.LogSeverity.WARN);
                         }
                         else
                         {
-                            addDiagLine(@"bink2w64 ASI loader is not installed. ASI mods will not load", Severity.WARN);
+                            addDiagLine(@"bink2w64 ASI loader is not installed. ASI mods will not load", ME3TweaksLogViewer.LogSeverity.WARN);
                         }
                     }
 
@@ -517,26 +602,26 @@ namespace ME3TweaksCore.Diagnostics
                         // Check for patched PhysX
                         if (ME1PhysXTools.IsPhysXLoaderPatchedLocalOnly(package.DiagnosticTarget))
                         {
-                            addDiagLine(@"PhysXLoader.dll is patched to force local PhysXCore.dll", Severity.GOOD);
+                            addDiagLine(@"PhysXLoader.dll is patched to force local PhysXCore.dll", ME3TweaksLogViewer.LogSeverity.GOOD);
                         }
                         else if (certOK == SignatureCheckResult.BadDigest)
                         {
-                            addDiagLine(@"PhysXLoader.dll is not patched to force local PhysXCore.dll. Game may not boot", Severity.WARN);
+                            addDiagLine(@"PhysXLoader.dll is not patched to force local PhysXCore.dll. Game may not boot", ME3TweaksLogViewer.LogSeverity.WARN);
                         }
                         else if (certOK == SignatureCheckResult.Valid)
                         {
-                            addDiagLine(@"PhysXLoader.dll is not patched, but executable is still signed", Severity.GOOD);
+                            addDiagLine(@"PhysXLoader.dll is not patched, but executable is still signed", ME3TweaksLogViewer.LogSeverity.GOOD);
                         }
                         else
                         {
-                            addDiagLine(@"PhysXLoader.dll status could not be checked", Severity.WARN);
+                            addDiagLine(@"PhysXLoader.dll status could not be checked", ME3TweaksLogViewer.LogSeverity.WARN);
                         }
                     }
 
                     package.DiagnosticTarget.PopulateExtras();
                     if (package.DiagnosticTarget.ExtraFiles.Any())
                     {
-                        addDiagLine(@"Additional dll files found in game executable directory:", Severity.WARN);
+                        addDiagLine(@"Additional dll files found in game executable directory:", ME3TweaksLogViewer.LogSeverity.WARN);
                         foreach (var extra in package.DiagnosticTarget.ExtraFiles)
                         {
                             addDiagLine(@" > " + extra.DisplayName);
@@ -551,7 +636,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingSystemInformation));
 
-                addDiagLine(@"System information", Severity.DIAGSECTION);
+                addDiagLine(@"System information", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                 OperatingSystem os = Environment.OSVersion;
                 Version osBuildVersion = os.Version;
 
@@ -566,18 +651,18 @@ namespace ME3TweaksCore.Diagnostics
 
                 if (os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS)
                 {
-                    addDiagLine(@"This operating system is not supported", Severity.FATAL);
-                    addDiagLine(@"Upgrade to a supported operating system if you want support", Severity.FATAL);
+                    addDiagLine(@"This operating system is not supported", ME3TweaksLogViewer.LogSeverity.FATAL);
+                    addDiagLine(@"Upgrade to a supported operating system if you want support", ME3TweaksLogViewer.LogSeverity.FATAL);
                 }
 
-                addDiagLine(verLine, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? Severity.ERROR : Severity.INFO);
-                addDiagLine(@"Version " + osBuildVersion, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? Severity.ERROR : Severity.INFO);
+                addDiagLine(verLine, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? ME3TweaksLogViewer.LogSeverity.ERROR : ME3TweaksLogViewer.LogSeverity.INFO);
+                addDiagLine(@"Version " + osBuildVersion, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? ME3TweaksLogViewer.LogSeverity.ERROR : ME3TweaksLogViewer.LogSeverity.INFO);
                 addDiagLine($@"System culture: {CultureInfo.InstalledUICulture.Name}");
 
                 addDiagLine();
                 MLog.Information(@"Collecting memory information");
 
-                addDiagLine(@"System Memory", Severity.BOLD);
+                addDiagLine(@"System Memory", ME3TweaksLogViewer.LogSeverity.BOLD);
                 var computerInfo = new ComputerInfo();
                 long ramInBytes = (long)computerInfo.TotalPhysicalMemory;
                 addDiagLine($@"Total memory available: {FileSize.FormatSize(ramInBytes)}");
@@ -588,17 +673,17 @@ namespace ME3TweaksCore.Diagnostics
                 }
                 else
                 {
-                    addDiagLine($@"Could not get memory speed", Severity.WARN);
+                    addDiagLine($@"Could not get memory speed", ME3TweaksLogViewer.LogSeverity.WARN);
                 }
 
 
-                addDiagLine(@"Processors", Severity.BOLD);
+                addDiagLine(@"Processors", ME3TweaksLogViewer.LogSeverity.BOLD);
                 MLog.Information(@"Collecting processor information");
 
                 addDiagLine(GetProcessorInformationForDiag());
                 if (ramInBytes == 0)
                 {
-                    addDiagLine(@"Unable to get the read amount of physically installed ram. This may be a sign of impending hardware failure in the SMBIOS", Severity.WARN);
+                    addDiagLine(@"Unable to get the read amount of physically installed ram. This may be a sign of impending hardware failure in the SMBIOS", ME3TweaksLogViewer.LogSeverity.WARN);
                 }
 
                 MLog.Information(@"Collecting video card information");
@@ -609,7 +694,7 @@ namespace ME3TweaksCore.Diagnostics
                 foreach (ManagementObject obj in objvide.Get())
                 {
                     addDiagLine();
-                    addDiagLine(@"Video Card " + vidCardIndex, Severity.BOLD);
+                    addDiagLine(@"Video Card " + vidCardIndex, LogSeverity.BOLD);
                     addDiagLine(@"Name: " + obj[@"Name"]);
 
                     //Get Memory
@@ -622,7 +707,7 @@ namespace ME3TweaksCore.Diagnostics
                     }
                     catch (Exception ex)
                     {
-                        addDiagLine($@"Unable to read memory size from registry. Reading from WMI instead ({ex.GetType()})", Severity.WARN);
+                        addDiagLine($@"Unable to read memory size from registry. Reading from WMI instead ({ex.GetType()})", LogSeverity.WARN);
                     }
 
                     string displayVal;
@@ -678,7 +763,7 @@ namespace ME3TweaksCore.Diagnostics
                                 string vidDriverDate = (string)videoKey.GetValue(@"DriverDate", @"Unable to get driver date");
 
                                 addDiagLine();
-                                addDiagLine($@"Video Card {(vidCardIndex++)}", Severity.BOLD);
+                                addDiagLine($@"Video Card {(vidCardIndex++)}", ME3TweaksLogViewer.LogSeverity.BOLD);
                                 addDiagLine($@"Name: {vidCardName}");
                                 addDiagLine($@"Memory: {FileSize.FormatSize(vidCardSizeInBytes)}");
                                 addDiagLine($@"Driver Version: {vidDriverVersion}");
@@ -686,7 +771,7 @@ namespace ME3TweaksCore.Diagnostics
                             }
                             catch (Exception ex)
                             {
-                                addDiagLine($@"Error getting video card information: {ex.Message}", Severity.WARN);
+                                addDiagLine($@"Error getting video card information: {ex.Message}", ME3TweaksLogViewer.LogSeverity.WARN);
                             }
                         }
                     }
@@ -694,7 +779,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 // Antivirus
                 var avs = MUtilities.GetListOfInstalledAV();
-                addDiagLine(@"Antivirus products", Severity.BOLD);
+                addDiagLine(@"Antivirus products", ME3TweaksLogViewer.LogSeverity.BOLD);
                 addDiagLine(@"The following antivirus products were detected:");
                 foreach (var av in avs)
                 {
@@ -706,7 +791,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 MLog.Information(@"Getting texture mod installation info");
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_gettingTextureInfo));
-                addDiagLine(@"Current texture mod information", Severity.DIAGSECTION);
+                addDiagLine(@"Current texture mod information", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
 
                 var textureHistory = package.DiagnosticTarget.GetTextureModInstallationHistory();
                 if (!textureHistory.Any())
@@ -742,10 +827,10 @@ namespace ME3TweaksCore.Diagnostics
 
                     addDiagLine($@"Latest installation used MEM v{latestInstall.MEM_VERSION_USED}");
 
-                    addDiagLine(@"Texture mod installation history", Severity.DIAGSECTION);
+                    addDiagLine(@"Texture mod installation history", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                     addDiagLine(@"The history of texture mods installed into this game is as follows (from latest install to first install):");
 
-                    addDiagLine(@"Click to view list", Severity.SUB);
+                    addDiagLine(@"Click to view list", ME3TweaksLogViewer.LogSeverity.SUB);
                     bool isFirst = true;
                     foreach (var tmii in textureHistory)
                     {
@@ -756,11 +841,11 @@ namespace ME3TweaksCore.Diagnostics
 
                         if (tmii.MarkerExtendedVersion >= TextureModInstallationInfo.FIRST_EXTENDED_MARKER_VERSION)
                         {
-                            addDiagLine($@"Texture install on {tmii.InstallationTimestamp:yyyy MMMM dd h:mm:ss tt zz}", Severity.BOLDBLUE);
+                            addDiagLine($@"Texture install on {tmii.InstallationTimestamp:yyyy MMMM dd h:mm:ss tt zz}", ME3TweaksLogViewer.LogSeverity.BOLDBLUE);
                         }
                         else
                         {
-                            addDiagLine(@"Texture install", Severity.BOLDBLUE);
+                            addDiagLine(@"Texture install", ME3TweaksLogViewer.LogSeverity.BOLDBLUE);
                         }
 
                         addDiagLine($@"Marker version {tmii.MarkerExtendedVersion}");
@@ -793,7 +878,7 @@ namespace ME3TweaksCore.Diagnostics
                                     modStr += $@" by {fi.AuthorName}";
                                 }
 
-                                addDiagLine(modStr, fi.ModType == InstalledTextureMod.InstalledTextureModType.USERFILE ? Severity.WARN : Severity.GOOD);
+                                addDiagLine(modStr, fi.ModType == InstalledTextureMod.InstalledTextureModType.USERFILE ? ME3TweaksLogViewer.LogSeverity.WARN : ME3TweaksLogViewer.LogSeverity.GOOD);
                                 if (fi.ChosenOptions.Any())
                                 {
                                     addDiagLine(@"   Chosen options for install:");
@@ -814,7 +899,7 @@ namespace ME3TweaksCore.Diagnostics
                 #region Basegame file changes
                 MLog.Information(@"Collecting basegame file changes information");
 
-                addDiagLine(@"Basegame changes", Severity.DIAGSECTION);
+                addDiagLine(@"Basegame changes", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
 
                 package.UpdateStatusCallback?.Invoke(@"Collecting basegame file modifications");
                 List<string> modifiedFiles = new List<string>();
@@ -881,9 +966,9 @@ namespace ME3TweaksCore.Diagnostics
 
                 void memExceptionOccured(string operation)
                 {
-                    addDiagLine($@"An exception occurred performing an operation: {operation}", Severity.ERROR);
-                    addDiagLine(@"Check the Mod Manager application log for more information.", Severity.ERROR);
-                    addDiagLine(@"Report this on the ME3Tweaks Discord for further assistance.", Severity.ERROR);
+                    addDiagLine($@"An exception occurred performing an operation: {operation}", ME3TweaksLogViewer.LogSeverity.ERROR);
+                    addDiagLine(@"Check the Mod Manager application log for more information.", ME3TweaksLogViewer.LogSeverity.ERROR);
+                    addDiagLine(@"Report this on the ME3Tweaks Discord for further assistance.", ME3TweaksLogViewer.LogSeverity.ERROR);
                 }
 
                 if (hasMEM)
@@ -908,18 +993,18 @@ namespace ME3TweaksCore.Diagnostics
                     {
                         addDiagLine(
                             $@"MassEffectModderNoGuiexited exited incompatible mod detection check with code {exitcode}",
-                            Severity.ERROR);
+                            ME3TweaksLogViewer.LogSeverity.ERROR);
                     }
 
                     if (blacklistedMods.Any())
                     {
-                        addDiagLine(@"The following blacklisted mods were found:", Severity.ERROR);
+                        addDiagLine(@"The following blacklisted mods were found:", ME3TweaksLogViewer.LogSeverity.ERROR);
                         foreach (var str in blacklistedMods)
                         {
                             addDiagLine(@" - " + str);
                         }
 
-                        addDiagLine(@"These mods have been blacklisted by modding tools because of known issues they cause. Do not use these mods", Severity.ERROR);
+                        addDiagLine(@"These mods have been blacklisted by modding tools because of known issues they cause. Do not use these mods", ME3TweaksLogViewer.LogSeverity.ERROR);
                     }
                     else
                     {
@@ -928,7 +1013,7 @@ namespace ME3TweaksCore.Diagnostics
                 }
                 else
                 {
-                    addDiagLine(@"MEM not available, skipped blacklisted mods check", Severity.WARN);
+                    addDiagLine(@"MEM not available, skipped blacklisted mods check", ME3TweaksLogViewer.LogSeverity.WARN);
 
                 }
 
@@ -936,58 +1021,36 @@ namespace ME3TweaksCore.Diagnostics
 
                 #region Installed DLCs
                 MLog.Information(@"Collecting installed DLC");
+                var installedDLCInfos = new List<ME3TweaksLogViewer.InstalledDLCStruct>();
 
                 //Get DLCs
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingDLCInformation));
 
                 var installedDLCs = package.DiagnosticTarget.GetMetaMappedInstalledDLC();
 
-                addDiagLine(@"Installed DLC", Severity.DIAGSECTION);
+                addDiagLine(@"Installed DLC", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                 addDiagLine(@"The following DLC is installed:");
 
                 var officialDLC = MEDirectories.OfficialDLC(package.DiagnosticTarget.Game);
                 foreach (var dlc in installedDLCs)
                 {
-                    string dlctext = dlc.Key;
+                    ME3TweaksLogViewer.InstalledDLCStruct dlcStruct = new ME3TweaksLogViewer.InstalledDLCStruct()
+                    {
+                        DLCFolderName = dlc.Key
+                    };
+
                     if (!officialDLC.Contains(dlc.Key, StringComparer.InvariantCultureIgnoreCase))
                     {
-                        dlctext += @";;";
-                        if (dlc.Value != null)
-                        {
-                            if (int.TryParse(dlc.Value.InstalledBy, out var _))
-                            {
-                                dlctext += @"Installed by Mod Manager Build " + dlc.Value.InstalledBy;
-                            }
-                            else
-                            {
-                                dlctext += @"Installed by " + dlc.Value.InstalledBy;
-                            }
-                            if (!string.IsNullOrWhiteSpace(dlc.Value.Version))
-                            {
-                                dlctext += @";;" + dlc.Value.Version;
-                            }
-                        }
-                        else
-                        {
-                            dlctext += @"Not installed by managed installer";
-                        }
+                        var metaMappedDLC = dlc.Value;
+                        dlcStruct.InstalledBy = metaMappedDLC?.InstalledBy;
+                        dlcStruct.VersionInstalled
                     }
-
-                    var isOfficialDLC = officialDLC.Contains(dlc.Key, StringComparer.InvariantCultureIgnoreCase);
-                    addDiagLine(dlctext, isOfficialDLC ? Severity.OFFICIALDLC : Severity.DLC);
-
-                    if (!isOfficialDLC)
+                    else
                     {
-                        if (dlc.Value != null && dlc.Value.OptionsSelectedAtInstallTime.Any())
-                        {
-                            // Print options
-                            //addDiagLine(@"   > The following options were chosen at install time:");
-                            foreach (var o in dlc.Value.OptionsSelectedAtInstallTime)
-                            {
-                                addDiagLine(($@"   > {o}"));
-                            }
-                        }
+                        dlcStruct.IsOfficialDLC = true;
                     }
+
+                    dlcStruct.PrintToDiag(addDiagLine);
                 }
 
                 if (installedDLCs.Any())
@@ -1001,11 +1064,11 @@ namespace ME3TweaksCore.Diagnostics
                 if (supercedanceList.Any())
                 {
                     addDiagLine();
-                    addDiagLine(@"DLC mod files", Severity.BOLD);
+                    addDiagLine(@"DLC mod files", ME3TweaksLogViewer.LogSeverity.BOLD);
                     addDiagLine(@"The following DLC mod files are installed, as well as their supercedances (if any). This may mean the mods are incompatible, or that these files are compatibility patches. This information is for developer use only - DO NOT MODIFY YOUR GAME DIRECTORY MANUALLY.");
 
                     bool isFirst = true;
-                    addDiagLine(@"Click to view list", Severity.SUB);
+                    addDiagLine(@"Click to view list", ME3TweaksLogViewer.LogSeverity.SUB);
                     foreach (var sl in supercedanceList.OrderBy(x => x.Key))
                     {
                         if (isFirst)
@@ -1013,10 +1076,10 @@ namespace ME3TweaksCore.Diagnostics
                         else
                             addDiagLine();
 
-                        addDiagLine(sl.Key, Severity.SUPERCEDANCE_FILE);
+                        addDiagLine(sl.Key, ME3TweaksLogViewer.LogSeverity.SUPERCEDANCE_FILE);
                         foreach (var dlc in sl.Value)
                         {
-                            addDiagLine(dlc, Severity.TPMI);
+                            addDiagLine(dlc, ME3TweaksLogViewer.LogSeverity.TPMI);
                         }
                     }
                     addDiagLine(@"[/SUB]");
@@ -1030,7 +1093,7 @@ namespace ME3TweaksCore.Diagnostics
                     MLog.Information(@"Getting list of TFCs");
                     package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingTFCFileInformation));
 
-                    addDiagLine(@"Texture File Cache (TFC) files", Severity.DIAGSECTION);
+                    addDiagLine(@"Texture File Cache (TFC) files", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                     addDiagLine(@"The following TFC files are present in the game directory.");
                     var bgPath = M3Directories.GetBioGamePath(package.DiagnosticTarget);
                     string[] tfcFiles = Directory.GetFiles(bgPath, @"*.tfc", SearchOption.AllDirectories);
@@ -1046,7 +1109,7 @@ namespace ME3TweaksCore.Diagnostics
                     }
                     else
                     {
-                        addDiagLine(@"No TFC files were found - is this installation broken?", Severity.ERROR);
+                        addDiagLine(@"No TFC files were found - is this installation broken?", ME3TweaksLogViewer.LogSeverity.ERROR);
                     }
                 }
 
@@ -1064,7 +1127,7 @@ namespace ME3TweaksCore.Diagnostics
                         MLog.Information(@"Checking texture map is in sync with game state");
 
                         bool textureMapFileExists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + $@"\MassEffectModder\me{gameID}map.bin");
-                        addDiagLine(@"Files added or removed after texture mods were installed", Severity.DIAGSECTION);
+                        addDiagLine(@"Files added or removed after texture mods were installed", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
 
                         if (textureMapFileExists)
                         {
@@ -1101,40 +1164,40 @@ namespace ME3TweaksCore.Diagnostics
                             {
                                 addDiagLine(
                                     $@"MassEffectModderNoGuiexited exited texture map consistency check with code {exitcode}",
-                                    Severity.ERROR);
+                                    ME3TweaksLogViewer.LogSeverity.ERROR);
                             }
 
                             if (removedFiles.Any())
                             {
-                                addDiagLine(@"The following problems were detected checking game consistency with the texture map file:", Severity.ERROR);
+                                addDiagLine(@"The following problems were detected checking game consistency with the texture map file:", ME3TweaksLogViewer.LogSeverity.ERROR);
                                 foreach (var error in removedFiles)
                                 {
-                                    addDiagLine(@" - " + error, Severity.ERROR);
+                                    addDiagLine(@" - " + error, ME3TweaksLogViewer.LogSeverity.ERROR);
                                 }
                             }
 
                             if (addedFiles.Any())
                             {
-                                addDiagLine(@"The following files were added after textures were installed:", Severity.ERROR);
+                                addDiagLine(@"The following files were added after textures were installed:", ME3TweaksLogViewer.LogSeverity.ERROR);
                                 foreach (var error in addedFiles)
                                 {
-                                    addDiagLine(@" - " + error, Severity.ERROR);
+                                    addDiagLine(@" - " + error, ME3TweaksLogViewer.LogSeverity.ERROR);
                                 }
                             }
 
                             if (replacedFiles.Any())
                             {
-                                addDiagLine(@"The following files were replaced after textures were installed:", Severity.ERROR);
+                                addDiagLine(@"The following files were replaced after textures were installed:", ME3TweaksLogViewer.LogSeverity.ERROR);
                                 foreach (var error in replacedFiles)
                                 {
-                                    addDiagLine(@" - " + error, Severity.ERROR);
+                                    addDiagLine(@" - " + error, ME3TweaksLogViewer.LogSeverity.ERROR);
                                 }
                             }
 
                             if (replacedFiles.Any() || addedFiles.Any() || removedFiles.Any())
                             {
-                                addDiagLine(@"Diagnostic detected that some files were added, removed or replaced after textures were installed.", Severity.ERROR);
-                                addDiagLine(@"Package files cannot be installed after a texture mod is installed - the texture pointers will be wrong.", Severity.ERROR);
+                                addDiagLine(@"Diagnostic detected that some files were added, removed or replaced after textures were installed.", ME3TweaksLogViewer.LogSeverity.ERROR);
+                                addDiagLine(@"Package files cannot be installed after a texture mod is installed - the texture pointers will be wrong.", ME3TweaksLogViewer.LogSeverity.ERROR);
                             }
                             else
                             {
@@ -1157,7 +1220,7 @@ namespace ME3TweaksCore.Diagnostics
                         MLog.Information(@"Performing full texture check");
                         var param = 0;
                         package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_performingFullTexturesCheckX, param)); //done this way to save a string in localization
-                        addDiagLine(@"Full Textures Check", Severity.DIAGSECTION);
+                        addDiagLine(@"Full Textures Check", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                         args = $@"--check-game-data-textures --gameid {gameID} --ipc";
                         var emptyMipsNotRemoved = new List<string>();
                         var badTFCReferences = new List<string>();
@@ -1229,10 +1292,10 @@ namespace ME3TweaksCore.Diagnostics
 
                         if (exitcode != 0)
                         {
-                            addDiagLine($@"MassEffectModderNoGui exited full textures check with code {exitcode}", Severity.ERROR);
+                            addDiagLine($@"MassEffectModderNoGui exited full textures check with code {exitcode}", ME3TweaksLogViewer.LogSeverity.ERROR);
                             if (currentProcessingFile != null)
                             {
-                                addDiagLine($@"The last file processed by MassEffectModder was: {currentProcessingFile}", Severity.ERROR);
+                                addDiagLine($@"The last file processed by MassEffectModder was: {currentProcessingFile}", ME3TweaksLogViewer.LogSeverity.ERROR);
                             }
                             addDiagLine();
                         }
@@ -1243,34 +1306,34 @@ namespace ME3TweaksCore.Diagnostics
 
                         if (emptyMipsNotRemoved.Any() || badTFCReferences.Any() || scanErrors.Any())
                         {
-                            addDiagLine(@"Texture check reported errors", Severity.ERROR);
+                            addDiagLine(@"Texture check reported errors", ME3TweaksLogViewer.LogSeverity.ERROR);
                             if (emptyMipsNotRemoved.Any())
                             {
                                 addDiagLine();
-                                addDiagLine(@"The following textures contain empty mips, which typically means files were installed after texture mods were installed.:", Severity.ERROR);
+                                addDiagLine(@"The following textures contain empty mips, which typically means files were installed after texture mods were installed.:", ME3TweaksLogViewer.LogSeverity.ERROR);
                                 foreach (var em in emptyMipsNotRemoved)
                                 {
-                                    addDiagLine(@" - " + em, Severity.ERROR);
+                                    addDiagLine(@" - " + em, ME3TweaksLogViewer.LogSeverity.ERROR);
                                 }
                             }
 
                             if (badTFCReferences.Any())
                             {
                                 addDiagLine();
-                                addDiagLine(@"The following textures have bad TFC references, which means the mods were built wrong, dependent DLC is missing, or the mod was installed wrong:", Severity.ERROR);
+                                addDiagLine(@"The following textures have bad TFC references, which means the mods were built wrong, dependent DLC is missing, or the mod was installed wrong:", ME3TweaksLogViewer.LogSeverity.ERROR);
                                 foreach (var br in badTFCReferences)
                                 {
-                                    addDiagLine(@" - " + br, Severity.ERROR);
+                                    addDiagLine(@" - " + br, ME3TweaksLogViewer.LogSeverity.ERROR);
                                 }
                             }
 
                             if (scanErrors.Any())
                             {
                                 addDiagLine();
-                                addDiagLine(@"The following textures failed to scan:", Severity.ERROR);
+                                addDiagLine(@"The following textures failed to scan:", ME3TweaksLogViewer.LogSeverity.ERROR);
                                 foreach (var fts in scanErrors)
                                 {
-                                    addDiagLine(@" - " + fts, Severity.ERROR);
+                                    addDiagLine(@" - " + fts, ME3TweaksLogViewer.LogSeverity.ERROR);
                                 }
                             }
                         }
@@ -1280,7 +1343,7 @@ namespace ME3TweaksCore.Diagnostics
                             if (memCrashText != null)
                             {
                                 addDiagLine(@"MassEffectModder crashed with info:");
-                                addDiagLines(memCrashText.Split("\n"), Severity.ERROR); //do not localize
+                                addDiagLines(memCrashText.Split("\n"), ME3TweaksLogViewer.LogSeverity.ERROR); //do not localize
                             }
                         }
                         else
@@ -1302,7 +1365,7 @@ namespace ME3TweaksCore.Diagnostics
                     }
                     else
                     {
-                        addDiagLine(@"MassEffectModderNoGui exited --print-lods with error. See application log for more info.", Severity.ERROR);
+                        addDiagLine(@"MassEffectModderNoGui exited --print-lods with error. See application log for more info.", ME3TweaksLogViewer.LogSeverity.ERROR);
                     }
 
                     #endregion
@@ -1311,13 +1374,13 @@ namespace ME3TweaksCore.Diagnostics
                 {
                     MLog.Warning(@"MEM not available. Multiple collections were skipped");
 
-                    addDiagLine(@"Texture checks skipped", Severity.DIAGSECTION);
-                    addDiagLine(@"Mass Effect Modder No Gui was not available for use when this diagnostic was run.", Severity.WARN);
-                    addDiagLine(@"The following checks were skipped:", Severity.WARN);
-                    addDiagLine(@" - Files added or removed after texture install", Severity.WARN);
-                    addDiagLine(@" - Blacklisted mods check", Severity.WARN);
-                    addDiagLine(@" - Textures check", Severity.WARN);
-                    addDiagLine(@" - Texture LODs check", Severity.WARN);
+                    addDiagLine(@"Texture checks skipped", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
+                    addDiagLine(@"Mass Effect Modder No Gui was not available for use when this diagnostic was run.", ME3TweaksLogViewer.LogSeverity.WARN);
+                    addDiagLine(@"The following checks were skipped:", ME3TweaksLogViewer.LogSeverity.WARN);
+                    addDiagLine(@" - Files added or removed after texture install", ME3TweaksLogViewer.LogSeverity.WARN);
+                    addDiagLine(@" - Blacklisted mods check", ME3TweaksLogViewer.LogSeverity.WARN);
+                    addDiagLine(@" - Textures check", ME3TweaksLogViewer.LogSeverity.WARN);
+                    addDiagLine(@" - Texture LODs check", ME3TweaksLogViewer.LogSeverity.WARN);
                 }
 
                 #region ASI mods
@@ -1326,7 +1389,7 @@ namespace ME3TweaksCore.Diagnostics
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingASIFileInformation));
 
                 string asidir = M3Directories.GetASIPath(package.DiagnosticTarget);
-                addDiagLine(@"Installed ASI mods", Severity.DIAGSECTION);
+                addDiagLine(@"Installed ASI mods", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                 if (Directory.Exists(asidir))
                 {
                     addDiagLine(@"The following ASI files are located in the ASI directory:");
@@ -1352,12 +1415,12 @@ namespace ME3TweaksCore.Diagnostics
                             {
                                 str += @" - Outdated";
                             }
-                            addDiagLine(str, knownAsiMod.Outdated ? Severity.WARN : Severity.GOOD);
+                            addDiagLine(str, knownAsiMod.Outdated ? ME3TweaksLogViewer.LogSeverity.WARN : ME3TweaksLogViewer.LogSeverity.GOOD);
                         }
 
                         foreach (var unknownAsiMod in installedASIs.OfType<IUnknownInstalledASIMod>())
                         {
-                            addDiagLine($@" - {Path.GetFileName(unknownAsiMod.InstalledPath)} - Unknown ASI mod", Severity.WARN);
+                            addDiagLine($@" - {Path.GetFileName(unknownAsiMod.InstalledPath)} - Unknown ASI mod", ME3TweaksLogViewer.LogSeverity.WARN);
                         }
 
                         foreach (var duplicateItem in nonUniqueItems)
@@ -1369,7 +1432,7 @@ namespace ME3TweaksCore.Diagnostics
                             }
 
                             str += @" - DUPLICATE ASI";
-                            addDiagLine(str, Severity.FATAL);
+                            addDiagLine(str, ME3TweaksLogViewer.LogSeverity.FATAL);
                         }
 
                         addDiagLine();
@@ -1389,14 +1452,14 @@ namespace ME3TweaksCore.Diagnostics
                     package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingASILogFiles));
 
                     var logFiles = GetASILogs(package.DiagnosticTarget);
-                    addDiagLine(@"ASI log files", Severity.DIAGSECTION);
+                    addDiagLine(@"ASI log files", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                     addDiagLine(@"These are log files from installed ASI mods (within the past day). These are >>highly<< technical; only advanced developers should attempt to interpret these logs.");
                     if (logFiles.Any())
                     {
                         foreach (var logF in logFiles)
                         {
-                            addDiagLine(logF.Key, Severity.BOLD);
-                            addDiagLine(@"Click to view log", Severity.SUB);
+                            addDiagLine(logF.Key, ME3TweaksLogViewer.LogSeverity.BOLD);
+                            addDiagLine(@"Click to view log", ME3TweaksLogViewer.LogSeverity.SUB);
                             addDiagLine(logF.Value);
                             addDiagLine(@"[/SUB]");
                         }
@@ -1417,8 +1480,9 @@ namespace ME3TweaksCore.Diagnostics
 
                     package.UpdateStatusCallback?.Invoke(@"Collecting TOC file information");
 
-                    addDiagLine(@"File Table of Contents (TOC) check", Severity.DIAGSECTION);
-                    addDiagLine(@"PCConsoleTOC.bin files list all files the can can normally access.");
+                    addDiagLine(@"File Table of Contents (TOC) check", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
+                    addDiagLine(@"PCConsoleTOC.bin files list all files the game can normally access.");
+                    addDiagLine(@"The vanilla shipping game includes references and incorrect size values for some files; these are normal.");
                     bool hadTocError = false;
                     string[] tocs = Directory.GetFiles(Path.Combine(gamePath, @"BIOGame"), @"PCConsoleTOC.bin", SearchOption.AllDirectories);
                     string markerfile = M3Directories.GetTextureMarkerPath(package.DiagnosticTarget);
@@ -1445,25 +1509,28 @@ namespace ME3TweaksCore.Diagnostics
                                     long size = fi.Length;
                                     if (ent.size < size)
                                     {
-                                        addDiagLine($@" - {filepath} size is {size}, but TOC lists {ent.size} ({ent.size - size} bytes)", Severity.ERROR);
+                                        addDiagLine($@" - {filepath} size is {size}, but TOC lists {ent.size} ({ent.size - size} bytes)", ME3TweaksLogViewer.LogSeverity.ERROR);
                                         hadTocError = true;
                                     }
                                 }
                             }
                             else
                             {
-                                addDiagLine($@" - {filepath} is listed in TOC but is not present on disk", Severity.WARN);
+                                addDiagLine($@" - {filepath} is listed in TOC but is not present on disk", ME3TweaksLogViewer.LogSeverity.WARN);
                             }
                         }
                     }
 
-                    if (!hadTocError)
+                    if (package.DiagnosticTarget.Game.IsOTGame())
                     {
-                        addDiagLine(@"All TOC files passed check. No files have a size larger than the TOC size.");
-                    }
-                    else
-                    {
-                        addDiagLine(@"Some files are larger than the listed TOC size. This typically won't happen unless you manually installed some files or an ALOT installation failed.", Severity.ERROR);
+                        if (!hadTocError)
+                        {
+                            addDiagLine(@"All TOC files passed check. No files have a size larger than the TOC size.");
+                        }
+                        else
+                        {
+                            addDiagLine(@"Some files are larger than the listed TOC size. This typically won't happen unless you manually installed some files or an ALOT installation failed. The game may have issues loading these files.", ME3TweaksLogViewer.LogSeverity.ERROR);
+                        }
                     }
                 }
 
@@ -1509,7 +1576,7 @@ namespace ME3TweaksCore.Diagnostics
                             {
                                 crashLineNumber = Math.Max(0, crashLineNumber - 10); //show last 10 lines of log leading up to the crash
                                                                                      //this log has a crash
-                                addDiagLine(@"Mass Effect game log " + file.Name, Severity.DIAGSECTION);
+                                addDiagLine(@"Mass Effect game log " + file.Name, ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                                 if (reason != "") addDiagLine(reason);
                                 if (crashLineNumber > 0)
                                 {
@@ -1542,7 +1609,7 @@ namespace ME3TweaksCore.Diagnostics
                     .Where(z => z.InstanceId == 1001 && z.TimeGenerated > sevenDaysAgo && (GenerateEventLogString(z).ContainsAny(MEDirectories.ExecutableNames(package.DiagnosticTarget.Game), StringComparison.InvariantCultureIgnoreCase)))
                     .ToList();
 
-                addDiagLine($@"{package.DiagnosticTarget.Game.ToGameName()} crash logs found in Event Viewer", Severity.DIAGSECTION);
+                addDiagLine($@"{package.DiagnosticTarget.Game.ToGameName()} crash logs found in Event Viewer", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                 if (entries.Any())
                 {
                     foreach (var entry in entries)
@@ -1569,7 +1636,7 @@ namespace ME3TweaksCore.Diagnostics
                     if (File.Exists(me3logfilepath))
                     {
                         FileInfo fi = new FileInfo(me3logfilepath);
-                        addDiagLine(@"Mass Effect 3 last session log", Severity.DIAGSECTION);
+                        addDiagLine(@"Mass Effect 3 last session log", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                         addDiagLine(@"Last session log has modification date of " + fi.LastWriteTimeUtc.ToShortDateString());
                         addDiagLine(@"Note that messages from this log can be highly misleading as they are context dependent!");
                         addDiagLine();
@@ -1577,7 +1644,7 @@ namespace ME3TweaksCore.Diagnostics
                         int lineNum = 0;
                         foreach (string line in log)
                         {
-                            addDiagLine(line, line.Contains(@"I/O failure", StringComparison.InvariantCultureIgnoreCase) ? Severity.FATAL : Severity.INFO);
+                            addDiagLine(line, line.Contains(@"I/O failure", StringComparison.InvariantCultureIgnoreCase) ? ME3TweaksLogViewer.LogSeverity.FATAL : ME3TweaksLogViewer.LogSeverity.INFO);
                             lineNum++;
                             if (lineNum > 100)
                             {
@@ -1598,8 +1665,8 @@ namespace ME3TweaksCore.Diagnostics
             }
             catch (Exception ex)
             {
-                addDiagLine(@"Exception occurred while running diagnostic.", Severity.ERROR);
-                addDiagLine(ex.FlattenException(), Severity.ERROR);
+                addDiagLine(@"Exception occurred while running diagnostic.", ME3TweaksLogViewer.LogSeverity.ERROR);
+                addDiagLine(ex.FlattenException(), ME3TweaksLogViewer.LogSeverity.ERROR);
                 return diagStringBuilder.ToString();
             }
             finally
@@ -1620,7 +1687,7 @@ namespace ME3TweaksCore.Diagnostics
             return diagStringBuilder.ToString();
         }
 
-        private static void SeeIfIncompatibleDLCIsInstalled(GameTarget target, Action<string, Severity> addDiagLine)
+        private static void SeeIfIncompatibleDLCIsInstalled(GameTarget target, Action<string, ME3TweaksLogViewer.LogSeverity> addDiagLine)
         {
             var installedDLCMods = VanillaDatabaseService.GetInstalledDLCMods(target);
             var metaFiles = target.GetMetaMappedInstalledDLC(false);
@@ -1634,37 +1701,37 @@ namespace ME3TweaksCore.Diagnostics
                     foreach (var id in installedIncompatDLC)
                     {
                         var incompatName = TPMIService.GetThirdPartyModInfo(id, target.Game);
-                        addDiagLine($@"{v.Value.ModName} is not compatible with {incompatName?.modname ?? id}", Severity.FATAL);
+                        addDiagLine($@"{v.Value.ModName} is not compatible with {incompatName?.modname ?? id}", ME3TweaksLogViewer.LogSeverity.FATAL);
                     }
                 }
             }
         }
 
-        private static void addLODStatusToDiag(GameTarget selectedDiagnosticTarget, Dictionary<string, string> lods, Action<string, Severity> addDiagLine)
+        private static void addLODStatusToDiag(GameTarget selectedDiagnosticTarget, Dictionary<string, string> lods, Action<string, ME3TweaksLogViewer.LogSeverity> addDiagLine)
         {
-            addDiagLine(@"Texture Level of Detail (LOD) settings", Severity.DIAGSECTION);
+            addDiagLine(@"Texture Level of Detail (LOD) settings", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
             if (selectedDiagnosticTarget.Game.IsLEGame())
             {
-                addDiagLine(@"These should always be blank for Legendary Edition games. Legendary Edition modding does not modify LODs due engine changes.", Severity.INFO);
+                addDiagLine(@"These should always be blank for Legendary Edition games. Legendary Edition modding does not modify LODs due engine changes.", ME3TweaksLogViewer.LogSeverity.INFO);
             }
 
             string iniPath = M3Directories.GetLODConfigFile(selectedDiagnosticTarget);
             if (!File.Exists(iniPath))
             {
-                addDiagLine($@"Game config file is missing: {iniPath}", Severity.ERROR);
+                addDiagLine($@"Game config file is missing: {iniPath}", ME3TweaksLogViewer.LogSeverity.ERROR);
                 return;
             }
 
             foreach (KeyValuePair<string, string> kvp in lods)
             {
-                addDiagLine($@"{kvp.Key}={kvp.Value}", Severity.INFO);
+                addDiagLine($@"{kvp.Key}={kvp.Value}", ME3TweaksLogViewer.LogSeverity.INFO);
             }
 
             var textureChar1024 = lods.FirstOrDefault(x => x.Key == @"TEXTUREGROUP_Character_1024");
             if (string.IsNullOrWhiteSpace(textureChar1024.Key)) //does this work for ME2/ME3??
             {
                 //not found
-                addDiagLine(@"Could not find TEXTUREGROUP_Character_1024 in config file for checking LOD settings", Severity.ERROR);
+                addDiagLine(@"Could not find TEXTUREGROUP_Character_1024 in config file for checking LOD settings", ME3TweaksLogViewer.LogSeverity.ERROR);
                 return;
             }
 
@@ -1690,21 +1757,21 @@ namespace ME3TweaksCore.Diagnostics
                             //LODS MODIFIED!
                             if (maxLodSize == 4096)
                             {
-                                addDiagLine(@"LOD quality settings: 4K textures", Severity.INFO);
+                                addDiagLine(@"LOD quality settings: 4K textures", ME3TweaksLogViewer.LogSeverity.INFO);
                             }
                             else if (maxLodSize == 2048)
                             {
-                                addDiagLine(@"LOD quality settings: 2K textures", Severity.INFO);
+                                addDiagLine(@"LOD quality settings: 2K textures", ME3TweaksLogViewer.LogSeverity.INFO);
                             }
 
                             //Not Default
                             if (selectedDiagnosticTarget.TextureModded)
                             {
-                                addDiagLine(@"This installation appears to have a texture mod installed, so unused/empty mips are already removed", Severity.INFO);
+                                addDiagLine(@"This installation appears to have a texture mod installed, so unused/empty mips are already removed", ME3TweaksLogViewer.LogSeverity.INFO);
                             }
                             else if (maxLodSize > 1024)
                             {
-                                addDiagLine(@"Texture LOD settings appear to have been raised, but this installation has not been texture modded - game will likely have unused mip crashes.", Severity.FATAL);
+                                addDiagLine(@"Texture LOD settings appear to have been raised, but this installation has not been texture modded - game will likely have unused mip crashes.", ME3TweaksLogViewer.LogSeverity.FATAL);
                             }
                         }
                         else
@@ -1712,11 +1779,11 @@ namespace ME3TweaksCore.Diagnostics
                             //Default ME1 LODs
                             if (selectedDiagnosticTarget.TextureModded && selectedDiagnosticTarget.HasALOTOrMEUITM())
                             {
-                                addDiagLine(HQSettingsMissingLine, Severity.ERROR);
+                                addDiagLine(HQSettingsMissingLine, ME3TweaksLogViewer.LogSeverity.ERROR);
                             }
                             else
                             {
-                                addDiagLine(HQVanillaLine, Severity.INFO);
+                                addDiagLine(HQVanillaLine, ME3TweaksLogViewer.LogSeverity.INFO);
                             }
                         }
 
@@ -1728,14 +1795,14 @@ namespace ME3TweaksCore.Diagnostics
                             //Not vanilla, alot/meuitm
                             if (selectedDiagnosticTarget.TextureModded && selectedDiagnosticTarget.HasALOTOrMEUITM())
                             {
-                                //addDiagLine(HQVanillaLine, Severity.INFO);
+                                //addDiagLine(HQVanillaLine, LogSeverity.INFO);
                                 if (maxLodSize == 4096)
                                 {
-                                    addDiagLine(@"LOD quality settings: 4K textures", Severity.INFO);
+                                    addDiagLine(@"LOD quality settings: 4K textures", ME3TweaksLogViewer.LogSeverity.INFO);
                                 }
                                 else if (maxLodSize == 2048)
                                 {
-                                    addDiagLine(@"LOD quality settings: 2K textures", Severity.INFO);
+                                    addDiagLine(@"LOD quality settings: 2K textures", ME3TweaksLogViewer.LogSeverity.INFO);
                                 }
                             }
                             else
@@ -1744,18 +1811,18 @@ namespace ME3TweaksCore.Diagnostics
                                 //{
                                 if (maxLodSize == 4096)
                                 {
-                                    addDiagLine(@"LOD quality settings: 4K textures (no high res mod installed)", Severity.WARN);
+                                    addDiagLine(@"LOD quality settings: 4K textures (no high res mod installed)", ME3TweaksLogViewer.LogSeverity.WARN);
                                 }
                                 else if (maxLodSize == 2048)
                                 {
-                                    addDiagLine(@"LOD quality settings: 2K textures (no high res mod installed)", Severity.INFO);
+                                    addDiagLine(@"LOD quality settings: 2K textures (no high res mod installed)", ME3TweaksLogViewer.LogSeverity.INFO);
                                 }
 
                                 //}
                                 if (!selectedDiagnosticTarget.TextureModded)
                                 {
                                     //no texture mod, but has set LODs
-                                    addDiagLine(@"LODs have been explicitly set, but a texture mod is not installed - game may have black textures as empty mips may not be removed", Severity.WARN);
+                                    addDiagLine(@"LODs have been explicitly set, but a texture mod is not installed - game may have black textures as empty mips may not be removed", ME3TweaksLogViewer.LogSeverity.WARN);
                                 }
                             }
                         }
@@ -1765,11 +1832,11 @@ namespace ME3TweaksCore.Diagnostics
                             if (selectedDiagnosticTarget.TextureModded &&
                                 selectedDiagnosticTarget.HasALOTOrMEUITM())
                             {
-                                addDiagLine(HQSettingsMissingLine, Severity.ERROR);
+                                addDiagLine(HQSettingsMissingLine, ME3TweaksLogViewer.LogSeverity.ERROR);
                             }
                             else //no alot/meuitm, vanilla setting.
                             {
-                                addDiagLine(HQVanillaLine, Severity.INFO);
+                                addDiagLine(HQVanillaLine, ME3TweaksLogViewer.LogSeverity.INFO);
                             }
                         }
 
@@ -1779,7 +1846,7 @@ namespace ME3TweaksCore.Diagnostics
             catch (Exception e)
             {
                 MLog.Error(@"Error checking LOD settings: " + e.Message);
-                addDiagLine($@"Error checking LOD settings: {e.Message}", Severity.INFO);
+                addDiagLine($@"Error checking LOD settings: {e.Message}", ME3TweaksLogViewer.LogSeverity.INFO);
             }
         }
 
@@ -1790,23 +1857,23 @@ namespace ME3TweaksCore.Diagnostics
             return props[@"CN"];
         }
 
-        private static void diagPrintSignatures(FileInspector info, Action<string, Severity> addDiagLine)
+        private static void diagPrintSignatures(FileInspector info, Action<string, ME3TweaksLogViewer.LogSeverity> addDiagLine)
         {
             foreach (var sig in info.GetSignatures())
             {
                 var signingTime = sig.TimestampSignatures.FirstOrDefault()?.TimestampDateTime?.UtcDateTime;
-                addDiagLine(@" > Signed on " + signingTime, Severity.INFO);
+                addDiagLine(@" > Signed on " + signingTime, ME3TweaksLogViewer.LogSeverity.INFO);
 
                 bool isFirst = true;
                 foreach (var signChain in sig.AdditionalCertificates)
                 {
                     try
                     {
-                        addDiagLine($@" >> {(isFirst ? @"Signed" : @"Countersigned")} by {getSignerSubject(signChain.Subject)}", Severity.INFO); // do not localize
+                        addDiagLine($@" >> {(isFirst ? @"Signed" : @"Countersigned")} by {getSignerSubject(signChain.Subject)}", ME3TweaksLogViewer.LogSeverity.INFO); // do not localize
                     }
                     catch
                     {
-                        addDiagLine($@"  >> {(isFirst ? "Signed" : "Countersigned")} by " + signChain.Subject, Severity.INFO); // do not localize
+                        addDiagLine($@"  >> {(isFirst ? "Signed" : "Countersigned")} by " + signChain.Subject, ME3TweaksLogViewer.LogSeverity.INFO); // do not localize
                     }
 
                     isFirst = false;
@@ -1828,19 +1895,15 @@ namespace ME3TweaksCore.Diagnostics
                     var partition = partitionSearcher.Get().Cast<ManagementBaseObject>().Single();
                     using (var physicalDiskSearcher = new ManagementObjectSearcher(
                         @"\\localhost\ROOT\Microsoft\Windows\Storage",
-                        $@"SELECT Size, Model, MediaType FROM MSFT_PhysicalDisk WHERE DeviceID='{ partition[@"DiskNumber"] }'")) //do not localize
+                        $@"SELECT Size, Model, MediaType FROM MSFT_PhysicalDisk WHERE DeviceID='{partition[@"DiskNumber"]}'")) //do not localize
                     {
                         var physicalDisk = physicalDiskSearcher.Get().Cast<ManagementBaseObject>().Single();
-                        return
-                            (UInt16)physicalDisk[@"MediaType"];/*||
-                        SSDModelSubstrings.Any(substring => result.Model.ToLower().Contains(substring)); ;*/
-
-
+                        return (UInt16)physicalDisk[@"MediaType"];
                     }
                 }
                 catch (Exception e)
                 {
-                    MLog.Error($@"Error reading partition type on {partitionLetter}: {e.Message}");
+                    MLog.Error($@"Error reading partition type on {partitionLetter}: {e.Message}. This may be an expected error due to how WMI works");
                     return -1;
                 }
             }
