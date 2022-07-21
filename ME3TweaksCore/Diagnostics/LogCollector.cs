@@ -67,6 +67,10 @@ namespace ME3TweaksCore.Diagnostics
             // Used to tell log viewer which version we have to parse
             private const int SERVERCODE_VER = 3;
 
+            /// <summary>
+            /// MetaCMM name
+            /// </summary>
+            public string ModName { get; set; }
             public string DLCFolderName { get; set; }
             public int NexusUpdateCode { get; set; }
             public string InstalledBy { get; set; }
@@ -90,7 +94,8 @@ namespace ME3TweaksCore.Diagnostics
                     sb.Append(SERVERCODE_VER);
                     sb.Append(";;");
                     sb.Append(DLCFolderName);
-
+                    sb.Append(";;");
+                    sb.Append(ModName); // Useful if not found in TPMI
                     // Mod Version
                     sb.Append(";;");
                     if (VersionInstalled != null)
@@ -140,6 +145,10 @@ namespace ME3TweaksCore.Diagnostics
 
     public class LogCollector
     {
+        /// <summary>
+        /// Closing tag for a collapsable subsection
+        /// </summary>
+        private const string END_SUB = @"[/SUB]";
         public static List<LogItem> GetLogsList()
         {
             var logs = Directory.GetFiles(MCoreFilesystem.GetLogDir(), @"*.txt");
@@ -755,19 +764,51 @@ namespace ME3TweaksCore.Diagnostics
                                 var videoKey = key.OpenSubKey(adapterRegistryIndex);
 
                                 // Get memory. If memory is not populated then this is not active right now (I think)
-                                long vidCardSizeInBytes = (long)videoKey.GetValue(@"HardwareInformation.qwMemorySize", 0L);
-                                if (vidCardSizeInBytes == 0) continue; // Not defined
-
-                                var vidCardNameReg = videoKey.GetValue(@"HardwareInformation.AdapterString", @"Unable to get adapter name");
-                                string vidCardName = @"Unknown name";
-                                if (vidCardNameReg is byte[] bytes)
+                                long vidCardSizeInBytes = (long)videoKey.GetValue(@"HardwareInformation.qwMemorySize", -1L);
+                                ulong vidCardSizeInBytesIntegrated = 1uL;
+                                if (vidCardSizeInBytes == -1)
                                 {
-                                    // AMD Radeon 6700XT on eGPU writes REG_BINARY for some reason
-                                    vidCardName = Encoding.Unicode.GetString(bytes).Trim(); // During upload step we have to strip \0 or it'll break the log viewer due to how lzma-js works
+                                    var memSize = videoKey.GetValue(@"HardwareInformation.MemorySize", 1uL); // We use 1 because 2-4GB range is realistic. But a 1 byte video card?
+                                    if (memSize is byte[] whyWouldYouPutThisInBytes)
+                                    {
+                                        vidCardSizeInBytesIntegrated = BitConverter.ToUInt32(whyWouldYouPutThisInBytes);
+                                    }
+                                    else if (memSize is long l)
+                                    {
+                                        vidCardSizeInBytesIntegrated = (ulong)l;
+                                    }
                                 }
-                                else if (vidCardNameReg is string str)
+                                if (vidCardSizeInBytes == -1 && vidCardSizeInBytesIntegrated == 1) continue; // Not defined
+
+                                string vidCardName = @"Unknown name";
+
+                                // Try 1: Use DriverDesc
+                                var vidCardNameReg = videoKey.GetValue(@"DriverDesc");
+                                if (vidCardNameReg is string str)
                                 {
                                     vidCardName = str;
+                                }
+                                else
+                                {
+                                    vidCardNameReg = null; // ensure null for flow control below
+                                }
+
+                                if (vidCardNameReg == null)
+                                {
+                                    // Try 2: Read AdapterString
+                                    vidCardNameReg = videoKey.GetValue(@"HardwareInformation.AdapterString",
+                                        @"Unable to get adapter name");
+                                    if (vidCardNameReg is byte[] bytes)
+                                    {
+                                        // AMD Radeon 6700XT on eGPU writes REG_BINARY for some reason
+                                        vidCardName =
+                                            Encoding.Unicode.GetString(bytes)
+                                                .Trim(); // During upload step we have to strip \0 or it'll break the log viewer due to how lzma-js works
+                                    }
+                                    else if (vidCardNameReg is string str2)
+                                    {
+                                        vidCardName = str2;
+                                    }
                                 }
 
                                 string vidDriverVersion = (string)videoKey.GetValue(@"DriverVersion", @"Unable to get driver version");
@@ -776,7 +817,18 @@ namespace ME3TweaksCore.Diagnostics
                                 addDiagLine();
                                 addDiagLine($@"Video Card {(vidCardIndex++)}", ME3TweaksLogViewer.LogSeverity.BOLD);
                                 addDiagLine($@"Name: {vidCardName}");
-                                addDiagLine($@"Memory: {FileSize.FormatSize(vidCardSizeInBytes)}");
+                                if (vidCardSizeInBytesIntegrated == 1 && vidCardSizeInBytes == -1)
+                                {
+                                    addDiagLine($@"Memory: (System Shared)");
+                                }
+                                else if (vidCardSizeInBytes > 0)
+                                {
+                                    addDiagLine($@"Memory: {FileSize.FormatSize(vidCardSizeInBytes)}");
+                                }
+                                else
+                                {
+                                    addDiagLine($@"Memory: {FileSize.FormatSize(vidCardSizeInBytesIntegrated)}");
+                                }
                                 addDiagLine($@"Driver Version: {vidDriverVersion}");
                                 addDiagLine($@"Driver Date: {vidDriverDate}");
                             }
@@ -902,7 +954,7 @@ namespace ME3TweaksCore.Diagnostics
                         }
                     }
 
-                    addDiagLine(@"[/SUB]");
+                    addDiagLine(END_SUB);
                 }
 
                 #endregion
@@ -1055,6 +1107,7 @@ namespace ME3TweaksCore.Diagnostics
                         var metaMappedDLC = dlc.Value;
                         if (metaMappedDLC != null)
                         {
+                            dlcStruct.ModName = metaMappedDLC.ModName;
                             dlcStruct.InstalledBy = metaMappedDLC.InstalledBy;
                             dlcStruct.VersionInstalled = metaMappedDLC.Version;
                             dlcStruct.InstalledOptions = metaMappedDLC.OptionsSelectedAtInstallTime;
@@ -1098,7 +1151,7 @@ namespace ME3TweaksCore.Diagnostics
                             addDiagLine(dlc, ME3TweaksLogViewer.LogSeverity.TPMI);
                         }
                     }
-                    addDiagLine(@"[/SUB]");
+                    addDiagLine(END_SUB);
                 }
                 #endregion
 
@@ -1477,7 +1530,7 @@ namespace ME3TweaksCore.Diagnostics
                             addDiagLine(logF.Key, ME3TweaksLogViewer.LogSeverity.BOLD);
                             addDiagLine(@"Click to view log", ME3TweaksLogViewer.LogSeverity.SUB);
                             addDiagLine(logF.Value);
-                            addDiagLine(@"[/SUB]");
+                            addDiagLine(END_SUB);
                         }
                     }
                     else
@@ -1523,8 +1576,9 @@ namespace ME3TweaksCore.Diagnostics
                                 {
                                     FileInfo fi = new FileInfo(filepath);
                                     long size = fi.Length;
-                                    if (ent.size < size)
+                                    if (ent.size < size && (ent.size == 0 || package.DiagnosticTarget.Game.IsOTGame()))
                                     {
+                                        // Size only matters on OT or if zero on LE
                                         addDiagLine($@" - {filepath} size is {size}, but TOC lists {ent.size} ({ent.size - size} bytes)", ME3TweaksLogViewer.LogSeverity.ERROR);
                                         hadTocError = true;
                                     }
@@ -1628,12 +1682,13 @@ namespace ME3TweaksCore.Diagnostics
                 addDiagLine($@"{package.DiagnosticTarget.Game.ToGameName()} crash logs found in Event Viewer", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                 if (entries.Any())
                 {
+                    addDiagLine(@"Click to view events", ME3TweaksLogViewer.LogSeverity.SUB);
                     foreach (var entry in entries)
                     {
                         string str = string.Join("\n", GenerateEventLogString(entry).Split('\n').ToList().Take(17).ToList()); //do not localize
                         addDiagLine($"{package.DiagnosticTarget.Game.ToGameName()} Event {entry.TimeGenerated}\n{str}"); //do not localize
                     }
-
+                    addDiagLine(END_SUB);
                 }
                 else
                 {
@@ -1952,24 +2007,24 @@ namespace ME3TweaksCore.Diagnostics
                         if (asilogExtensions.Contains(extension))
                         {
                             StringBuilder sb = new StringBuilder();
-                            var fileContents = File.ReadAllLines(f);
+                            var fileContentsLines = File.ReadAllLines(f);
 
                             int lastIndexRead = 0;
                             // Read first 30 lines.
-                            for (int i = 0; i < 30 && i < fileContents.Length - 1; i++)
+                            for (int i = 0; i < 30 && i < fileContentsLines.Length - 1; i++)
                             {
-                                sb.AppendLine(fileContents[i]);
+                                sb.AppendLine(fileContentsLines[i]);
                                 lastIndexRead = i;
                             }
 
                             // Read last 30 lines.
-                            if (lastIndexRead < fileContents.Length)
+                            if (lastIndexRead < fileContentsLines.Length - 1)
                             {
                                 sb.AppendLine(@"...");
-                                var startIndex = Math.Max(lastIndexRead, fileContents.Length - 30);
-                                for (int i = startIndex; i < fileContents.Length - 1; i++)
+                                var startIndex = Math.Max(lastIndexRead, fileContentsLines.Length - 30);
+                                for (int i = startIndex; i < fileContentsLines.Length - 1; i++)
                                 {
-                                    sb.AppendLine(fileContents[i]);
+                                    sb.AppendLine(fileContentsLines[i]);
                                 }
                             }
 
@@ -2088,8 +2143,8 @@ namespace ME3TweaksCore.Diagnostics
 
                 string responseString = package.UploadEndpoint.PostUrlEncodedAsync(new
                 {
-                    LogData = Convert.ToBase64String(lzmalog), 
-                    ToolName = MLibraryConsumer.GetHostingProcessname(), 
+                    LogData = Convert.ToBase64String(lzmalog),
+                    ToolName = MLibraryConsumer.GetHostingProcessname(),
                     ToolVersion = MLibraryConsumer.GetAppVersion()
                 }).ReceiveString().Result;
                 Uri uriResult;
