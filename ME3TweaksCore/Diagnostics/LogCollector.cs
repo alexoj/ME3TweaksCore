@@ -758,7 +758,18 @@ namespace ME3TweaksCore.Diagnostics
                                 long vidCardSizeInBytes = (long)videoKey.GetValue(@"HardwareInformation.qwMemorySize", 0L);
                                 if (vidCardSizeInBytes == 0) continue; // Not defined
 
-                                string vidCardName = (string)videoKey.GetValue(@"HardwareInformation.AdapterString", @"Unable to get adapter name");
+                                var vidCardNameReg = videoKey.GetValue(@"HardwareInformation.AdapterString", @"Unable to get adapter name");
+                                string vidCardName = @"Unknown name";
+                                if (vidCardNameReg is byte[] bytes)
+                                {
+                                    // AMD Radeon 6700XT on eGPU writes REG_BINARY for some reason
+                                    vidCardName = Encoding.Unicode.GetString(bytes).Trim(); // During upload step we have to strip \0 or it'll break the log viewer due to how lzma-js works
+                                }
+                                else if (vidCardNameReg is string str)
+                                {
+                                    vidCardName = str;
+                                }
+
                                 string vidDriverVersion = (string)videoKey.GetValue(@"DriverVersion", @"Unable to get driver version");
                                 string vidDriverDate = (string)videoKey.GetValue(@"DriverDate", @"Unable to get driver date");
 
@@ -1042,10 +1053,13 @@ namespace ME3TweaksCore.Diagnostics
                     if (!officialDLC.Contains(dlc.Key, StringComparer.InvariantCultureIgnoreCase))
                     {
                         var metaMappedDLC = dlc.Value;
-                        dlcStruct.InstalledBy = metaMappedDLC?.InstalledBy;
-                        dlcStruct.VersionInstalled = metaMappedDLC?.Version;
-                        dlcStruct.InstalledOptions = metaMappedDLC?.OptionsSelectedAtInstallTime;
-                        dlcStruct.NexusUpdateCode = metaMappedDLC?.NexusCode;
+                        if (metaMappedDLC != null)
+                        {
+                            dlcStruct.InstalledBy = metaMappedDLC.InstalledBy;
+                            dlcStruct.VersionInstalled = metaMappedDLC.Version;
+                            dlcStruct.InstalledOptions = metaMappedDLC.OptionsSelectedAtInstallTime;
+                            dlcStruct.NexusUpdateCode = metaMappedDLC.NexusUpdateCode;
+                        }
                     }
                     else
                     {
@@ -1686,7 +1700,8 @@ namespace ME3TweaksCore.Diagnostics
                 }
             }
 
-            return diagStringBuilder.ToString();
+            // We have to strip any null terminators or it will bork it on the server log viewer
+            return diagStringBuilder.ToString().Replace("\0", @""); // do not localize
         }
 
         private static void SeeIfIncompatibleDLCIsInstalled(GameTarget target, Action<string, ME3TweaksLogViewer.LogSeverity> addDiagLine)
@@ -2069,10 +2084,14 @@ namespace ME3TweaksCore.Diagnostics
             try
             {
                 //this doesn't need to technically be async, but library doesn't have non-async method.
-                //DEBUG ONLY!!!
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_uploadingToME3Tweaks));
 
-                string responseString = package.UploadEndpoint.PostUrlEncodedAsync(new { LogData = Convert.ToBase64String(lzmalog), ToolName = MLibraryConsumer.GetHostingProcessname(), ToolVersion = MLibraryConsumer.GetAppVersion() }).ReceiveString().Result;
+                string responseString = package.UploadEndpoint.PostUrlEncodedAsync(new
+                {
+                    LogData = Convert.ToBase64String(lzmalog), 
+                    ToolName = MLibraryConsumer.GetHostingProcessname(), 
+                    ToolVersion = MLibraryConsumer.GetAppVersion()
+                }).ReceiveString().Result;
                 Uri uriResult;
                 bool result = Uri.TryCreate(responseString, UriKind.Absolute, out uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
                 if (result)
