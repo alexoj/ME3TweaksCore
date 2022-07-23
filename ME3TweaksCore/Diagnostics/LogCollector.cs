@@ -1758,7 +1758,7 @@ namespace ME3TweaksCore.Diagnostics
             MLog.Information($@"Checking TOC file {tocFilePath}");
 
             TOCBinFile tbf = new TOCBinFile(tocFilePath);
-            addDiagLine($@" - TOC {tocFilePath.Substring(package.DiagnosticTarget.TargetPath.Length + 1)} info: {tbf.GetAllEntries().Count} file entries, {tbf.HashBuckets.Count} hash buckets", ME3TweaksLogViewer.LogSeverity.INFO);
+            addDiagLine($@" - {tocFilePath.Substring(package.DiagnosticTarget.TargetPath.Length + 1)}: {tbf.GetAllEntries().Count} file entries, {tbf.HashBuckets.Count} hash buckets", ME3TweaksLogViewer.LogSeverity.INFO);
             foreach (TOCBinFile.Entry ent in tbf.GetAllEntries())
             {
                 //Console.WriteLine(index + "\t0x" + ent.offset.ToString("X6") + "\t" + ent.size + "\t" + ent.name);
