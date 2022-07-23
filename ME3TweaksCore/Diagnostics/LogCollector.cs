@@ -1550,45 +1550,27 @@ namespace ME3TweaksCore.Diagnostics
                     package.UpdateStatusCallback?.Invoke(@"Collecting TOC file information");
 
                     addDiagLine(@"File Table of Contents (TOC) check", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
-                    addDiagLine(@"PCConsoleTOC.bin files list all files the game can normally access.");
+                    addDiagLine(@"PCConsoleTOC.bin files list all files the game can normally access and stores the values in hash tables for faster lookup.");
                     addDiagLine(@"The vanilla shipping game includes references and incorrect size values for some files; these are normal.");
                     bool hadTocError = false;
-                    string[] tocs = Directory.GetFiles(Path.Combine(gamePath, @"BIOGame"), @"PCConsoleTOC.bin", SearchOption.AllDirectories);
                     string markerfile = M3Directories.GetTextureMarkerPath(package.DiagnosticTarget);
-                    foreach (string toc in tocs)
-                    {
-                        MLog.Information($@"Checking TOC file {toc}");
+                    var bgTOC = Path.Combine(M3Directories.GetBioGamePath(package.DiagnosticTarget), "PCConsoleTOC.bin"); // Basegame
+                    hadTocError |= CheckTOCFile(package, bgTOC, markerfile, addDiagLine);
 
-                        TOCBinFile tbf = new TOCBinFile(toc);
-                        foreach (TOCBinFile.Entry ent in tbf.GetAllEntries())
+                    var dlcs = package.DiagnosticTarget.GetInstalledDLC();
+                    var dlcTOCs = new List<string>();
+                    foreach (var v in dlcs)
+                    {
+                        var tocPath = Path.Combine(M3Directories.GetDLCPath(package.DiagnosticTarget), v, @"PCConsoleTOC.bin");
+                        if (File.Exists(tocPath))
                         {
-                            //Console.WriteLine(index + "\t0x" + ent.offset.ToString("X6") + "\t" + ent.size + "\t" + ent.name);
-                            var tocrootPath = gamePath;
-                            if (Path.GetFileName(Directory.GetParent(toc).FullName).StartsWith(@"DLC_"))
-                            {
-                                tocrootPath = Directory.GetParent(toc).FullName;
-                            }
-                            string filepath = Path.Combine(tocrootPath, ent.name);
-                            var fileExists = File.Exists(filepath);
-                            if (fileExists)
-                            {
-                                if (!filepath.Equals(markerfile, StringComparison.InvariantCultureIgnoreCase) && !filepath.ToLower().EndsWith(@"pcconsoletoc.bin"))
-                                {
-                                    FileInfo fi = new FileInfo(filepath);
-                                    long size = fi.Length;
-                                    if (ent.size < size && (ent.size == 0 || package.DiagnosticTarget.Game.IsOTGame()))
-                                    {
-                                        // Size only matters on OT or if zero on LE
-                                        addDiagLine($@" - {filepath} size is {size}, but TOC lists {ent.size} ({ent.size - size} bytes)", ME3TweaksLogViewer.LogSeverity.ERROR);
-                                        hadTocError = true;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                addDiagLine($@" - {filepath} is listed in TOC but is not present on disk", ME3TweaksLogViewer.LogSeverity.WARN);
-                            }
+                            dlcTOCs.Add(tocPath);
                         }
+                    }
+
+                    foreach (string toc in dlcTOCs)
+                    {
+                        hadTocError |= CheckTOCFile(package, toc, markerfile, addDiagLine);
                     }
 
                     if (package.DiagnosticTarget.Game.IsOTGame())
@@ -1757,6 +1739,53 @@ namespace ME3TweaksCore.Diagnostics
 
             // We have to strip any null terminators or it will bork it on the server log viewer
             return diagStringBuilder.ToString().Replace("\0", @""); // do not localize
+        }
+
+        /// <summary>
+        /// Checks the TOC file at the listed path and prints information to the diagnostic for it.
+        /// </summary>
+        /// <param name="tocFilePath">TOC file to check</param>
+        /// <param name="addDiagLine">Function to print to diagnostic</param>
+        private static bool CheckTOCFile(LogUploadPackage package, string tocFilePath, string textureMarkerFilePath, Action<string, ME3TweaksLogViewer.LogSeverity> addDiagLine)
+        {
+            bool hadTocError = false;
+            var tocrootPath = package.DiagnosticTarget.TargetPath;
+            if (Path.GetFileName(Directory.GetParent(tocFilePath).FullName).StartsWith(@"DLC_"))
+            {
+                tocrootPath = Directory.GetParent(tocFilePath).FullName;
+            }
+
+            MLog.Information($@"Checking TOC file {tocFilePath}");
+
+            TOCBinFile tbf = new TOCBinFile(tocFilePath);
+            addDiagLine($@" - TOC {tocFilePath.Substring(package.DiagnosticTarget.TargetPath.Length + 1)} info: {tbf.GetAllEntries().Count} file entries, {tbf.HashBuckets.Count} hash buckets", ME3TweaksLogViewer.LogSeverity.INFO);
+            foreach (TOCBinFile.Entry ent in tbf.GetAllEntries())
+            {
+                //Console.WriteLine(index + "\t0x" + ent.offset.ToString("X6") + "\t" + ent.size + "\t" + ent.name);
+
+                string filepath = Path.Combine(tocrootPath, ent.name);
+                var fileExists = File.Exists(filepath);
+                if (fileExists)
+                {
+                    if (!filepath.Equals(textureMarkerFilePath, StringComparison.InvariantCultureIgnoreCase) && !filepath.ToLower().EndsWith(@"pcconsoletoc.bin"))
+                    {
+                        FileInfo fi = new FileInfo(filepath);
+                        long size = fi.Length;
+                        if (ent.size < size && (ent.size == 0 || package.DiagnosticTarget.Game.IsOTGame()))
+                        {
+                            // Size only matters on OT or if zero on LE
+                            addDiagLine($@"   >  {filepath} size is {size}, but TOC lists {ent.size} ({ent.size - size} bytes)", ME3TweaksLogViewer.LogSeverity.ERROR);
+                            hadTocError = true;
+                        }
+                    }
+                }
+                else
+                {
+                    addDiagLine($@"   > {filepath} is listed in TOC but is not present on disk", ME3TweaksLogViewer.LogSeverity.WARN);
+                }
+            }
+
+            return hadTocError;
         }
 
         private static void SeeIfIncompatibleDLCIsInstalled(GameTarget target, Action<string, ME3TweaksLogViewer.LogSeverity> addDiagLine)
