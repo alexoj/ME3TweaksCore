@@ -76,7 +76,7 @@ namespace ME3TweaksCore.Targets
             }
         }
 
-        public void ReloadGameTarget(bool logInfo = true, bool forceLodUpdate = false, bool reverseME1Executable = true, bool skipInit = false)
+        public virtual void ReloadGameTarget(bool logInfo = true, bool forceLodUpdate = false, bool reverseME1Executable = true, bool skipInit = false)
         {
             if (!IsCustomOption && !skipInit)
             {

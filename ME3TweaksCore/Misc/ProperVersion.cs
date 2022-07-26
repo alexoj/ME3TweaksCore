@@ -28,7 +28,7 @@ namespace ME3TweaksCore.Misc
         /// <param name="str"></param>
         /// <param name="version"></param>
         /// <returns></returns>
-        private static bool TryParse(string str, out Version version)
+        public static bool TryParse(string str, out Version version)
         {
             if (Version.TryParse(str, out version))
             {
@@ -49,6 +49,13 @@ namespace ME3TweaksCore.Misc
         /// <returns></returns>
         public static int CompareVersions(Version v1, Version v2)
         {
+            if (v1 == null && v2 != null)
+                return -1; // v2 is above v1
+            if (v2 == null && v1 != null)
+                return 1; // v1 is above v2
+            if (v1 == null && v2 == null)
+                return 0; // IDK how you'd do this...
+
             Version av1 = ParseProperVersion(v1.ToString());
             Version av2 = ParseProperVersion(v2.ToString());
             return av1.CompareTo(av2);

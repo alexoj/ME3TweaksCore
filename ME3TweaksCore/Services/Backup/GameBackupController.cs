@@ -229,67 +229,73 @@ namespace ME3TweaksCore.Services.Backup
             MLog.Information(@"Checking target is vanilla");
             bool isVanilla = VanillaDatabaseService.ValidateTargetAgainstVanilla(targetToBackup, nonVanillaFileFoundCallback, false);
 
-            MLog.Information(@"Checking DLC consistency");
-            bool isDLCConsistent = VanillaDatabaseService.ValidateTargetDLCConsistency(targetToBackup, inconsistentDLCCallback: inconsistentDLCFoundCallback);
+            List<string> dlcModsInstalled = null;
 
-            MLog.Information(@"Checking only vanilla DLC is installed");
-            List<string> dlcModsInstalled = VanillaDatabaseService.GetInstalledDLCMods(targetToBackup).Select(x =>
+            if (Game != MEGame.LELauncher)
             {
-                var tpmi = TPMIService.GetThirdPartyModInfo(x, targetToBackup.Game);
-                if (tpmi != null) return $@"{x} ({tpmi.modname})";
-                return x;
-            }).ToList();
-            List<string> installedDLC = VanillaDatabaseService.GetInstalledOfficialDLC(targetToBackup);
-            List<string> allOfficialDLC = Game == MEGame.LELauncher ? new List<string>() : MEDirectories.OfficialDLC(targetToBackup.Game).ToList();
+                MLog.Information(@"Checking DLC consistency");
+                bool isDLCConsistent = VanillaDatabaseService.ValidateTargetDLCConsistency(targetToBackup, inconsistentDLCCallback: inconsistentDLCFoundCallback);
 
-            MLog.Information(@"Checking for TexturesMEM TFCs");
-            var memTextures = Directory.GetFiles(targetToBackup.TargetPath, @"TexturesMEM*.tfc", SearchOption.AllDirectories);
-
-            if (installedDLC.Count() < allOfficialDLC.Count())
-            {
-                var dlcList = string.Join("\n - ", allOfficialDLC.Except(installedDLC).Select(x => $@"{MEDirectories.OfficialDLCNames(targetToBackup.Game)[x]} ({x})")); //do not localize
-                dlcList = @" - " + dlcList;
-                MLog.Information(@"The following dlc will be missing in the backup if user continues: " + dlcList);
-                string message = LC.GetString(LC.string_dialog_notAllDLCInstalled, dlcList);
-                var okToBackup = WarningActionYesNoCallback?.Invoke(LC.GetString(LC.string_someDlcNotInstalled), message, false, LC.GetString(LC.string_continueBackingUp), LC.GetString(LC.string_abortBackup));
-                if (!okToBackup.HasValue || !okToBackup.Value)
+                MLog.Information(@"Checking only vanilla DLC is installed");
+                dlcModsInstalled = VanillaDatabaseService.GetInstalledDLCMods(targetToBackup).Select(x =>
                 {
-                    MLog.Information(@"User canceled backup due to some missing data");
+                    var tpmi = TPMIService.GetThirdPartyModInfo(x, targetToBackup.Game);
+                    if (tpmi != null) return $@"{x} ({tpmi.modname})";
+                    return x;
+                }).ToList();
+                List<string> installedDLC = VanillaDatabaseService.GetInstalledOfficialDLC(targetToBackup);
+                List<string> allOfficialDLC = Game == MEGame.LELauncher ? new List<string>() : MEDirectories.OfficialDLC(targetToBackup.Game).ToList();
+
+                MLog.Information(@"Checking for TexturesMEM TFCs");
+                var memTextures = Directory.GetFiles(targetToBackup.TargetPath, @"TexturesMEM*.tfc", SearchOption.AllDirectories);
+
+                if (installedDLC.Count() < allOfficialDLC.Count())
+                {
+                    var dlcList = string.Join("\n - ", allOfficialDLC.Except(installedDLC).Select(x => $@"{MEDirectories.OfficialDLCNames(targetToBackup.Game)[x]} ({x})")); //do not localize
+                    dlcList = @" - " + dlcList;
+                    MLog.Information(@"The following dlc will be missing in the backup if user continues: " + dlcList);
+                    string message = LC.GetString(LC.string_dialog_notAllDLCInstalled, dlcList);
+                    var okToBackup = WarningActionYesNoCallback?.Invoke(LC.GetString(LC.string_someDlcNotInstalled), message, false, LC.GetString(LC.string_continueBackingUp), LC.GetString(LC.string_abortBackup));
+                    if (!okToBackup.HasValue || !okToBackup.Value)
+                    {
+                        MLog.Information(@"User canceled backup due to some missing data");
+                        EndBackup();
+                        return false;
+                    }
+                }
+
+                if (memTextures.Any())
+                {
+                    MLog.Information($@"Cannot backup: Game contains TexturesMEM TFC files ({memTextures.Length})");
                     EndBackup();
+                    BlockingActionCallback?.Invoke(LC.GetString(LC.string_leftoverTextureFilesFound), LC.GetString(LC.string_dialog_foundLeftoverTextureFiles));
                     return false;
                 }
-            }
 
-            if (memTextures.Any())
-            {
-                MLog.Information($@"Cannot backup: Game contains TexturesMEM TFC files ({memTextures.Length})");
-                EndBackup();
-                BlockingActionCallback?.Invoke(LC.GetString(LC.string_leftoverTextureFilesFound), LC.GetString(LC.string_dialog_foundLeftoverTextureFiles));
-                return false;
-            }
-
-            if (!isDLCConsistent)
-            {
-                MLog.Information(@"Cannot backup: Game contains inconsistent DLC");
-                EndBackup();
-                if (targetToBackup.Supported)
+                if (!isDLCConsistent)
                 {
-                    BlockingListCallback?.Invoke(LC.GetString(LC.string_inconsistentDLCDetected), LC.GetString(LC.string_dialogTheFollowingDLCAreInAnInconsistentState), inconsistentDLC);
-                }
-                else
-                {
-                    BlockingListCallback?.Invoke(LC.GetString(LC.string_inconsistentDLCDetected), LC.GetString(LC.string_inconsistentDLCDetectedUnofficialGame), inconsistentDLC);
-                }
-                return false;
-            }
+                    MLog.Information(@"Cannot backup: Game contains inconsistent DLC");
+                    EndBackup();
+                    if (targetToBackup.Supported)
+                    {
+                        BlockingListCallback?.Invoke(LC.GetString(LC.string_inconsistentDLCDetected), LC.GetString(LC.string_dialogTheFollowingDLCAreInAnInconsistentState), inconsistentDLC);
+                    }
+                    else
+                    {
+                        BlockingListCallback?.Invoke(LC.GetString(LC.string_inconsistentDLCDetected), LC.GetString(LC.string_inconsistentDLCDetectedUnofficialGame), inconsistentDLC);
+                    }
 
-            // Todo: Maybe find a way to skip these?
-            if (dlcModsInstalled.Any())
-            {
-                MLog.Information(@"Cannot backup: Game contains modified game files");
-                EndBackup();
-                BlockingListCallback?.Invoke(LC.GetString(LC.string_cannotBackupModifiedGame), LC.GetString(LC.string_dialogDLCModsWereDetectedCannotBackup), dlcModsInstalled);
-                return false;
+                    return false;
+                }
+
+                // Todo: Maybe find a way to skip these?
+                if (dlcModsInstalled.Any())
+                {
+                    MLog.Information(@"Cannot backup: Game contains modified game files");
+                    EndBackup();
+                    BlockingListCallback?.Invoke(LC.GetString(LC.string_cannotBackupModifiedGame), LC.GetString(LC.string_dialogDLCModsWereDetectedCannotBackup), dlcModsInstalled);
+                    return false;
+                }
             }
 
             if (!isVanilla)
@@ -327,9 +333,9 @@ namespace ME3TweaksCore.Services.Backup
             }
             else
             {
+                // Linking existing backup
                 MLog.Information(@"Linking existing backup at " + targetToBackup.TargetPath);
                 backupPath = targetToBackup.TargetPath;
-                // Linking existing backup
                 bool okToBackup = validateBackupPath(targetToBackup.TargetPath, targetToBackup, applicationTargets);
                 if (!okToBackup)
                 {
@@ -340,6 +346,7 @@ namespace ME3TweaksCore.Services.Backup
 
             if (!targetToBackup.IsCustomOption)
             {
+                // Making new backup
                 #region callbacks and copy code
 
                 // Todo: Maybe uninstall bink before copying data? So it's more 'vanilla'
@@ -351,11 +358,26 @@ namespace ME3TweaksCore.Services.Backup
                     BackupProgressCallback?.Invoke(ProgressValue, ProgressMax);
                 }
 
-                string dlcFolderpath = M3Directories.GetDLCPath(targetToBackup) + Path.DirectorySeparatorChar;
-                int dlcSubStringLen = dlcFolderpath.Length;
-                var officialDLCNames = MEDirectories.OfficialDLCNames(targetToBackup.Game);
+                string dlcFolderpath = null;
+                int dlcSubStringLen = 0;
+                CaseInsensitiveDictionary<string> officialDLCNames = null;
 
-                bool aboutToCopyCallback(string file)
+                if (Game != MEGame.LELauncher)
+                {
+                    // Launch doesn't set these paths so we cannot access them on Launcher backup.
+                    dlcFolderpath = M3Directories.GetDLCPath(targetToBackup) + Path.DirectorySeparatorChar;
+                    dlcSubStringLen = dlcFolderpath.Length;
+                    officialDLCNames = MEDirectories.OfficialDLCNames(targetToBackup.Game);
+                }
+
+                bool aboutToCopyCallbackLauncher(string file)
+                {
+                    UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpX, Path.GetFileName(file)));
+                    BackupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_backingUpX, Path.GetFileName(file));
+                    return true;
+                }
+
+                bool aboutToCopyCallbackMainGame(string file)
                 {
                     try
                     {
@@ -481,7 +503,7 @@ namespace ME3TweaksCore.Services.Backup
                 CopyTools.CopyAll_ProgressBar(new DirectoryInfo(targetToBackup.TargetPath),
                     new DirectoryInfo(backupPath),
                     totalItemsToCopyCallback: totalFilesToCopyCallback,
-                    aboutToCopyCallback: aboutToCopyCallback,
+                    aboutToCopyCallback: Game == MEGame.LELauncher ? aboutToCopyCallbackLauncher: aboutToCopyCallbackMainGame,
                     fileCopiedCallback: fileCopiedCallback,
                     ignoredExtensions: new[] { @"*.pdf", @"*.mp3", @"*.wav" },
                     bigFileProgressCallback: bigFileProgressCallback,
@@ -493,7 +515,7 @@ namespace ME3TweaksCore.Services.Backup
             SetBackupPath(Game, backupPath);
 
             // Write vanilla marker
-            if (isVanilla && !Enumerable.Any(dlcModsInstalled))
+            if (isVanilla && dlcModsInstalled == null || !dlcModsInstalled.Any())
             {
                 var cmmvanilla = Path.Combine(backupPath, @"cmm_vanilla");
                 if (!File.Exists(cmmvanilla))
@@ -579,7 +601,7 @@ namespace ME3TweaksCore.Services.Backup
                     {
                         //Not enough space.
                         MLog.Error($@"A backup cannot be created in a subdirectory of a game. {backupPath} is a subdir of {targetToBackup.TargetPath}");
-                        BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotCreateBackup), LC.GetString(LC.string_dialogBackupCannotBeSubdirectoryOfGame));
+                        BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotCreateBackup), LC.GetString(LC.string_dialogBackupCannotBeSubdirectoryOfGame, backupPath, targetToBackup.TargetPath));
                         return false;
                     }
                 }
