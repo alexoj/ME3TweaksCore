@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Targets;
@@ -62,7 +64,17 @@ namespace ME3TweaksCore.NativeMods
 
         protected void InstallLoader()
         {
-            CurrentGameTarget.InstallBinkBypass();
+            try
+            {
+                CurrentGameTarget.InstallBinkBypass();
+            }
+            catch (Exception e)
+            {
+                // Logically we'd find a way to pass this to the consuming application
+                // but not sure how you'd do that in a command pattern like this
+                MLog.Exception(e, @"Error installing bink bypass:");
+            }
+
             RefreshBinkStatus();
         }
 
@@ -85,7 +97,7 @@ namespace ME3TweaksCore.NativeMods
 
                 // Known
                 DisplayedASIMods.ReplaceAll(installedKnownASIMods.OrderBy(x => x.AssociatedManifestItem.Name));
-                
+
                 // Unknown
                 DisplayedASIMods.AddRange(installedUnknownASIMods.OrderBy(x => x.UnmappedFilename));
 
