@@ -64,17 +64,9 @@ namespace ME3TweaksCore.NativeMods
 
         protected void InstallLoader()
         {
-            try
-            {
-                CurrentGameTarget.InstallBinkBypass();
-            }
-            catch (Exception e)
-            {
-                // Logically we'd find a way to pass this to the consuming application
-                // but not sure how you'd do that in a command pattern like this
-                MLog.Exception(e, @"Error installing bink bypass:");
-            }
-
+            // Logically we'd find a way to pass this to the consuming application
+            // but not sure how you'd do that in a command pattern like this
+            CurrentGameTarget.InstallBinkBypass(false); // Catch statement is in here already.
             RefreshBinkStatus();
         }
 
