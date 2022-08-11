@@ -172,6 +172,7 @@
 	<system:String x:Key="string_errorUploadingLogResponse">Ошибка загрузки лога: Код ответа {0}</system:String>
 	<system:String x:Key="string_interp_serverRejectedLogUpload">На сервере отказано в загрузке: {0}</system:String>
 	<system:String x:Key="string_interp_errorUploadingLog">Ошибка загрузки лога: {0}</system:String>
+	<system:String x:Key="string_interp_currentLog">{0} - {1} - ТЕКУЩИЙ ЛОГ</system:String>
 	<system:String x:Key="string_unpackingDLC">Распаковка DLC</system:String>
 	<system:String x:Key="string_checkingGameData">Проверка данных игры</system:String>
 	<system:String x:Key="string_scanningGameTextures">Сканирование игровых текстур</system:String>
