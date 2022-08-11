@@ -81,6 +81,8 @@
     <!-- 0={server response string} -->
     <system:String x:Key="string_interp_errorUploadingLog">Error uploading log: {0}</system:String>
     <!-- 0={Exception message} -->
+    <system:String x:Key="string_interp_currentLog">{0} - {1} - CURRENT LOG</system:String>
+    <!-- 0={Filepath} 1={File size (e.g. 7KB)} - This string is used to tell user what the current active log file is for the current session -->
 
     <!-- Restore panel -->
     <system:String x:Key="string_insufficientDiskSpace">Insufficient disk space</system:String>

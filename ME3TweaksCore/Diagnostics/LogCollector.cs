@@ -92,28 +92,28 @@ namespace ME3TweaksCore.Diagnostics
                 {
                     severity = LogSeverity.DLC;
                     sb.Append(SERVERCODE_VER);
-                    sb.Append(";;");
+                    sb.Append(@";;");
                     sb.Append(DLCFolderName);
-                    sb.Append(";;");
+                    sb.Append(@";;");
                     sb.Append(ModName); // Useful if not found in TPMI
                     // Mod Version
-                    sb.Append(";;");
+                    sb.Append(@";;");
                     if (VersionInstalled != null)
                     {
                         sb.Append(VersionInstalled);
                     }
                     else
                     {
-                        sb.Append("0.0");
+                        sb.Append(@"0.0");
                     }
 
                     // Installed By
-                    sb.Append(";;");
+                    sb.Append(@";;");
 
                     // It's a modded DLC
                     if (string.IsNullOrWhiteSpace(InstalledBy))
                     {
-                        sb.Append($@"Not installed by managed installer"); // Invalid metacmm or not present
+                        sb.Append(@"Not installed by managed installer"); // Invalid metacmm or not present
                     }
                     else if (int.TryParse(InstalledBy, out var _))
                     {
@@ -125,7 +125,7 @@ namespace ME3TweaksCore.Diagnostics
                     }
 
                     // Nexus Update Code
-                    sb.Append(";;");
+                    sb.Append(@";;");
                     sb.Append(NexusUpdateCode);
                     printToDiagFunc(sb.ToString(), severity);
 
@@ -1554,7 +1554,7 @@ namespace ME3TweaksCore.Diagnostics
                     addDiagLine(@"The vanilla shipping game includes references and incorrect size values for some files; these are normal.");
                     bool hadTocError = false;
                     string markerfile = M3Directories.GetTextureMarkerPath(package.DiagnosticTarget);
-                    var bgTOC = Path.Combine(M3Directories.GetBioGamePath(package.DiagnosticTarget), "PCConsoleTOC.bin"); // Basegame
+                    var bgTOC = Path.Combine(M3Directories.GetBioGamePath(package.DiagnosticTarget), @"PCConsoleTOC.bin"); // Basegame
                     hadTocError |= CheckTOCFile(package, bgTOC, markerfile, addDiagLine);
 
                     var dlcs = package.DiagnosticTarget.GetInstalledDLC();

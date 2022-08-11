@@ -65,6 +65,7 @@ namespace ME3TweaksCore.Localization
 		public const string string_errorUploadingLogResponse = "string_errorUploadingLogResponse";
 		public const string string_interp_serverRejectedLogUpload = "string_interp_serverRejectedLogUpload";
 		public const string string_interp_errorUploadingLog = "string_interp_errorUploadingLog";
+		public const string string_interp_currentLog = "string_interp_currentLog";
 		public const string string_insufficientDiskSpace = "string_insufficientDiskSpace";
 		public const string string_interp_restoringXpercent = "string_interp_restoringXpercent";
 		public const string string_interp_restoringX = "string_interp_restoringX";
