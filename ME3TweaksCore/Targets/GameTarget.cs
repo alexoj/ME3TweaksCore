@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Mime;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using LegendaryExplorerCore.Compression;
 using LegendaryExplorerCore.GameFilesystem;
@@ -26,8 +27,7 @@ using Serilog;
 namespace ME3TweaksCore.Targets
 {
     [DebuggerDisplay("GameTarget {Game} {TargetPath}")]
-    [AddINotifyPropertyChangedInterface]
-    public class GameTarget : IEqualityComparer<GameTarget>
+    public class GameTarget : IEqualityComparer<GameTarget>, INotifyPropertyChanged
     {
         public const uint MEMI_TAG = 0x494D454D;
 
@@ -1122,6 +1122,13 @@ namespace ME3TweaksCore.Targets
             if (Game.IsLEGame()) return Path.Combine(TargetPath, @"Binaries", @"Win64", @"bink2w64.dll");
             if (Game == MEGame.LELauncher) return Path.Combine(TargetPath, @"bink2w64.dll");
             return null;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

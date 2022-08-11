@@ -5,6 +5,7 @@ using LegendaryExplorerCore.Packages;
 using ME3TweaksCore;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Targets;
+using PropertyChanged;
 
 namespace ME3TweaksCoreWPF.Targets
 {
@@ -12,7 +13,8 @@ namespace ME3TweaksCoreWPF.Targets
     /// WPF extension class to the ME3TweaksCore GameTarget class that provides information about an installation of a game.
     /// </summary>
     [DebuggerDisplay("GameTargetWPF {Game} {TargetPath}")]
-    public class GameTargetWPF : GameTarget, INotifyPropertyChanged
+    [AddINotifyPropertyChangedInterface]
+    public class GameTargetWPF : GameTarget
     {
         public GameTargetWPF(MEGame game, string targetRootPath, bool currentRegistryActive, bool isCustomOption = false, bool isTest = false, bool skipInit = false) : base(game, targetRootPath, currentRegistryActive, isCustomOption, isTest, skipInit)
         {
@@ -80,9 +82,7 @@ namespace ME3TweaksCoreWPF.Targets
         public override void ReloadGameTarget(bool logInfo = true, bool forceLodUpdate = false, bool reverseME1Executable = true, bool skipInit = false)
         {
             base.ReloadGameTarget(logInfo, forceLodUpdate, reverseME1Executable, skipInit);
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TargetBootIcon)));
+            OnPropertyChanged(nameof(TargetBootIcon));
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
