@@ -172,6 +172,7 @@
 	<system:String x:Key="string_errorUploadingLogResponse">Log di Errore durante il caricamento: Codice di risposta {0}</system:String>
 	<system:String x:Key="string_interp_serverRejectedLogUpload">Il server ha rifiutato il caricamento: {0}</system:String>
 	<system:String x:Key="string_interp_errorUploadingLog">Log di Errore durante il caricamento: {0}</system:String>
+	<system:String x:Key="string_interp_currentLog">{0} - {1} - LOG CORRENTE</system:String>
 	<system:String x:Key="string_unpackingDLC">Spacchettamento del DLC</system:String>
 	<system:String x:Key="string_checkingGameData">Controllo dei file di gioco</system:String>
 	<system:String x:Key="string_scanningGameTextures">Scansione delle texture del gioco</system:String>
