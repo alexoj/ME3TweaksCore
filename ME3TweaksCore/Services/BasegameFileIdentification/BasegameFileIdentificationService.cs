@@ -109,7 +109,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
                 try
                 {
                     File.WriteAllText(MCoreFilesystem.GetLocalBasegameIdentificationServiceFile(), outText);
-                    MLog.Information(@"Updated Local {ServiceLoggingName}");
+                    MLog.Information($@"Updated Local {ServiceLoggingName}");
 
                 }
                 catch (Exception e)
@@ -120,7 +120,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             }
             else
             {
-                MLog.Information(@"Local {ServiceLoggingName} did not need updating");
+                MLog.Information($@"Local {ServiceLoggingName} did not need updating");
 
             }
         }

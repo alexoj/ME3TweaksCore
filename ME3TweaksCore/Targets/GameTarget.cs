@@ -59,6 +59,16 @@ namespace ME3TweaksCore.Targets
         /// Indicates that this is a custom, abnormal game object. It may be used only for UI purposes, but it depends on the context.
         /// </summary>
         public bool IsCustomOption { get; set; } = false;
+
+        /// <summary>
+        /// Initializes a game target
+        /// </summary>
+        /// <param name="game">Game this target represents</param>
+        /// <param name="targetRootPath">The root path of the target</param>
+        /// <param name="currentRegistryActive">If this path is the current 'active' registry target</param>
+        /// <param name="isCustomOption">If this is a custom fake game target but is used in a target list</param>
+        /// <param name="isTest">If this is a test object</param>
+        /// <param name="skipInit">If we should skip initialization when loading the target data</param>
         public GameTarget(MEGame game, string targetRootPath, bool currentRegistryActive, bool isCustomOption = false, bool isTest = false, bool skipInit = false)
         {
             //if (!currentRegistryActive)
