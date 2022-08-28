@@ -503,7 +503,7 @@ namespace ME3TweaksCore.Services.Backup
                 CopyTools.CopyAll_ProgressBar(new DirectoryInfo(targetToBackup.TargetPath),
                     new DirectoryInfo(backupPath),
                     totalItemsToCopyCallback: totalFilesToCopyCallback,
-                    aboutToCopyCallback: Game == MEGame.LELauncher ? aboutToCopyCallbackLauncher: aboutToCopyCallbackMainGame,
+                    aboutToCopyCallback: Game == MEGame.LELauncher ? aboutToCopyCallbackLauncher : aboutToCopyCallbackMainGame,
                     fileCopiedCallback: fileCopiedCallback,
                     ignoredExtensions: new[] { @"*.pdf", @"*.mp3", @"*.wav" },
                     bigFileProgressCallback: bigFileProgressCallback,
@@ -545,11 +545,22 @@ namespace ME3TweaksCore.Services.Backup
             //Check empty
             if (!targetToBackup.IsCustomOption && Directory.Exists(backupPath))
             {
-                if (Directory.GetFiles(backupPath).Length > 0 ||
-                    Directory.GetDirectories(backupPath).Length > 0)
+                var files = Directory.GetFiles(backupPath);
+                var dirs = Directory.GetFiles(backupPath);
+                if (files.Length > 0 || dirs.Length > 0)
                 {
                     //Directory not empty
-                    MLog.Error(@"Selected backup directory is not empty.");
+                    MLog.Error($@"Selected backup directory {backupPath} is not empty: {files.Length} files, {dirs.Length} directories");
+                    if (files.Length > 0)
+                    {
+                        MLog.Error($@"First file found: {files.FirstOrDefault()}");
+                    }
+
+                    if (dirs.Length > 0)
+                    {
+                        MLog.Error($@"First directory found: {dirs.FirstOrDefault()}");
+                    }
+
                     EndBackup();
                     BlockingActionCallback?.Invoke(LC.GetString(LC.string_directoryNotEmpty), LC.GetString(LC.string_directoryIsNotEmptyMustBeEmpty));
                     return false;
