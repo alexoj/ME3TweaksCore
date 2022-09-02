@@ -289,6 +289,8 @@ namespace ME3TweaksCore.NativeMods
                                     }).ToList();
                 foreach (var v in updateGroups)
                 {
+                    if (v.LatestVersion == null)
+                        continue; // Group has no available ASIs - maybe new beta asi
 #if DEBUG
                     Debug.WriteLine($@"Read {v.Game} ASI group {v.UpdateGroupId}: {v.LatestVersion}. Beta: {v.LatestVersion.IsBeta}");
 #endif
