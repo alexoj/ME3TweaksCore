@@ -36,15 +36,21 @@ namespace ME3TweaksCore.Helpers
                                 continue;
                             }
 
+                            Version v = null;
                             if (stdOut.Text.StartsWith(@"Microsoft.NETCore.App") && !desktopVersion)
                             {
+                                v = parseVersion(stdOut.Text);
                                 runtimes.Add(parseVersion(stdOut.Text));
                             }
                             else if (stdOut.Text.StartsWith(@"Microsoft.WindowsDesktop.App") && desktopVersion)
                             {
-                                runtimes.Add(parseVersion(stdOut.Text));
+                                v = parseVersion(stdOut.Text);
                             }
 
+                            if (v != null)
+                            {
+                                runtimes.Add(v);
+                            }
                             break;
                         case StandardErrorCommandEvent stdErr:
                             break;
@@ -62,10 +68,23 @@ namespace ME3TweaksCore.Helpers
 
         }
 
+        /// <summary>
+        /// Parses the version number from the string. If the parse fails, it returns null.
+        /// </summary>
+        /// <param name="stdOutText"></param>
+        /// <returns></returns>
         private static Version parseVersion(string stdOutText)
         {
             var split = stdOutText.Split(' ');
-            return Version.Parse(split[1]); // 0 = SDK name, 1 = version, 2+ = path parts
+
+            // We do not check things like rc- or previews.
+            if (Version.TryParse(split[1], out var v))
+            {
+                return v;
+            }
+
+            MLog.Warning($@".NET version string not supported: {split[1]}. It may be that this is not a production version which this code does not support.");
+            return null;
         }
     }
 }
