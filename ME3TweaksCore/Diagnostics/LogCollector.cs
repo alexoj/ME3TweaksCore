@@ -130,7 +130,7 @@ namespace ME3TweaksCore.Diagnostics
                     printToDiagFunc(sb.ToString(), severity);
 
                     // SELECTED OPTIONS
-                    if (InstalledOptions.Any())
+                    if (InstalledOptions != null && InstalledOptions.Any())
                     {
                         severity = LogSeverity.INFO;
                         foreach (var o in InstalledOptions)
@@ -1113,6 +1113,10 @@ namespace ME3TweaksCore.Diagnostics
                             dlcStruct.InstalledOptions = metaMappedDLC.OptionsSelectedAtInstallTime;
                             dlcStruct.NexusUpdateCode = metaMappedDLC.NexusUpdateCode;
                         }
+                        else
+                        {
+
+                        }
                     }
                     else
                     {
@@ -2027,38 +2031,37 @@ namespace ME3TweaksCore.Diagnostics
             {
                 foreach (var f in Directory.GetFiles(directory, "*"))
                 {
+                    if (!asilogExtensions.Contains(Path.GetExtension(f)))
+                        continue; // Not parsable
+
                     var fi = new FileInfo(f);
                     var timeDelta = DateTime.Now - fi.LastWriteTime;
                     if (timeDelta < TimeSpan.FromDays(1))
                     {
                         // If the log was written within the last day.
-                        var extension = Path.GetExtension(f);
-                        if (asilogExtensions.Contains(extension))
-                        {
-                            StringBuilder sb = new StringBuilder();
-                            var fileContentsLines = File.ReadAllLines(f);
+                        StringBuilder sb = new StringBuilder();
+                        var fileContentsLines = File.ReadAllLines(f);
 
-                            int lastIndexRead = 0;
-                            // Read first 30 lines.
-                            for (int i = 0; i < 30 && i < fileContentsLines.Length - 1; i++)
+                        int lastIndexRead = 0;
+                        // Read first 30 lines.
+                        for (int i = 0; i < 30 && i < fileContentsLines.Length - 1; i++)
+                        {
+                            sb.AppendLine(fileContentsLines[i]);
+                            lastIndexRead = i;
+                        }
+
+                        // Read last 30 lines.
+                        if (lastIndexRead < fileContentsLines.Length - 1)
+                        {
+                            sb.AppendLine(@"...");
+                            var startIndex = Math.Max(lastIndexRead, fileContentsLines.Length - 30);
+                            for (int i = startIndex; i < fileContentsLines.Length - 1; i++)
                             {
                                 sb.AppendLine(fileContentsLines[i]);
-                                lastIndexRead = i;
                             }
-
-                            // Read last 30 lines.
-                            if (lastIndexRead < fileContentsLines.Length - 1)
-                            {
-                                sb.AppendLine(@"...");
-                                var startIndex = Math.Max(lastIndexRead, fileContentsLines.Length - 30);
-                                for (int i = startIndex; i < fileContentsLines.Length - 1; i++)
-                                {
-                                    sb.AppendLine(fileContentsLines[i]);
-                                }
-                            }
-
-                            logs[Path.GetFileName(f)] = sb.ToString();
                         }
+
+                        logs[Path.GetFileName(f)] = sb.ToString();
                     }
                     else
                     {
