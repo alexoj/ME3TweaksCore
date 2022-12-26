@@ -25,7 +25,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <param name="message"></param>
         /// <param name="prefix"></param>
         /// <param name="shouldLog"></param>
-        internal static void Information(string message, bool shouldLog = true)
+        public static void Information(string message, bool shouldLog = true)
         {
             if (shouldLog)
             {
@@ -130,5 +130,9 @@ namespace ME3TweaksCore.Diagnostics
             }
         }
 
+        public static void Error(string v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
