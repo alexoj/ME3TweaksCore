@@ -208,10 +208,11 @@ namespace ME3TweaksCore.NativeMods
         }
 
         /// <summary>
-        ///// Fetches the specified ASI by it's hash for the specified game
+        /// Fetches the specified ASI by it's hash for the specified game
         /// </summary>
-        /// <param name="asi"></param>
-        /// <returns></returns>
+        /// <param name="hash">The MD5 to lookup</param>
+        /// <param name="game">The game the ASI belongs to</param>
+        /// <returns>The versioned ASI mod if found, null otherwise</returns>
         public static ASIModVersion GetASIVersionByHash(string hash, MEGame game)
         {
             List<ASIMod> relevantGroups = null;
@@ -242,6 +243,53 @@ namespace ME3TweaksCore.NativeMods
             if (relevantGroups.Any())
             {
                 return relevantGroups.FirstOrDefault(x => x.HasMatchingHash(hash))?.Versions.First(x => x.Hash == hash);
+            }
+
+            return null;
+        }
+
+
+        /// <summary>
+        /// Fetches the specific ASI version by game.
+        /// </summary>
+        /// <param name="updateGroup">The update group of the ASI.</param>
+        /// <param name="version">The version to fetch of the ASI</param>
+        /// <param name="game">The game the ASI belongs to</param>
+        /// <returns>The versioned ASI mod object, or null if not found.</returns>
+        public static ASIModVersion GetASIVersion(int updateGroup, int version, MEGame game)
+        {
+            List<ASIMod> relevantGroups = null;
+            switch (game)
+            {
+                case MEGame.ME1:
+                    relevantGroups = MasterME1ASIUpdateGroups;
+                    break;
+                case MEGame.ME2:
+                    relevantGroups = MasterME2ASIUpdateGroups;
+                    break;
+                case MEGame.ME3:
+                    relevantGroups = MasterME3ASIUpdateGroups;
+                    break;
+                case MEGame.LE1:
+                    relevantGroups = MasterLE1ASIUpdateGroups;
+                    break;
+                case MEGame.LE2:
+                    relevantGroups = MasterLE2ASIUpdateGroups;
+                    break;
+                case MEGame.LE3:
+                    relevantGroups = MasterLE3ASIUpdateGroups;
+                    break;
+                default:
+                    return null;
+            }
+
+            if (relevantGroups.Any())
+            {
+                var group = relevantGroups.FirstOrDefault(x => x.UpdateGroupId == updateGroup);
+                if (group != null)
+                {
+                    return group.Versions.FirstOrDefault(x => x.Version == version);
+                }
             }
 
             return null;
