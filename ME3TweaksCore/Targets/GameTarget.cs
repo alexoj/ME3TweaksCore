@@ -475,6 +475,7 @@ namespace ME3TweaksCore.Targets
 
         private InstalledDLCMod InternalGenerateDLCModObject()
         {
+            // This is for superclass I think?
             throw new NotImplementedException();
         }
 
