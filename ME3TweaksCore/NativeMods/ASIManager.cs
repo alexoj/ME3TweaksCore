@@ -43,7 +43,7 @@ namespace ME3TweaksCore.NativeMods
         /// Returns an enumeration of all master update groups for all games
         /// </summary>
         public static IEnumerable<ASIMod> AllASIMods => MasterLE1ASIUpdateGroups.Concat(MasterLE2ASIUpdateGroups).Concat(MasterLE3ASIUpdateGroups).Concat(MasterME1ASIUpdateGroups).Concat(MasterME2ASIUpdateGroups).Concat(MasterME3ASIUpdateGroups);
-        
+
         /// <summary>
         /// If ASI Manager is using Beta ASI mods
         /// </summary>
@@ -56,7 +56,7 @@ namespace ME3TweaksCore.NativeMods
         public static void SetUsingBeta(bool usingBeta)
         {
             UsingBeta = usingBeta;
-            
+
             // Other logic here
         }
 
@@ -332,18 +332,18 @@ namespace ME3TweaksCore.NativeMods
                                             Hidden = TryConvert.ToBoolFromInt(version.Element(@"hidden")?.Value),
                                             _otherGroupsToDeleteOnInstallInternal = version.Element(@"autoremovegroups")?.Value,
 
-                                        Game = intToGame((int)ugroup.Attribute(@"game")), // use ugroup element to pull from outer group
+                                            Game = intToGame((int)ugroup.Attribute(@"game")), // use ugroup element to pull from outer group
                                         }).OrderBy(x => x.Version).ToList()
                                     }).ToList();
                 foreach (var v in updateGroups)
                 {
-                    if (v.LatestVersion == null)
+                    if (v.LatestVersionIncludingHidden == null)
                         continue; // Group has no available ASIs - maybe new beta asi
 #if DEBUG
-                    Debug.WriteLine($@"Read {v.Game} ASI group {v.UpdateGroupId}: {v.LatestVersion}. Beta: {v.LatestVersion.IsBeta}");
+                    Debug.WriteLine($@"Read {v.Game} ASI group {v.UpdateGroupId}: {v.LatestVersionIncludingHidden}. Beta: {v.LatestVersionIncludingHidden.IsBeta}");
 #endif
                     // If all ASIs are hidden mark entire group as hidden.
-                    if (v.Versions.All(x=>x.Hidden))
+                    if (v.Versions.All(x => x.Hidden))
                     {
                         v.IsHidden = true;
                     }
@@ -405,7 +405,6 @@ namespace ME3TweaksCore.NativeMods
         /// <summary>
         /// Installs the specific version of an ASI to the specified target
         /// </summary>
-        /// <param name="modVersion"></param>
         /// <param name="target"></param>
         /// <param name="forceSource">Null to let application choose the source, true to force online, false to force local cache. This parameter is used for testing</param>
         /// <returns></returns>
@@ -539,13 +538,14 @@ namespace ME3TweaksCore.NativeMods
         /// <param name="mod">The ASI mod to install</param>
         /// <param name="target">The target to install to</param>
         /// <param name="version">The version to install. The default is 0, which means the latest</param>
+        /// <param name="includeHiddenASIVersions">If hidden ASI mod versions should be included.</param>
         /// <returns></returns>
-        public static bool InstallASIToTarget(ASIMod mod, GameTarget target, int version = 0)
+        public static bool InstallASIToTarget(ASIMod mod, GameTarget target, int version = 0, bool includeHiddenASIVersions = false)
         {
             ASIModVersion modV = null;
             if (version == 0)
             {
-                modV = mod.LatestVersion;
+                modV = includeHiddenASIVersions ? mod.LatestVersionIncludingHidden : mod.LatestVersion;
             }
             else
             {
@@ -565,7 +565,7 @@ namespace ME3TweaksCore.NativeMods
         /// <param name="nameForLogging"></param>
         /// <param name="gameTarget"></param>
         /// <param name="version">The versio nto install. The default is 0, which means the latest</param>
-        public static bool InstallASIToTargetByGroupID(int updateGroup, string nameForLogging, GameTarget gameTarget, int version = 0)
+        public static bool InstallASIToTargetByGroupID(int updateGroup, string nameForLogging, GameTarget gameTarget, int version = 0, bool includeHiddenASIs = false)
         {
             var group = GetASIModsByGame(gameTarget.Game).FirstOrDefault(x => x.UpdateGroupId == updateGroup);
             if (group == null)
@@ -575,7 +575,7 @@ namespace ME3TweaksCore.NativeMods
                 return false;
             }
 
-            return InstallASIToTarget(group, gameTarget, version);
+            return InstallASIToTarget(group, gameTarget, version, includeHiddenASIs);
         }
 
         /// <summary>

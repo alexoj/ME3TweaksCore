@@ -9,7 +9,7 @@ namespace ME3TweaksCore.NativeMods
     /// <summary>
     /// Represents a single group of ASI mods across versions. This is used to help prevent installation of duplicate ASIs even if the names differ
     /// </summary>
-    [DebuggerDisplay("ASIMod - {LatestVersion}")]
+    [DebuggerDisplay("ASIMod - {LatestVersionIncludingHidden}")]
     public class ASIMod
     {
         /// <summary>
@@ -29,10 +29,15 @@ namespace ME3TweaksCore.NativeMods
         /// </summary>
         public bool IsHidden { get; set; }
         /// <summary>
-        /// Gets the latest version of the ASI
+        /// Gets the latest version of the ASI. Does not include ASIs marked as hidden.
         /// </summary>
         /// <returns></returns>
-        public ASIModVersion LatestVersion => Versions.Where(x=> !x.Hidden && (ASIManager.UsingBeta || !x.IsBeta)).MaxBy(x => x.Version);
+        public ASIModVersion LatestVersion => Versions.Where(x => !x.Hidden && (ASIManager.UsingBeta || !x.IsBeta)).MaxBy(x => x.Version);
+
+        /// <summary>
+        /// Gets latest version of ASI even if it's hidden.
+        /// </summary>
+        public ASIModVersion LatestVersionIncludingHidden => Versions.Where(x => ASIManager.UsingBeta || !x.IsBeta).MaxBy(x => x.Version);
         /// <summary>
         /// If any of the versions of this ASI match the given hash
         /// </summary>
