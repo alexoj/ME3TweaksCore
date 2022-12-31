@@ -65,9 +65,19 @@ namespace ME3TweaksCore
 
             // Load Legendary Explorer Core as we depend on it
             MEPackageHandler.GlobalSharedCacheEnabled = false; // ME3Tweaks tools (non LEX) do not use the global package cache
-            LegendaryExplorerCoreLib.InitLib(null, logger: Log.Logger, packageSavingFailed: package.LECPackageSaveFailedCallback); // Might need to change off of null for scheduler
-            
-            MUtilities.DeleteFilesAndFoldersRecursively(MCoreFilesystem.GetTempDirectory(), deleteDirectoryItself: false); // Clear temp but don't delete the directory itself
+            LegendaryExplorerCoreLib.InitLib(null, logger: Log.Logger, 
+                packageSavingFailed: package.LECPackageSaveFailedCallback, 
+                objectDBsToLoad: new[] { MEGame.ME1, MEGame.ME2, MEGame.ME3, MEGame.LE1, MEGame.LE2, MEGame.LE3 }); // Might need to change off of null for scheduler
+
+            try
+            {
+                MUtilities.DeleteFilesAndFoldersRecursively(MCoreFilesystem.GetTempDirectory(), deleteDirectoryItself: false); // Clear temp but don't delete the directory itself
+            }
+            catch (Exception e)
+            {
+                MLog.Error($@"Error deleting temp files: {e.Message}");
+            }
+
             BackupService.InitBackupService(RunOnUIThread, logPaths: true);
 
             if (package.LoadAuxiliaryServices)
