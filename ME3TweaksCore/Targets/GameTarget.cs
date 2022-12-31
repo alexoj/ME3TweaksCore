@@ -1022,7 +1022,7 @@ namespace ME3TweaksCore.Targets
         private const string ME1ASILoaderHash = @"30660f25ab7f7435b9f3e1a08422411a";
         private const string ME2ASILoaderHash = @"a5318e756893f6232284202c1196da13";
         private const string ME3ASILoaderHash = @"1acccbdae34e29ca7a50951999ed80d5";
-        private const string LEASILoaderHash = @"693059d154851232c1ec7e901ebb246a"; // Will need changed as game is updated // bink 2009 by ME3Tweaks 08/22/2022
+        private const string LEASILoaderHash = @"d986340a0d2e3f1f3c1f8e1742ccc5bf"; // Will need changed as game is updated // bink 2.0.0.10 by ME3Tweaks 12/31/2022
 
         /// <summary>
         /// Determines if the bink ASI loader/bypass is installed (both OT and LE)

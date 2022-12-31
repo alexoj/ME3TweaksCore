@@ -8,7 +8,7 @@ using Microsoft.Win32;
 
 namespace ME3TweaksCore.Services
 {
-    internal class MSharedSettings
+    public class MSharedSettings
     {
         private const string REGISTRY_KEY_ME3TWEAKS = @"HKEY_CURRENT_USER\Software\ME3Tweaks";
 
