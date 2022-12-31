@@ -54,6 +54,10 @@ namespace ME3TweaksCore.NativeMods
         /// </summary>
         public bool IsBeta { get; set; }
         /// <summary>
+        /// If this ASI version should not be shown to user for new installs, but around for tracking
+        /// </summary>
+        public bool Hidden { get; set; }
+        /// <summary>
         /// The owning mod of this version
         /// </summary>
         public ASIMod OwningMod { get; set; }

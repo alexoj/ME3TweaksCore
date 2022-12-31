@@ -32,7 +32,7 @@ namespace ME3TweaksCore.NativeMods
         /// Gets the latest version of the ASI
         /// </summary>
         /// <returns></returns>
-        public ASIModVersion LatestVersion => Versions.Where(x=> ASIManager.UsingBeta || !x.IsBeta).MaxBy(x => x.Version);
+        public ASIModVersion LatestVersion => Versions.Where(x=> !x.Hidden && (ASIManager.UsingBeta || !x.IsBeta)).MaxBy(x => x.Version);
         /// <summary>
         /// If any of the versions of this ASI match the given hash
         /// </summary>

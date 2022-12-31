@@ -94,7 +94,7 @@ namespace ME3TweaksCore.NativeMods
                 DisplayedASIMods.AddRange(installedUnknownASIMods.OrderBy(x => x.UnmappedFilename));
 
                 // Not installed
-                DisplayedASIMods.AddRange(notInstalledASIs.OrderBy(x => x.LatestVersion.Name));
+                DisplayedASIMods.AddRange(notInstalledASIs.Where(x => !x.IsHidden).OrderBy(x => x.LatestVersion.Name));
 
                 // Attempt to re-select the existing object
                 if (DisplayedASIMods.Contains(selectedObject))

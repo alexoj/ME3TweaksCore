@@ -318,7 +318,6 @@ namespace ME3TweaksCore.NativeMods
                                     {
                                         UpdateGroupId = (int)ugroup.Attribute(@"groupid"),
                                         Game = intToGame((int)ugroup.Attribute(@"game")),
-                                        IsHidden = TryConvert.ToBool(ugroup.Attribute(@"hidden")?.Value, false),
                                         Versions = ugroup.Elements(@"asimod").Select(version => new ASIModVersion
                                         {
                                             Name = (string)version.Element(@"name"),
@@ -330,9 +329,10 @@ namespace ME3TweaksCore.NativeMods
                                             SourceCodeLink = (string)version.Element(@"sourcecode"),
                                             DownloadLink = (string)version.Element(@"downloadlink"),
                                             IsBeta = TryConvert.ToBoolFromInt(version.Element(@"beta")?.Value),
+                                            Hidden = TryConvert.ToBoolFromInt(version.Element(@"hidden")?.Value),
                                             _otherGroupsToDeleteOnInstallInternal = version.Element(@"autoremovegroups")?.Value,
-                                            
-                                            Game = intToGame((int)ugroup.Attribute(@"game")), // use ugroup element to pull from outer group
+
+                                        Game = intToGame((int)ugroup.Attribute(@"game")), // use ugroup element to pull from outer group
                                         }).OrderBy(x => x.Version).ToList()
                                     }).ToList();
                 foreach (var v in updateGroups)
@@ -342,6 +342,12 @@ namespace ME3TweaksCore.NativeMods
 #if DEBUG
                     Debug.WriteLine($@"Read {v.Game} ASI group {v.UpdateGroupId}: {v.LatestVersion}. Beta: {v.LatestVersion.IsBeta}");
 #endif
+                    // If all ASIs are hidden mark entire group as hidden.
+                    if (v.Versions.All(x=>x.Hidden))
+                    {
+                        v.IsHidden = true;
+                    }
+
                     switch (v.Game)
                     {
                         case MEGame.ME1:
