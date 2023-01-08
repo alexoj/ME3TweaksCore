@@ -86,6 +86,7 @@ namespace ME3TweaksCore.Targets
             }
         }
 
+
         public virtual void ReloadGameTarget(bool logInfo = true, bool forceLodUpdate = false, bool reverseME1Executable = true, bool skipInit = false)
         {
             if (!IsCustomOption && !skipInit)
@@ -543,7 +544,8 @@ namespace ME3TweaksCore.Targets
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Startup_INT.pcc"),
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Coalesced_INT.bin"),
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Textures.tfc"),
-                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"PlotManagerAutoDLC_UNC.pcc")
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"PlotManagerAutoDLC_UNC.pcc"),
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"SFXTest.pcc") // This file is expected to exist as lots of code depends on it
                     };
                     break;
                 case MEGame.LE2:
@@ -555,7 +557,8 @@ namespace ME3TweaksCore.Targets
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Coalesced_INT.bin"),
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"BioD_QuaTlL_505LifeBoat_LOC_INT.pcc"),
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"cithub_ad_low_a_S_INT.afc"),
-                        Path.Combine(TargetPath, @"BioGame", @"DLC", @"DLC_METR_Patch01", @"CookedPCConsole", @"BioA_Nor_103aGalaxyMap.pcc")
+                        Path.Combine(TargetPath, @"BioGame", @"DLC", @"DLC_METR_Patch01", @"CookedPCConsole", @"BioA_Nor_103aGalaxyMap.pcc"),
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"SFXTest.pcc") // This file is expected to exist as lots of code depends on it
                     };
                     break;
                 case MEGame.LE3:
@@ -566,7 +569,8 @@ namespace ME3TweaksCore.Targets
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Startup.pcc"),
                         Path.Combine(TargetPath, @"BioGame", @"DLC", @"DLC_CON_PRO3", @"CookedPCConsole", @"DLC_CON_PRO3_INT.tlk"),
                         Path.Combine(TargetPath, @"BioGame", @"DLC", @"DLC_CON_END", @"CookedPCConsole", @"BioD_End001_910RaceToConduit.pcc"),
-                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"citwrd_rp1_bailey_m_D_Int.afc")
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"citwrd_rp1_bailey_m_D_Int.afc"),
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"SFXTest.pcc") // This file is expected to exist as lots of code depends on it
                     };
                     break;
                 case MEGame.LELauncher: // LELAUNCHER
