@@ -642,6 +642,8 @@ namespace ME3TweaksCore.Diagnostics
 
                 #region System Information
                 MLog.Information(@"Collecting system information");
+                var computerInfo = new ComputerInfo();
+
 
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingSystemInformation));
 
@@ -650,13 +652,7 @@ namespace ME3TweaksCore.Diagnostics
                 Version osBuildVersion = os.Version;
 
                 //Windows 10 only
-                string releaseId = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", @"ReleaseId", "").ToString();
-                string productName = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", @"ProductName", "").ToString();
-                string verLine = @"Running " + productName;
-                if (osBuildVersion.Major == 10)
-                {
-                    verLine += @" " + releaseId;
-                }
+                string verLine = computerInfo.OSFullName;
 
                 if (os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS)
                 {
@@ -672,7 +668,6 @@ namespace ME3TweaksCore.Diagnostics
                 MLog.Information(@"Collecting memory information");
 
                 addDiagLine(@"System Memory", ME3TweaksLogViewer.LogSeverity.BOLD);
-                var computerInfo = new ComputerInfo();
                 long ramInBytes = (long)computerInfo.TotalPhysicalMemory;
                 addDiagLine($@"Total memory available: {FileSize.FormatSize(ramInBytes)}");
                 var memSpeed = computerInfo.MemorySpeed;
