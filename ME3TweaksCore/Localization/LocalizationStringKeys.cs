@@ -201,5 +201,6 @@ namespace ME3TweaksCore.Localization
 		public const string string_installingTextures = "string_installingTextures";
 		public const string string_verifyingTextures = "string_verifyingTextures";
 		public const string string_installingMarkers = "string_installingMarkers";
+		public const string string_deleting = "string_deleting";
 	}
 }

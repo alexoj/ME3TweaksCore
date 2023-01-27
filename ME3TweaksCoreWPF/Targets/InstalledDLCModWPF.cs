@@ -38,7 +38,7 @@ namespace ME3TweaksCoreWPF.Targets
                 MLog.Information(@"Deleting DLC mod from target: " + dlcFolderPath);
                 try
                 {
-                    DeleteText = "Deleting";
+                    DeleteText = LC.GetString(LC.string_deleting);
                     MUtilities.DeleteFilesAndFoldersRecursively(dlcFolderPath);
                     notifyDeleted?.Invoke();
                 }

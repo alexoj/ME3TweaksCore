@@ -108,7 +108,7 @@ namespace ME3TweaksCore
         /// The localization language to load after loading the INT one to initially set the strings
         /// </summary>
         public string InitialLanguage { get; init; }
-        
+
         /// <summary>
         /// Installs the callbacks specified in this package into ME3TweaksCore.
         /// </summary>
@@ -148,7 +148,7 @@ namespace ME3TweaksCore
 
             // Load strings
             LC.InternalSetLanguage(@"int"); // Load INT as it is the default language. Non-INT can be loaded later over the top of this
-            if (InitialLanguage != null && InitialLanguage != "@int")
+            if (InitialLanguage != null && InitialLanguage != @"int")
             {
                 LC.InternalSetLanguage(InitialLanguage);
             }

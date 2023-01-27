@@ -287,4 +287,6 @@
     <system:String x:Key="string_verifyingTextures">Verifying textures</system:String>
     <system:String x:Key="string_installingMarkers">Installing markers</system:String>
 
+    <!-- General -->
+    <system:String x:Key="string_deleting">Deleting</system:String>
 </ResourceDictionary>
