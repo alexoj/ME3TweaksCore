@@ -139,6 +139,7 @@
 	<system:String x:Key="string_binkw32ASILoader">Binkw32 ASI Loader</system:String>
 	<system:String x:Key="string_binkw32ASIBypass">Binkw32 ASI Bypass</system:String>
 	<system:String x:Key="string_bink2w64ASILoader">Bink2w64 ASI Loader</system:String>
+	<system:String x:Key="string_deleting">Lösche</system:String>
 	<system:String x:Key="string_installedByModManager">Von Mod Manager installiert</system:String>
 	<system:String x:Key="string_interp_installedByX">Von {0} installiert</system:String>
 	<system:String x:Key="string_notInstalledByModManager">Nicht von Mod Manager installiert</system:String>
@@ -172,6 +173,7 @@
 	<system:String x:Key="string_errorUploadingLogResponse">Fehler beim hochladen des Ereignisprotokolls: Antwortcode {0}</system:String>
 	<system:String x:Key="string_interp_serverRejectedLogUpload">Der Server hat das Hochladen abgewieder: {0}</system:String>
 	<system:String x:Key="string_interp_errorUploadingLog">Fehler beim Hochladen des Ereignisprotokolls: {0}</system:String>
+	<system:String x:Key="string_interp_currentLog">{0} - {1} - AKTUELLES PROTOKOLL</system:String>
 	<system:String x:Key="string_unpackingDLC">DLC wird entpackt</system:String>
 	<system:String x:Key="string_checkingGameData">Spieldaten werden geprüft</system:String>
 	<system:String x:Key="string_scanningGameTextures">Spieltexturen werden eingelesen</system:String>
