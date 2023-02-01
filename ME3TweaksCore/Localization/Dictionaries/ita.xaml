@@ -139,6 +139,7 @@
 	<system:String x:Key="string_binkw32ASILoader">Bwink32 ASI Loader</system:String>
 	<system:String x:Key="string_binkw32ASIBypass">Bwink32 ASI Bypass</system:String>
 	<system:String x:Key="string_bink2w64ASILoader">Bink2w64 ASI Loader</system:String>
+	<system:String x:Key="string_deleting">Rimozione</system:String>
 	<system:String x:Key="string_installedByModManager">Installato con il Mod Manager</system:String>
 	<system:String x:Key="string_interp_installedByX">Installato con {0}</system:String>
 	<system:String x:Key="string_notInstalledByModManager">Non installato con il Mod Manager</system:String>
