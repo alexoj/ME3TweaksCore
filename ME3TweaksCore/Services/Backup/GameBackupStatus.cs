@@ -56,6 +56,8 @@ namespace ME3TweaksCore.Services.Backup
         /// <param name="log">If the paths should be logged</param>
         internal void RefreshBackupStatus(bool installed, bool log)
         {
+            if (Game == MEGame.LE1)
+                Debug.WriteLine("hi");
             var bPath = BackupService.GetGameBackupPath(Game);
             if (bPath != null)
             {
@@ -88,7 +90,18 @@ namespace ME3TweaksCore.Services.Backup
                 BackedUp = false;
                 BackupStatus = LC.GetString(LC.string_backupUnavailable);
                 BackupLocationStatus = LC.GetString(LC.string_interp_backupPathNotAccessibleX, bPath);
-                MLog.Information($@"BackupService: {Game} backup is not accessible, {BackupLocationStatus}", log);
+                MLog.Warning($@"BackupService: {Game} backup is not accessible, {BackupLocationStatus}", log);
+                LinkActionText = LC.GetString(LC.string_unlinkBackup);
+                BackupActionText = LC.GetString(LC.string_createNewBackup);
+                return;
+            }
+            else if (installed)
+            {
+                // Backup path value DOES exist but basic validation failed
+                BackedUp = false;
+                BackupStatus = LC.GetString(LC.string_backupUnavailable);
+                BackupLocationStatus = LC.GetString(LC.string_interp_backupPathNotAccessibleX, bPath);
+                MLog.Error($@"BackupService: {Game} backup path exists but is not a valid backup, {BackupLocationStatus}", shouldLog: log);
                 LinkActionText = LC.GetString(LC.string_unlinkBackup);
                 BackupActionText = LC.GetString(LC.string_createNewBackup);
                 return;
