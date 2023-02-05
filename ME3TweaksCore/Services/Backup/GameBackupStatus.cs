@@ -98,6 +98,7 @@ namespace ME3TweaksCore.Services.Backup
             else if (installed)
             {
                 // Backup path value DOES exist but basic validation failed
+                // Todo: Localize to backup failed validation instead of reusing inaccessible
                 BackedUp = false;
                 BackupStatus = LC.GetString(LC.string_backupUnavailable);
                 BackupLocationStatus = LC.GetString(LC.string_interp_backupPathNotAccessibleX, bPath);
