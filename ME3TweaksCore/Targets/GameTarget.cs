@@ -120,6 +120,7 @@ namespace ME3TweaksCore.Targets
                                 var testPath = Game == MEGame.ME3 ? TargetPath : Directory.GetParent(TargetPath).FullName;
                                 if (Game != MEGame.ME3)
                                 {
+                                    // This looks for __overlay folder; LE games use it in Legendary Edition root, above game target paths, so we go up folder
                                     var parent = Directory.GetParent(testPath);
                                     if (parent != null)
                                     {
@@ -127,7 +128,7 @@ namespace ME3TweaksCore.Targets
                                     }
                                     else
                                     {
-                                        MLog.Error(@"Executable is not in the correct filesystem heirarchy; this is not a valid installation", shouldLog: logInfo);
+                                        MLog.Error(@"Executable is not in the correct filesystem hierarchy (parent folder that should exist does not); this is not a valid installation", shouldLog: logInfo);
                                         IsValid = false;
                                         return;
                                     }

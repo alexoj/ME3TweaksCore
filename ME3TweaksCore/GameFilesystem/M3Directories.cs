@@ -64,6 +64,12 @@ namespace ME3TweaksCore.GameFilesystem
         }
 
         // Oh boy how do we do this for localizations?
+        /// <summary>
+        /// Warning: This method has not been updated for Legendary Edition games or localized Coalesced files.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static string GetCoalescedPath(GameTarget target)
         {
             if (target.Game != MEGame.ME2 && target.Game != MEGame.ME3) throw new Exception(@"Cannot fetch Coalesced path for games that are not ME2/ME3");
