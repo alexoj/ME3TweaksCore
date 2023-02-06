@@ -1818,7 +1818,7 @@ namespace ME3TweaksCore.Diagnostics
             string iniPath = M3Directories.GetLODConfigFile(selectedDiagnosticTarget);
             if (!File.Exists(iniPath))
             {
-                addDiagLine($@"Game config file is missing: {iniPath}", ME3TweaksLogViewer.LogSeverity.ERROR);
+                addDiagLine($@"Game config file is missing - has game been run once?: {iniPath}", ME3TweaksLogViewer.LogSeverity.WARN);
                 return;
             }
 
