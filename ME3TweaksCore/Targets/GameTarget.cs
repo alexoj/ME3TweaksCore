@@ -120,7 +120,17 @@ namespace ME3TweaksCore.Targets
                                 var testPath = Game == MEGame.ME3 ? TargetPath : Directory.GetParent(TargetPath).FullName;
                                 if (Game != MEGame.ME3)
                                 {
-                                    testPath = Directory.GetParent(testPath).FullName;
+                                    var parent = Directory.GetParent(testPath);
+                                    if (parent != null)
+                                    {
+                                        testPath = parent.FullName;
+                                    }
+                                    else
+                                    {
+                                        MLog.Error(@"Executable is not in the correct filesystem heirarchy; this is not a valid installation", shouldLog: logInfo);
+                                        IsValid = false;
+                                        return;
+                                    }
                                 }
                                 if (Directory.Exists(Path.Combine(testPath, @"__overlay")))
                                 {
@@ -176,7 +186,7 @@ namespace ME3TweaksCore.Targets
                 }
                 else
                 {
-                    Log.Error($@"Target is invalid: {TargetPath} does not exist (or is not accessible)");
+                    MLog.Error($@"Target is invalid: {TargetPath} does not exist (or is not accessible)");
                     IsValid = false;
                 }
             }
