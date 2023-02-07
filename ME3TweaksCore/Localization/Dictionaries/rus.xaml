@@ -98,6 +98,8 @@
 	<system:String x:Key="string_abortBackup">Отменить архивацию</system:String>
 	<system:String x:Key="string_selectEmptyBackupDestinationDirectory">Выберите пустую директорию для архива</system:String>
 	<system:String x:Key="string_interp_backingUpSinglePercentage">Создание архива {0} {1}%</system:String>
+	<system:String x:Key="string_errorCreatingBackup">Ошибка создания архива</system:String>
+	<system:String x:Key="string_interp_errorCreatingBackupX">Возникла ошибка архивации игры: {0}. Последним файлом в обработке был: {1}.</system:String>
 	<system:String x:Key="string_cannotRestoreGame">Невозможно восстановить игру</system:String>
 	<system:String x:Key="string_interp_cannotRestoreGameToGameWhileRunning">Невозможно восстановить {0} пока игра запущена</system:String>
 	<system:String x:Key="string_interp_restoringWillDeleteEverythingTitle">Восстановление {0} удалит существующую установку игры</system:String>
@@ -139,6 +141,7 @@
 	<system:String x:Key="string_binkw32ASILoader">Загрузчик Binkw32 ASI</system:String>
 	<system:String x:Key="string_binkw32ASIBypass">Байпас Binkw32 ASI</system:String>
 	<system:String x:Key="string_bink2w64ASILoader">Загрузчик Bink2w64 ASI</system:String>
+	<system:String x:Key="string_deleting">Удаление</system:String>
 	<system:String x:Key="string_installedByModManager">Установлено через Mod Manager</system:String>
 	<system:String x:Key="string_interp_installedByX">Установлено через {0}</system:String>
 	<system:String x:Key="string_notInstalledByModManager">Не установлено через Mod Manager</system:String>
