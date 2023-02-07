@@ -56,8 +56,6 @@ namespace ME3TweaksCore.Services.Backup
         /// <param name="log">If the paths should be logged</param>
         internal void RefreshBackupStatus(bool installed, bool log)
         {
-            if (Game == MEGame.LE1)
-                Debug.WriteLine("hi");
             var bPath = BackupService.GetGameBackupPath(Game);
             if (bPath != null)
             {

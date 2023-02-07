@@ -53,6 +53,13 @@
     <system:String x:Key="string_interp_backingUpSinglePercentage">Backing up {0} {1}%</system:String>
     <!-- 0={filename} 1={number percent} -->
 
+    <system:String x:Key="string_errorCreatingBackup">Error creating backup</system:String>
+    <system:String x:Key="string_interp_errorCreatingBackupX">An error occurred backing up the game: {0}. The last file attempted to be processed was: {1}.</system:String>
+    <!-- 0={e.Message} 1={currentProcessingFile} -->
+    <!-- The follow items are only for letting this localizer replace the correct strings! Remove them when done and make sure keys are identical to the stripped versions-->
+    <system:String x:Key="string_interp_errorCreatingBackupX">An error occurred backing up the game: {e.Message}. The last file attempted to be processed was: {currentProcessingFile}.</system:String>
+
+
     <!-- Installation Information -->
     <system:String x:Key="string_installedByModManager">Installed by Mod Manager</system:String>
     <system:String x:Key="string_interp_installedByX">Installed by {0}</system:String>

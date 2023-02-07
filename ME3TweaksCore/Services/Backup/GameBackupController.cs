@@ -522,7 +522,7 @@ namespace ME3TweaksCore.Services.Backup
                 {
                     MLog.Exception(e, @"Exception backing up game:");
                     EndBackup();
-                    BlockingActionCallback?.Invoke("Error creating backup", $"An error occurred backing up the game: {e.Message}. The last file attempted to be processed was: {currentProcessingFile}.");
+                    BlockingActionCallback?.Invoke(LC.GetString(LC.string_errorCreatingBackup), LC.GetString(LC.string_interp_errorCreatingBackupX, e.Message, currentProcessingFile));
                     return false;
                 }
 
