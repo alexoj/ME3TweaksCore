@@ -98,6 +98,8 @@
 	<system:String x:Key="string_abortBackup">Annulla il backup</system:String>
 	<system:String x:Key="string_selectEmptyBackupDestinationDirectory">Seleziona una cartella di destinazione vuota</system:String>
 	<system:String x:Key="string_interp_backingUpSinglePercentage">Backup di {0} {1}%</system:String>
+	<system:String x:Key="string_errorCreatingBackup">Errore durante la creazione del backup</system:String>
+	<system:String x:Key="string_interp_errorCreatingBackupX">C'è stato un errore durante il backup del gioco: {0}. L'ultimo file che si è cercato di processare è stato: {1}.</system:String>
 	<system:String x:Key="string_cannotRestoreGame">Impossibile ripristinare il gioco</system:String>
 	<system:String x:Key="string_interp_cannotRestoreGameToGameWhileRunning">Impossibile ripristinare {0} quando una sua istanza è in esecuzione.</system:String>
 	<system:String x:Key="string_interp_restoringWillDeleteEverythingTitle">Ripristinare {0} eliminerà l'installazione esistente</system:String>
