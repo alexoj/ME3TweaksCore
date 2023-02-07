@@ -370,8 +370,11 @@ namespace ME3TweaksCore.Services.Backup
                     officialDLCNames = MEDirectories.OfficialDLCNames(targetToBackup.Game);
                 }
 
+                // Used for showing to the user what the last file processed was.
+                string currentProcessingFile = null;
                 bool aboutToCopyCallbackLauncher(string file)
                 {
+                    currentProcessingFile = file;
                     UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpX, Path.GetFileName(file)));
                     BackupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_backingUpX, Path.GetFileName(file));
                     return true;
@@ -379,6 +382,7 @@ namespace ME3TweaksCore.Services.Backup
 
                 bool aboutToCopyCallbackMainGame(string file)
                 {
+                    currentProcessingFile = file;
                     try
                     {
                         // TODO: MAYBE WAY TO SKIP DLC MODS? So we can just backup even if user installed ONLY DLC mods
@@ -500,14 +504,28 @@ namespace ME3TweaksCore.Services.Backup
 
                 BackupStatus.BackupStatus = LC.GetString(LC.string_creatingBackup);
                 MLog.Information($@"Backing up {targetToBackup.TargetPath} to {backupPath}");
-                CopyTools.CopyAll_ProgressBar(new DirectoryInfo(targetToBackup.TargetPath),
-                    new DirectoryInfo(backupPath),
-                    totalItemsToCopyCallback: totalFilesToCopyCallback,
-                    aboutToCopyCallback: Game == MEGame.LELauncher ? aboutToCopyCallbackLauncher : aboutToCopyCallbackMainGame,
-                    fileCopiedCallback: fileCopiedCallback,
-                    ignoredExtensions: new[] { @"*.pdf", @"*.mp3", @"*.wav" },
-                    bigFileProgressCallback: bigFileProgressCallback,
-                    copyTimestamps: true);
+
+                try
+                {
+                    CopyTools.CopyAll_ProgressBar(new DirectoryInfo(targetToBackup.TargetPath),
+                        new DirectoryInfo(backupPath),
+                        totalItemsToCopyCallback: totalFilesToCopyCallback,
+                        aboutToCopyCallback: Game == MEGame.LELauncher
+                            ? aboutToCopyCallbackLauncher
+                            : aboutToCopyCallbackMainGame,
+                        fileCopiedCallback: fileCopiedCallback,
+                        ignoredExtensions: new[] { @"*.pdf", @"*.mp3", @"*.wav" },
+                        bigFileProgressCallback: bigFileProgressCallback,
+                        copyTimestamps: true);
+                }
+                catch (Exception e)
+                {
+                    MLog.Exception(e, @"Exception backing up game:");
+                    EndBackup();
+                    BlockingActionCallback?.Invoke("Error creating backup", $"An error occurred backing up the game: {e.Message}. The last file attempted to be processed was: {currentProcessingFile}.");
+                    return false;
+                }
+
                 #endregion
             }
 
@@ -621,7 +639,9 @@ namespace ME3TweaksCore.Services.Backup
             return true;
         }
 
-
+        /// <summary>
+        /// This must be called before showing a dialog if canceling a backup - not entirely sure why.
+        /// </summary>
         private void EndBackup()
         {
             ResetBackupStatus();
