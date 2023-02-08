@@ -4,10 +4,10 @@
     <Description>Core library for ME3Tweaks software</Description>
     <Company>ME3Tweaks</Company>
     <Authors>ME3Tweaks</Authors>
-    <Version>8.0.1</Version>
+    <Version>8.1.0</Version>
     <TargetFramework>net6.0-windows8.0</TargetFramework>
     <Platforms>x64</Platforms>
-    <Copyright>2021-2023 ME3Tweaks</Copyright>
+    <Copyright>ME3Tweaks 2021 - 2023</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

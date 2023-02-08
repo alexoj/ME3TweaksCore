@@ -21,6 +21,7 @@ namespace ME3TweaksCore.GameFilesystem
         public static readonly string PrefixExtendedAttributes = @"[EXTENDEDATTRIBUTE]";
         public static readonly string PrefixModDescPath = @"[SOURCEMODDESC]";
         public static readonly string PrefixNexusUpdateCode = @"[NEXUSUPDATECODE]";
+        public static readonly string PrefixUsesEnhancedBink = @"[USESENHANCEDBINK]";
         #endregion
 
         public string ModName { get; set; }
@@ -53,6 +54,11 @@ namespace ME3TweaksCore.GameFilesystem
         /// The code used to check for nexus updates - this is not for updating the mod, but just checking the installed version against the server version, mostly for logging.
         /// </summary>
         public int NexusUpdateCode { get; }
+
+        /// <summary>
+        /// If this mod makes use of the enhanced 2022.5 bink encoder (LE only)
+        /// </summary>
+        public bool RequiresEnhancedBink { get; set; }
 
         /// <summary>
         /// Writes the metacmm file to the specified filepath.
@@ -93,6 +99,11 @@ namespace ME3TweaksCore.GameFilesystem
             if (NexusUpdateCode != 0)
             {
                 sb.AppendLine($@"{PrefixNexusUpdateCode}{NexusUpdateCode}");
+            }
+
+            if (RequiresEnhancedBink)
+            {
+                sb.AppendLine($@"{PrefixUsesEnhancedBink}true");
             }
 
             File.WriteAllText(path, sb.ToString());
@@ -173,6 +184,18 @@ namespace ME3TweaksCore.GameFilesystem
                             else
                             {
                                 MLog.Warning($@"Failed to read NexusUpdateCode: Invalid value: {parsedline}");
+                            }
+                        }
+                        else if (line.StartsWith(PrefixUsesEnhancedBink))
+                        {
+                            var parsedline = line.Substring(PrefixUsesEnhancedBink.Length);
+                            if (bool.TryParse(parsedline, out var nc))
+                            {
+                                RequiresEnhancedBink = nc;
+                            }
+                            else
+                            {
+                                MLog.Warning($@"Failed to read UsesEnhancedBink: Invalid value: {parsedline}");
                             }
                         }
                         break;

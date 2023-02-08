@@ -582,7 +582,6 @@ namespace ME3TweaksCore.Diagnostics
                     //BINK
                     MLog.Information(@"Checking if Bink ASI loader is installed");
 
-
                     if (package.DiagnosticTarget.IsBinkBypassInstalled())
                     {
                         if (package.DiagnosticTarget.Game.IsOTGame())
@@ -605,6 +604,22 @@ namespace ME3TweaksCore.Diagnostics
                             addDiagLine(@"bink2w64 ASI loader is not installed. ASI mods will not load", ME3TweaksLogViewer.LogSeverity.WARN);
                         }
                     }
+
+                    bool enhancedBinkInstalled = false;
+                    if (package.DiagnosticTarget.Game.IsLEGame() || package.DiagnosticTarget.Game == MEGame.LELauncher)
+                    {
+                        // ME3Tweakscore 8.1.0 for LE: Enhanced bink2 encoder
+                        enhancedBinkInstalled = package.DiagnosticTarget.IsEnhancedBinkInstalled();
+                        if (enhancedBinkInstalled)
+                        {
+                            addDiagLine(@"Enhanced bink dll is installed", ME3TweaksLogViewer.LogSeverity.GOOD);
+                        }
+                        else
+                        {
+                            addDiagLine(@"Standard bink dll is installed");
+                        }
+                    }
+
 
                     if (package.DiagnosticTarget.Game == MEGame.ME1)
                     {
