@@ -98,6 +98,8 @@
 	<system:String x:Key="string_abortBackup">Backuperstellung abbrechen</system:String>
 	<system:String x:Key="string_selectEmptyBackupDestinationDirectory">Wähle einen leeren Zielordner für das Backup</system:String>
 	<system:String x:Key="string_interp_backingUpSinglePercentage">Backup wird erstellt {0} {1}%</system:String>
+	<system:String x:Key="string_errorCreatingBackup">Fehler beim Erstellen des Backups</system:String>
+	<system:String x:Key="string_interp_errorCreatingBackupX">Bei der Backuperstellung des Spiels ist ein Fehler aufgetreten: {0}. Die letzte Datei, deren Verarbeitung versucht wurde, war: {1}.</system:String>
 	<system:String x:Key="string_cannotRestoreGame">Spiel kann nicht wiederhergestellt werden</system:String>
 	<system:String x:Key="string_interp_cannotRestoreGameToGameWhileRunning">{0} kann nicht wiederhergestellt werden während eine Instanz läuft.</system:String>
 	<system:String x:Key="string_interp_restoringWillDeleteEverythingTitle">Wiederherstellen von {0} wird die existierende Installation löschen</system:String>
