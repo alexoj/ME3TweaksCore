@@ -46,6 +46,8 @@ namespace ME3TweaksCore.Localization
 		public const string string_abortBackup = "string_abortBackup";
 		public const string string_selectEmptyBackupDestinationDirectory = "string_selectEmptyBackupDestinationDirectory";
 		public const string string_interp_backingUpSinglePercentage = "string_interp_backingUpSinglePercentage";
+		public const string string_errorCreatingBackup = "string_errorCreatingBackup";
+		public const string string_interp_errorCreatingBackupX = "string_interp_errorCreatingBackupX";
 		public const string string_installedByModManager = "string_installedByModManager";
 		public const string string_interp_installedByX = "string_interp_installedByX";
 		public const string string_notInstalledByModManager = "string_notInstalledByModManager";
@@ -65,6 +67,7 @@ namespace ME3TweaksCore.Localization
 		public const string string_errorUploadingLogResponse = "string_errorUploadingLogResponse";
 		public const string string_interp_serverRejectedLogUpload = "string_interp_serverRejectedLogUpload";
 		public const string string_interp_errorUploadingLog = "string_interp_errorUploadingLog";
+		public const string string_interp_currentLog = "string_interp_currentLog";
 		public const string string_insufficientDiskSpace = "string_insufficientDiskSpace";
 		public const string string_interp_restoringXpercent = "string_interp_restoringXpercent";
 		public const string string_interp_restoringX = "string_interp_restoringX";
@@ -194,5 +197,12 @@ namespace ME3TweaksCore.Localization
 		public const string string_calculatingHowManyFilesWillBeRestored = "string_calculatingHowManyFilesWillBeRestored";
 		public const string string_dlcRequirementInvalidParenthesis = "string_dlcRequirementInvalidParenthesis";
 		public const string string_interp_dlcRequirementInvalidBadVersion = "string_interp_dlcRequirementInvalidBadVersion";
+		public const string string_unpackingDLC = "string_unpackingDLC";
+		public const string string_checkingGameData = "string_checkingGameData";
+		public const string string_scanningGameTextures = "string_scanningGameTextures";
+		public const string string_installingTextures = "string_installingTextures";
+		public const string string_verifyingTextures = "string_verifyingTextures";
+		public const string string_installingMarkers = "string_installingMarkers";
+		public const string string_deleting = "string_deleting";
 	}
 }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.Services;
@@ -103,6 +104,10 @@ namespace ME3TweaksCore
         /// </summary>
         public bool BetaMode { get; init; }
 
+        /// <summary>
+        /// The localization language to load after loading the INT one to initially set the strings
+        /// </summary>
+        public string InitialLanguage { get; init; }
 
         /// <summary>
         /// Installs the callbacks specified in this package into ME3TweaksCore.
@@ -140,6 +145,13 @@ namespace ME3TweaksCore
 
             // BETA FEATURES - These will require a reboot of the consuming app to properly fully work if changed during runtime
             ASIManager.SetUsingBeta(BetaMode);
+
+            // Load strings
+            LC.InternalSetLanguage(@"int"); // Load INT as it is the default language. Non-INT can be loaded later over the top of this
+            if (InitialLanguage != null && InitialLanguage != @"int")
+            {
+                LC.InternalSetLanguage(InitialLanguage);
+            }
         }
 
         [Conditional(@"DEBUG")]

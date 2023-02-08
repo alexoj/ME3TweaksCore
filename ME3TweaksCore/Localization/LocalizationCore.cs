@@ -28,6 +28,21 @@ namespace ME3TweaksCore.Localization
         /// <param name="langcode"></param>
         public static void SetLanguage(string langcode)
         {
+            // If the library has not yet booted, we do not set any strings
+            if (!ME3TweaksCoreLib.Initialized)
+            {
+                return;
+            }
+
+            InternalSetLanguage(langcode);
+        }
+
+        /// <summary>
+        /// Internal language setter that allows bypassing the initialization check; used for initial language loads
+        /// </summary>
+        /// <param name="langcode"></param>
+        internal static void InternalSetLanguage(string langcode)
+        {
             if (CurrentLanguage != langcode && LoadLanguage(langcode))
             {
                 CurrentLanguage = langcode;

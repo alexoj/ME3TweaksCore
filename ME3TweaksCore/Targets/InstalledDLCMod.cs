@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
@@ -22,6 +23,7 @@ namespace ME3TweaksCore.Targets
     {
         protected string dlcFolderPath;
         public string EnableDisableText => DLCFolderName.StartsWith(@"xDLC") ? LC.GetString(LC.string_enable) : LC.GetString(LC.string_disable);
+        public string DeleteText { get; set; } = LC.GetString(LC.string_delete);
         public string EnableDisableTooltip { get; set; }
         public string ModName { get; private set; }
         public string DLCFolderName { get; private set; }
@@ -29,6 +31,11 @@ namespace ME3TweaksCore.Targets
         public string InstalledBy { get; private set; }
         public string Version { get; private set; }
         public string InstallerInstanceBuild { get; private set; }
+
+        /// <summary>
+        /// If DLC is being toggled or deleted
+        /// </summary>
+        public bool IsBeingOperatedOn { get; set; }
 
 
         public ObservableCollectionExtended<string> IncompatibleDLC { get; } = new ObservableCollectionExtended<string>();
@@ -41,7 +48,7 @@ namespace ME3TweaksCore.Targets
         private Action notifyToggled;
 
 
-        
+
 
         /// <summary>
         /// Indicates that this mod was installed by ALOT Installer or Mod Manager.
@@ -155,7 +162,8 @@ namespace ME3TweaksCore.Targets
             var confirmDelete = deleteConfirmationCallback?.Invoke(this);
             if (confirmDelete.HasValue && confirmDelete.Value)
             {
-                Log.Information(@"Deleting DLC mod from target: " + dlcFolderPath);
+                IsBeingOperatedOn = true;
+                MLog.Information(@"Deleting DLC mod from target: " + dlcFolderPath);
                 try
                 {
                     MUtilities.DeleteFilesAndFoldersRecursively(dlcFolderPath);
@@ -163,9 +171,10 @@ namespace ME3TweaksCore.Targets
                 }
                 catch (Exception e)
                 {
-                    Log.Error($@"Error deleting DLC mod: {e.Message}");
+                    MLog.Error($@"Error deleting DLC mod: {e.Message}");
                     // Todo: Show a dialog to the user
                 }
+                IsBeingOperatedOn = false;
             }
         }
 

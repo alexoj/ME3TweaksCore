@@ -58,7 +58,6 @@ namespace ME3TweaksCore.Services.Backup
         /// </summary>
         public static void InitBackupService(Action<Action> runCodeOnUIThreadCallback, bool refreshStatuses = true, bool logPaths = false)
         {
-            object obj = new object(); //Syncobj to ensure the UI thread method has finished invoking
             void runOnUiThread()
             {
                 GameBackupStatuses.Add(new GameBackupStatus(MEGame.ME1));

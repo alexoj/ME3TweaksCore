@@ -77,7 +77,7 @@ namespace ME3TweaksCore.Services.Backup
                 BackedUp = false;
                 BackupStatus = LC.GetString(LC.string_notBackedUp);
                 BackupLocationStatus = LC.GetString(LC.string_gameHasNotBeenBackedUp);
-                if (log) MLog.Information($@"BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
+                MLog.Information($@"BackupService: {Game} has not been backed up, {BackupLocationStatus}", log);
                 LinkActionText = LC.GetString(LC.string_linkExistingBackup);
                 BackupActionText = LC.GetString(LC.string_createBackup); //This should be disabled if game is not installed. This will be handled by the wrapper
                 return;
@@ -88,7 +88,19 @@ namespace ME3TweaksCore.Services.Backup
                 BackedUp = false;
                 BackupStatus = LC.GetString(LC.string_backupUnavailable);
                 BackupLocationStatus = LC.GetString(LC.string_interp_backupPathNotAccessibleX, bPath);
-                if (log) MLog.Information($@"BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
+                MLog.Warning($@"BackupService: {Game} backup is not accessible, {BackupLocationStatus}", log);
+                LinkActionText = LC.GetString(LC.string_unlinkBackup);
+                BackupActionText = LC.GetString(LC.string_createNewBackup);
+                return;
+            }
+            else if (installed)
+            {
+                // Backup path value DOES exist but basic validation failed
+                // Todo: Localize to backup failed validation instead of reusing inaccessible
+                BackedUp = false;
+                BackupStatus = LC.GetString(LC.string_backupUnavailable);
+                BackupLocationStatus = LC.GetString(LC.string_interp_backupPathNotAccessibleX, bPath);
+                MLog.Error($@"BackupService: {Game} backup path exists but is not a valid backup, {BackupLocationStatus}", shouldLog: log);
                 LinkActionText = LC.GetString(LC.string_unlinkBackup);
                 BackupActionText = LC.GetString(LC.string_createNewBackup);
                 return;
@@ -99,7 +111,7 @@ namespace ME3TweaksCore.Services.Backup
                 //BackedUp = false; // Not sure if this is the right call, maybe we shouldn't modify this
                 BackupStatus = LC.GetString(LC.string_gameNotInstalled);
                 BackupLocationStatus = LC.GetString(LC.string_gameNotInstalledRunOnce);
-                if (log) MLog.Information($@"BackupService: {Game} {BackupStatus}, {BackupLocationStatus}");
+                MLog.Information($@"BackupService: {Game} game not installed, has it been run once?, {BackupLocationStatus}", log);
                 LinkActionText = LC.GetString(LC.string_linkExistingBackup); //this seems dangerous to the average user
                 BackupActionText = LC.GetString(LC.string_cantCreateBackup);
             }

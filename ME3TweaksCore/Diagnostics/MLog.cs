@@ -20,12 +20,12 @@ namespace ME3TweaksCore.Diagnostics
         private const string LoggingPrefix = @"[ME3TWEAKSCORE] ";
 
         /// <summary>
-        /// Logs a string to the log. You can specify a prefix or a boolean that is checked (for making calls easier)
+        /// Logs a string to the log. You can specify a boolean for log checking (for making calls easier)
         /// </summary>
         /// <param name="message"></param>
         /// <param name="prefix"></param>
         /// <param name="shouldLog"></param>
-        internal static void Information(string message, bool shouldLog = true)
+        public static void Information(string message, bool shouldLog = true)
         {
             if (shouldLog)
             {
@@ -34,7 +34,7 @@ namespace ME3TweaksCore.Diagnostics
         }
 
         /// <summary>
-        /// Logs a string to the log. You can specify a prefix or a boolean that is checked (for making calls easier)
+        /// Logs a string to the log. You can specify a boolean for log checking (for making calls easier)
         /// </summary>
         /// <param name="message"></param>
         /// <param name="prefix"></param>
@@ -48,12 +48,12 @@ namespace ME3TweaksCore.Diagnostics
         }
 
         /// <summary>
-        /// Logs a string to the log. You can specify a prefix or a boolean that is checked (for making calls easier)
+        /// Logs a string to the log. You can specify a boolean for log checking (for making calls easier)
         /// </summary>
         /// <param name="message"></param>
         /// <param name="prefix"></param>
         /// <param name="shouldLog"></param>
-        internal static void Error(string message, string prefix = null, bool shouldLog = true)
+        public static void Error(string message, string prefix = null, bool shouldLog = true)
         {
             if (shouldLog)
             {
@@ -62,12 +62,12 @@ namespace ME3TweaksCore.Diagnostics
         }
 
         /// <summary>
-        /// Logs a string to the log. You can specify a prefix or a boolean that is checked (for making calls easier)
+        /// Logs a string to the log. You can specify a boolean for log checking (for making calls easier)
         /// </summary>
         /// <param name="message"></param>
         /// <param name="prefix"></param>
         /// <param name="shouldLog"></param>
-        internal static void Error(Exception ex, bool shouldLog = true)
+        public static void Error(Exception ex, bool shouldLog = true)
         {
             if (shouldLog)
             {
@@ -76,7 +76,7 @@ namespace ME3TweaksCore.Diagnostics
         }
 
         /// <summary>
-        /// Logs a string to the log. You can specify a prefix or a boolean that is checked (for making calls easier)
+        /// Logs a string to the log. You can specify a boolean for log checking (for making calls easier)
         /// </summary>
         /// <param name="message"></param>
         /// <param name="prefix"></param>
@@ -129,6 +129,5 @@ namespace ME3TweaksCore.Diagnostics
                 exception = exception.InnerException;
             }
         }
-
     }
 }

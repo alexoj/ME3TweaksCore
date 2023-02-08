@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Windows.Input;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Targets;
 using ME3TweaksCoreWPF.UI;
 using PropertyChanged;
@@ -32,17 +34,21 @@ namespace ME3TweaksCoreWPF.Targets
             var confirmDelete = holdingShift ?? deleteConfirmationCallback?.Invoke(this);
             if (confirmDelete.HasValue && confirmDelete.Value)
             {
-                Log.Information(@"Deleting DLC mod from target: " + dlcFolderPath);
+                IsBeingOperatedOn = true;
+                MLog.Information(@"Deleting DLC mod from target: " + dlcFolderPath);
                 try
                 {
+                    DeleteText = LC.GetString(LC.string_deleting);
                     MUtilities.DeleteFilesAndFoldersRecursively(dlcFolderPath);
                     notifyDeleted?.Invoke();
                 }
                 catch (Exception e)
                 {
-                    Log.Error($@"Error deleting DLC mod: {e.Message}");
+                    DeleteText = LC.GetString(LC.string_delete);
+                    MLog.Error($@"Error deleting DLC mod: {e.Message}");
                     // Todo: Show a dialog to the user
                 }
+                IsBeingOperatedOn = false;
             }
         }
 

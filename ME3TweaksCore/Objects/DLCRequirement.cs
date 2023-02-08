@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Localization;
+using ME3TweaksCore.Misc;
 using ME3TweaksCore.Targets;
 
 namespace ME3TweaksCore.Objects
@@ -40,7 +41,7 @@ namespace ME3TweaksCore.Objects
                 var metas = target.GetMetaMappedInstalledDLC(installedDLC: installedDLC);
                 if (metas.TryGetValue(DLCFolderName, out var meta) && Version.TryParse(meta.Version, out var version))
                 {
-                    if (version >= MinVersion)
+                    if (ProperVersion.IsGreaterThanOrEqual(version, MinVersion))
                     {
                         return true;
                     }

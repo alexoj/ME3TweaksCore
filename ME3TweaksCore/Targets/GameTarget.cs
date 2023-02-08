@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Mime;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using LegendaryExplorerCore.Compression;
 using LegendaryExplorerCore.GameFilesystem;
@@ -26,8 +27,7 @@ using Serilog;
 namespace ME3TweaksCore.Targets
 {
     [DebuggerDisplay("GameTarget {Game} {TargetPath}")]
-    [AddINotifyPropertyChangedInterface]
-    public class GameTarget : IEqualityComparer<GameTarget>
+    public class GameTarget : IEqualityComparer<GameTarget>, INotifyPropertyChanged
     {
         public const uint MEMI_TAG = 0x494D454D;
 
@@ -59,6 +59,16 @@ namespace ME3TweaksCore.Targets
         /// Indicates that this is a custom, abnormal game object. It may be used only for UI purposes, but it depends on the context.
         /// </summary>
         public bool IsCustomOption { get; set; } = false;
+
+        /// <summary>
+        /// Initializes a game target
+        /// </summary>
+        /// <param name="game">Game this target represents</param>
+        /// <param name="targetRootPath">The root path of the target</param>
+        /// <param name="currentRegistryActive">If this path is the current 'active' registry target</param>
+        /// <param name="isCustomOption">If this is a custom fake game target but is used in a target list</param>
+        /// <param name="isTest">If this is a test object</param>
+        /// <param name="skipInit">If we should skip initialization when loading the target data</param>
         public GameTarget(MEGame game, string targetRootPath, bool currentRegistryActive, bool isCustomOption = false, bool isTest = false, bool skipInit = false)
         {
             //if (!currentRegistryActive)
@@ -76,7 +86,8 @@ namespace ME3TweaksCore.Targets
             }
         }
 
-        public void ReloadGameTarget(bool logInfo = true, bool forceLodUpdate = false, bool reverseME1Executable = true, bool skipInit = false)
+
+        public virtual void ReloadGameTarget(bool logInfo = true, bool forceLodUpdate = false, bool reverseME1Executable = true, bool skipInit = false)
         {
             if (!IsCustomOption && !skipInit)
             {
@@ -109,7 +120,18 @@ namespace ME3TweaksCore.Targets
                                 var testPath = Game == MEGame.ME3 ? TargetPath : Directory.GetParent(TargetPath).FullName;
                                 if (Game != MEGame.ME3)
                                 {
-                                    testPath = Directory.GetParent(testPath).FullName;
+                                    // This looks for __overlay folder; LE games use it in Legendary Edition root, above game target paths, so we go up folder
+                                    var parent = Directory.GetParent(testPath);
+                                    if (parent != null)
+                                    {
+                                        testPath = parent.FullName;
+                                    }
+                                    else
+                                    {
+                                        MLog.Error(@"Executable is not in the correct filesystem hierarchy (parent folder that should exist does not); this is not a valid installation", shouldLog: logInfo);
+                                        IsValid = false;
+                                        return;
+                                    }
                                 }
                                 if (Directory.Exists(Path.Combine(testPath, @"__overlay")))
                                 {
@@ -165,7 +187,7 @@ namespace ME3TweaksCore.Targets
                 }
                 else
                 {
-                    Log.Error($@"Target is invalid: {TargetPath} does not exist (or is not accessible)");
+                    MLog.Error($@"Target is invalid: {TargetPath} does not exist (or is not accessible)");
                     IsValid = false;
                 }
             }
@@ -402,10 +424,15 @@ namespace ME3TweaksCore.Targets
             modifiedSfars = modifiedSfars.Distinct().ToList(); //filter out if modified + inconsistent
 
             ModifiedSFARFiles.AddRange(modifiedSfars.Select(file => MExtendedClassGenerators.GenerateSFARObject(file, this, restoreSfarConfirmationCallback, notifySFARRestoringCallback, notifyRestoredCallback)));
-            ModifiedBasegameFiles.AddRange(modifiedFiles.Select(file => MExtendedClassGenerators.GenerateModifiedFileObject(file.Substring(TargetPath.Length + 1), this,
+
+            // Filter out packages and TFCs if game is texture modded
+            var modifiedBasegameFiles = modifiedFiles.Where(x => !TextureModded || (!x.RepresentsPackageFilePath() && Path.GetExtension(x) != @".tfc"))
+                .Select(file => MExtendedClassGenerators.GenerateModifiedFileObject(file.Substring(TargetPath.Length + 1), this,
                 restoreBasegamefileConfirmationCallback,
                 notifyFileRestoringCallback,
-                notifyRestoredCallback)));
+                notifyRestoredCallback));
+
+            ModifiedBasegameFiles.AddRange(modifiedBasegameFiles);
         }
 
         /// <summary>
@@ -460,6 +487,7 @@ namespace ME3TweaksCore.Targets
 
         private InstalledDLCMod InternalGenerateDLCModObject()
         {
+            // This is for superclass I think?
             throw new NotImplementedException();
         }
 
@@ -527,7 +555,8 @@ namespace ME3TweaksCore.Targets
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Startup_INT.pcc"),
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Coalesced_INT.bin"),
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Textures.tfc"),
-                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"PlotManagerAutoDLC_UNC.pcc")
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"PlotManagerAutoDLC_UNC.pcc"),
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"SFXTest.pcc") // This file is expected to exist as lots of code depends on it
                     };
                     break;
                 case MEGame.LE2:
@@ -539,7 +568,8 @@ namespace ME3TweaksCore.Targets
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Coalesced_INT.bin"),
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"BioD_QuaTlL_505LifeBoat_LOC_INT.pcc"),
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"cithub_ad_low_a_S_INT.afc"),
-                        Path.Combine(TargetPath, @"BioGame", @"DLC", @"DLC_METR_Patch01", @"CookedPCConsole", @"BioA_Nor_103aGalaxyMap.pcc")
+                        Path.Combine(TargetPath, @"BioGame", @"DLC", @"DLC_METR_Patch01", @"CookedPCConsole", @"BioA_Nor_103aGalaxyMap.pcc"),
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"SFXTest.pcc") // This file is expected to exist as lots of code depends on it
                     };
                     break;
                 case MEGame.LE3:
@@ -550,7 +580,8 @@ namespace ME3TweaksCore.Targets
                         Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"Startup.pcc"),
                         Path.Combine(TargetPath, @"BioGame", @"DLC", @"DLC_CON_PRO3", @"CookedPCConsole", @"DLC_CON_PRO3_INT.tlk"),
                         Path.Combine(TargetPath, @"BioGame", @"DLC", @"DLC_CON_END", @"CookedPCConsole", @"BioD_End001_910RaceToConduit.pcc"),
-                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"citwrd_rp1_bailey_m_D_Int.afc")
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"citwrd_rp1_bailey_m_D_Int.afc"),
+                        Path.Combine(TargetPath, @"BioGame", @"CookedPCConsole", @"SFXTest.pcc") // This file is expected to exist as lots of code depends on it
                     };
                     break;
                 case MEGame.LELauncher: // LELAUNCHER
@@ -1006,7 +1037,7 @@ namespace ME3TweaksCore.Targets
         private const string ME1ASILoaderHash = @"30660f25ab7f7435b9f3e1a08422411a";
         private const string ME2ASILoaderHash = @"a5318e756893f6232284202c1196da13";
         private const string ME3ASILoaderHash = @"1acccbdae34e29ca7a50951999ed80d5";
-        private const string LEASILoaderHash = @"d518cd6dae4c4289c5439381dbeb1c4d"; // Will need changed as game is updated // bink 2008 by ME3Tweaks 06/11/2022
+        private const string LEASILoaderHash = @"bf50b297e9c4013abc20854c48064516"; // Will need changed as game is updated // bink 2.0.0.11 by ME3Tweaks 01/29/2023
 
         /// <summary>
         /// Determines if the bink ASI loader/bypass is installed (both OT and LE)
@@ -1014,16 +1045,24 @@ namespace ME3TweaksCore.Targets
         /// <returns></returns>
         public bool IsBinkBypassInstalled()
         {
-            string binkPath = GetVanillaBinkPath();
-            string expectedHash = null;
-            if (Game == MEGame.ME1) expectedHash = ME1ASILoaderHash;
-            else if (Game == MEGame.ME2) expectedHash = ME2ASILoaderHash;
-            else if (Game == MEGame.ME3) expectedHash = ME3ASILoaderHash;
-            else if (Game.IsLEGame()) expectedHash = LEASILoaderHash;
-
-            if (File.Exists(binkPath))
+            try
             {
-                return MUtilities.CalculateMD5(binkPath) == expectedHash;
+                string binkPath = GetVanillaBinkPath();
+                string expectedHash = null;
+                if (Game == MEGame.ME1) expectedHash = ME1ASILoaderHash;
+                else if (Game == MEGame.ME2) expectedHash = ME2ASILoaderHash;
+                else if (Game == MEGame.ME3) expectedHash = ME3ASILoaderHash;
+                else if (Game.IsLEGame()) expectedHash = LEASILoaderHash;
+
+                if (File.Exists(binkPath))
+                {
+                    return MUtilities.CalculateMD5(binkPath) == expectedHash;
+                }
+            }
+            catch (Exception e)
+            {
+                // File is in use by another process perhaps
+                MLog.Exception(e, @"Unable to hash bink dll:");
             }
 
             return false;
@@ -1033,49 +1072,60 @@ namespace ME3TweaksCore.Targets
         /// Installs the Bink ASI loader to this target.
         /// </summary>
         /// <returns></returns>
-        public bool InstallBinkBypass()
+        public bool InstallBinkBypass(bool throwError)
         {
             var destPath = GetVanillaBinkPath();
             MLog.Information($@"Installing Bink bypass for {Game} to {destPath}");
-            if (Game == MEGame.ME1)
+            try
             {
-                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"binkw23.dll");
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw32.dll", destPath, true);
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw23.dll", obinkPath, true);
-            }
-            else if (Game == MEGame.ME2)
-            {
-                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"binkw23.dll");
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw32.dll", destPath, true);
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw23.dll", obinkPath, true);
+                if (Game == MEGame.ME1)
+                {
+                    var obinkPath = Path.Combine(TargetPath, @"Binaries", @"binkw23.dll");
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw32.dll", destPath, true);
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me1.binkw23.dll", obinkPath, true);
+                }
+                else if (Game == MEGame.ME2)
+                {
+                    var obinkPath = Path.Combine(TargetPath, @"Binaries", @"binkw23.dll");
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw32.dll", destPath, true);
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me2.binkw23.dll", obinkPath, true);
 
+                }
+                else if (Game == MEGame.ME3)
+                {
+                    var obinkPath = Path.Combine(TargetPath, @"Binaries", @"win32", @"binkw23.dll");
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw32.dll", destPath, true);
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw23.dll", obinkPath, true);
+                }
+                else if (Game.IsLEGame())
+                {
+                    var obinkPath = Path.Combine(TargetPath, @"Binaries", @"Win64", @"bink2w64_original.dll"); // Where the original bink should go
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true); // Bypass proxy
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
+                }
+                else if (Game == MEGame.LELauncher)
+                {
+                    var obinkPath = Path.Combine(TargetPath, @"bink2w64_original.dll"); // Where the original bink should go
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true); // Bypass proxy
+                    MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
+                }
+                else
+                {
+                    MLog.Error(@"Unknown game for gametarget (InstallBinkBypass)");
+                    return false;
+                }
+
+                MLog.Information($@"Installed Bink bypass for {Game}");
+                return true;
             }
-            else if (Game == MEGame.ME3)
+            catch (Exception e)
             {
-                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"win32", @"binkw23.dll");
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw32.dll", destPath, true);
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._32.me3.binkw23.dll", obinkPath, true);
-            }
-            else if (Game.IsLEGame())
-            {
-                var obinkPath = Path.Combine(TargetPath, @"Binaries", @"Win64", @"bink2w64_original.dll"); // Where the original bink should go
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true);  // Bypass proxy
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
-            }
-            else if (Game == MEGame.LELauncher)
-            {
-                var obinkPath = Path.Combine(TargetPath, @"bink2w64_original.dll"); // Where the original bink should go
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64.dll", destPath, true);  // Bypass proxy
-                MUtilities.ExtractInternalFile(@"ME3TweaksCore.GameFilesystem.Bink._64.bink2w64_original.dll", obinkPath, true); //
-            }
-            else
-            {
-                MLog.Error(@"Unknown game for gametarget (InstallBinkBypass)");
-                return false;
+                MLog.Exception(e, @"Error installing bink bypass:");
+                if (throwError)
+                    throw;
             }
 
-            MLog.Information($@"Installed Bink bypass for {Game}");
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -1117,6 +1167,13 @@ namespace ME3TweaksCore.Targets
             if (Game.IsLEGame()) return Path.Combine(TargetPath, @"Binaries", @"Win64", @"bink2w64.dll");
             if (Game == MEGame.LELauncher) return Path.Combine(TargetPath, @"bink2w64.dll");
             return null;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

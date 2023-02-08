@@ -9,6 +9,7 @@ using LegendaryExplorerCore.Compression;
 using LegendaryExplorerCore.Helpers;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Localization;
+using ME3TweaksCore.Misc;
 using ME3TweaksCore.Services;
 using Octokit;
 using Serilog;
@@ -101,7 +102,7 @@ namespace ME3TweaksCore.Helpers
                     {
                         Version onlineReleaseVersion = new Version(onlineRelease.TagName);
 
-                        if (onlineReleaseVersion <= currentAppVersionInfo && ((interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease) || !onlineRelease.Prerelease))
+                        if (ProperVersion.IsLessThan(onlineReleaseVersion,currentAppVersionInfo)  && ((interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease) || !onlineRelease.Prerelease))
                         {
                             MLog.Information($@"The version of {interopPackage.ApplicationName} that we have is higher than/equal to the latest release from github, no updates available. Latest applicable github release is {onlineReleaseVersion}");
                             break;
@@ -125,7 +126,7 @@ namespace ME3TweaksCore.Helpers
                             myReleaseAge++;
                         }
 
-                        if (onlineReleaseVersion > latestVer)
+                        if (ProperVersion.IsGreaterThan(onlineReleaseVersion, latestVer))
                         {
                             latest = onlineRelease;
                             latestVer = onlineReleaseVersion;
@@ -136,7 +137,7 @@ namespace ME3TweaksCore.Helpers
                     {
                         MLog.Information(@"Latest available applicable update: " + latest.TagName);
                         Version releaseName = new Version(latest.TagName);
-                        if (currentAppVersionInfo < releaseName)
+                        if (ProperVersion.IsGreaterThan(releaseName, currentAppVersionInfo))
                         {
                             bool upgrade = false;
                             bool canCancel = true;

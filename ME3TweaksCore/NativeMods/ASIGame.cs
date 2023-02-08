@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Targets;
@@ -62,7 +64,9 @@ namespace ME3TweaksCore.NativeMods
 
         protected void InstallLoader()
         {
-            CurrentGameTarget.InstallBinkBypass();
+            // Logically we'd find a way to pass this to the consuming application
+            // but not sure how you'd do that in a command pattern like this
+            CurrentGameTarget.InstallBinkBypass(false); // Catch statement is in here already.
             RefreshBinkStatus();
         }
 
@@ -85,12 +89,12 @@ namespace ME3TweaksCore.NativeMods
 
                 // Known
                 DisplayedASIMods.ReplaceAll(installedKnownASIMods.OrderBy(x => x.AssociatedManifestItem.Name));
-                
+
                 // Unknown
                 DisplayedASIMods.AddRange(installedUnknownASIMods.OrderBy(x => x.UnmappedFilename));
 
                 // Not installed
-                DisplayedASIMods.AddRange(notInstalledASIs.OrderBy(x => x.LatestVersion.Name));
+                DisplayedASIMods.AddRange(notInstalledASIs.Where(x => !x.IsHidden).OrderBy(x => x.LatestVersion.Name));
 
                 // Attempt to re-select the existing object
                 if (DisplayedASIMods.Contains(selectedObject))
