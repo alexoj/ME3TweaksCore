@@ -21,6 +21,7 @@ using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Objects;
 using ME3TweaksCore.Services;
+using ME3TweaksCore.Services.Backup;
 using PropertyChanged;
 using Serilog;
 
@@ -1167,6 +1168,19 @@ namespace ME3TweaksCore.Targets
             if (Game.IsLEGame()) return Path.Combine(TargetPath, @"Binaries", @"Win64", @"bink2w64.dll");
             if (Game == MEGame.LELauncher) return Path.Combine(TargetPath, @"bink2w64.dll");
             return null;
+        }
+
+        /// <summary>
+        /// Removes the cmm_vanilla file from this target, if present.
+        /// </summary>
+        public void StripCmmVanilla()
+        {
+            var cmmVanilla = Path.Combine(TargetPath, BackupService.CMM_VANILLA_FILENAME);
+            if (File.Exists(cmmVanilla))
+            {
+                MLog.Information($@"Deleting {BackupService.CMM_VANILLA_FILENAME} file: {cmmVanilla}");
+                File.Delete(cmmVanilla);
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

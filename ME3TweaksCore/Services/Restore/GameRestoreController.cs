@@ -6,6 +6,7 @@ using System.Linq;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Helpers;
+using LegendaryExplorerCore.ME1.Unreal.UnhoodBytecode;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
@@ -64,6 +65,66 @@ namespace ME3TweaksCore.Services.Restore
         /// </summary>
         public bool RestoreInProgress { get; private set; }
 
+        /// <summary>
+        /// The function that retreives a string for the restore-everything prompt, to allow tool-specific text
+        /// </summary>
+        public Func<MEGame, string> GetRestoreEverythingString { get; set; } = RestoreEverythingDefault;
+
+        /// <summary>
+        /// If optimized texture restore method should be used. If false, it's skipped
+        /// </summary>
+        public Func<bool> UseOptimizedTextureRestore { get; set; } = UseOptimizedTextureRestoreDefault;
+
+        /// <summary>
+        /// If each file about to be copied should be logged. This is a debugging feature
+        /// </summary>
+        public Func<bool> ShouldLogEveryCopiedFile { get; set; } = ShouldLogEveryCopiedFileDefault;
+
+        /// <summary>
+        /// If the restore should use the legacy full copy implementation (not recommended)
+        /// </summary>
+        public Func<bool> UseLegacyFullCopy { get; set; } = UseLegacyFullCopyDefault;
+
+        #region Delegate defaults
+        /// <summary>
+        /// If texture modded, scan for marker and strip it and reset datestamp instead of copy
+        /// </summary>
+        /// <returns></returns>
+        private static bool UseOptimizedTextureRestoreDefault()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Do not log all files by default
+        /// </summary>
+        /// <returns></returns>
+        private static bool ShouldLogEveryCopiedFileDefault()
+        {
+            return false;
+        }
+
+
+        /// <summary>
+        /// The default text for when everything is being restored via a backup.
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns></returns>
+        private static string RestoreEverythingDefault(MEGame game)
+        {
+            return LC.GetString(LC.string_interp_restoringWillDeleteEverythingMessage);
+        }
+
+        /// <summary>
+        /// Default: we don't use legacy full wipe method of restore
+        /// </summary>
+        /// <returns></returns>
+        private static bool UseLegacyFullCopyDefault()
+        {
+            return false;
+        }
+        #endregion
+
         public GameRestore(MEGame game)
         {
             this.Game = game;
@@ -76,8 +137,7 @@ namespace ME3TweaksCore.Services.Restore
         /// <returns></returns>
         public bool PerformRestore(GameTarget restoreTarget, string destinationDirectory)
         {
-            // Todo: Localize this to LocalizationCore
-            var useFullCopyMethod = false;  // Prefer robocopy for now.
+            var useFullCopyMethod = UseLegacyFullCopy();
 
             if (MUtilities.IsGameRunning(Game))
             {
@@ -88,7 +148,7 @@ namespace ME3TweaksCore.Services.Restore
             bool restore = destinationDirectory == null; // Restore to custom location
             if (!restore)
             {
-                var confirmDeletion = ConfirmationCallback?.Invoke(LC.GetString(LC.string_interp_restoringWillDeleteEverythingTitle, Game.ToGameName()), LC.GetString(LC.string_interp_restoringWillDeleteEverythingMessage, Game.ToGameName()));
+                var confirmDeletion = ConfirmationCallback?.Invoke(LC.GetString(LC.string_interp_restoringWillDeleteEverythingTitle, Game.ToGameName()), GetRestoreEverythingString(Game));
                 restore |= confirmDeletion.HasValue && confirmDeletion.Value;
             }
 
@@ -175,7 +235,6 @@ namespace ME3TweaksCore.Services.Restore
                     return false;
                 }
 
-
                 if (useFullCopyMethod)
                 {
                     RestoreUsingFullCopy(backupPath, destinationDirectory);
@@ -207,11 +266,24 @@ namespace ME3TweaksCore.Services.Restore
             return false;
         }
 
+        /// <summary>
+        /// External setter for RestoreInProgress - used when errors may occur that stall this variable from being reset
+        /// </summary>
+        /// <param name="inProgress"></param>
+        public void SetRestoreInProgress(bool inProgress)
+        {
+            RestoreInProgress = inProgress;
+        }
         private void RestoreUsingRoboCopy(string backupPath, GameTarget destTarget, GameBackupStatus backupStatus, string destinationPathOverride = null)
         {
-            if (destTarget != null && destTarget.TextureModded)
+            var useTextureOptimized = UseOptimizedTextureRestore();
+            var logEachFileCopied = ShouldLogEveryCopiedFile();
+            if (destTarget != null && useTextureOptimized && destTarget.TextureModded)
             {
+                MLog.Information(@"Using texture-modded restore method");
                 backupStatus.BackupLocationStatus = LC.GetString(LC.string_analyzingGameFiles);
+                SetProgressIndeterminateCallback?.Invoke(true);
+
                 // Game is texture modded.
                 var packagesToCheck = new List<string>();
 
@@ -260,6 +332,8 @@ namespace ME3TweaksCore.Services.Restore
                     }
                     ProgressValue++;
                 }
+                MLog.Information(@"Texture-modded pre-restore has completed");
+
                 Debug.WriteLine($@"Files only texture tagged: {numOnlyTexTagged}");
             }
 
@@ -283,11 +357,17 @@ namespace ME3TweaksCore.Services.Restore
                 if (args.ProcessedFile.Name.StartsWith(backupPath) && args.ProcessedFile.Name.Length > backupPath.Length)
                 {
                     currentRoboCopyFile = args.ProcessedFile.Name.Substring(backupPath.Length + 1);
+                    if (logEachFileCopied)
+                    {
+                        MLog.Debug($"Robocopying {currentRoboCopyFile}");
+                    }
                     backupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_copyingX, currentRoboCopyFile);
                 }
             };
-            MLog.Information($@"Beginning robocopy restore: {backupPath} -> {destTarget.TargetPath}");
+            MLog.Information($@"Beginning robocopy restore: {backupPath} -> {rc.CopyOptions.Destination}");
             rc.Start().Wait();
+            MLog.Information(@"Robocopy restore has completed");
+
         }
 
         private void RestoreUsingFullCopy(string backupPath, string destinationDirectory)

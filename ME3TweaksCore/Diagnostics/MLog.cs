@@ -129,5 +129,13 @@ namespace ME3TweaksCore.Diagnostics
                 exception = exception.InnerException;
             }
         }
+
+        public static void Debug(string message, string prefix = null, bool shouldLog = true)
+        {
+            if (shouldLog)
+            {
+                Log.Debug($@"{prefix ?? LoggingPrefix}{message}");
+            }
+        }
     }
 }
