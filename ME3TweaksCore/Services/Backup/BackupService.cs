@@ -182,7 +182,7 @@ namespace ME3TweaksCore.Services.Backup
         /// <param name="meGame"></param>
         public static void UnlinkBackup(MEGame meGame)
         {
-            MLog.Information($"Unlinking backup for {meGame}");
+            MLog.Information($@"Unlinking backup for {meGame}");
             var gbPath = BackupService.GetGameBackupPath(meGame, forceReturnPath: true);
             if (gbPath != null)
             {

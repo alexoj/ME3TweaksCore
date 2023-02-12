@@ -9,7 +9,7 @@ namespace ME3TweaksCore.NativeMods
     /// <summary>
     /// Represents a single group of ASI mods across versions. This is used to help prevent installation of duplicate ASIs even if the names differ
     /// </summary>
-    [DebuggerDisplay("ASIMod - {LatestVersionIncludingHidden}")]
+    [DebuggerDisplay(@"ASIMod - {LatestVersionIncludingHidden}")]
     public class ASIMod
     {
         /// <summary>

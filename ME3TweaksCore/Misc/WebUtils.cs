@@ -61,10 +61,10 @@ namespace ME3TweaksCore.Misc
             Encoding defaultEncoding = null)
         {
             if (responseHeaders == null)
-                throw new ArgumentNullException("responseHeaders");
+                throw new ArgumentNullException(@"responseHeaders");
 
             //Note that key lookup is case-insensitive
-            var contentType = responseHeaders["Content-Type"];
+            var contentType = responseHeaders[@"Content-Type"];
             if (contentType == null)
                 return defaultEncoding;
 
@@ -74,7 +74,7 @@ namespace ME3TweaksCore.Misc
 
             var charsetPart =
                 contentTypeParts.Skip(1).FirstOrDefault(
-                    p => p.TrimStart().StartsWith("charset", StringComparison.InvariantCultureIgnoreCase));
+                    p => p.TrimStart().StartsWith(@"charset", StringComparison.InvariantCultureIgnoreCase));
             if (charsetPart == null)
                 return defaultEncoding;
 
@@ -93,7 +93,7 @@ namespace ME3TweaksCore.Misc
             catch (ArgumentException ex)
             {
                 throw new Exception(
-                    "The server returned data in an unknown encoding: " + charsetName,
+                    @"The server returned data in an unknown encoding: " + charsetName,
                     ex);
             }
         }

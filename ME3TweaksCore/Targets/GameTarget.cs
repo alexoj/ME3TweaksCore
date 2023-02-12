@@ -27,7 +27,7 @@ using Serilog;
 
 namespace ME3TweaksCore.Targets
 {
-    [DebuggerDisplay("GameTarget {Game} {TargetPath}")]
+    [DebuggerDisplay(@"GameTarget {Game} {TargetPath}")]
     public class GameTarget : IEqualityComparer<GameTarget>, INotifyPropertyChanged
     {
         public const uint MEMI_TAG = 0x494D454D;

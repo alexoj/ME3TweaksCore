@@ -453,7 +453,7 @@ namespace ME3TweaksCore.Services.Backup
                     }
                     catch (Exception e)
                     {
-                        MLog.Error($"Error about to copy file: {e.Message}");
+                        MLog.Error($@"Error about to copy file: {e.Message}");
                         TelemetryInterposer.TrackError(e);
                     }
 
@@ -544,7 +544,7 @@ namespace ME3TweaksCore.Services.Backup
             }
             else
             {
-                MLog.Information("Not writing vanilla marker as this is not a vanilla backup");
+                MLog.Information(@"Not writing vanilla marker as this is not a vanilla backup");
             }
 
             MLog.Information(@"Backup completed.");

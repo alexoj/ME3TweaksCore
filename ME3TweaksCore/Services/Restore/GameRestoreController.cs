@@ -184,7 +184,7 @@ namespace ME3TweaksCore.Services.Restore
                     }
                     else
                     {
-                        MLog.Warning("User declined to choose destination directory");
+                        MLog.Warning(@"User declined to choose destination directory");
                         return false;
                     }
                 }
@@ -359,7 +359,7 @@ namespace ME3TweaksCore.Services.Restore
                     currentRoboCopyFile = args.ProcessedFile.Name.Substring(backupPath.Length + 1);
                     if (logEachFileCopied)
                     {
-                        MLog.Debug($"Robocopying {currentRoboCopyFile}");
+                        MLog.Debug($@"Robocopying {currentRoboCopyFile}");
                     }
                     backupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_copyingX, currentRoboCopyFile);
                 }

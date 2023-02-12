@@ -512,7 +512,7 @@ namespace ME3TweaksCore.Helpers
 
             if (requireAdmin)
             {
-                MLog.Information($"Running process as admin: {exe} {argsStr}");
+                MLog.Information($@"Running process as admin: {exe} {argsStr}");
                 //requires elevation
                 using (Process p = new Process())
                 {
@@ -539,7 +539,7 @@ namespace ME3TweaksCore.Helpers
             }
             else
             {
-                MLog.Information($"Running process: {exe} {argsStr}");
+                MLog.Information($@"Running process: {exe} {argsStr}");
                 try
                 {
                     using (Process p = new Process())
@@ -566,10 +566,10 @@ namespace ME3TweaksCore.Helpers
                 }
                 catch (Win32Exception w32e)
                 {
-                    MLog.Warning("Win32 exception running process: " + w32e.ToString());
+                    MLog.Warning(@"Win32 exception running process: " + w32e.ToString());
                     if (w32e.NativeErrorCode == 740 && allowReattemptAsAdmin)
                     {
-                        MLog.Information("Attempting relaunch with administrative rights.");
+                        MLog.Information(@"Attempting relaunch with administrative rights.");
                         //requires elevation
                         using (Process p = new Process())
                         {
