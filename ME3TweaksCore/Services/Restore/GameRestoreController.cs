@@ -297,6 +297,7 @@ namespace ME3TweaksCore.Services.Restore
 
                 // For each package that failed validation, we should check the size.
                 backupStatus.BackupLocationStatus = LC.GetString(LC.string_checkingTexturetaggedPackages);
+                UpdateStatusCallback?.Invoke(backupStatus.BackupLocationStatus);
                 int numOnlyTexTagged = 0;
                 SetProgressIndeterminateCallback?.Invoke(false);
                 ProgressValue = 0;
@@ -331,6 +332,7 @@ namespace ME3TweaksCore.Services.Restore
                         numOnlyTexTagged++;
                     }
                     ProgressValue++;
+                    UpdateProgressCallback?.Invoke(ProgressValue, ProgressMax);
                 }
                 MLog.Information(@"Texture-modded pre-restore has completed");
 
@@ -339,6 +341,7 @@ namespace ME3TweaksCore.Services.Restore
 
 
             backupStatus.BackupStatus = LC.GetString(LC.string_restoringFromBackup);
+            UpdateStatusCallback?.Invoke(backupStatus.BackupStatus);
 
             string currentRoboCopyFile = null;
             RoboCommand rc = new RoboCommand();
@@ -351,6 +354,7 @@ namespace ME3TweaksCore.Services.Restore
                 SetProgressIndeterminateCallback?.Invoke(false);
                 ProgressValue = (int)args.CurrentFileProgress;
                 ProgressMax = 100;
+                UpdateProgressCallback?.Invoke(ProgressValue, ProgressMax);
             };
             rc.OnFileProcessed += (sender, args) =>
             {
@@ -362,6 +366,8 @@ namespace ME3TweaksCore.Services.Restore
                         MLog.Debug($@"Robocopying {currentRoboCopyFile}");
                     }
                     backupStatus.BackupLocationStatus = LC.GetString(LC.string_interp_copyingX, currentRoboCopyFile);
+                    UpdateStatusCallback?.Invoke(backupStatus.BackupLocationStatus);
+
                 }
             };
             MLog.Information($@"Beginning robocopy restore: {backupPath} -> {rc.CopyOptions.Destination}");

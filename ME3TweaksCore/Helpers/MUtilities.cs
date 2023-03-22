@@ -64,7 +64,7 @@ namespace ME3TweaksCore.Helpers
         }
 
         /// <summary>
-        /// Calculates the MD5 of a stream.
+        /// Calculates the MD5 of the stream from the beginning. Resets the stream to the beginning at the end.
         /// </summary>
         /// <param name="stream"></param>
         /// <returns></returns>
