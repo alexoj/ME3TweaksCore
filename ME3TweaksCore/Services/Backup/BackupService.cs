@@ -58,6 +58,8 @@ namespace ME3TweaksCore.Services.Backup
         /// </summary>
         public static void InitBackupService(Action<Action> runCodeOnUIThreadCallback, bool refreshStatuses = true, bool logPaths = false)
         {
+            MLog.Information($@"Initializing backup service");
+
             void runOnUiThread()
             {
                 GameBackupStatuses.Add(new GameBackupStatus(MEGame.ME1));
@@ -78,27 +80,6 @@ namespace ME3TweaksCore.Services.Backup
 
             if (refreshStatuses)
                 RefreshBackupStatus(null, log: true);
-
-            /*
-             *                 // Todo: Initialize library here?
-
-                // Build 118 settings migration for backups
-                BackupService.MigrateBackupPaths();
-
-                M3Log.Information(@"The following backup paths are listed in the registry:");
-                M3Log.Information(@"Mass Effect ======");
-                M3Log.Information(BackupService.GetGameBackupPath(MEGame.ME1, true, true));
-                M3Log.Information(@"Mass Effect 2 ====");
-                M3Log.Information(BackupService.GetGameBackupPath(MEGame.ME2, true, true));
-                M3Log.Information(@"Mass Effect 3 ====");
-                M3Log.Information(BackupService.GetGameBackupPath(MEGame.ME3, true, true));
-                M3Log.Information(@"Mass Effect LE ======");
-                M3Log.Information(BackupService.GetGameBackupPath(MEGame.LE1, true, true));
-                M3Log.Information(@"Mass Effect 2 LE ====");
-                M3Log.Information(BackupService.GetGameBackupPath(MEGame.LE2, true, true));
-                M3Log.Information(@"Mass Effect 3 LE ====");
-                M3Log.Information(BackupService.GetGameBackupPath(MEGame.LE3, true, true));
-             */
         }
 
         /// <summary>
@@ -182,7 +163,7 @@ namespace ME3TweaksCore.Services.Backup
         /// <param name="meGame"></param>
         public static void UnlinkBackup(MEGame meGame)
         {
-            MLog.Information($"Unlinking backup for {meGame}");
+            MLog.Information($@"Unlinking backup for {meGame}");
             var gbPath = BackupService.GetGameBackupPath(meGame, forceReturnPath: true);
             if (gbPath != null)
             {

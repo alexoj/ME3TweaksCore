@@ -38,7 +38,7 @@ namespace ME3TweaksCore.Misc
             {
                 if (e.Error != null)
                 {
-                    MLog.Error($"An error occurred copying the file to the destination:");
+                    MLog.Error(@"An error occurred copying the file to the destination:");
                     MLog.Error(e.Error);
                     errorCallback?.Invoke(e.Error);
                 }

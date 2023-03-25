@@ -4,7 +4,7 @@
 /*
     A C# Implementation of JoJoDiff's JPatch functionality.
     Supports 0.8.4 and below diff files.
-    Copyright (C) 2019-2020 Mgamerz
+    Copyright (C) 2019-2023 Mgamerz
 
     Ported from the original implementation by Joris Heirbaut:
     http://jojodiff.sourceforge.net/
@@ -161,7 +161,7 @@ namespace ME3TweaksCore.Helpers
                                 break;
                             case EOF:
                                 // FAILED, EOF
-                                Debug.WriteLine("Unexpected end of patch file!");
+                                Debug.WriteLine(@"Unexpected end of patch file!");
                                 return false;
                             default:
                                 // ESC xxx or ESC ESC at the start of a sequence
@@ -210,7 +210,7 @@ namespace ME3TweaksCore.Helpers
                         readByte = 0; // Makes next op read fully (ESC 0xA7)
                         break;
                     default:
-                        Debug.WriteLine("Unsupported opcode: " + readByte.ToString("X2"));
+                        Debug.WriteLine(@"Unsupported opcode: " + readByte.ToString(@"X2"));
                         break;
                 }
             }
@@ -219,7 +219,7 @@ namespace ME3TweaksCore.Helpers
 #endif
             if (patchData.Position != patchData.Length)
             {
-                Debug.WriteLine("didn't read until end of patch file!");
+                Debug.WriteLine(@"Didn't read until end of patch file!");
             }
 
             return true; //OK
@@ -280,7 +280,7 @@ namespace ME3TweaksCore.Helpers
             {
                 // LARGE FILE SUPPORT (0xFF) IS NOT SUPPORTED
                 // IN THIS IMPLEMENTATION OF JPATCH
-                Debug.WriteLine("64-bit length numbers are not supported by this implementation of JPatch");
+                Debug.WriteLine(@"64-bit length numbers are not supported by this implementation of JPatch");
                 return -1;
             }
         }

@@ -93,6 +93,7 @@ namespace ME3TweaksCore
                 ASIManager.LoadManifest();
             }
 
+            MLog.Information(@"ME3TweaksCore has initialized");
             Initialized = true;
         }
     }

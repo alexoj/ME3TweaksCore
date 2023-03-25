@@ -25,15 +25,35 @@ namespace ME3TweaksCore.Helpers
     /// </summary>
     public class MUtilities
     {
+
+        // From https://stackoverflow.com/a/40361205
+        /// <summary>
+        /// Gets a filename from a URL. Returns null if the URI cannot be parsed.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static string GetFileNameFromUrl(string url)
+        {
+            Uri uri;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+            {
+                return null; // Cannot get filename!
+            }
+
+            return Path.GetFileName(uri.LocalPath);
+        }
+
+        /// <summary>
+        /// Calculates the MD5 of the specified file on disk
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         public static string CalculateMD5(string filename)
         {
             try
             {
-                Debug.WriteLine(@"Hashing file " + filename);
-                using var md5 = MD5.Create();
                 using var stream = File.OpenRead(filename);
-                var hash = md5.ComputeHash(stream);
-                return BitConverter.ToString(hash).Replace(@"-", "").ToLowerInvariant();
+                return CalculateMD5(stream);
             }
             catch (IOException e)
             {
@@ -116,6 +136,17 @@ namespace ME3TweaksCore.Helpers
                 ms.Position = 0;
                 return ms;
             }
+        }
+
+        /// <summary>
+        /// Tests if an embedded resource with the specified name exists.
+        /// </summary>
+        /// <param name="internalResourceName"></param>
+        /// <returns></returns>
+        internal static bool DoesEmbeddedAssetExist(string internalResourceName)
+        {
+            var resources = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+            return resources.Any(x => x == internalResourceName);
         }
 
 
@@ -517,7 +548,7 @@ namespace ME3TweaksCore.Helpers
 
             if (requireAdmin)
             {
-                MLog.Information($"Running process as admin: {exe} {argsStr}");
+                MLog.Information($@"Running process as admin: {exe} {argsStr}");
                 //requires elevation
                 using (Process p = new Process())
                 {
@@ -544,7 +575,7 @@ namespace ME3TweaksCore.Helpers
             }
             else
             {
-                MLog.Information($"Running process: {exe} {argsStr}");
+                MLog.Information($@"Running process: {exe} {argsStr}");
                 try
                 {
                     using (Process p = new Process())
@@ -571,10 +602,10 @@ namespace ME3TweaksCore.Helpers
                 }
                 catch (Win32Exception w32e)
                 {
-                    MLog.Warning("Win32 exception running process: " + w32e.ToString());
+                    MLog.Warning(@"Win32 exception running process: " + w32e.ToString());
                     if (w32e.NativeErrorCode == 740 && allowReattemptAsAdmin)
                     {
-                        MLog.Information("Attempting relaunch with administrative rights.");
+                        MLog.Information(@"Attempting relaunch with administrative rights.");
                         //requires elevation
                         using (Process p = new Process())
                         {

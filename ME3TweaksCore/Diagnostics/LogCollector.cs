@@ -1209,7 +1209,13 @@ namespace ME3TweaksCore.Diagnostics
                         // Is this correct on linux?
                         MLog.Information(@"Checking texture map is in sync with game state");
 
-                        bool textureMapFileExists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + $@"\MassEffectModder\me{gameID}map.bin");
+                        var mapName = $"me{gameID}map";
+                        if (package.DiagnosticTarget.Game.IsLEGame())
+                        {
+                            mapName = $"mele{gameID}"; // LE has different name
+                        }
+
+                        bool textureMapFileExists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + $@"\MassEffectModder\{mapName}.bin");
                         addDiagLine(@"Files added or removed after texture mods were installed", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
 
                         if (textureMapFileExists)

@@ -463,9 +463,10 @@ namespace ME3TweaksCore.NativeMods
             //    Debug.WriteLine("Hit me");
             //}
             string md5;
-            bool useLocal = forceSource.HasValue && !forceSource.Value; // false (forceLocal)
+            bool useLocal = forceSource == false;
             if (!useLocal && !forceSource.HasValue)
             {
+                // Do not use local was set, but no preference of where source was set, so we will see if it exists in cache
                 useLocal = File.Exists(cachedPath);
             }
             if (useLocal)
@@ -487,24 +488,67 @@ namespace ME3TweaksCore.NativeMods
 
             if (!forceSource.HasValue || forceSource.Value)
             {
-                WebRequest request = WebRequest.Create(asi.DownloadLink);
-                MLog.Information(@"Fetching remote ASI from server");
+                var usingEmbedded = false;
+                var downloadStream = new MemoryStream();
+
+
+                // Is this a locally embedded ASI?
+                var fname = MUtilities.GetFileNameFromUrl(asi.DownloadLink);
+                if (fname != null)
+                {
+                    var embeddedAssetPath = $@"ME3TweaksCore.NativeMods.CachedASI.{asi.Game}.{destinationFilename}";
+
+                    if (asi.OwningMod.UpdateGroupId is 29 or 30 or 31) // AutoTOC for LE is the same across all games 
+                    {
+                        embeddedAssetPath = $@"ME3TweaksCore.NativeMods.CachedASI.{destinationFilename}";
+                    }
+                    
+                    var existsEmbedded = MUtilities.DoesEmbeddedAssetExist(embeddedAssetPath);
+                    if (existsEmbedded)
+                    {
+                        downloadStream = MUtilities.ExtractInternalFileToStream(embeddedAssetPath);
+
+                        if (MUtilities.CalculateMD5(downloadStream) != asi.Hash)
+                        {
+                            MLog.Error(@"Embedded ASI hash does not match manifest, we will discard the embedded ASI data");
+                            downloadStream = new MemoryStream();
+                        }
+                        else
+                        {
+                            usingEmbedded = true;
+                        }
+                    }
+                }
+
                 try
                 {
-                    using WebResponse response = request.GetResponse();
-                    var memoryStream = new MemoryStream();
-                    response.GetResponseStream().CopyTo(memoryStream);
-                    //MD5 check on file for security
-                    md5 = MUtilities.CalculateMD5(memoryStream);
-                    if (md5 != asi.Hash)
+                    if (!usingEmbedded)
                     {
-                        //ERROR!
-                        MLog.Error(@"Downloaded ASI did not match the manifest! It has the wrong hash.");
-                        return false;
+                        // Online download
+                        MLog.Information(@"Fetching remote ASI from server");
+                        var request = WebRequest.Create(asi.DownloadLink);
+
+                        using WebResponse response = request.GetResponse();
+                        response.GetResponseStream().CopyTo(downloadStream);
                     }
 
-                    MLog.Information(@"Fetched remote ASI from server. Installing ASI to " + finalPath);
-                    memoryStream.WriteToFile(finalPath);
+                    // Online download security check
+                    if (!usingEmbedded)
+                    {
+                        md5 = MUtilities.CalculateMD5(downloadStream);
+                        if (md5 != asi.Hash)
+                        {
+                            //ERROR!
+                            MLog.Error(@"Downloaded ASI did not match the manifest! It has the wrong hash.");
+                            return false;
+                        }
+
+                        MLog.Information(@"Fetched remote ASI from server.");
+                    }
+
+                    MLog.Information($@"Installing ASI to {finalPath}");
+
+                    downloadStream.WriteToFile(finalPath);
                     MLog.Information(@"ASI successfully installed.");
                     TelemetryInterposer.TrackEvent(@"Installed ASI", new Dictionary<string, string>()
                     {
@@ -519,7 +563,7 @@ namespace ME3TweaksCore.NativeMods
                     }
 
                     MLog.Information(@"Caching ASI to local ASI library: " + cachedPath);
-                    memoryStream.WriteToFile(cachedPath);
+                    downloadStream.WriteToFile(cachedPath);
                     return true;
                 }
                 catch (Exception e)

@@ -22,6 +22,7 @@
     <EmbeddedResource Include="GameFilesystem\Bink\**\*.dll" />
     <EmbeddedResource Include="Assets\**\*.exe" />
     <EmbeddedResource Include="Assets\**\*.bin" />
+    <EmbeddedResource Include="NativeMods\CachedASI\**\*.asi" />
   </ItemGroup>
 
   <ItemGroup>

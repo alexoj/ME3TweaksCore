@@ -144,7 +144,7 @@ namespace ME3TweaksCore.Helpers
                             MLog.Information(@"Latest release is applicable to us.");
                             if (interopPackage.ForcedUpgradeMaxReleaseAge > 0 && myReleaseAge > interopPackage.ForcedUpgradeMaxReleaseAge)
                             {
-                                MLog.Warning("This is an old release. We are force upgrading the application.");
+                                MLog.Warning(@"This is an old release. We are force upgrading the application.");
                                 upgrade = true;
                                 canCancel = false;
                             }

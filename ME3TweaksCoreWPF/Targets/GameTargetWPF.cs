@@ -12,7 +12,7 @@ namespace ME3TweaksCoreWPF.Targets
     /// <summary>
     /// WPF extension class to the ME3TweaksCore GameTarget class that provides information about an installation of a game.
     /// </summary>
-    [DebuggerDisplay("GameTargetWPF {Game} {TargetPath}")]
+    [DebuggerDisplay(@"GameTargetWPF {Game} {TargetPath}")]
     [AddINotifyPropertyChangedInterface]
     public class GameTargetWPF : GameTarget
     {

@@ -149,7 +149,7 @@ namespace ME3TweaksCore.Helpers.MEM
                             }
                             else if (releaseNameInt <= memVersion)
                             {
-                                MLog.Information(@"Latest release that is available and has been approved for use is v" + releaseNameInt + " - no update available for us");
+                                MLog.Information(@"Latest release that is available and has been approved for use is v" + releaseNameInt + @" - no update available for us");
                                 break;
                             }
                         }
@@ -175,7 +175,7 @@ namespace ME3TweaksCore.Helpers.MEM
                     if (latestReleaseWithApplicableAsset != null)
                     {
                         ReleaseAsset asset = getApplicableAssetForPlatform(latestReleaseWithApplicableAsset);
-                        MLog.Information("@MassEffectModderNoGui update available: " + latestReleaseWithApplicableAsset.TagName);
+                        MLog.Information(@"MassEffectModderNoGui update available: " + latestReleaseWithApplicableAsset.TagName);
                         //there's an update
                         var downloadClient = new WebClient();
                         downloadClient.Headers[@"Accept"] = @"application/vnd.github.v3+json";
