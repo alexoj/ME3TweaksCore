@@ -65,8 +65,23 @@ namespace ME3TweaksCore.Config
             {
                 switch (prop.ParseAction)
                 {
-                    case CoalesceParseAction.Add:
-                    case CoalesceParseAction.New: // Type 0 and Type 2 are considered the same for the purpose of merging.
+                    case CoalesceParseAction.New: // Type 0 - Overwrite or add
+                        {
+                            if (value.TryGetValue(property.Name, out var values))
+                            {
+                                values.Clear(); // Remove all existing values on this property.
+                                MLog.Debug($@"ConfigMerge::MergeEntry - Setting value {property.Name}->{prop.Value}", shouldLog: DebugConfigMerge);
+                                values.Add(new CoalesceValue(prop.Value, game == MEGame.LE1 ? CoalesceParseAction.Add : prop.ParseAction)); // Add our entry to this property.
+                                continue;
+                            }
+
+                            // We are just adding the new property itself.
+                            // Todo: Double check if we need double typing (++/--/..) for LE2/LE3 so you can run it on existing stuff as well as basedon stuff
+                            MLog.Debug($@"ConfigMerge::MergeEntry - Setting NEW value {property.Name}->{prop.Value}", shouldLog: DebugConfigMerge);
+                            value.AddEntry(new CoalesceProperty(property.Name, new CoalesceValue(prop.Value, game == MEGame.LE1 ? CoalesceParseAction.Add : prop.ParseAction))); // Add our property to the list
+                        }
+                        break;
+                    case CoalesceParseAction.Add: // Type 2 - add
                         MLog.Debug($@"ConfigMerge::MergeEntry - Adding value {property.Name}->{prop.Value}", shouldLog: DebugConfigMerge);
                         value.AddEntry(new CoalesceProperty(property.Name, prop.Value)); // Add our property to the list
                         break;
@@ -78,8 +93,7 @@ namespace ME3TweaksCore.Config
                                 {
                                     if (values[i].Value == prop.Value)
                                     {
-                                        MLog.Debug(
-                                            $@"ConfigMerge::MergeEntry - Not adding duplicate value {property.Name}->{prop.Value} on {value.Name}",
+                                        MLog.Debug($@"ConfigMerge::MergeEntry - Not adding duplicate value {property.Name}->{prop.Value} on {value.Name}",
                                             shouldLog: DebugConfigMerge);
                                         continue;
                                     }
