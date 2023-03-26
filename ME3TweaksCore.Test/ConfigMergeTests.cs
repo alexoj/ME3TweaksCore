@@ -1,21 +1,34 @@
 using LegendaryExplorerCore.Coalesced;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
+using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Config;
+using ME3TweaksCore.Diagnostics;
+using Serilog;
 
 namespace ME3TweaksCore.Test
 {
     [TestClass]
     public class ConfigMergeTests
     {
+        public static void GlobalInit()
+        {
+#if !AZURE
+            Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.Debug().CreateLogger();
+#else
+            Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+#endif
+            MLog.SetLogger(Log.Logger);
+        }
+
         [TestMethod]
         public void TestConfigMerge()
         {
             // WIP: This is for dev right now
-
-            var coalBaseFile = @"B:\UserProfile\Documents\Coalesced_INT.bin"; // LE1
-            var coalOut = @"B:\UserProfile\Documents\Coalesced_INT_OUT.bin"; // LE1
-            var deltaBaseFile = @"B:\UserProfile\Documents\CoalDelta.m3cd"; // M3 Coalesced Delta file
+            GlobalInit();
+            var coalBaseFile = @"G:\My Drive\Mass Effect Legendary Modding\CoalescedMerge\Coalesced_INT.bin";
+            var coalOut = @"G:\My Drive\Mass Effect Legendary Modding\CoalescedMerge\Coalesced_INT_OUT.bin"; 
+            var deltaBaseFile = @"G:\My Drive\Mass Effect Legendary Modding\CoalescedMerge\CoalDelta.m3cd"; // M3 Coalesced Delta file
 
             // Read coalesced
             using var coalFS = File.OpenRead(coalBaseFile);
@@ -24,7 +37,7 @@ namespace ME3TweaksCore.Test
             // Read delta
             var delta = ConfigFileProxy.LoadIni(deltaBaseFile);
 
-            ConfigMerge.PerformMerge(coal, delta);
+            ConfigMerge.PerformMerge(coal, delta, MEGame.LE1);
             CaseInsensitiveDictionary<DuplicatingIni> inis = new CaseInsensitiveDictionary<DuplicatingIni>();
             foreach (var asset in coal)
             {
