@@ -9,7 +9,7 @@ namespace ME3TweaksCore.Diagnostics
     /// </summary>
     public class MLog
     {
-        public void SetLogger(ILogger logger)
+        public static void SetLogger(ILogger logger)
         {
             Log.Logger = logger;
         }
@@ -135,6 +135,7 @@ namespace ME3TweaksCore.Diagnostics
             if (shouldLog)
             {
                 Log.Debug($@"{prefix ?? LoggingPrefix}{message}");
+                System.Diagnostics.Debug.WriteLine($@"{prefix ?? LoggingPrefix}{message}");
             }
         }
     }

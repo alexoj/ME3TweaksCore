@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using LegendaryExplorerCore.Coalesced;
 using LegendaryExplorerCore.Misc;
+using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 
 namespace ME3TweaksCore.Config
 {
@@ -14,6 +16,12 @@ namespace ME3TweaksCore.Config
     /// </summary>
     public class ConfigMerge
     {
+
+#if DEBUG
+        private static readonly bool DebugConfigMerge = true;
+#else
+        private static readonly bool DebugConfigMerge = false;
+#endif
         /// <summary>
         /// Splits a delta section name into filename and actual section name in the config file.
         /// </summary>
@@ -33,7 +41,7 @@ namespace ME3TweaksCore.Config
         /// <param name="sourceFileText"></param>
         /// <param name="deltaText"></param>
         /// <returns></returns>
-        public static void PerformMerge(CaseInsensitiveDictionary<CoalesceAsset> assets, CoalesceAsset delta)
+        public static void PerformMerge(CaseInsensitiveDictionary<CoalesceAsset> assets, CoalesceAsset delta, MEGame game)
         {
             foreach (var section in delta.Sections)
             {
@@ -45,20 +53,63 @@ namespace ME3TweaksCore.Config
                     var inisection = ini.GetOrAddSection(iniSectionName);
                     foreach (var entry in section.Value.Values)
                     {
-                        MergeEntry(inisection, entry);
+                        MergeEntry(inisection, entry, game);
                     }
                 }
             }
         }
 
-        private static void MergeEntry(CoalesceSection value, CoalesceProperty property)
+        private static void MergeEntry(CoalesceSection value, CoalesceProperty property, MEGame game)
         {
             foreach (var prop in property)
             {
                 switch (prop.ParseAction)
                 {
                     case CoalesceParseAction.Add:
+                    case CoalesceParseAction.New: // Type 0 and Type 2 are considered the same for the purpose of merging.
+                        MLog.Debug($@"ConfigMerge::MergeEntry - Adding value {property.Name}->{prop.Value}", shouldLog: DebugConfigMerge);
                         value.AddEntry(new CoalesceProperty(property.Name, prop.Value)); // Add our property to the list
+                        break;
+                    case CoalesceParseAction.AddUnique:
+                        {
+                            if (value.TryGetValue(property.Name, out var values))
+                            {
+                                for (int i = values.Count - 1; i >= 0; i--)
+                                {
+                                    if (values[i].Value == prop.Value)
+                                    {
+                                        MLog.Debug(
+                                            $@"ConfigMerge::MergeEntry - Not adding duplicate value {property.Name}->{prop.Value} on {value.Name}",
+                                            shouldLog: DebugConfigMerge);
+                                        continue;
+                                    }
+                                }
+                            }
+                            // It's new just add the whole thing or did not find existing one
+                            // Todo: LE1 only supports type 2
+                            // Todo: Double check if we need double typing (++/--/..) for LE2/LE3 so you can run it on existing stuff as well as basedon stuff
+                            value.AddEntry(new CoalesceProperty(property.Name, new CoalesceValue(prop.Value, game == MEGame.LE1 ? CoalesceParseAction.Add : prop.ParseAction))); // Add our property to the list
+                        }
+                        break;
+                    case CoalesceParseAction.RemoveProperty:
+                        value.RemoveAllNamedEntries(property.Name);
+                        break;
+                    case CoalesceParseAction.Remove:
+                        {
+                            if (value.TryGetValue(property.Name, out var values))
+                            {
+                                for (int i = values.Count - 1; i >= 0; i--)
+                                {
+                                    if (values[i].Value == prop.Value)
+                                    {
+                                        MLog.Debug(
+                                            $@"ConfigMerge::MergeEntry - Removing value {property.Name}->{prop.Value} from {value.Name}",
+                                            shouldLog: DebugConfigMerge);
+                                        values.RemoveAt(i); // Remove this value
+                                    }
+                                }
+                            }
+                        }
                         break;
                     default:
                         Debug.WriteLine($"TYPE NOT IMPLEMENTED: {prop.ParseAction}");
