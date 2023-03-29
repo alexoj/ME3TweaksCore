@@ -41,6 +41,42 @@ namespace ME3TweaksCore.Helpers
             }
         }
 
+        public static List<string> GetFileListForMEMFile(string file)
+        {
+            var files = new List<string>();
+            try
+            {
+                MEGame game = MEGame.Unknown;
+                using var memFile = File.OpenRead(file);
+                var magic = memFile.ReadStringASCII(4);
+                if (magic != @"TMOD")
+                {
+                    return files;
+                }
+                var version = memFile.ReadInt32(); //3 = LE
+                var gameIdOffset = memFile.ReadInt64();
+                memFile.Position = gameIdOffset;
+                var gameId = memFile.ReadInt32();
+
+                var numFiles = memFile.ReadInt32();
+                for (int i = 0; i < numFiles; i++)
+                {
+                    var tag = memFile.ReadInt32();
+                    var name = memFile.ReadStringASCIINull();
+                    var offset = memFile.ReadUInt64();
+                    var size = memFile.ReadUInt64();
+                    var flags = memFile.ReadUInt64();
+                    files.Add(name);
+                }
+            }
+            catch (Exception e)
+            {
+                MLog.Exception(e, $@"Unable to determine game MEM file {file} is for");
+            }
+            return files;
+
+        }
+
         // Mod files are NOT supported in M3
 #if ALOT
         public static ModFileInfo GetGameForMod(string file)
