@@ -405,7 +405,7 @@ namespace ME3TweaksCore.Services.Backup
                         }
 
 
-                        if (file.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
+                        if (dlcFolderpath != null && file.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
                         {
                             //It's a DLC!
                             string dlcname = file.Substring(dlcSubStringLen);
@@ -462,6 +462,13 @@ namespace ME3TweaksCore.Services.Backup
 
                 void bigFileProgressCallback(string fileBeingCopied, long dataCopied, long totalDataToCopy)
                 {
+                    if (dlcFolderpath == null)
+                    {
+                        // If DLC folder path is not set (maybe launcher has big file?) this prevents crash
+                        UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_backingUpSinglePercentage, Path.GetFileName(fileBeingCopied), (int)(dataCopied * 100d / totalDataToCopy)));
+                        return;
+                    }
+
                     if (fileBeingCopied.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
                     {
                         //It's a DLC!
