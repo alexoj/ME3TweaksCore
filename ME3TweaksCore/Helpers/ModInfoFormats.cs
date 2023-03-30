@@ -15,6 +15,9 @@ namespace ME3TweaksCore.Helpers
 
         public static MEGame GetGameMEMFileIsFor(string file)
         {
+            if (!File.Exists(file))
+                return MEGame.Unknown; // We don't know what file this game is for because it doesn't exist!
+
             try
             {
                 MEGame game = MEGame.Unknown;

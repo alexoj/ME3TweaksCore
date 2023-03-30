@@ -486,24 +486,14 @@ namespace ME3TweaksCore.Helpers.MEM
         /// <summary>
         /// Installs a MEM file to the game the mem is for
         /// </summary>
-        /// <param name="mFileName"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        public static void InstallMEMFile(string memFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
+        /// <param name="game">What game to install for</param>
+        /// <param name="memFileListFile">The path to the MFL file that MEM will use to install</param>
+        /// <param name="currentActionCallback">A delegate to set UI text to inform the user of what is occurring</param>
+        /// <param name="progressCallback">Percentage-based progress indicator for the current stage</param>
+        public static void InstallMEMFiles(MEGame game, string memFileListFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
         {
-            var game = ModFileFormats.GetGameMEMFileIsFor(memFile);
-            // MEM command line only supports install from folder
-            // Move file to subfolder
-
-            var subfolder = Path.Combine(Directory.GetParent(memFile).FullName, @"MEMInstall");
-            var memSubfile = Path.Combine(subfolder, Path.GetFileName(memFile));
-            if (!Directory.Exists(subfolder))
-            {
-                Directory.CreateDirectory(subfolder);
-                File.Move(memFile, memSubfile);
-            }
-
-            MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(),
-                $"--install-mods --gameid {game.ToMEMGameNum()} --input \"{subfolder}\" --verify --ipc", // do not localize
+            currentActionCallback?.Invoke("Preparing to install textures");
+            MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(), $"--install-mods --gameid {game.ToMEMGameNum()} --input \"{memFileListFile}\" --verify --ipc", // do not localize
 
                 ipcCallback: (command, param) =>
                 {
