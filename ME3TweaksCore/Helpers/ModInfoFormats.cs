@@ -66,6 +66,7 @@ namespace ME3TweaksCore.Helpers
                 {
                     var tag = memFile.ReadInt32();
                     var name = memFile.ReadStringASCIINull();
+                    if (string.IsNullOrWhiteSpace(name)) name = "<name not listed in mem>";
                     var offset = memFile.ReadUInt64();
                     var size = memFile.ReadUInt64();
                     var flags = memFile.ReadUInt64();

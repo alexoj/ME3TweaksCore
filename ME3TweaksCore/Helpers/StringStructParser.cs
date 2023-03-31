@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using LegendaryExplorerCore.Misc;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Localization;
 using Serilog;
@@ -60,9 +61,10 @@ namespace ME3TweaksCore.Helpers
         /// <summary>
         /// Gets a dictionary of command split value keypairs. Can accept incoming string with 1 or 2 () outer parenthesis
         /// </summary>
-        /// <param name="inputString"></param>
+        /// <param name="inputString">The string to split to value</param>
+        /// <param name="canBeCaseInsensitive">If the keys can be case insensitive. This changes the return to a case insensitive dictionary type, casted to Dictionary</param>
         /// <returns></returns>
-        public static Dictionary<string, string> GetCommaSplitValues(string inputString)
+        public static Dictionary<string, string> GetCommaSplitValues(string inputString, bool canBeCaseInsensitive = false)
         {
             var origString = inputString;
             if (inputString[0] == '(' && inputString[1] == '(' && inputString[inputString.Length - 1] == ')' && inputString[inputString.Length - 2] == ')')
@@ -80,7 +82,7 @@ namespace ME3TweaksCore.Helpers
             bool isInQuotes = false;
 
             int openParenthesisCount = 0;
-            Dictionary<string, string> values = new Dictionary<string, string>();
+            var values = canBeCaseInsensitive ? new CaseInsensitiveDictionary<string>() : new Dictionary<string, string>();
             for (int i = 0; i < inputString.Length; i++)
             {
                 switch (inputString[i])
