@@ -150,17 +150,24 @@ namespace ME3TweaksCore.Helpers
             }
             //Finish last property
             {
-                string propertyName = inputString.Substring(propNameStartPos, lastEqualsPos - propNameStartPos).Trim();
-                string value = "";
-                if (openingQuotePos >= 0)
+                if (lastEqualsPos > -1) // If the struct is empty there won't be a last equals position
                 {
-                    value = inputString.Substring(openingQuotePos + 1, closingQuotePos - (openingQuotePos + 1)).Trim();
+                    string propertyName = inputString.Substring(propNameStartPos, lastEqualsPos - propNameStartPos)
+                        .Trim();
+                    string value = "";
+                    if (openingQuotePos >= 0)
+                    {
+                        value = inputString.Substring(openingQuotePos + 1, closingQuotePos - (openingQuotePos + 1))
+                            .Trim();
+                    }
+                    else
+                    {
+                        value = inputString.Substring(lastEqualsPos + 1, inputString.Length - (lastEqualsPos + 1))
+                            .Trim();
+                    }
+
+                    values[propertyName] = value;
                 }
-                else
-                {
-                    value = inputString.Substring(lastEqualsPos + 1, inputString.Length - (lastEqualsPos + 1)).Trim();
-                }
-                values[propertyName] = value;
             }
             return values;
         }
