@@ -140,7 +140,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 
                 if (infosForGameL.TryGetValue(relativeFilename, out var items))
                 {
-                    md5 ??= MUtilities.CalculateMD5(fullfilepath);
+                    md5 ??= MUtilities.CalculateHash(fullfilepath);
                     var match = items.FirstOrDefault(x => x.hash == md5);
                     if (match != null)
                     {

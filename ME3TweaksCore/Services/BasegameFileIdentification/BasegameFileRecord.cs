@@ -24,7 +24,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
         public BasegameFileRecord(string relativePathToRoot, int size, MEGame game, string humanName, string md5)
         {
             this.file = relativePathToRoot;
-            this.hash = md5 ?? MUtilities.CalculateMD5(relativePathToRoot);
+            this.hash = md5 ?? MUtilities.CalculateHash(relativePathToRoot);
             this.game = game.ToGameNum().ToString(); // due to how json serializes stuff we have to convert it here.
             this.size = size;
             this.source = humanName;

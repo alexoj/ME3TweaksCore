@@ -131,5 +131,10 @@ namespace ME3TweaksCore.Config
                 }
             }
         }
+
+        public static void PerformDLCMerge(string getDlcPath, string dlcFolderInstalled)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -84,7 +84,7 @@ namespace ME3TweaksCore.Assets.VanillaDatabase
             {
                 mapStream.WriteInt32(idx); // Name Table IDX. Update this code for duplicates support
                 mapStream.WriteInt32((int)new FileInfo(f).Length); // Size
-                var md5 = MUtilities.CalculateMD5(f);
+                var md5 = MUtilities.CalculateHash(f);
                 for (int i = 0; i < 32; i++)
                 {
                     byte b = 0;

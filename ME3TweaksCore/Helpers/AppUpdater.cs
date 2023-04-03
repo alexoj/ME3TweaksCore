@@ -286,7 +286,7 @@ namespace ME3TweaksCore.Helpers
                 // Mapping of MD5 patches to destination. Value is a list of mirrors we can use, preferring github first. AI only uses Github
                 var patchMappingSourceMd5ToLinks = new Dictionary<string, List<(string downloadhash, string downloadLink, string timetamp)>>();
 
-                var localExecutableHash = MUtilities.CalculateMD5(MLibraryConsumer.GetExecutablePath());
+                var localExecutableHash = MUtilities.CalculateHash(MLibraryConsumer.GetExecutablePath());
 
                 // Find applicable patch
                 foreach (var asset in latestRelease.Assets.Where(x => x.Name.StartsWith(@"upd-")))
@@ -370,7 +370,7 @@ namespace ME3TweaksCore.Helpers
 
                 MemoryStream outStream = new MemoryStream();
                 JPatch.ApplyJPatch(currentBuildStream, patchStream, outStream);
-                var calculatedHash = MUtilities.CalculateMD5(outStream);
+                var calculatedHash = MUtilities.CalculateHash(outStream);
                 if (calculatedHash == expectedFinalHash)
                 {
                     MLog.Information(@"Patch application successful: Writing new executable to disk");

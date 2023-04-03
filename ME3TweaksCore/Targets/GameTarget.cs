@@ -220,7 +220,7 @@ namespace ME3TweaksCore.Targets
                             Path.Combine(TargetPath, @"Engine", @"Shaders", @"BranchingPCFCommon.usf");
                         if (File.Exists(branchingPCFCommon))
                         {
-                            var md5 = MUtilities.CalculateMD5(branchingPCFCommon);
+                            var md5 = MUtilities.CalculateHash(branchingPCFCommon);
                             MTextureLODSetter.SetLODs(this, true, twoK, md5 == @"10db76cb98c21d3e90d4f0ffed55d424");
                         }
                     }
@@ -959,7 +959,7 @@ namespace ME3TweaksCore.Targets
                     var asiFiles = Directory.GetFiles(asiDirectory, @"*.asi");
                     foreach (var asiFile in asiFiles)
                     {
-                        var hash = MUtilities.CalculateMD5(asiFile);
+                        var hash = MUtilities.CalculateHash(asiFile);
                         var matchingManifestASI = ASIManager.GetASIVersionByHash(hash, Game);
                         if (matchingManifestASI != null)
                         {
@@ -1082,7 +1082,7 @@ namespace ME3TweaksCore.Targets
 
                 if (File.Exists(binkPath))
                 {
-                    return MUtilities.CalculateMD5(binkPath) == expectedHash;
+                    return MUtilities.CalculateHash(binkPath) == expectedHash;
                 }
             }
             catch (Exception e)

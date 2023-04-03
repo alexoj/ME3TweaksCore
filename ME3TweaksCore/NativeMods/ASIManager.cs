@@ -472,7 +472,7 @@ namespace ME3TweaksCore.NativeMods
             if (useLocal)
             {
                 //Check hash first
-                md5 = MUtilities.CalculateMD5(cachedPath);
+                md5 = MUtilities.CalculateHash(cachedPath);
                 if (md5 == asi.Hash)
                 {
                     MLog.Information($@"Copying ASI from cached library to destination: {cachedPath} -> {finalPath}");
@@ -508,7 +508,7 @@ namespace ME3TweaksCore.NativeMods
                     {
                         downloadStream = MUtilities.ExtractInternalFileToStream(embeddedAssetPath);
 
-                        if (MUtilities.CalculateMD5(downloadStream) != asi.Hash)
+                        if (MUtilities.CalculateHash(downloadStream) != asi.Hash)
                         {
                             MLog.Error(@"Embedded ASI hash does not match manifest, we will discard the embedded ASI data");
                             downloadStream = new MemoryStream();
@@ -535,7 +535,7 @@ namespace ME3TweaksCore.NativeMods
                     // Online download security check
                     if (!usingEmbedded)
                     {
-                        md5 = MUtilities.CalculateMD5(downloadStream);
+                        md5 = MUtilities.CalculateHash(downloadStream);
                         if (md5 != asi.Hash)
                         {
                             //ERROR!

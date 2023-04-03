@@ -81,7 +81,7 @@ namespace ME3TweaksCore.Helpers.ME1
 
             if (calculateOriginalHash)
             {
-                info.OriginalExecutableHash = MUtilities.CalculateMD5(s);
+                info.OriginalExecutableHash = MUtilities.CalculateHash(s);
             }
 
             return info;

@@ -103,7 +103,7 @@ namespace ME3TweaksCore.Services
             }
 
             if (hash == null) return (responseStream, downloadError);
-            var md5 = MUtilities.CalculateMD5(responseStream);
+            var md5 = MUtilities.CalculateHash(responseStream);
             responseStream.Position = 0;
             if (md5 != hash)
             {

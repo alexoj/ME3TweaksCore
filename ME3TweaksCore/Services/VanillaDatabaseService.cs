@@ -318,7 +318,7 @@ namespace ME3TweaksCore.Services
 
                 if (md5check)
                 {
-                    var md5 = MUtilities.CalculateMD5(fullpath);
+                    var md5 = MUtilities.CalculateHash(fullpath);
                     return info.Any(x => x.md5 == md5);
                 }
                 return true;
@@ -558,7 +558,7 @@ namespace ME3TweaksCore.Services
             string md5 = null;
             if (target.Game != MEGame.ME1 || !reverseME1)
             {
-                md5 = MUtilities.CalculateMD5(exe);
+                md5 = MUtilities.CalculateHash(exe);
             }
 
             switch (target.Game)

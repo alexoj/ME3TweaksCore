@@ -20,7 +20,7 @@ namespace ME3TweaksCore.Diagnostics
         public static (bool uploaded, string result) UploadLog(string logtext, string endpoint)
         {
             var lzmalog = LZMA.CompressToLZMAFile(Encoding.UTF8.GetBytes(logtext));
-            var lzmamd5 = MUtilities.CalculateMD5(new MemoryStream(lzmalog));
+            var lzmamd5 = MUtilities.CalculateHash(new MemoryStream(lzmalog));
             try
             {
                 // examples of converting both Stream and byte [] to HttpContent objects
