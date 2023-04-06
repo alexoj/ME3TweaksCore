@@ -884,9 +884,13 @@ namespace ME3TweaksCore.Diagnostics
                             addDiagLine($@"{meuitmName} version: {latestInstall.MEUITMVER}");
                         }
                     }
-                    else
+                    else if (package.DiagnosticTarget.Game.IsOTGame())
                     {
                         addDiagLine(@"This installation has been texture modded, but ALOT and/or MEUITM has not been installed");
+                    }
+                    else if (package.DiagnosticTarget.Game.IsLEGame())
+                    {
+                        addDiagLine(@"This installation has been texture modded with MassEffectModder");
                     }
 
                     if (latestInstall.MarkerExtendedVersion >= TextureModInstallationInfo.FIRST_EXTENDED_MARKER_VERSION && !string.IsNullOrWhiteSpace(latestInstall.InstallerVersionFullName))
@@ -899,7 +903,6 @@ namespace ME3TweaksCore.Diagnostics
                     }
 
                     addDiagLine($@"Latest installation used MEM v{latestInstall.MEM_VERSION_USED}");
-
                     addDiagLine(@"Texture mod installation history", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                     addDiagLine(@"The history of texture mods installed into this game is as follows (from latest install to first install):");
 
