@@ -1212,7 +1212,7 @@ namespace ME3TweaksCore.Diagnostics
                         var mapName = $"me{gameID}map";
                         if (package.DiagnosticTarget.Game.IsLEGame())
                         {
-                            mapName = $"mele{gameID}"; // LE has different name
+                            mapName = $"mele{gameID}map"; // LE has different name
                         }
 
                         bool textureMapFileExists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + $@"\MassEffectModder\{mapName}.bin");
@@ -1296,7 +1296,7 @@ namespace ME3TweaksCore.Diagnostics
                         }
                         else
                         {
-                            addDiagLine($@"Texture map file is missing: {package.DiagnosticTarget.Game.ToString().ToLower()}map.bin - was game migrated to new system or are you M3 on a different user account?");
+                            addDiagLine($@"Texture map file is missing: {mapName}.bin - was game migrated to new system or are you running this tool on a different user account than textures were installed with?");
                         }
                     }
 
