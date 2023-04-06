@@ -87,7 +87,7 @@ namespace ME3TweaksCore.Objects
         };
 
         /// <summary>
-        /// The language code - filenames will be suffixed with this to denote the specific language
+        /// The language code - filenames will be suffixed with this to denote the specific language (e.g. POL or FRA - no underscore)
         /// </summary>
         public string FileCode { get; }
         /// <summary>
