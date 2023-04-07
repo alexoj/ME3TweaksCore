@@ -34,27 +34,23 @@ namespace ME3TweaksCore.Test
         public void TestConfigMerge()
         {
             // WIP: This is for dev right now
-            GlobalInit();
-            var coalBaseFile = @"G:\My Drive\Mass Effect Legendary Modding\CoalescedMerge\Coalesced_INT.bin";
-            var coalOut = @"G:\My Drive\Mass Effect Legendary Modding\CoalescedMerge\Coalesced_INT_OUT.bin";
-            var deltaBaseFile = @"G:\My Drive\Mass Effect Legendary Modding\CoalescedMerge\CoalDelta.m3cd"; // M3 Coalesced Delta file
+            //GlobalInit();
+            //var coalBaseFile = @"G:\My Drive\Mass Effect Legendary Modding\CoalescedMerge\Coalesced_INT.bin";
+            //var coalOut = @"G:\My Drive\Mass Effect Legendary Modding\CoalescedMerge\Coalesced_INT_OUT.bin";
+            //var deltaBaseFile = @"G:\My Drive\Mass Effect Legendary Modding\CoalescedMerge\CoalDelta.m3cd"; // M3 Coalesced Delta file
 
-            // Read coalesced
-            using var coalFS = File.OpenRead(coalBaseFile);
-            var coal = CoalescedConverter.DecompileLE1LE2ToAssets(coalFS, Path.GetFileName(coalBaseFile));
+            //// Read coalesced
+            //using var coalFS = File.OpenRead(coalBaseFile);
+            //var coal = ConfigAssetBundle.FromSingleFile(MEGame.LE1,coalBaseFile)
 
-            // Read delta
-            var delta = ConfigFileProxy.LoadIni(deltaBaseFile);
+            //// Read delta
+            //var delta = ConfigFileProxy.LoadIni(deltaBaseFile);
 
-            ConfigMerge.PerformMerge(coal, delta, MEGame.LE1);
-            CaseInsensitiveDictionary<DuplicatingIni> inis = new CaseInsensitiveDictionary<DuplicatingIni>();
-            foreach (var asset in coal)
-            {
-                inis[asset.Key] = CoalesceAsset.ToIni(asset.Value);
-            }
+            //ConfigMerge.PerformMerge(coal, delta);
+            //CaseInsensitiveDictionary<DuplicatingIni> inis = new CaseInsensitiveDictionary<DuplicatingIni>();
 
-            var compiled = CoalescedConverter.CompileLE1LE2FromMemory(inis);
-            compiled.WriteToFile(coalOut);
+            //var compiled = CoalescedConverter.CompileLE1LE2FromMemory(inis);
+            //compiled.WriteToFile(coalOut);
         }
 
 

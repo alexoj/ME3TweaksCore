@@ -980,7 +980,7 @@ namespace ME3TweaksCore.Targets
             return installedASIs;
         }
 
-        public bool SupportsLODUpdates() => Game is MEGame.ME1 or MEGame.ME2 or MEGame.ME3;
+        public bool SupportsLODUpdates() => Game.IsOTGame();
 
         /// <summary>
         /// Gets all installed and enabled DLC foldernames. Includes disabled if indicated.
@@ -996,6 +996,16 @@ namespace ME3TweaksCore.Targets
             }
 
             return new List<string>();
+        }
+
+        /// <summary>
+        /// Gets a list of installed DLC, sorted by mount priority from lowest to highest. Does not include disabled DLC.
+        /// </summary>
+        /// <param name="includeDisabled"></param>
+        /// <returns></returns>
+        public List<string> GetInstalledDLCByMountPriority(bool includeDisabled = false)
+        {
+            return MELoadedDLC.GetDLCNamesInMountOrder(Game, TargetPath);
         }
 
         /// <summary>
