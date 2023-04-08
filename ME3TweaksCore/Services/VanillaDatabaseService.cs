@@ -67,7 +67,7 @@ namespace ME3TweaksCore.Services
                     ParseDatabase(le1stream, LE1VanillaDatabase);
                     return LE1VanillaDatabase;
                 case MEGame.LE2:
-                    if (ME2VanillaDatabase.Count > 0) return LE2VanillaDatabase;
+                    if (LE2VanillaDatabase.Count > 0) return LE2VanillaDatabase;
                     var le2stream = MUtilities.ExtractInternalFileToStream($@"{assetPrefix}.bin");
                     ParseDatabase(le2stream, LE2VanillaDatabase);
                     return LE2VanillaDatabase;
