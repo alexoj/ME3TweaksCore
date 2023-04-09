@@ -67,12 +67,14 @@ namespace ME3TweaksCore.Helpers
         public static Dictionary<string, string> GetCommaSplitValues(string inputString, bool canBeCaseInsensitive = false)
         {
             var origString = inputString;
+            inputString = inputString.TrimEnd(';'); // I don't know why bioware does shit like this
+            
             if (inputString[0] == '(' && inputString[1] == '(' && inputString[inputString.Length - 1] == ')' && inputString[inputString.Length - 2] == ')')
             {
                 throw new Exception(@"GetCommaSplitValues() can only deal with items encapsulated in a single ( ) set. The current set has at least two, e.g. ((value)).");
             }
-            inputString = inputString.Trim('(', ')');
 
+            inputString = inputString.Trim('(', ')');
             //Find commas
             int propNameStartPos = 0;
             int lastEqualsPos = -1;
