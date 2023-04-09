@@ -23,17 +23,16 @@ namespace ME3TweaksCore.Config
         /// <returns></returns>
         public static ConfigAssetBundle GetMergedBundle(GameTarget target)
         {
-            ConfigAssetBundle b = ConfigAssetBundle.FromSingleFile(target.Game, target.GetCoalescedPath());
+            ConfigAssetBundle mergedBundle = ConfigAssetBundle.FromSingleFile(target.Game, target.GetCoalescedPath());
             var dlcPath = target.GetDLCPath();
             var dlc = target.GetInstalledDLCByMountPriority();
 
             foreach (var v in dlc)
             {
                 var dlcBundle = ConfigAssetBundle.FromDLCFolder(target.Game, Path.Combine(dlcPath, v, target.Game.CookedDirName()), v);
-                dlcBundle.MergeInto(b);
+                dlcBundle.MergeInto(mergedBundle);
             }
-            b.CommitAssets(@"B:\out.bin");
-            return b;
+            return mergedBundle;
         }
     }
 }

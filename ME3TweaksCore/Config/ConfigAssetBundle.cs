@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ namespace ME3TweaksCore.Config
     /// <summary>
     /// Handler for a bundle of config assets
     /// </summary>
+    [DebuggerDisplay("ConfigAssetBundle for {DebugFileName}")]
     public class ConfigAssetBundle
     {
         /// <summary>
@@ -44,10 +46,13 @@ namespace ME3TweaksCore.Config
         /// <exception cref="Exception"></exception>
         private ConfigAssetBundle(MEGame game, Stream stream, string filename = null)
         {
+#if DEBUG
+            DebugFileName = filename;
+#endif
             Game = game;
             if (Game is MEGame.LE1 or MEGame.LE2)
             {
-                Assets = CoalescedConverter.DecompileLE1LE2ToAssets(stream, filename ?? @"Coalesced_INT.bin");
+                Assets = CoalescedConverter.DecompileLE1LE2ToAssets(stream, filename ?? @"Coalesced_INT.bin", stripExtensions: true);
             }
             else if (Game == MEGame.LE3)
             {
@@ -59,6 +64,9 @@ namespace ME3TweaksCore.Config
                 throw new Exception($"{nameof(ConfigAssetBundle)} does not support game {game}");
             }
         }
+#if DEBUG
+        public string DebugFileName { get; set; }
+#endif
 
         /// <summary>
         /// Generate a ConfigAssetBundle from the specified single packed file stream (.bin)
@@ -107,13 +115,18 @@ namespace ME3TweaksCore.Config
             CookedDir = cookedDir;
             DLCFolderName = dlcFolderName;
 
+#if DEBUG
+            DebugFileName = dlcFolderName;
+#endif
+
             if (game == MEGame.LE2)
             {
                 var iniFiles = Directory.GetFiles(cookedDir, "*.ini", SearchOption.TopDirectoryOnly);
                 foreach (var ini in iniFiles)
                 {
-                    // Todo: Filter out
                     var fname = Path.GetFileNameWithoutExtension(ini);
+                    if (!CoalescedConverter.ProperNames.Contains(fname, StringComparer.InvariantCultureIgnoreCase))
+                        continue; // Not supported.
                     Assets[fname] = ConfigFileProxy.LoadIni(ini);
                 }
             }
@@ -173,20 +186,20 @@ namespace ME3TweaksCore.Config
         /// <summary>
         /// Commits this bundle to the same folder it was loaded from
         /// </summary>
-        public void CommitDLCAssets()
+        public void CommitDLCAssets(string outPath = null)
         {
             if (Game == MEGame.LE2)
             {
                 foreach (var v in Assets)
                 {
-                    var outFile = Path.Combine(CookedDir, v.Key + @".ini");
+                    var outFile = Path.Combine(outPath ?? CookedDir, Path.GetFileNameWithoutExtension(v.Key) + @".ini");
                     File.WriteAllText(outFile, v.Value.GetGame2IniText());
                 }
                 HasChanges = false;
             }
             else if (Game == MEGame.LE3)
             {
-                var coalFile = Path.Combine(CookedDir, $@"Default_{DLCFolderName}.bin");
+                var coalFile = Path.Combine(outPath ?? CookedDir, $@"Default_{DLCFolderName}.bin");
                 CommitAssets(coalFile);
                 HasChanges = false;
 
@@ -196,18 +209,18 @@ namespace ME3TweaksCore.Config
         /// <summary>
         /// Merges this bundle into the specified one, applying the changes.
         /// </summary>
-        /// <param name="configAssetBundle"></param>
-        public void MergeInto(ConfigAssetBundle configAssetBundle)
+        /// <param name="destBundle"></param>
+        public void MergeInto(ConfigAssetBundle destBundle)
         {
-            foreach (var asset in Assets)
+            foreach (var myAsset in Assets)
             {
-                var matchingAsset = configAssetBundle.GetAsset(asset.Key);
-                foreach (var section in asset.Value.Sections)
+                var matchingDestAsset = destBundle.GetAsset(myAsset.Key);
+                foreach (var mySection in myAsset.Value.Sections)
                 {
-                    var matchingSection = matchingAsset.GetOrAddSection(section.Key);
-                    foreach (var entry in section.Value)
+                    var matchingDestSection = matchingDestAsset.GetOrAddSection(mySection.Key);
+                    foreach (var entry in mySection.Value)
                     {
-                        ConfigMerge.MergeEntry(matchingSection, entry.Value, configAssetBundle.Game);
+                        ConfigMerge.MergeEntry(matchingDestSection, entry.Value, destBundle.Game);
                     }
                 }
             }

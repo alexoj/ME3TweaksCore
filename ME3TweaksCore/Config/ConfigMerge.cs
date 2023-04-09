@@ -82,7 +82,7 @@ namespace ME3TweaksCore.Config
                             if (targetSection.TryGetValue(incomingProperty.Name, out var values))
                             {
                                 values.Clear(); // Remove all existing values on this property.
-                                MLog.Debug($@"ConfigMerge::MergeEntry - Setting value {incomingProperty.Name}->{prop.Value}", shouldLog: DebugConfigMerge);
+                                MLog.Debug($@"ConfigMerge::MergeEntry - Setting value {incomingProperty.Name}->{prop.Value} in {targetSection.Name}", shouldLog: DebugConfigMerge);
                                 values.Add(new CoalesceValue(prop.Value, game == MEGame.LE1 ? CoalesceParseAction.Add : prop.ParseAction)); // Add our entry to this property.
                                 continue;
                             }
@@ -95,7 +95,7 @@ namespace ME3TweaksCore.Config
                         }
                         break;
                     case CoalesceParseAction.Add: // Type 2 - add
-                        MLog.Debug($@"ConfigMerge::MergeEntry - Adding value {incomingProperty.Name}->{prop.Value}", shouldLog: DebugConfigMerge);
+                        MLog.Debug($@"ConfigMerge::MergeEntry - Adding value {incomingProperty.Name}->{prop.Value} to {targetSection.Name}", shouldLog: DebugConfigMerge);
                         targetSection.AddEntry(new CoalesceProperty(incomingProperty.Name, prop.Value)); // Add our property to the list
                         hasChanged = true;
                         break;
@@ -116,12 +116,17 @@ namespace ME3TweaksCore.Config
                             // It's new just add the whole thing or did not find existing one
                             // Todo: LE1 only supports type 2
                             // Todo: Double check if we need double typing (++/--/..) for LE2/LE3 so you can run it on existing stuff as well as basedon stuff
+                            MLog.Debug($@"ConfigMerge::MergeEntry - Adding unique value {incomingProperty.Name}->{prop.Value} to {targetSection.Name}",
+                                shouldLog: DebugConfigMerge);
                             targetSection.AddEntry(new CoalesceProperty(incomingProperty.Name, new CoalesceValue(prop.Value, game == MEGame.LE1 ? CoalesceParseAction.Add : prop.ParseAction))); // Add our property to the list
                             hasChanged = true;
 
                         }
                         break;
                     case CoalesceParseAction.RemoveProperty: // Type 1
+                        MLog.Debug($@"ConfigMerge::MergeEntry - Removing entire property {incomingProperty.Name} from {targetSection.Name}",
+                            shouldLog: DebugConfigMerge);
+
                         targetSection.RemoveAllNamedEntries(incomingProperty.Name);
                         hasChanged = true;
                         break;
