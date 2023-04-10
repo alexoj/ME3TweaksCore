@@ -71,7 +71,7 @@ namespace ME3TweaksCore.GameFilesystem
         /// <exception cref="Exception"></exception>
         public static string GetCoalescedPath(this GameTarget target)
         {
-            if (target.Game == MEGame.ME2) 
+            if (target.Game == MEGame.ME2)
                 return Path.Combine(GetBioGamePath(target), @"Config", @"PC", @"Cooked", @"Coalesced.ini");
             if (target.Game is MEGame.LE1 or MEGame.LE2)
                 return Path.Combine(GetCookedPath(target), @"Coalesced_INT.bin");
@@ -85,6 +85,12 @@ namespace ME3TweaksCore.GameFilesystem
         public static List<string> EnumerateGameFiles(this GameTarget validationTarget, Predicate<string> predicate = null)
         {
             return MEDirectories.EnumerateGameFiles(validationTarget.Game, validationTarget.TargetPath, predicate: predicate);
+        }
+
+
+        public static CaseInsensitiveDictionary<string> GetFilesLoadedInGame(this GameTarget target, bool forceReload = false, bool includeTFCs = false, bool includeAFCs = false, string gameRootOverride = null, bool forceUseCached = false)
+        {
+            return MELoadedFiles.GetFilesLoadedInGame(target.Game, forceReload, includeTFCs, includeAFCs, target.TargetPath, forceUseCached);
         }
         #endregion
 
