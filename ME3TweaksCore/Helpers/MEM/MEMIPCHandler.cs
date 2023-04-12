@@ -14,6 +14,7 @@ using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
+using ME3TweaksCore.Targets;
 using Serilog;
 
 namespace ME3TweaksCore.Helpers.MEM
@@ -264,7 +265,7 @@ namespace ME3TweaksCore.Helpers.MEM
         /// </summary>
         /// <param name="targetGame"></param>
         /// <param name="targetPath"></param>
-        /// <returns></returns>
+        /// <returns>True if exit code is zero</returns>
         public static bool SetGamePath(bool classicMEM, MEGame targetGame, string targetPath)
         {
             int exitcode = 0;
@@ -277,6 +278,17 @@ namespace ME3TweaksCore.Helpers.MEM
             }
 
             return exitcode == 0;
+        }
+
+
+        /// <summary>
+        /// Sets MEM up to use the specified target for texture modding
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static bool SetGamePath(GameTarget target)
+        {
+            return SetGamePath(target.Game.IsOTGame(), target.Game, target.TargetPath);
         }
 
         /// <summary>
@@ -483,18 +495,33 @@ namespace ME3TweaksCore.Helpers.MEM
                 }
 #endif
 
+
+
         /// <summary>
-        /// Installs a MEM file to the game the mem is for
+        /// Installs a MEM List File (MFL) to the game specified
         /// </summary>
-        /// <param name="game">What game to install for</param>
+        /// <param name="target">Target to install textures to</param>
         /// <param name="memFileListFile">The path to the MFL file that MEM will use to install</param>
         /// <param name="currentActionCallback">A delegate to set UI text to inform the user of what is occurring</param>
         /// <param name="progressCallback">Percentage-based progress indicator for the current stage</param>
-        public static void InstallMEMFiles(MEGame game, string memFileListFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
+        public static MEMInstallResult InstallMEMFiles(GameTarget target, string memFileListFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
         {
-            currentActionCallback?.Invoke("Preparing to install textures");
-            MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(), $"--install-mods --gameid {game.ToMEMGameNum()} --input \"{memFileListFile}\" --verify --ipc", // do not localize
+            MEMInstallResult result = new MEMInstallResult();
+            MEMIPCHandler.SetGamePath(target);
 
+            currentActionCallback?.Invoke("Preparing to install textures");
+            List<string> errors = new List<string>();
+            MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $"--install-mods --gameid {target.Game.ToMEMGameNum()} --input \"{memFileListFile}\" --verify --ipc", // do not localize
+                applicationExited: code => result.ExitCode = code,
+                applicationStarted: pid =>
+                {
+                    MLog.Information($@"MassEffectModder process started with PID {pid}");
+                    result.ProcessID = pid;
+                },
+                setMEMCrashLog: crashMsg =>
+                {
+                    MLog.Fatal(crashMsg); // MEM died
+                },
                 ipcCallback: (command, param) =>
                 {
                     switch (command)
@@ -530,12 +557,24 @@ namespace ME3TweaksCore.Helpers.MEM
                                     case @"STAGE_MARKERS":
                                         currentActionCallback?.Invoke(LC.GetString(LC.string_installingMarkers));
                                         break;
+                                    default:
+                                        // REPACK - that's for OT only?
+
+                                        break;
 
                                 }
                             }
                             break;
                         case @"PROCESSING_FILE":
                             MLog.Information($@"MEM processing file: {param}");
+                            break;
+                        case @"ERROR_REFERENCED_TFC_NOT_FOUND":
+                            MLog.Error($@"MEM: Texture references a TFC that was not found in game: {param}");
+                            result.AddError($"A texture references a TFC file that is not found in the game: {param}");
+                            break;
+                        case @"ERROR":
+                            MLog.Error($@"MEM: Error occurred: {param}");
+                            result.AddError($"An error occurred during installation: {param}");
                             break;
                         case @"TASK_PROGRESS":
                             {
@@ -547,6 +586,7 @@ namespace ME3TweaksCore.Helpers.MEM
                             break;
                     }
                 });
+            return result;
         }
     }
 }
