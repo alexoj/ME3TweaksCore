@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace ME3TweaksCore.Helpers.MEM
 {
     /// <summary>
-    /// Information package describing the result of a MassEffectModderNoGui installation
+    /// Information package describing the result of a MassEffectModderNoGui session
     /// </summary>
-    public class MEMInstallResult
+    public class MEMSessionResult
     {
         /// <summary>
         /// The exit code of the application, if any

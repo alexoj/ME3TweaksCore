@@ -506,9 +506,9 @@ namespace ME3TweaksCore.Helpers.MEM
         /// <param name="currentActionCallback">A delegate to set UI text to inform the user of what is occurring</param>
         /// <param name="progressCallback">Percentage-based progress indicator for the current stage</param>
         /// <param name="setGamePath">If the game path should be set. Setting to false can save a bit of time if you know the path is already correct.</param>
-        public static MEMInstallResult InstallMEMFiles(GameTarget target, string memFileListFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null, bool setGamePath = true)
+        public static MEMSessionResult InstallMEMFiles(GameTarget target, string memFileListFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null, bool setGamePath = true)
         {
-            MEMInstallResult result = new MEMInstallResult();
+            MEMSessionResult result = new MEMSessionResult();
             if (setGamePath)
             {
                 MEMIPCHandler.SetGamePath(target);
@@ -603,7 +603,7 @@ namespace ME3TweaksCore.Helpers.MEM
         /// <param name="target"></param>
         /// <param name="currentActionCallback"></param>
         /// <param name="progressCallback"></param>
-        public static MEMInstallResult CheckForMarkers(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
+        public static MEMSessionResult CheckForMarkers(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
         {
             if (target.TextureModded) return null; // We aren't even gonna bother
 
@@ -612,8 +612,8 @@ namespace ME3TweaksCore.Helpers.MEM
             // and can easily break stuff in the game
 
             // Markers will be stored in the 'Errors' variable.
-            MEMInstallResult result = new MEMInstallResult();
-            
+            MEMSessionResult result = new MEMSessionResult();
+
             MEMIPCHandler.SetGamePath(target);
             currentActionCallback?.Invoke("Checking for existing markers");
             MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $@"--check-for-markers --gameid {target.Game.ToMEMGameNum()} --ipc",
@@ -644,6 +644,69 @@ namespace ME3TweaksCore.Helpers.MEM
                         case "ERROR_FILEMARKER_FOUND":
                             MLog.Error($"Package file was part of a different texture installation: {param}");
                             result.AddError(param);
+                            break;
+                        default:
+                            Debug.WriteLine($@"{command}: {param}");
+                            break;
+                    }
+                });
+
+            return result;
+        }
+
+        /// <summary>
+        /// Checks the texture map for consistency to the current game state (added/removed/replaced files)
+        /// </summary>
+        /// <returns>Object containing all texture map desynchronizations in the errors list.</returns>
+        public static MEMSessionResult CheckTextureMapConsistency(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
+        {
+            if (!target.TextureModded) return null; // We have nothing to check
+
+            var result = new MEMSessionResult();
+
+            // This is the list of added files.
+            // We use this to suppress duplicates when a vanilla file is found
+            // e.g. new mod is installed, it will not have marker
+            // and it will also not be in texture map.
+            var addedFiles = new List<string>();
+
+            string args = $@"--check-game-data-mismatch --gameid {target.Game.ToGameNum()} --ipc";
+            MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), args,
+                applicationExited: code => result.ExitCode = code,
+                applicationStarted: pid =>
+                {
+                    MLog.Information($@"MassEffectModder process started with PID {pid}");
+                    result.ProcessID = pid;
+                },
+                setMEMCrashLog: crashMsg =>
+                {
+                    MLog.Fatal(crashMsg); // MEM died
+                },
+                ipcCallback: (command, param) =>
+                {
+                    switch (command)
+                    {
+                        case "TASK_PROGRESS":
+                            if (int.TryParse(param, out var percent))
+                            {
+                                progressCallback?.Invoke(percent);
+                            }
+                            break;
+                        case "ERROR_REMOVED_FILE":
+                            MLog.Error($@"MEM: File was removed from game after texture scan took place: {param}");
+                            result.AddError($"File was removed from game after texture scan took place: {param}");
+                            break;
+                        case "ERROR_ADDED_FILE":
+                            MLog.Error($@"MEM: File was added to game after texture scan took place: {param}");
+                            result.AddError($"File was added tom game after texture scan took place: {param}");
+                            addedFiles.Add(param); //Used to suppress vanilla mod file
+                            break;
+                        case "ERROR_VANILLA_MOD_FILE":
+                            if (!addedFiles.Contains(param, StringComparer.InvariantCultureIgnoreCase))
+                            {
+                                MLog.Error($@"MEM: File was replaced in game after texture scan took place: {param}");
+                                result.AddError($"File was replaced in game after texture scan took place: {param}");
+                            }
                             break;
                         default:
                             Debug.WriteLine($@"{command}: {param}");
