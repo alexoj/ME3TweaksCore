@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -498,20 +499,23 @@ namespace ME3TweaksCore.Helpers.MEM
 
 
         /// <summary>
-        /// Installs a MEM List File (MFL) to the game specified
+        /// Installs a MEM List File (MFL) to the game specified. This call does NOT ensure MEM exists.
         /// </summary>
         /// <param name="target">Target to install textures to</param>
         /// <param name="memFileListFile">The path to the MFL file that MEM will use to install</param>
         /// <param name="currentActionCallback">A delegate to set UI text to inform the user of what is occurring</param>
         /// <param name="progressCallback">Percentage-based progress indicator for the current stage</param>
-        public static MEMInstallResult InstallMEMFiles(GameTarget target, string memFileListFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
+        /// <param name="setGamePath">If the game path should be set. Setting to false can save a bit of time if you know the path is already correct.</param>
+        public static MEMInstallResult InstallMEMFiles(GameTarget target, string memFileListFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null, bool setGamePath = true)
         {
             MEMInstallResult result = new MEMInstallResult();
-            MEMIPCHandler.SetGamePath(target);
+            if (setGamePath)
+            {
+                MEMIPCHandler.SetGamePath(target);
+            }
 
             currentActionCallback?.Invoke("Preparing to install textures");
-            List<string> errors = new List<string>();
-            MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $"--install-mods --gameid {target.Game.ToMEMGameNum()} --input \"{memFileListFile}\" --verify --ipc", // do not localize
+            MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $"--install-mods --gameid {target.Game.ToMEMGameNum()} --input \"{memFileListFile}\" --alot-mode --verify --ipc", // do not localize
                 applicationExited: code => result.ExitCode = code,
                 applicationStarted: pid =>
                 {
@@ -572,6 +576,10 @@ namespace ME3TweaksCore.Helpers.MEM
                             MLog.Error($@"MEM: Texture references a TFC that was not found in game: {param}");
                             result.AddError($"A texture references a TFC file that is not found in the game: {param}");
                             break;
+                        case @"ERROR_FILE_NOT_COMPATIBLE":
+                            MLog.Error($@"MEM: This file is not listed as compatible with {target.Game}: {param}");
+                            result.AddError($"{param} is not compatible with {target.Game}");
+                            break;
                         case @"ERROR":
                             MLog.Error($@"MEM: Error occurred: {param}");
                             result.AddError($"An error occurred during installation: {param}");
@@ -586,6 +594,63 @@ namespace ME3TweaksCore.Helpers.MEM
                             break;
                     }
                 });
+            return result;
+        }
+
+        /// <summary>
+        /// Checks a target for texture install markers, and returns a list of markers if found. This check returns null if the target is already marked as texture modded, as it will have markers.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="currentActionCallback"></param>
+        /// <param name="progressCallback"></param>
+        public static MEMInstallResult CheckForMarkers(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
+        {
+            if (target.TextureModded) return null; // We aren't even gonna bother
+
+            // If not texture modded, we check for presense of MEM marker on files
+            // which tells us this was part of a different texture installation
+            // and can easily break stuff in the game
+
+            // Markers will be stored in the 'Errors' variable.
+            MEMInstallResult result = new MEMInstallResult();
+            
+            MEMIPCHandler.SetGamePath(target);
+            currentActionCallback?.Invoke("Checking for existing markers");
+            MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $@"--check-for-markers --gameid {target.Game.ToMEMGameNum()} --ipc",
+                applicationExited: code => result.ExitCode = code,
+                applicationStarted: pid =>
+                {
+                    MLog.Information($@"MassEffectModder process started with PID {pid}");
+                    result.ProcessID = pid;
+                },
+                setMEMCrashLog: crashMsg =>
+                {
+                    MLog.Fatal(crashMsg); // MEM died
+                },
+                ipcCallback: (command, param) =>
+                {
+                    switch (command)
+                    {
+                        case "TASK_PROGRESS":
+                            if (int.TryParse(param, out var percent))
+                            {
+                                progressCallback?.Invoke(percent);
+                            }
+                            break;
+                        case "FILENAME":
+                            // Not sure what's going on here...
+                            Debug.WriteLine(param);
+                            break;
+                        case "ERROR_FILEMARKER_FOUND":
+                            MLog.Error($"Package file was part of a different texture installation: {param}");
+                            result.AddError(param);
+                            break;
+                        default:
+                            Debug.WriteLine($@"{command}: {param}");
+                            break;
+                    }
+                });
+
             return result;
         }
     }

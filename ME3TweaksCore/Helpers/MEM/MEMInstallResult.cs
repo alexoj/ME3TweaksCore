@@ -32,9 +32,31 @@ namespace ME3TweaksCore.Helpers.MEM
             Errors.Add(msg);
         }
 
+        /// <summary>
+        /// Gets a list of the errors
+        /// </summary>
+        /// <returns></returns>
         public IReadOnlyList<string> GetErrors()
         {
             return Errors;
+        }
+
+        /// <summary>
+        /// If there are any errors in the result
+        /// </summary>
+        /// <returns></returns>
+        public bool HasAnyErrors()
+        {
+            return Errors.Any();
+        }
+
+        /// <summary>
+        /// Adds an item to the list of errors at the front
+        /// </summary>
+        /// <param name="error">The error message</param>
+        public void AddFirstError(string error)
+        {
+            Errors.Insert(0, error);
         }
     }
 }
