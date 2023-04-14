@@ -306,7 +306,7 @@ namespace ME3TweaksCore.Helpers.MEM
                 return false;
             }
 
-            string args = $@"--apply-lods-gfx --gameid {game.ToGameNum()}";
+            string args = $@"--apply-lods-gfx --gameid {game.ToMEMGameNum()}";
             if (setting.HasFlag(LodSetting.SoftShadows))
             {
                 args += @" --soft-shadows-mode --meuitm-mode";
@@ -323,7 +323,7 @@ namespace ME3TweaksCore.Helpers.MEM
             else if (setting == LodSetting.Vanilla)
             {
                 // Remove LODs
-                args = $@"--remove-lods --gameid {game.ToGameNum()}";
+                args = $@"--remove-lods --gameid {game.ToMEMGameNum()}";
             }
 
             int exitcode = -1;
@@ -515,7 +515,7 @@ namespace ME3TweaksCore.Helpers.MEM
             }
 
             currentActionCallback?.Invoke("Preparing to install textures");
-            MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $"--install-mods --gameid {target.Game.ToMEMGameNum()} --input \"{memFileListFile}\" --alot-mode --verify --ipc", // do not localize
+            MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $"--install-mods --gameid {target.Game.ToMEMGameNum()} --input \"{memFileListFile}\" --verify --ipc", // do not localize
                 applicationExited: code => result.ExitCode = code,
                 applicationStarted: pid =>
                 {
@@ -603,9 +603,14 @@ namespace ME3TweaksCore.Helpers.MEM
         /// <param name="target"></param>
         /// <param name="currentActionCallback"></param>
         /// <param name="progressCallback"></param>
-        public static MEMSessionResult CheckForMarkers(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
+        public static MEMSessionResult CheckForMarkers(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null, bool setGamePath = true)
         {
             if (target.TextureModded) return null; // We aren't even gonna bother
+
+            if (setGamePath)
+            {
+                MEMIPCHandler.SetGamePath(target);
+            }
 
             // If not texture modded, we check for presense of MEM marker on files
             // which tells us this was part of a different texture installation
@@ -613,9 +618,9 @@ namespace ME3TweaksCore.Helpers.MEM
 
             // Markers will be stored in the 'Errors' variable.
             MEMSessionResult result = new MEMSessionResult();
-
-            MEMIPCHandler.SetGamePath(target);
             currentActionCallback?.Invoke("Checking for existing markers");
+            
+            MLog.Information(@"Checking for existing texture markers with MEM");
             MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $@"--check-for-markers --gameid {target.Game.ToMEMGameNum()} --ipc",
                 applicationExited: code => result.ExitCode = code,
                 applicationStarted: pid =>
@@ -658,19 +663,25 @@ namespace ME3TweaksCore.Helpers.MEM
         /// Checks the texture map for consistency to the current game state (added/removed/replaced files)
         /// </summary>
         /// <returns>Object containing all texture map desynchronizations in the errors list.</returns>
-        public static MEMSessionResult CheckTextureMapConsistency(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
+        public static MEMSessionResult CheckTextureMapConsistency(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null, bool setGamePath = true)
         {
             if (!target.TextureModded) return null; // We have nothing to check
 
-            var result = new MEMSessionResult();
+            if (setGamePath)
+            {
+                MEMIPCHandler.SetGamePath(target);
+            }
 
+            var result = new MEMSessionResult();
+            MLog.Information(@"Checking texture map consistency with MEM");
+            currentActionCallback?.Invoke("Checking texture map consistency");
             // This is the list of added files.
             // We use this to suppress duplicates when a vanilla file is found
             // e.g. new mod is installed, it will not have marker
             // and it will also not be in texture map.
             var addedFiles = new List<string>();
 
-            string args = $@"--check-game-data-mismatch --gameid {target.Game.ToGameNum()} --ipc";
+            string args = $@"--check-game-data-mismatch --gameid {target.Game.ToMEMGameNum()} --ipc";
             MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), args,
                 applicationExited: code => result.ExitCode = code,
                 applicationStarted: pid =>
@@ -698,7 +709,7 @@ namespace ME3TweaksCore.Helpers.MEM
                             break;
                         case "ERROR_ADDED_FILE":
                             MLog.Error($@"MEM: File was added to game after texture scan took place: {param}");
-                            result.AddError($"File was added tom game after texture scan took place: {param}");
+                            result.AddError($"File was added to game after texture scan took place: {param}");
                             addedFiles.Add(param); //Used to suppress vanilla mod file
                             break;
                         case "ERROR_VANILLA_MOD_FILE":
