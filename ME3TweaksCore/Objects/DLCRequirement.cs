@@ -69,9 +69,18 @@ namespace ME3TweaksCore.Objects
             if (!supportsVersion)
                 return new DLCRequirement() { DLCFolderName = inputString };
 
+            // Mod Manager 8.1 changed from () to [] but we still try to support () for older versions
+            // This is due to how string struct parser strips ()
+            var verStart = inputString.IndexOf('[');
+            var verEnd = inputString.IndexOf(']');
 
-            var verStart = inputString.IndexOf('(');
-            var verEnd = inputString.IndexOf(')');
+            if (verStart == -1 && verEnd == -1)
+            {
+                // Try legacy
+                verStart = inputString.IndexOf('(');
+                verEnd = inputString.IndexOf(')');
+            }
+
 
             if (verStart == -1 && verEnd == -1)
                 return new DLCRequirement() { DLCFolderName = inputString };
@@ -106,7 +115,9 @@ namespace ME3TweaksCore.Objects
                 return $"?{Serialize(false)}"; // do not localize
 
             if (MinVersion != null)
-                return $@"{DLCFolderName}({MinVersion})";
+                // Mod Manager 8.1: We serialize as [] instead of ()
+                // Since moddesc editor only supports latest version we use this instead.
+                return $@"{DLCFolderName}[{MinVersion}]";
             return DLCFolderName;
         }
 
