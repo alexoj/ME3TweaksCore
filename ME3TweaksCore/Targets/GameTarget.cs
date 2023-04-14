@@ -1024,10 +1024,10 @@ namespace ME3TweaksCore.Targets
         /// <param name="target">Target to get data from</param>
         /// <param name="installedDLC">The list of DLC in the target, to prevent multiple filesystem enumeration if done externally to method</param>
         /// <returns></returns>
-        public Dictionary<string, MetaCMM> GetMetaMappedInstalledDLC(bool includeOfficial = true, List<string> installedDLC = null)
+        public CaseInsensitiveDictionary<MetaCMM> GetMetaMappedInstalledDLC(bool includeOfficial = true, List<string> installedDLC = null)
         {
             installedDLC ??= GetInstalledDLC();
-            var metamap = new Dictionary<string, MetaCMM>();
+            var metamap = new CaseInsensitiveDictionary<MetaCMM>();
             var dlcpath = M3Directories.GetDLCPath(this);
             foreach (var v in installedDLC)
             {
