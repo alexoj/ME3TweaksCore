@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PropertyChanged;
 
 namespace ME3TweaksCore.Helpers.MEM
 {
     /// <summary>
     /// Information package describing the result of a MassEffectModderNoGui session
     /// </summary>
+    [AddINotifyPropertyChangedInterface]
     public class MEMSessionResult
     {
         /// <summary>
@@ -22,6 +24,16 @@ namespace ME3TweaksCore.Helpers.MEM
         /// The process ID that was assigned to the application
         /// </summary>
         public int ProcessID { get; set; }
+
+        /// <summary>
+        /// If this session is the 'install' session, in which the game will be modified.
+        /// </summary>
+        public bool IsInstallSession { get; set; }
+        
+        /// <summary>
+        /// The last file that MEM was operating on. This is useful for debugging crashes and errors in MEM.
+        /// </summary>
+        public string CurrentFile { get; set; }
 
         /// <summary>
         /// Adds an error message
