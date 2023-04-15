@@ -73,6 +73,14 @@ namespace ME3TweaksCore.Config
         internal static bool MergeEntry(CoalesceSection targetSection, CoalesceProperty incomingProperty, MEGame game)
         {
             bool hasChanged = false;
+
+            // Check if this is a double typed property. If it is, we should process it as an addition rather 
+            // than as a merge.
+            if (applyDoubleTypedItem(targetSection, incomingProperty))
+            {
+                return true;
+            }
+
             foreach (var prop in incomingProperty)
             {
                 switch (prop.ParseAction)
@@ -154,6 +162,44 @@ namespace ME3TweaksCore.Config
             }
 
             return hasChanged;
+        }
+
+        /// <summary>
+        /// Adjusts the typing of the values of this property if it is a double typed property name - e.g. it starts with !/., even after we identified the parsing type.
+        /// </summary>
+        /// <param name="incomingProperty">Property to account for.</param>
+        /// <returns>The same property, but with the value type adjusted and name corrected if it was a double typed property.</returns>
+        private static bool applyDoubleTypedItem(CoalesceSection targetSection, CoalesceProperty incomingProperty)
+        {
+            if (!ConfigFileProxy.IsTyped(incomingProperty.Name) || incomingProperty.Count == 0) return false;
+
+            // Double typed
+            var originalType = incomingProperty.First().ParseAction;
+            var newType = ConfigFileProxy.GetIniDataType(incomingProperty.Name);
+            incomingProperty.Name = ConfigFileProxy.StripType(incomingProperty.Name);
+
+            // Change incoming typings to match the double type value
+            for (int i = 0; i < incomingProperty.Count; i++)
+            {
+                var val = incomingProperty[i];
+                val.ValueType = CoalesceValue.GetValueType(newType);
+                incomingProperty[i] = val; // Struct assignment
+            }
+
+            if (originalType == CoalesceParseAction.Add)
+            {
+                targetSection.AddEntry(incomingProperty);
+            }
+            else if (originalType == CoalesceParseAction.AddUnique)
+            {
+                targetSection.AddEntryIfUnique(incomingProperty);
+            }
+            else
+            {
+                MLog.Warning($@"Double typed config delta has unsupported original typing: {originalType}. Must be Add or AddUnique only.");
+            }
+
+            return true;
         }
 
         public static void PerformDLCMerge(MEGame game, string dlcFolderRoot, string dlcFolderName)
