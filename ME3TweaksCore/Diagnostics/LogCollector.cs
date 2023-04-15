@@ -75,6 +75,7 @@ namespace ME3TweaksCore.Diagnostics
             public int NexusUpdateCode { get; set; }
             public string InstalledBy { get; set; }
             public string VersionInstalled { get; set; }
+            public DateTime? InstallTime { get; set; }
             public IEnumerable<string> InstalledOptions { get; set; }
             public bool IsOfficialDLC { get; set; }
 
@@ -111,17 +112,18 @@ namespace ME3TweaksCore.Diagnostics
                     sb.Append(@";;");
 
                     // It's a modded DLC
+                    string installTime = InstallTime == null ? "" : $" on {InstallTime.ToString()}";
                     if (string.IsNullOrWhiteSpace(InstalledBy))
                     {
-                        sb.Append(@"Not installed by managed installer"); // Invalid metacmm or not present
+                        sb.Append($@"Not installed by managed installer{installTime}"); // Invalid metacmm or not present
                     }
                     else if (int.TryParse(InstalledBy, out var _))
                     {
-                        sb.Append($@"Installed by Mod Manager Build {InstalledBy}"); // Legacy (and M3) - only list build number
+                        sb.Append($@"Installed by Mod Manager Build {InstalledBy}{installTime}"); // Legacy (and M3) - only list build number
                     }
                     else
                     {
-                        sb.Append($@"Installed by {InstalledBy}"); // The metacmm lists the string
+                        sb.Append($@"Installed by {InstalledBy}{installTime}"); // The metacmm lists the string
                     }
 
                     // Nexus Update Code
@@ -1097,7 +1099,6 @@ namespace ME3TweaksCore.Diagnostics
 
                 #region Installed DLCs
                 MLog.Information(@"Collecting installed DLC");
-                var installedDLCInfos = new List<ME3TweaksLogViewer.InstalledDLCStruct>();
 
                 //Get DLCs
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingDLCInformation));
@@ -1125,6 +1126,7 @@ namespace ME3TweaksCore.Diagnostics
                             dlcStruct.VersionInstalled = metaMappedDLC.Version;
                             dlcStruct.InstalledOptions = metaMappedDLC.OptionsSelectedAtInstallTime;
                             dlcStruct.NexusUpdateCode = metaMappedDLC.NexusUpdateCode;
+                            dlcStruct.InstallTime = metaMappedDLC.InstallTime;
                         }
                         else
                         {

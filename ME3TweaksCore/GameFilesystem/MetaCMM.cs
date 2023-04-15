@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using LegendaryExplorerCore.Gammtek.Collections.ObjectModel;
@@ -22,6 +23,7 @@ namespace ME3TweaksCore.GameFilesystem
         public static readonly string PrefixModDescPath = @"[SOURCEMODDESC]";
         public static readonly string PrefixNexusUpdateCode = @"[NEXUSUPDATECODE]";
         public static readonly string PrefixUsesEnhancedBink = @"[USESENHANCEDBINK]";
+        public static readonly string PrefixInstallTime = @"[INSTALLTIME]";
         #endregion
 
         public string ModName { get; set; }
@@ -59,6 +61,11 @@ namespace ME3TweaksCore.GameFilesystem
         /// If this mod makes use of the enhanced 2022.5 bink encoder (LE only)
         /// </summary>
         public bool RequiresEnhancedBink { get; set; }
+
+        /// <summary>
+        /// When this DLC mod was installed
+        /// </summary>
+        public DateTime? InstallTime { get; set; }
 
         /// <summary>
         /// Writes the metacmm file to the specified filepath.
@@ -104,6 +111,11 @@ namespace ME3TweaksCore.GameFilesystem
             if (RequiresEnhancedBink)
             {
                 sb.AppendLine($@"{PrefixUsesEnhancedBink}true");
+            }
+
+            if (InstallTime != null)
+            {
+                sb.AppendLine($@"{PrefixInstallTime}{InstallTime.Value.Ticks}");
             }
 
             File.WriteAllText(path, sb.ToString());
@@ -196,6 +208,21 @@ namespace ME3TweaksCore.GameFilesystem
                             else
                             {
                                 MLog.Warning($@"Failed to read UsesEnhancedBink: Invalid value: {parsedline}");
+                            }
+                        }
+                        else if (line.StartsWith(PrefixInstallTime))
+                        {
+                            var parsedline = line.Substring(PrefixInstallTime.Length);
+                            if (long.TryParse(parsedline, out var ticks))
+                            {
+                                try
+                                {
+                                    InstallTime = new DateTime(ticks);
+                                }
+                                catch (Exception ex)
+                                {
+                                    MLog.Warning($@"Failed to read install time, value {parsedline}: {ex.Message}");
+                                }
                             }
                         }
                         break;
