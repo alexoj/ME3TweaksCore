@@ -191,16 +191,22 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             return true;
         }
 
+        private static object syncObj = new object();
+
         /// <summary>
         /// Purges all entries for the specified game and commits the file back to disk.
         /// </summary>
         /// <param name="game">The game to purge entries for</param>
         public static void PurgeEntriesForGame(MEGame game)
         {
-            if (Database.TryGetValue(game.ToString(), out var infosForGameL))
+            lock (syncObj)
             {
-                MLog.Information($@"Clearing basegame filedatabase entries for {game}");
-                infosForGameL.Clear();
+                if (Database.TryGetValue(game.ToString(), out var infosForGameL))
+                {
+                    MLog.Information($@"Clearing basegame filedatabase entries for {game}");
+                    infosForGameL.Clear();
+                    CommitDatabaseToDisk();
+                }
             }
         }
 
