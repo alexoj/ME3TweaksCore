@@ -39,7 +39,8 @@ namespace ME3TweaksCore.Objects
                     return true; // No min version
 
                 var metas = target.GetMetaMappedInstalledDLC(installedDLC: installedDLC);
-                if (metas.TryGetValue(DLCFolderName, out var meta) && Version.TryParse(meta.Version, out var version))
+                // if no metacmm file is found it will be mapped to null. In this case we just set it to version 0 because user did not use M3 and we have no way to determine version
+                if (metas.TryGetValue(DLCFolderName, out var meta) && Version.TryParse(meta?.Version ?? @"0.0.0.0", out var version))
                 {
                     if (ProperVersion.IsGreaterThanOrEqual(version, MinVersion))
                     {
@@ -47,7 +48,14 @@ namespace ME3TweaksCore.Objects
                     }
                     else
                     {
-                        MLog.Information($@"DLCRequirement not met: {version} is less than MinVersion {MinVersion}");
+                        if (meta == null)
+                        {
+                            MLog.Error($@"DLCRequirement not met: The version of the DLC mod {DLCFolderName} could not be determined; there is no mod manager metadata file with the DLC mod. Manually installed mods are not supported for version checks.");
+                        }
+                        else
+                        {
+                            MLog.Information($@"DLCRequirement not met: {version} is less than MinVersion {MinVersion}");
+                        }
                     }
                 }
             }
