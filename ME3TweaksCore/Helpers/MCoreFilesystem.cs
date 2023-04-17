@@ -85,7 +85,7 @@ namespace ME3TweaksCore.Helpers
         /// Directory that contains MEM executables
         /// </summary>
         /// <returns></returns>
-        internal static string GetMEMDir()
+        public static string GetMEMDir()
         {
             return Directory.CreateDirectory(Path.Combine(GetAppDataFolder(), @"MassEffectModder")).FullName;
         }
