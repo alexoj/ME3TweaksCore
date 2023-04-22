@@ -62,7 +62,7 @@ namespace ME3TweaksCore.Services
         /// <param name="hash">Hash check value (md5). Leave null if no hash check</param>
         /// <returns></returns>
 
-        public static async Task<(MemoryStream result, string errorMessage)> DownloadToMemory(string url,
+        public static (MemoryStream result, string errorMessage) DownloadToMemory(string url,
             Action<long, long> progressCallback = null,
             string hash = null,
             bool logDownload = false,

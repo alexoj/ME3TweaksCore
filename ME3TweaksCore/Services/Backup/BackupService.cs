@@ -87,7 +87,7 @@ namespace ME3TweaksCore.Services.Backup
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private static void InternalOnBackupStateChanged(object? sender, EventArgs e)
+        private static void InternalOnBackupStateChanged(object sender, EventArgs e)
         {
             StaticBackupStateChanged?.Invoke(sender, EventArgs.Empty);;
         }

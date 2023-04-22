@@ -34,7 +34,7 @@ namespace ME3TweaksCore.Misc
             };
             bool result = false;
             object syncObj = new object();
-            downloadClient.DownloadFileCompleted += async (s, e) =>
+            downloadClient.DownloadFileCompleted += (s, e) =>
             {
                 if (e.Error != null)
                 {

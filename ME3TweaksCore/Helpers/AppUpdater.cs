@@ -97,7 +97,6 @@ namespace ME3TweaksCore.Helpers
                     //The release we want to check is always the latest
                     Release latest = null;
                     Version latestVer = new Version(@"0.0.0.0");
-                    bool betaAvailableButOnStable = false;
                     foreach (Release onlineRelease in releases)
                     {
                         Version onlineReleaseVersion = new Version(onlineRelease.TagName);
@@ -116,7 +115,6 @@ namespace ME3TweaksCore.Helpers
 
                         if (!interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
                         {
-                            betaAvailableButOnStable = true;
                             continue;
                         }
 
@@ -203,7 +201,7 @@ namespace ME3TweaksCore.Helpers
 
 
                                 var asset = latest.Assets.First(x => x.Name.StartsWith(interopPackage.UpdateAssetPrefix));
-                                var downloadResult = await MOnlineContent.DownloadToMemory(asset.BrowserDownloadUrl, interopPackage.ProgressCallback,
+                                var downloadResult = MOnlineContent.DownloadToMemory(asset.BrowserDownloadUrl, interopPackage.ProgressCallback,
                                     logDownload: true, cancellationTokenSource: interopPackage.cancellationTokenSource);
 
                                 // DEBUG ONLY
@@ -322,7 +320,7 @@ namespace ME3TweaksCore.Helpers
                     {
                         MLog.Information($@"Downloading patch file {downloadInfo.downloadLink}");
                         var patchUpdate = MOnlineContent.DownloadToMemory(downloadInfo.downloadLink, progressCallback,
-                            downloadInfo.downloadhash, cancellationTokenSource: cancellationTokenSource).Result;
+                            downloadInfo.downloadhash, cancellationTokenSource: cancellationTokenSource);
                         if (patchUpdate.errorMessage != null)
                         {
                             MLog.Warning($@"Patch update download failed: {patchUpdate.errorMessage}");

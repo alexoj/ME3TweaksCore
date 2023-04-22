@@ -58,7 +58,6 @@ namespace ME3TweaksCore.Helpers
         {
             try
             {
-                MEGame game = MEGame.Unknown;
                 using var memFile = File.OpenRead(file);
                 return GetFileListForMEMFile(memFile);
             }

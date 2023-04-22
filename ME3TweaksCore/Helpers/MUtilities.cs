@@ -491,7 +491,7 @@ namespace ME3TweaksCore.Helpers
                 Directory.CreateDirectory(directoryPath);
                 return true;
             }
-            catch (UnauthorizedAccessException uae)
+            catch (UnauthorizedAccessException)
             {
                 //Must have admin rights.
                 MLog.Information(@"We need admin rights to create this directory");

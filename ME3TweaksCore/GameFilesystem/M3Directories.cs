@@ -104,7 +104,7 @@ namespace ME3TweaksCore.GameFilesystem
                 var mountpath = Path.Combine(M3Directories.GetDLCPath(selectedTarget), dlc);
                 try
                 {
-                    mountMapping[dlc] = MELoadedFiles.GetMountPriority(mountpath, selectedTarget.Game);
+                    mountMapping[dlc] = MELoadedDLC.GetMountPriority(mountpath, selectedTarget.Game);
                 }
                 catch (Exception e)
                 {
@@ -124,7 +124,7 @@ namespace ME3TweaksCore.GameFilesystem
         {
             //make dictionary from basegame files
             var fileListMapping = new CaseInsensitiveDictionary<List<string>>();
-            var directories = MELoadedFiles.GetEnabledDLCFolders(target.Game, target.TargetPath).OrderBy(dir => MELoadedFiles.GetMountPriority(dir, target.Game)).ToList();
+            var directories = MELoadedDLC.GetEnabledDLCFolders(target.Game, target.TargetPath).OrderBy(dir => MELoadedDLC.GetMountPriority(dir, target.Game)).ToList();
             foreach (string directory in directories)
             {
                 var dlc = Path.GetFileName(directory);
