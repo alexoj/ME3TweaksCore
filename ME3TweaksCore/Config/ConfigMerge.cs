@@ -207,7 +207,6 @@ namespace ME3TweaksCore.Config
             var cookedDir = Path.Combine(dlcFolderRoot, dlcFolderName, game.CookedDirName());
             var configBundle = ConfigAssetBundle.FromDLCFolder(game, cookedDir, dlcFolderName);
 
-            var update = false;
             var m3cds = Directory.GetFiles(cookedDir, @"*" + ConfigMerge.CONFIG_MERGE_EXTENSION,
                     SearchOption.TopDirectoryOnly)
                 .Where(x => Path.GetFileName(x).StartsWith(ConfigMerge.CONFIG_MERGE_PREFIX))
