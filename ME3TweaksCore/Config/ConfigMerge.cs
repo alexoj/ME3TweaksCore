@@ -206,6 +206,11 @@ namespace ME3TweaksCore.Config
         {
             var cookedDir = Path.Combine(dlcFolderRoot, dlcFolderName, game.CookedDirName());
             var configBundle = ConfigAssetBundle.FromDLCFolder(game, cookedDir, dlcFolderName);
+            if (configBundle == null)
+            {
+                MLog.Error($@"Cannot DLC merge {dlcFolderName}, assets did not load");
+                return; // Cannot asset merge
+            }
 
             var m3cds = Directory.GetFiles(cookedDir, @"*" + ConfigMerge.CONFIG_MERGE_EXTENSION,
                     SearchOption.TopDirectoryOnly)

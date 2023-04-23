@@ -9,6 +9,7 @@ using LegendaryExplorerCore.Coalesced;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 
 namespace ME3TweaksCore.Config
 {
@@ -98,9 +99,11 @@ namespace ME3TweaksCore.Config
         /// <param name="game">What game this bundle is for</param>
         /// <param name="cookedDir">The full path to the cooked directory</param>
         /// <param name="dlcFolderName">The name of the DLC folder, e.g. DLC_MOD_XXX</param>
+        /// <returns>Asset bundle object if the bundle was loaded; if the bundle failed to load, it returns null instead</returns>
         public static ConfigAssetBundle FromDLCFolder(MEGame game, string cookedDir, string dlcFolderName)
         {
-            return new ConfigAssetBundle(game, cookedDir, dlcFolderName);
+            var assetBundle = new ConfigAssetBundle(game, cookedDir, dlcFolderName);
+            return assetBundle.Assets != null ? assetBundle : null;
         }
 
         /// <summary>
@@ -133,7 +136,14 @@ namespace ME3TweaksCore.Config
             else if (game == MEGame.LE3)
             {
                 var coalFile = Path.Combine(cookedDir, $"Default_{dlcFolderName}.bin");
-                Assets = CoalescedConverter.DecompileGame3ToAssets(coalFile, stripExtensions: true);
+                if (File.Exists(coalFile))
+                {
+                    Assets = CoalescedConverter.DecompileGame3ToAssets(coalFile, stripExtensions: true);
+                }
+                else
+                {
+                    MLog.Error($@"LE3 config file does not exist: {coalFile}, using blank assets");
+                }
             }
             else
             {
