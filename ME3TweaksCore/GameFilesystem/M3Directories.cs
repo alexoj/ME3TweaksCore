@@ -88,7 +88,7 @@ namespace ME3TweaksCore.GameFilesystem
         }
 
 
-        public static CaseInsensitiveDictionary<string> GetFilesLoadedInGame(this GameTarget target, bool forceReload = false, bool includeTFCs = false, bool includeAFCs = false, string gameRootOverride = null, bool forceUseCached = false)
+        public static CaseInsensitiveDictionary<string> GetFilesLoadedInGame(this GameTarget target, bool forceReload = false, bool includeTFCs = false, bool includeAFCs = false, bool forceUseCached = false)
         {
             return MELoadedFiles.GetFilesLoadedInGame(target.Game, forceReload, includeTFCs, includeAFCs, target.TargetPath, forceUseCached);
         }
