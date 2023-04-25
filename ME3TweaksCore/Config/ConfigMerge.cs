@@ -205,6 +205,12 @@ namespace ME3TweaksCore.Config
         public static void PerformDLCMerge(MEGame game, string dlcFolderRoot, string dlcFolderName)
         {
             var cookedDir = Path.Combine(dlcFolderRoot, dlcFolderName, game.CookedDirName());
+            if (!Directory.Exists(cookedDir))
+            {
+                MLog.Error($@"Cannot DLC merge {dlcFolderName}, cooked directory doesn't exist: {cookedDir}");
+                return; // Cannot asset merge
+            }
+
             var configBundle = ConfigAssetBundle.FromDLCFolder(game, cookedDir, dlcFolderName);
             if (configBundle == null)
             {
