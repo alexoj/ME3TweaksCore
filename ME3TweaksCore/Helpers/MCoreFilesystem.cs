@@ -68,6 +68,15 @@ namespace ME3TweaksCore.Helpers
         }
 
         /// <summary>
+        /// Returns the path to where the cached FileSourceService file resides on disk.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFileSourceServiceFile()
+        {
+            return Path.Combine(GetME3TweaksServicesCache(), @"filesourceservice.json");
+        }
+
+        /// <summary>
         /// Returns the path to where the cached server BasegameIdentificationService file resides on disk.
         /// </summary>
         /// <returns></returns>
