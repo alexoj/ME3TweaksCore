@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Flurl.Http;
 using LegendaryExplorerCore.Gammtek.Extensions.Collections.Generic;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
@@ -63,7 +64,7 @@ namespace ME3TweaksCore.Services
             }
         }
 
-        public static void AddFileSourceEntries(CaseInsensitiveDictionary<string> entries)
+        public static void AddFileSourceEntries(CaseInsensitiveDictionary<string> entries, string telemetryKey)
         {
             LoadFileSourceService();
 
@@ -81,6 +82,17 @@ namespace ME3TweaksCore.Services
             if (updated)
             {
                 CommitDatabaseToDisk();
+
+                // telemetrykey is used to gate this feature
+                if (telemetryKey != null)
+                {
+                    var dict = new Dictionary<string, object>()
+                    {
+                        {@"key", telemetryKey},
+                        {@"data", entries}
+                    };
+                    "https://me3tweaks.com/modmanager/services/submithashsource".PostJsonAsync(dict);
+                }
             }
             else
             {
@@ -102,13 +114,12 @@ namespace ME3TweaksCore.Services
             try
             {
                 File.WriteAllText(MCoreFilesystem.GetFileSourceServiceFile(), outText);
-                MLog.Information($@"Updated local {ServiceLoggingName}");
-
+                MLog.Information($@"Updated {ServiceLoggingName}");
             }
             catch (Exception e)
             {
                 // bwomp bwomp
-                MLog.Error($@"Error saving local BGFIS: {e.Message}");
+                MLog.Error($@"Error saving {ServiceLoggingName}: {e.Message}");
             }
         }
 
