@@ -8,6 +8,7 @@ using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Services.BasegameFileIdentification;
+using ME3TweaksCore.Services.FileSource;
 using ME3TweaksCore.Services.ThirdPartyModIdentification;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -34,7 +35,7 @@ namespace ME3TweaksCore.ME3Tweaks.Online
         public const string ASI_MANIFEST_KEY = @"asimanifest";
         public const string BGFI_SERVICE_KEY = @"basegamefileidentificationservice";
         public const string TPMI_SERVICE_KEY = @"thirdpartyidentificationservice";
-        public const string FS_SERVICE_KEY   = @"filesource";
+        public const string FS_SERVICE_KEY   = @"filesourceservice";
 
         /// <summary>
         /// If this is the first content check for this session, we will check throttling for online fetch. If we are not able to use online, we will use cached instead

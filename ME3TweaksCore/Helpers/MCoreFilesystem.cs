@@ -68,7 +68,7 @@ namespace ME3TweaksCore.Helpers
         }
 
         /// <summary>
-        /// Returns the path to where the cached FileSourceService file resides on disk.
+        /// Returns the path to where the local FileSourceService file resides on disk.
         /// </summary>
         /// <returns></returns>
         public static string GetFileSourceServiceFile()
