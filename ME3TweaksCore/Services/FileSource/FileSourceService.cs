@@ -160,7 +160,7 @@ namespace ME3TweaksCore.Services.FileSource
                             {@"data", entries}
                         };
                         IsFullySerializing = true;
-                        "https://me3tweaks.com/modmanager/services/submithashsource".PostJsonAsync(dict);
+                        @"https://me3tweaks.com/modmanager/services/submithashsource".PostJsonAsync(dict);
                         //var result = "https://me3tweaks.com/modmanager/services/submithashsource".PostJsonAsync(dict).Result;
                         //var text = result.GetStringAsync().Result;
                         IsFullySerializing = false;

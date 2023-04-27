@@ -1064,7 +1064,7 @@ namespace ME3TweaksCore.Targets
                     return false;
 
                 var finfo = FileVersionInfo.GetVersionInfo(binkPath);
-                return Version.TryParse(finfo.FileVersion, out var binkVer) && binkVer >= new Version("2022.05");
+                return Version.TryParse(finfo.FileVersion, out var binkVer) && binkVer >= new Version(@"2022.05");
             }
             catch (Exception e)
             {

@@ -112,7 +112,7 @@ namespace ME3TweaksCore.Diagnostics
                     sb.Append(@";;");
 
                     // It's a modded DLC
-                    string installTime = InstallTime == null ? "" : $" on {InstallTime.ToString()}";
+                    string installTime = InstallTime == null ? @"" : $@" on {InstallTime.ToString()}";
                     if (string.IsNullOrWhiteSpace(InstalledBy))
                     {
                         sb.Append($@"Not installed by managed installer{installTime}"); // Invalid metacmm or not present
@@ -1214,10 +1214,10 @@ namespace ME3TweaksCore.Diagnostics
                         // Is this correct on linux?
                         MLog.Information(@"Checking texture map is in sync with game state");
 
-                        var mapName = $"me{gameID}map";
+                        var mapName = $@"me{gameID}map";
                         if (package.DiagnosticTarget.Game.IsLEGame())
                         {
-                            mapName = $"mele{gameID}map"; // LE has different name
+                            mapName = $@"mele{gameID}map"; // LE has different name
                         }
 
                         bool textureMapFileExists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + $@"\MassEffectModder\{mapName}.bin");

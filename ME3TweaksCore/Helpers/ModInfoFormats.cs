@@ -6,6 +6,7 @@ using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
+using ME3TweaksCore.Localization;
 
 namespace ME3TweaksCore.Helpers
 {
@@ -87,7 +88,7 @@ namespace ME3TweaksCore.Helpers
             {
                 var tag = memFile.ReadInt32();
                 var name = memFile.ReadStringASCIINull();
-                if (string.IsNullOrWhiteSpace(name)) name = "<name not listed in mem>";
+                if (string.IsNullOrWhiteSpace(name)) name = LC.GetString(LC.string_nameNotListedInMemBrackets);
                 var offset = memFile.ReadUInt64();
                 var size = memFile.ReadUInt64();
                 var flags = memFile.ReadUInt64();
@@ -135,7 +136,7 @@ namespace ME3TweaksCore.Helpers
                     return new ModFileInfo()
                     {
                         ApplicableGames = ApplicableGame.None,
-                        Description = $"Target game ({game.ApplicableGameToMEGame()}) is not installed",
+                        Description = LC.GetString(LC.string_interp_targetGameXnotInstalled, game.ApplicableGameToMEGame()),
                         Usable = false
                     };
                 }
@@ -151,7 +152,7 @@ namespace ME3TweaksCore.Helpers
                         return new ModFileInfo()
                         {
                             ApplicableGames = ApplicableGame.None,
-                            Description = $"Target file doesn't exist: {subBioPath}",
+                            Description = LC.GetString(LC.string_interp_targetFileDoesntExistX, subBioPath),
                             Usable = false
                         };
                     }

@@ -10,6 +10,7 @@ using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
+using ME3TweaksCore.Localization;
 
 namespace ME3TweaksCore.Config
 {
@@ -17,7 +18,7 @@ namespace ME3TweaksCore.Config
     /// <summary>
     /// Handler for a bundle of config assets
     /// </summary>
-    [DebuggerDisplay("ConfigAssetBundle for {DebugFileName}")]
+    [DebuggerDisplay(@"ConfigAssetBundle for {DebugFileName}")]
     public class ConfigAssetBundle
     {
         /// <summary>
@@ -62,7 +63,7 @@ namespace ME3TweaksCore.Config
             }
             else
             {
-                throw new Exception($"{nameof(ConfigAssetBundle)} does not support game {game}");
+                throw new Exception(LC.GetString(LC.string_interp_XDoesNotSupportGameY, nameof(ConfigAssetBundle), game));
             }
         }
 #if DEBUG
@@ -124,7 +125,7 @@ namespace ME3TweaksCore.Config
 
             if (game == MEGame.LE2)
             {
-                var iniFiles = Directory.GetFiles(cookedDir, "*.ini", SearchOption.TopDirectoryOnly);
+                var iniFiles = Directory.GetFiles(cookedDir, @"*.ini", SearchOption.TopDirectoryOnly);
                 foreach (var ini in iniFiles)
                 {
                     var fname = Path.GetFileNameWithoutExtension(ini);
@@ -135,7 +136,7 @@ namespace ME3TweaksCore.Config
             }
             else if (game == MEGame.LE3)
             {
-                var coalFile = Path.Combine(cookedDir, $"Default_{dlcFolderName}.bin");
+                var coalFile = Path.Combine(cookedDir, $@"Default_{dlcFolderName}.bin");
                 if (File.Exists(coalFile))
                 {
                     Assets = CoalescedConverter.DecompileGame3ToAssets(coalFile, stripExtensions: true);
@@ -147,7 +148,7 @@ namespace ME3TweaksCore.Config
             }
             else
             {
-                throw new Exception($"{nameof(ConfigAssetBundle)} does not support game {game}");
+                throw new Exception(LC.GetString(LC.string_interp_XDoesNotSupportGameY, nameof(ConfigAssetBundle), game));
             }
         }
 
@@ -159,7 +160,7 @@ namespace ME3TweaksCore.Config
 
             if (createIfNotFound)
             {
-                Assets[asset] = new CoalesceAsset($"{asset}.ini"); // Even game 3 uses .ini, I think...
+                Assets[asset] = new CoalesceAsset($@"{asset}.ini"); // Even game 3 uses .ini, I think...
                 return Assets[asset];
             }
 

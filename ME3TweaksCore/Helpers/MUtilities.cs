@@ -58,7 +58,7 @@ namespace ME3TweaksCore.Helpers
             }
             catch (IOException e)
             {
-                MLog.Error($@"I/O ERROR CALCULATING {(algorithm == null ? @"md5" : algorithm.GetType())} OF FILE: " + filename);
+                MLog.Error($@"I/O ERROR CALCULATING {(algorithm == null ? @"md5" : algorithm.GetType())} OF FILE: " + filename); // do not localize
                 MLog.Error(e);
                 return "";
             }

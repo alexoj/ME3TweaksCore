@@ -83,7 +83,7 @@ namespace ME3TweaksCore.Helpers
         /// </summary>
         public static async void PerformGithubAppUpdateCheck(AppUpdateInteropPackage interopPackage)
         {
-            MLog.Information($@"Checking for application updates from github. Mode: {(interopPackage.AllowPrereleaseBuilds ? @"Beta" : @"Stable")}");
+            MLog.Information($@"Checking for application updates from github. Mode: {(interopPackage.AllowPrereleaseBuilds ? @"Beta" : @"Stable")}"); // do not localize
             var currentAppVersionInfo = MLibraryConsumer.GetAppVersion();
             var client = new GitHubClient(new ProductHeaderValue(interopPackage.RequestHeader));
             try

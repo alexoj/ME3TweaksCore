@@ -7,6 +7,7 @@ using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.GameFilesystem;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.Targets;
 
 namespace ME3TweaksCore.Diagnostics
@@ -23,7 +24,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <param name="target"></param>
         /// <param name="progressCallback"></param>
         /// <returns></returns>
-        public static List<string> VerifyPackages(GameTarget target, Action<int,int> progressCallback = null)
+        public static List<string> VerifyPackages(GameTarget target, Action<int, int> progressCallback = null)
         {
             List<string> errors = new List<string>();
 
@@ -38,9 +39,9 @@ namespace ME3TweaksCore.Diagnostics
                 {
                     using var package = MEPackageHandler.OpenMEPackage(packPath.Value);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                    errors.Add($"Failed to load package {packPath}: {e.FlattenException()}"); // Fat stack is probably more useful as it can trace where code failed.
+                    errors.Add(LC.GetString(LC.string_interp_failedToLoadPackageXY, packPath, e.FlattenException())); // Fat stack is probably more useful as it can trace where code failed.
                 }
 
                 done++;

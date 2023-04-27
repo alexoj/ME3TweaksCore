@@ -197,7 +197,7 @@ namespace ME3TweaksCore.Helpers
                     }
 
                     File.WriteAllText(settingspath, ini.ToString());
-                    MLog.Information($@"Set {(highres ? limit2k ? @"2K lods" : @"4K lods" : @"default LODs")} in BioEngine.ini file for ME1");
+                    MLog.Information($@"Set {(highres ? limit2k ? @"2K lods" : @"4K lods" : @"default LODs")} in BioEngine.ini file for ME1"); // do not localize
                 }
 
                 if (configFileReadOnly)

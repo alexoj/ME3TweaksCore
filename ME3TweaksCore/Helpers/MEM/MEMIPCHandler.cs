@@ -115,7 +115,7 @@ namespace ME3TweaksCore.Helpers.MEM
 
             void appStart(int processID)
             {
-                MLog.Information($"MassEffectModderNoGui launched, process ID: {processID}");
+                MLog.Information($@"MassEffectModderNoGui launched, process ID: {processID}");
                 applicationStarted?.Invoke(processID);
             }
 
@@ -123,9 +123,9 @@ namespace ME3TweaksCore.Helpers.MEM
             {
                 // We will log the start and stops.
                 if (code == 0)
-                    MLog.Information("MassEffectModderNoGui exited normally with code 0");
+                    MLog.Information(@"MassEffectModderNoGui exited normally with code 0");
                 else
-                    MLog.Error($"MassEffectModderNoGui exited abnormally with code {code}");
+                    MLog.Error($@"MassEffectModderNoGui exited abnormally with code {code}");
 
                 applicationExited?.Invoke(code);
                 lock (lockObject)
@@ -519,7 +519,7 @@ namespace ME3TweaksCore.Helpers.MEM
                 MEMIPCHandler.SetGamePath(target);
             }
 
-            currentActionCallback?.Invoke("Preparing to install textures");
+            currentActionCallback?.Invoke(LC.GetString(LC.string_preparingToInstallTextures));
             MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $"--install-mods --gameid {target.Game.ToMEMGameNum()} --input \"{memFileListFile}\" --verify --ipc", // do not localize
                 applicationExited: code => { result.ExitCode = code; },
                 applicationStarted: pid =>
@@ -529,7 +529,7 @@ namespace ME3TweaksCore.Helpers.MEM
                 },
                 setMEMCrashLog: crashMsg =>
                 {
-                    result.AddError($"The last file that was being processed was: {result.CurrentFile}");
+                    result.AddError(LC.GetString(LC.string_interp_lastFileBeingProcessedWasX, result.CurrentFile));
                     result.AddError(crashMsg);
                     MLog.Fatal(crashMsg); // MEM died
                 },
@@ -584,15 +584,15 @@ namespace ME3TweaksCore.Helpers.MEM
                             break;
                         case @"ERROR_REFERENCED_TFC_NOT_FOUND":
                             MLog.Error($@"MEM: Texture references a TFC that was not found in game: {param}");
-                            result.AddError($"A texture references a TFC file that is not found in the game: {param}");
+                            result.AddError(LC.GetString(LC.string_interp_textureReferencesTFCNotFoundY, param));
                             break;
                         case @"ERROR_FILE_NOT_COMPATIBLE":
                             MLog.Error($@"MEM: This file is not listed as compatible with {target.Game}: {param}");
-                            result.AddError($"{param} is not compatible with {target.Game}");
+                            result.AddError(LC.GetString(LC.string_interp_XIsNotCompatibleWithY, param, target.Game));
                             break;
                         case @"ERROR":
                             MLog.Error($@"MEM: Error occurred: {param}");
-                            result.AddError($"An error occurred during installation: {param}");
+                            result.AddError(LC.GetString(LC.string_interp_anErrorOccurredDuringInstallationX, param));
                             break;
                         case @"TASK_PROGRESS":
                             {
@@ -630,12 +630,12 @@ namespace ME3TweaksCore.Helpers.MEM
             if (target.TextureModded)
             {
                 MLog.Information(@"Checking for missing texture markers with MEM");
-                currentActionCallback?.Invoke("Checking current installation");
+                currentActionCallback?.Invoke(LC.GetString(LC.string_checkingCurrentInstallation));
             }
             else
             {
                 MLog.Information(@"Checking for existing texture markers with MEM");
-                currentActionCallback?.Invoke("Checking for existing markers");
+                currentActionCallback?.Invoke(LC.GetString(LC.string_checkingForExistingMarkers));
             }
 
             MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $@"--check-for-markers --gameid {target.Game.ToMEMGameNum()} --ipc",
@@ -653,17 +653,17 @@ namespace ME3TweaksCore.Helpers.MEM
                 {
                     switch (command)
                     {
-                        case "TASK_PROGRESS":
+                        case @"TASK_PROGRESS":
                             if (int.TryParse(param, out var percent))
                             {
                                 progressCallback?.Invoke(percent);
                             }
                             break;
-                        case "FILENAME":
+                        case @"FILENAME":
                             // Not sure what's going on here...
                             // Debug.WriteLine(param);
                             break;
-                        case "ERROR_FILEMARKER_FOUND":
+                        case @"ERROR_FILEMARKER_FOUND":
                             if (!target.TextureModded)
                             {
                                 // If not texture modded, we found file part of a different install
@@ -695,7 +695,7 @@ namespace ME3TweaksCore.Helpers.MEM
 
             var result = new MEMSessionResult();
             MLog.Information(@"Checking texture map consistency with MEM");
-            currentActionCallback?.Invoke("Checking texture map consistency");
+            currentActionCallback?.Invoke(LC.GetString(LC.string_checkingTextureMapConsistency));
 
             int stageMultiplier = 0;
             // This is the list of added files.
@@ -728,7 +728,7 @@ namespace ME3TweaksCore.Helpers.MEM
                     {
                         switch (command)
                         {
-                            case "TASK_PROGRESS":
+                            case @"TASK_PROGRESS":
                                 if (int.TryParse(param, out var percent))
                                 {
                                     // Two stages so we divide by two and then multiply by the result
@@ -736,20 +736,20 @@ namespace ME3TweaksCore.Helpers.MEM
                                 }
 
                                 break;
-                            case "ERROR_REMOVED_FILE":
+                            case @"ERROR_REMOVED_FILE":
                                 MLog.Error($@"MEM: File was removed from game after texture scan took place: {GetShortPath(param)}");
-                                result.AddError($"File was removed: {GetShortPath(param)}");
+                                result.AddError(LC.GetString(LC.string_interp_fileWasRemovedX, GetShortPath(param)));
                                 break;
-                            case "ERROR_ADDED_FILE":
+                            case @"ERROR_ADDED_FILE":
                                 MLog.Error($@"MEM: File was added to game after texture scan took place: {GetShortPath(param)}");
-                                result.AddError($"File was added: {GetShortPath(param)}");
+                                result.AddError(LC.GetString(LC.string_interp_fileWasAddedX, GetShortPath(param)));
                                 addedFiles.Add(param); //Used to suppress vanilla mod file
                                 break;
-                            case "ERROR_VANILLA_MOD_FILE":
+                            case @"ERROR_VANILLA_MOD_FILE":
                                 if (!addedFiles.Contains(param, StringComparer.InvariantCultureIgnoreCase) && !IsIgnoredFile(param))
                                 {
                                     MLog.Error($@"MEM: File was replaced in game after texture scan took place: {GetShortPath(param)}");
-                                    result.AddError($"File was replaced: {GetShortPath(param)}");
+                                    result.AddError(LC.GetString(LC.string_interp_fileWasReplacedX, GetShortPath(param)));
                                 }
                                 break;
                             default:
