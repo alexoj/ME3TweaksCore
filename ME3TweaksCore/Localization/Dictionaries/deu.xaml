@@ -33,7 +33,7 @@
 	<system:String x:Key="string_outdatedVersionInstalled">Alte Version installiert</system:String>
 	<system:String x:Key="string_installed">Installiert</system:String>
 	<system:String x:Key="string_installLoader">Loader installieren</system:String>
-	<system:String x:Key="string_unknownASIDescription">Unbekannter ASI-Mod. Du solltest mit diesem ASI vorsichtig umgehen, da sie böswilligen Code enthalten könnte.</system:String>
+	<system:String x:Key="string_unknownASIDescription">Unbekannte ASI-Mod. Du solltest mit dieser ASI vorsichtig umgehen, da sie böswilligen Code enthalten könnte.</system:String>
 	<system:String x:Key="string_loaderInstalled">Loader installiert</system:String>
 	<system:String x:Key="string_aSILoaderInstalledASIModsWillLoad">ASI-Loader installiert. ASI-Mods werden geladen</system:String>
 	<system:String x:Key="string_aSILoaderNotInstalledASIModsWillNotLoad">ASI-Loader nicht installiert. ASI-Mods werden nicht geladen</system:String>
@@ -82,6 +82,8 @@
 	<system:String x:Key="string_gameNotInstalled">Spiel nicht installiert</system:String>
 	<system:String x:Key="string_gameNotInstalledRunOnce">Spiel nicht installiert. Führe es mindestens einmal aus, um sicher zu stellen, dass es vollständig eingerichtet ist</system:String>
 	<system:String x:Key="string_cantCreateBackup">Kann kein Backup erstellen</system:String>
+	<system:String x:Key="string_interp_XDoesNotSupportGameY">{0} unterstützt das Spiel {1} nicht</system:String>
+	<system:String x:Key="string_interp_failedToLoadPackageXY">Paket {0} konnte nicht geladen werden: {1}</system:String>
 	<system:String x:Key="string_dlcRequirementInvalidParenthesis">DLCRequirement-Eingabe ist ungültig: Version muss in Klammern angegeben werden</system:String>
 	<system:String x:Key="string_interp_dlcRequirementInvalidBadVersion">DLCRequirement-Eingabe ist ungültig: Ungültige Versionsangabe '{0}'</system:String>
 	<system:String x:Key="string_cannotBackupGame">Kann kein Backup des Spiels erstellen</system:String>
@@ -150,8 +152,8 @@
 	<system:String x:Key="string_enable">Aktivieren</system:String>
 	<system:String x:Key="string_disable">Deaktivieren</system:String>
 	<system:String x:Key="string_disabled">Deaktiviert</system:String>
-	<system:String x:Key="string_tooltip_disableDLC" xml:space="preserve">Deaktiviert das Laden dieses DLC-Mods.&#10;Da keine Dateien verändert werden, ist dies auch nach der Installation von Texturmods sicher möglich</system:String>
-	<system:String x:Key="string_tooltip_enableDLC" xml:space="preserve">Aktiviert das Laden dieses DLC-Mods im Spiel.</system:String>
+	<system:String x:Key="string_tooltip_disableDLC" xml:space="preserve">Deaktiviert das Laden dieser DLC-Mod.&#10;Da keine Dateien verändert werden, ist dies auch nach der Installation von Texturmods sicher möglich</system:String>
+	<system:String x:Key="string_tooltip_enableDLC" xml:space="preserve">Aktiviert das Laden dieser DLC-Mod im Spiel.</system:String>
 	<system:String x:Key="string_other">Andere</system:String>
 	<system:String x:Key="string_preparingToCollectDiagnosticInfo">Sammeln von Diagnoseinformationen wird vorbereitet</system:String>
 	<system:String x:Key="string_interp_preparingMEMNoGUIX">MEM No GUI wird vorbereitet {0}%</system:String>
@@ -182,10 +184,33 @@
 	<system:String x:Key="string_installingTextures">Texturen werden installiert</system:String>
 	<system:String x:Key="string_verifyingTextures">Texturen werden verifiziert</system:String>
 	<system:String x:Key="string_installingMarkers">Marker werden installiert</system:String>
+	<system:String x:Key="string_preparingToInstallTextures">Vorbereitung zur Installation von Texturen</system:String>
+	<system:String x:Key="string_interp_lastFileBeingProcessedWasX">Die letzte verarbeitete Datei war: {0}</system:String>
+	<system:String x:Key="string_interp_textureReferencesTFCNotFoundY">Eine Textur verweist auf eine TFC-Datei, die nicht im Spiel gefunden wird: {0}</system:String>
+	<system:String x:Key="string_interp_XIsNotCompatibleWithY">{0} ist nicht kompatibel mit {1}</system:String>
+	<system:String x:Key="string_interp_anErrorOccurredDuringInstallationX">Während der Installation ist ein Fehler aufgetreten: {0}</system:String>
+	<system:String x:Key="string_checkingCurrentInstallation">Überprüfung aktueller Installation</system:String>
+	<system:String x:Key="string_checkingForExistingMarkers">Überprüfung auf vorhandene Markierungen</system:String>
+	<system:String x:Key="string_checkingTextureMapConsistency">Überprüfung der Textur-Map-Konsistenz</system:String>
+	<system:String x:Key="string_interp_fileWasRemovedX">Datei wurde entfernt: {0}</system:String>
+	<system:String x:Key="string_interp_fileWasAddedX">Datei wurde hinzugefügt: {0}</system:String>
+	<system:String x:Key="string_interp_fileWasReplacedX">Datei wurde ersetzt: {0}</system:String>
 	<system:String x:Key="string_extractingMassEffectModderNoGui">MassEffectModderNoGui wird entpackt</system:String>
 	<system:String x:Key="string_no">Nein</system:String>
 	<system:String x:Key="string_ok">OK</system:String>
 	<system:String x:Key="string_yes">Ja</system:String>
+	<system:String x:Key="string_nameNotListedInMemBrackets">[Name nicht in mem aufgeführt]</system:String>
+	<system:String x:Key="string_interp_targetGameXnotInstalled">Zielspiel ({0}) ist nicht installiert</system:String>
+	<system:String x:Key="string_interp_targetFileDoesntExistX">Zieldatei existiert nicht: {0}</system:String>
+	<system:String x:Key="string_interp_XhoursYMinutes">{0}h {1}m</system:String>
+	<system:String x:Key="string_narrative">Erzählung</system:String>
+	<system:String x:Key="string_casual">Leicht</system:String>
+	<system:String x:Key="string_normal">Normal</system:String>
+	<system:String x:Key="string_veteran">Veteran</system:String>
+	<system:String x:Key="string_hardcore">Extrem</system:String>
+	<system:String x:Key="string_insanity">Wahnsinn</system:String>
+	<system:String x:Key="string_debugDifficulty">Debug Schwierigkeitsgrad</system:String>
+	<system:String x:Key="string_interp_unknownDifficultyLevelX">Unbekannter Schwierigkeitsgrad: {0}</system:String>
 	<system:String x:Key="string_interp_onlineContentHashWrong">Prüfsumme der heruntergeladenen Datei ({0}) stimmt nicht mit der erwarteten Prüfsumme überein. Erwartet: {1}, erhalten: {2}</system:String>
 	<system:String x:Key="string_insufficientDiskSpace">Nicht genug freier Speicherplatz</system:String>
 	<system:String x:Key="string_interp_restoringXpercent">Wird wiederhergestellt {0}%</system:String>
