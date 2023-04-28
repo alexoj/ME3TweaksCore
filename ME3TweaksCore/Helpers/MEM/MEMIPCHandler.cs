@@ -196,8 +196,7 @@ namespace ME3TweaksCore.Helpers.MEM
 
             // GET MEM ENCODING
             FileVersionInfo mvi = FileVersionInfo.GetVersionInfo(memPath);
-            Encoding encoding =
-                mvi.FileMajorPart > 421 ? Encoding.Unicode : Encoding.UTF8; //? Is UTF8 the default for windows console
+            Encoding encoding = mvi.FileMajorPart > 421 ? Encoding.Unicode : Encoding.UTF8; //? Is UTF8 the default for windows console
 
             await foreach (var cmdEvent in cmd.ListenAsync(encoding, cancellationToken))
 
