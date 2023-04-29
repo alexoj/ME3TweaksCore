@@ -155,7 +155,7 @@ namespace ME3TweaksCore.Helpers
 #if AZURE
                 if (stream == null)
                 {
-                    throw new Exception(@"Failed to find internal resource stream: {internalResourceName}");
+                    throw new Exception($@"Failed to find internal resource stream: {internalResourceName}");
                 }
 #endif
                 MemoryStream ms = new MemoryStream();

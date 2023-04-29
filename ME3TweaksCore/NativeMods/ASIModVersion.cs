@@ -69,6 +69,7 @@ namespace ME3TweaksCore.NativeMods
         /// <summary>
         /// Internal hack to generate the OtherGroupsToDeleteOnInstall variable from text.
         /// </summary>
+        [SuppressPropertyChangedWarnings]
         public string _otherGroupsToDeleteOnInstallInternal
         {
             set
