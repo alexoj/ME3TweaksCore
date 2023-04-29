@@ -676,6 +676,13 @@ namespace ME3TweaksCore.Diagnostics
                     addDiagLine(@"This operating system is not supported", ME3TweaksLogViewer.LogSeverity.FATAL);
                     addDiagLine(@"Upgrade to a supported operating system if you want support", ME3TweaksLogViewer.LogSeverity.FATAL);
                 }
+                else if (!computerInfo.ActuallyPlatform)
+                {
+                    // Is this actually Windows? Probably not
+                    // Do not waste time supporting these, just give user a message saying it's not supported
+                    addDiagLine(@"This software environment is not supported", ME3TweaksLogViewer.LogSeverity.FATAL);
+                    addDiagLine(@"Only actual Windows platforms are supported; do not report issues with this installation, they will not be fixed", ME3TweaksLogViewer.LogSeverity.FATAL);
+                }
 
                 addDiagLine(verLine, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? ME3TweaksLogViewer.LogSeverity.ERROR : ME3TweaksLogViewer.LogSeverity.INFO);
                 addDiagLine(@"Version " + osBuildVersion, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? ME3TweaksLogViewer.LogSeverity.ERROR : ME3TweaksLogViewer.LogSeverity.INFO);
