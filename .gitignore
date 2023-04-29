@@ -362,4 +362,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# Do not commit compressed localization dictionaries as they will change often
 ME3TweaksCore/Localization/Dictionaries/*.lzma
+
+# Do not commit the hash files, clients must build them 
+ME3TweaksCore/Build/*.hash

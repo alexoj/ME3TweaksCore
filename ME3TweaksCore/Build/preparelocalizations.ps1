@@ -7,17 +7,17 @@ $filesToCompress = Get-ChildItem $localizationDir -Filter *.xaml
 
 foreach ($xaml in $filesToCompress){
     $hashFile = Join-Path -Path $buildRoot -ChildPath "$($xaml.Name).hash"
+    $lzmaFile = $xaml.FullName + ".lzma"
     $needsCompiled = $true
 
-    if ($null -ne $env:TF_BUILD)
-    {
-        # Azure should always compile these 
-    } 
+    if ((Test-Path $lzmaFile) -eq $false){
+        # LZMA file doesn't exist - it needs compiled
+    }
     elseif (Test-Path $hashFile)
     {
         # Local builds can skip compilation if hash file is up to date
         $hashLast = Get-Content $hashFile
-        $currentHash = Get-FileHash $xaml.FullName -Algorithm SHA256
+        $currentHash = Get-FileHash $lzmaFile -Algorithm SHA256
         $needsCompiled = $hashLast -ne $currentHash.Hash;
         # If hash file exists we can check if it doesn't need compiled. If it doesn't, it will always need compiled
         if ($needsCompiled -eq $false)
@@ -28,9 +28,7 @@ foreach ($xaml in $filesToCompress){
     }
 
     $inname = "`"" + $xaml.FullName + "`""
-    $inname
     $outname = "`"" + $xaml.FullName + ".lzma`""
-    $outname
     $processOptions = @{
         FilePath = $lzmaExe
         Wait = $true
@@ -40,6 +38,6 @@ foreach ($xaml in $filesToCompress){
     $processOptions.FilePath
     Start-Process @processOptions
 
-    $currentHash = Get-FileHash $xaml.FullName -Algorithm SHA256
+    $currentHash = Get-FileHash $lzmaFile -Algorithm SHA256
     Set-Content -Path $hashFile -Value $currentHash.Hash
 }
