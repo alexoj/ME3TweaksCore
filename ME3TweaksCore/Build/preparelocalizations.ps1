@@ -9,10 +9,15 @@ foreach ($xaml in $filesToCompress){
     $hashFile = Join-Path -Path $buildRoot -ChildPath "$($xaml.Name).hash"
     $needsCompiled = $true
 
-    if (Test-Path $hashFile){
+    if ($null -ne $env:TF_BUILD)
+    {
+        # Azure should always compile these 
+    } 
+    elseif (Test-Path $hashFile)
+    {
+        # Local builds can skip compilation if hash file is up to date
         $hashLast = Get-Content $hashFile
         $currentHash = Get-FileHash $xaml.FullName -Algorithm SHA256
-
         $needsCompiled = $hashLast -ne $currentHash.Hash;
         # If hash file exists we can check if it doesn't need compiled. If it doesn't, it will always need compiled
         if ($needsCompiled -eq $false)
@@ -20,7 +25,6 @@ foreach ($xaml in $filesToCompress){
             Write-Output "Skipping compression of localization file $($xaml.Name) as hash is already up to date"
             continue # Skip this compilation
         }
-
     }
 
     $inname = "`"" + $xaml.FullName + "`""
