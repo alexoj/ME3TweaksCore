@@ -152,6 +152,12 @@ namespace ME3TweaksCore.Helpers
 #endif
             using (Stream stream = GetResourceStream(internalResourceName))
             {
+#if AZURE
+                if (stream == null)
+                {
+                    throw new Exception(@"Failed to find internal resource stream: {internalResourceName}");
+                }
+#endif
                 MemoryStream ms = new MemoryStream();
                 stream.CopyTo(ms);
                 ms.Position = 0;
