@@ -103,8 +103,17 @@ namespace ME3TweaksCore.Config
         /// <returns>Asset bundle object if the bundle was loaded; if the bundle failed to load, it returns null instead</returns>
         public static ConfigAssetBundle FromDLCFolder(MEGame game, string cookedDir, string dlcFolderName)
         {
-            var assetBundle = new ConfigAssetBundle(game, cookedDir, dlcFolderName);
-            return assetBundle.Assets != null ? assetBundle : null;
+            try
+            {
+                var assetBundle = new ConfigAssetBundle(game, cookedDir, dlcFolderName);
+                return assetBundle.Assets != null ? assetBundle : null;
+
+            }
+            catch (Exception e)
+            {
+                MLog.Exception(e, $@"Exception building asset bundle from DLC folder {game} {cookedDir} {dlcFolderName}:");
+                return null;
+            }
         }
 
         /// <summary>
