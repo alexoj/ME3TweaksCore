@@ -48,14 +48,14 @@ namespace ME3TweaksCore.Helpers
             string newpatch = Path.Combine(rootpath, "patch");
 
             var destFile = Path.Combine(rootpath, "BioP_MPBrdg.pcc");
-            var destMd5 = Utilities.CalculateMD5(destFile);
+            var destMd5 = Utilities.CalculateHash(destFile);
             var destSize = new FileInfo(destFile).Length;
             using FileStream sourceStream = new FileStream(sourcefile, FileMode.Open);
             //using FileStream oldPatchStream = new FileStream(oldpatch, FileMode.Open);
             using FileStream newPatchStream = new FileStream(newpatch, FileMode.Open);
             MemoryStream outStream = new MemoryStream();
             //ApplyJPatch(sourceStream, oldPatchStream, outStream);
-            //var oldCalcedMd5 = Utilities.CalculateMD5(outStream);
+            //var oldCalcedMd5 = Utilities.CalculateHash(outStream);
             //if (destMd5 != oldCalcedMd5)
             //{
             //    Debug.WriteLine("Old jpatch failed! Wrong MD5");
@@ -70,7 +70,7 @@ namespace ME3TweaksCore.Helpers
                 Debug.WriteLine($"Wrong new patch size! Should be {destSize} however we got {outStream.Length}");
             }
 
-            var newCalcedMd5 = Utilities.CalculateMD5(outStream);
+            var newCalcedMd5 = Utilities.CalculateHash(outStream);
             if (destMd5 != newCalcedMd5)
             {
                 Debug.WriteLine("New jpatch failed! Wrong MD5");

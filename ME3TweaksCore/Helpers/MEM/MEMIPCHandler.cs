@@ -1,8 +1,10 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -14,6 +16,7 @@ using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;
+using ME3TweaksCore.Targets;
 using Serilog;
 
 namespace ME3TweaksCore.Helpers.MEM
@@ -112,14 +115,18 @@ namespace ME3TweaksCore.Helpers.MEM
 
             void appStart(int processID)
             {
+                MLog.Information($@"MassEffectModderNoGui launched, process ID: {processID}");
                 applicationStarted?.Invoke(processID);
-                // This might need to be waited on after method is called.
-                Debug.WriteLine(@"Process launched. Process ID: " + processID);
             }
 
             void appExited(int code)
             {
-                Debug.WriteLine($@"Process exited with code {code}");
+                // We will log the start and stops.
+                if (code == 0)
+                    MLog.Information(@"MassEffectModderNoGui exited normally with code 0");
+                else
+                    MLog.Error($@"MassEffectModderNoGui exited abnormally with code {code}");
+
                 applicationExited?.Invoke(code);
                 lock (lockObject)
                 {
@@ -131,7 +138,7 @@ namespace ME3TweaksCore.Helpers.MEM
 
             void memCrashLogOutput(string str)
             {
-                crashLogBuilder.Append(str);
+                crashLogBuilder.AppendLine(str);
             }
 
             // Run MEM
@@ -147,7 +154,7 @@ namespace ME3TweaksCore.Helpers.MEM
 
             if (crashLogBuilder.Length > 0)
             {
-                setMEMCrashLog?.Invoke(crashLogBuilder.ToString());
+                setMEMCrashLog?.Invoke(crashLogBuilder.ToString().Trim());
             }
         }
 
@@ -189,8 +196,7 @@ namespace ME3TweaksCore.Helpers.MEM
 
             // GET MEM ENCODING
             FileVersionInfo mvi = FileVersionInfo.GetVersionInfo(memPath);
-            Encoding encoding =
-                mvi.FileMajorPart > 421 ? Encoding.Unicode : Encoding.UTF8; //? Is UTF8 the default for windows console
+            Encoding encoding = mvi.FileMajorPart > 421 ? Encoding.Unicode : Encoding.UTF8; //? Is UTF8 the default for windows console
 
             await foreach (var cmdEvent in cmd.ListenAsync(encoding, cancellationToken))
 
@@ -264,7 +270,7 @@ namespace ME3TweaksCore.Helpers.MEM
         /// </summary>
         /// <param name="targetGame"></param>
         /// <param name="targetPath"></param>
-        /// <returns></returns>
+        /// <returns>True if exit code is zero</returns>
         public static bool SetGamePath(bool classicMEM, MEGame targetGame, string targetPath)
         {
             int exitcode = 0;
@@ -277,6 +283,17 @@ namespace ME3TweaksCore.Helpers.MEM
             }
 
             return exitcode == 0;
+        }
+
+
+        /// <summary>
+        /// Sets MEM up to use the specified target for texture modding
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static bool SetGamePath(GameTarget target)
+        {
+            return SetGamePath(target.Game.IsOTGame(), target.Game, target.TargetPath);
         }
 
         /// <summary>
@@ -293,7 +310,7 @@ namespace ME3TweaksCore.Helpers.MEM
                 return false;
             }
 
-            string args = $@"--apply-lods-gfx --gameid {game.ToGameNum()}";
+            string args = $@"--apply-lods-gfx --gameid {game.ToMEMGameNum()}";
             if (setting.HasFlag(LodSetting.SoftShadows))
             {
                 args += @" --soft-shadows-mode --meuitm-mode";
@@ -310,7 +327,7 @@ namespace ME3TweaksCore.Helpers.MEM
             else if (setting == LodSetting.Vanilla)
             {
                 // Remove LODs
-                args = $@"--remove-lods --gameid {game.ToGameNum()}";
+                args = $@"--remove-lods --gameid {game.ToMEMGameNum()}";
             }
 
             int exitcode = -1;
@@ -483,28 +500,38 @@ namespace ME3TweaksCore.Helpers.MEM
                 }
 #endif
 
-        /// <summary>
-        /// Installs a MEM file to the game the mem is for
-        /// </summary>
-        /// <param name="mFileName"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        public static void InstallMEMFile(string memFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null)
-        {
-            var game = ModFileFormats.GetGameMEMFileIsFor(memFile);
-            // MEM command line only supports install from folder
-            // Move file to subfolder
 
-            var subfolder = Path.Combine(Directory.GetParent(memFile).FullName, @"MEMInstall");
-            var memSubfile = Path.Combine(subfolder, Path.GetFileName(memFile));
-            if (!Directory.Exists(subfolder))
+
+        /// <summary>
+        /// Installs a MEM List File (MFL) to the game specified. This call does NOT ensure MEM exists.
+        /// </summary>
+        /// <param name="target">Target to install textures to</param>
+        /// <param name="memFileListFile">The path to the MFL file that MEM will use to install</param>
+        /// <param name="currentActionCallback">A delegate to set UI text to inform the user of what is occurring</param>
+        /// <param name="progressCallback">Percentage-based progress indicator for the current stage</param>
+        /// <param name="setGamePath">If the game path should be set. Setting to false can save a bit of time if you know the path is already correct.</param>
+        public static MEMSessionResult InstallMEMFiles(GameTarget target, string memFileListFile, Action<string> currentActionCallback = null, Action<int> progressCallback = null, bool setGamePath = true)
+        {
+            MEMSessionResult result = new MEMSessionResult(); // Install session flag is set during stage context switching
+            if (setGamePath)
             {
-                Directory.CreateDirectory(subfolder);
-                File.Move(memFile, memSubfile);
+                MEMIPCHandler.SetGamePath(target);
             }
 
-            MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(),
-                $"--install-mods --gameid {game.ToMEMGameNum()} --input \"{subfolder}\" --verify --ipc", // do not localize
-
+            currentActionCallback?.Invoke(LC.GetString(LC.string_preparingToInstallTextures));
+            MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $"--install-mods --gameid {target.Game.ToMEMGameNum()} --input \"{memFileListFile}\" --verify --ipc", // do not localize
+                applicationExited: code => { result.ExitCode = code; },
+                applicationStarted: pid =>
+                {
+                    MLog.Information($@"MassEffectModder process started with PID {pid}");
+                    result.ProcessID = pid;
+                },
+                setMEMCrashLog: crashMsg =>
+                {
+                    result.AddError(LC.GetString(LC.string_interp_lastFileBeingProcessedWasX, result.CurrentFile));
+                    result.AddError(crashMsg);
+                    MLog.Fatal(crashMsg); // MEM died
+                },
                 ipcCallback: (command, param) =>
                 {
                     switch (command)
@@ -518,6 +545,7 @@ namespace ME3TweaksCore.Helpers.MEM
                                 {
                                     // OT-ME3 ONLY - DLC is unpacked for use
                                     case @"STAGE_UNPACKDLC":
+                                        result.IsInstallSession = true; // Once we move to this stage, we now are modifying the game. This is not used in any game but ME3.
                                         currentActionCallback?.Invoke(LC.GetString(LC.string_unpackingDLC));
                                         break;
                                     // The game file sizes are compared against the precomputed texture map
@@ -530,6 +558,7 @@ namespace ME3TweaksCore.Helpers.MEM
                                         break;
                                     // Package files are updated and data is stored in them for the lower mips
                                     case @"STAGE_INSTALLTEXTURES":
+                                        result.IsInstallSession = true; // Once we move to this stage, we now are modifying the game.
                                         currentActionCallback?.Invoke(LC.GetString(LC.string_installingTextures));
                                         break;
                                     // Textures that were installed are checked for correct magic numbers
@@ -540,12 +569,29 @@ namespace ME3TweaksCore.Helpers.MEM
                                     case @"STAGE_MARKERS":
                                         currentActionCallback?.Invoke(LC.GetString(LC.string_installingMarkers));
                                         break;
+                                    default:
+                                        // REPACK - that's for OT only?
+
+                                        break;
 
                                 }
                             }
                             break;
                         case @"PROCESSING_FILE":
                             MLog.Information($@"MEM processing file: {param}");
+                            result.CurrentFile = GetShortPath(param);
+                            break;
+                        case @"ERROR_REFERENCED_TFC_NOT_FOUND":
+                            MLog.Error($@"MEM: Texture references a TFC that was not found in game: {param}");
+                            result.AddError(LC.GetString(LC.string_interp_textureReferencesTFCNotFoundY, param));
+                            break;
+                        case @"ERROR_FILE_NOT_COMPATIBLE":
+                            MLog.Error($@"MEM: This file is not listed as compatible with {target.Game}: {param}");
+                            result.AddError(LC.GetString(LC.string_interp_XIsNotCompatibleWithY, param, target.Game));
+                            break;
+                        case @"ERROR":
+                            MLog.Error($@"MEM: Error occurred: {param}");
+                            result.AddError(LC.GetString(LC.string_interp_anErrorOccurredDuringInstallationX, param));
                             break;
                         case @"TASK_PROGRESS":
                             {
@@ -557,6 +603,188 @@ namespace ME3TweaksCore.Helpers.MEM
                             break;
                     }
                 });
+            return result;
+        }
+
+        /// <summary>
+        /// Checks a target for texture install markers, and returns a list of packages containing texture markers on them. This only is run on a game target that is not texture modded.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="currentActionCallback"></param>
+        /// <param name="progressCallback"></param>
+        public static MEMSessionResult CheckForMarkers(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null, bool setGamePath = true)
+        {
+            if (target.TextureModded) return null;
+            if (setGamePath)
+            {
+                MEMIPCHandler.SetGamePath(target);
+            }
+
+            // If not texture modded, we check for presense of MEM marker on files
+            // which tells us this was part of a different texture installation
+            // and can easily break stuff in the game
+
+            // Markers will be stored in the 'Errors' variable.
+            MEMSessionResult result = new MEMSessionResult();
+            if (target.TextureModded)
+            {
+                MLog.Information(@"Checking for missing texture markers with MEM");
+                currentActionCallback?.Invoke(LC.GetString(LC.string_checkingCurrentInstallation));
+            }
+            else
+            {
+                MLog.Information(@"Checking for existing texture markers with MEM");
+                currentActionCallback?.Invoke(LC.GetString(LC.string_checkingForExistingMarkers));
+            }
+
+            MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $@"--check-for-markers --gameid {target.Game.ToMEMGameNum()} --ipc",
+                applicationExited: code => result.ExitCode = code,
+                applicationStarted: pid =>
+                {
+                    MLog.Information($@"MassEffectModder process started with PID {pid}");
+                    result.ProcessID = pid;
+                },
+                setMEMCrashLog: crashMsg =>
+                {
+                    MLog.Fatal(crashMsg); // MEM died
+                },
+                ipcCallback: (command, param) =>
+                {
+                    switch (command)
+                    {
+                        case @"TASK_PROGRESS":
+                            if (int.TryParse(param, out var percent))
+                            {
+                                progressCallback?.Invoke(percent);
+                            }
+                            break;
+                        case @"FILENAME":
+                            // Not sure what's going on here...
+                            // Debug.WriteLine(param);
+                            break;
+                        case @"ERROR_FILEMARKER_FOUND":
+                            if (!target.TextureModded)
+                            {
+                                // If not texture modded, we found file part of a different install
+                                //  MLog.Error($"Package file was part of a different texture installation: {param}");
+                                result.AddError(param);
+                            }
+                            break;
+                        default:
+                            Debug.WriteLine($@"{command}: {param}");
+                            break;
+                    }
+                });
+
+            return result;
+        }
+
+        /// <summary>
+        /// Checks the texture map for consistency to the current game state (added/removed and replaced). This is run in two stages and only is run on games that are not already texture modded.
+        /// </summary>
+        /// <returns>Object containing all texture map desynchronizations in the errors list.</returns>
+        public static MEMSessionResult CheckTextureMapConsistencyAddedRemoved(GameTarget target, Action<string> currentActionCallback = null, Action<int> progressCallback = null, bool setGamePath = true)
+        {
+            if (!target.TextureModded) return null; // We have nothing to check
+
+            if (setGamePath)
+            {
+                MEMIPCHandler.SetGamePath(target);
+            }
+
+            var result = new MEMSessionResult();
+            MLog.Information(@"Checking texture map consistency with MEM");
+            currentActionCallback?.Invoke(LC.GetString(LC.string_checkingTextureMapConsistency));
+
+            int stageMultiplier = 0;
+            // This is the list of added files.
+            // We use this to suppress duplicates when a vanilla file is found
+            // e.g. new mod is installed, it will not have marker
+            // and it will also not be in texture map.
+            var addedFiles = new List<string>();
+
+            string[] argsToRun = new[]
+            {
+                $@"--check-game-data-mismatch --gameid {target.Game.ToMEMGameNum()} --ipc", // Added/Removed
+                $@"--check-game-data-after --gameid {target.Game.ToMEMGameNum()} --ipc", // Replaced
+            };
+
+            foreach (var args in argsToRun)
+            {
+                stageMultiplier++;
+                MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), args,
+                    applicationExited: code => result.ExitCode = code,
+                    applicationStarted: pid =>
+                    {
+                        MLog.Information($@"MassEffectModder process started with PID {pid}");
+                        result.ProcessID = pid;
+                    },
+                    setMEMCrashLog: crashMsg =>
+                    {
+                        MLog.Fatal(crashMsg); // MEM died
+                    },
+                    ipcCallback: (command, param) =>
+                    {
+                        switch (command)
+                        {
+                            case @"TASK_PROGRESS":
+                                if (int.TryParse(param, out var percent))
+                                {
+                                    // Two stages so we divide by two and then multiply by the result
+                                    progressCallback?.Invoke((percent / 2 * stageMultiplier));
+                                }
+
+                                break;
+                            case @"ERROR_REMOVED_FILE":
+                                MLog.Error($@"MEM: File was removed from game after texture scan took place: {GetShortPath(param)}");
+                                result.AddError(LC.GetString(LC.string_interp_fileWasRemovedX, GetShortPath(param)));
+                                break;
+                            case @"ERROR_ADDED_FILE":
+                                MLog.Error($@"MEM: File was added to game after texture scan took place: {GetShortPath(param)}");
+                                result.AddError(LC.GetString(LC.string_interp_fileWasAddedX, GetShortPath(param)));
+                                addedFiles.Add(param); //Used to suppress vanilla mod file
+                                break;
+                            case @"ERROR_VANILLA_MOD_FILE":
+                                if (!addedFiles.Contains(param, StringComparer.InvariantCultureIgnoreCase) && !IsIgnoredFile(param))
+                                {
+                                    MLog.Error($@"MEM: File was replaced in game after texture scan took place: {GetShortPath(param)}");
+                                    result.AddError(LC.GetString(LC.string_interp_fileWasReplacedX, GetShortPath(param)));
+                                }
+                                break;
+                            default:
+                                Debug.WriteLine($@"{command}: {param}");
+                                break;
+                        }
+                    });
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Determines if file is ignored by texture consistency check
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        private static bool IsIgnoredFile(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return false; // ???
+            var name = Path.GetFileName(s).ToLower();
+            switch (name)
+            {
+                case @"sfxtest.pcc":
+                case @"plotmanager.pcc":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static string GetShortPath(string LERelativePath)
+        {
+            if (string.IsNullOrWhiteSpace(LERelativePath) || LERelativePath.Length < 11) return LERelativePath;
+            return LERelativePath.Substring(10); // Remove /Game/MEX/
+
         }
     }
 }

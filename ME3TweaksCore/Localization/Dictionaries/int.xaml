@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:system="clr-namespace:System;assembly=System.Runtime">
-    
+
     <!-- Backup Creator-->
     <system:String x:Key="string_validatingBackupSource">Validating backup source</system:String>
     <system:String x:Key="string_waitingForUserInput">Waiting for user input</system:String>
@@ -289,7 +289,59 @@
     <system:String x:Key="string_installingTextures">Installing textures</system:String>
     <system:String x:Key="string_verifyingTextures">Verifying textures</system:String>
     <system:String x:Key="string_installingMarkers">Installing markers</system:String>
+    <system:String x:Key="string_preparingToInstallTextures">Preparing to install textures</system:String>
+    <system:String x:Key="string_interp_lastFileBeingProcessedWasX">The last file that was being processed was: {0}</system:String>
+    <!-- 0={Filename} -->
+    <system:String x:Key="string_interp_textureReferencesTFCNotFoundY">A texture references a TFC file that is not found in the game: {0}</system:String>
+    <!-- 0={Filename} -->
+    <system:String x:Key="string_interp_XIsNotCompatibleWithY">{0} is not compatible with {1}</system:String>
+    <!-- 0={Filename} 1={Game name (ME1, ME2, etc)} -->
+    <system:String x:Key="string_interp_anErrorOccurredDuringInstallationX">An error occurred during installation: {0}</system:String>
+    <!-- 0={Error message} -->
+    <system:String x:Key="string_checkingCurrentInstallation">Checking current installation</system:String>
+    <system:String x:Key="string_checkingForExistingMarkers">Checking for existing markers</system:String>
+    <system:String x:Key="string_checkingTextureMapConsistency">Checking texture map consistency</system:String>
+    <system:String x:Key="string_interp_fileWasRemovedX">File was removed: {0}</system:String>
+    <!-- 0={Filename} -->
+    <system:String x:Key="string_interp_fileWasAddedX">File was added: {0}</system:String>
+    <!-- 0={Filename} -->
+    <system:String x:Key="string_interp_fileWasReplacedX">File was replaced: {0}</system:String>
+    <!-- 0={Filename} -->
 
     <!-- General -->
     <system:String x:Key="string_deleting">Deleting</system:String>
+
+    <!-- Mod Info Formats -->
+    <system:String x:Key="string_nameNotListedInMemBrackets">[name not listed in mem]</system:String>
+    <system:String x:Key="string_interp_targetGameXnotInstalled">Target game ({0}) is not installed</system:String>
+    <!-- 0={Game name} -->
+    <system:String x:Key="string_interp_targetFileDoesntExistX">Target file doesn't exist: {0}</system:String>
+    <!-- 0={File path} -->
+
+    <!-- MSaveShared -->
+    <system:String x:Key="string_interp_XhoursYMinutes">{0}h {1}m</system:String>
+    <!-- 0={hours} 1={minutes}. This is 'how long played'. Localize to however it fits your localization -->
+    <system:String x:Key="string_narrative">Narrative</system:String>
+    <system:String x:Key="string_casual">Casual</system:String>
+    <system:String x:Key="string_normal">Normal</system:String>
+    <system:String x:Key="string_veteran">Veteran</system:String>
+    <system:String x:Key="string_hardcore">Hardcore</system:String>
+    <system:String x:Key="string_insanity">Insanity</system:String>
+    <system:String x:Key="string_debugDifficulty">Debug difficulty</system:String>
+    <!-- This may show up for users who dink around with save files -->
+    <system:String x:Key="string_interp_unknownDifficultyLevelX">Unknown difficulty level: {0}</system:String>
+    <!-- 0={Number} -->
+
+    <!-- Config Asset Bundle -->
+    <system:String x:Key="string_interp_XDoesNotSupportGameY">{0} does not support game {1}</system:String>
+    <!-- 0={Object name (e.g. ConfigAssetBundle)} 1={game name (ME1,ME2, etc)} -->
+
+    <!-- Diagnostic Tools -->
+    <system:String x:Key="string_interp_failedToLoadPackageXY">Failed to load package {0}: {1}</system:String>
+    <!-- 0={filepath} 1={exception message} -->
+
+    <!-- Copy Tools -->
+    <system:String x:Key="string_interp_copyDidntWorkX">Destination file doesn't exist after file copy: {0}</system:String>
+    <!-- 0={File path} -->
+
 </ResourceDictionary>

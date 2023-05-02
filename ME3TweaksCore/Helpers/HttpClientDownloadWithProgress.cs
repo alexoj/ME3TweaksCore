@@ -92,7 +92,7 @@ namespace ME3TweaksCore.Helpers
             }
             catch (OperationCanceledException)
             {
-                MLog.Warning("Download canceled");
+                MLog.Warning(@"Download canceled");
             }
             finally
             {

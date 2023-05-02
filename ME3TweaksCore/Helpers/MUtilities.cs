@@ -47,42 +47,63 @@ namespace ME3TweaksCore.Helpers
         /// Calculates the MD5 of the specified file on disk
         /// </summary>
         /// <param name="filename"></param>
+        /// <param name="algorithm">Algorithm to use. Use null for MD5.</param>
         /// <returns></returns>
-        public static string CalculateMD5(string filename)
+        public static string CalculateHash(string filename, string algorithm = null)
         {
             try
             {
                 using var stream = File.OpenRead(filename);
-                return CalculateMD5(stream);
+                return CalculateHash(stream, algorithm);
             }
             catch (IOException e)
             {
-                MLog.Error(@"I/O ERROR CALCULATING CHECKSUM OF FILE: " + filename);
+                MLog.Error($@"I/O ERROR CALCULATING {(algorithm == null ? @"md5" : algorithm.GetType())} OF FILE: " + filename); // do not localize
                 MLog.Error(e);
                 return "";
             }
         }
 
         /// <summary>
-        /// Calculates the MD5 of the stream from the beginning. Resets the stream to the beginning at the end.
+        /// Calculates the hash of the stream from the beginning. Resets the stream to the beginning at the end.
         /// </summary>
-        /// <param name="stream"></param>
+        /// <param name="stream">Stream to hash</param>
+        /// <param name="algorithm">Algorithm to use. Use null for MD5.</param>
         /// <returns></returns>
-        public static string CalculateMD5(Stream stream)
+        public static string CalculateHash(Stream stream, string algorithm = null)
         {
+            HashAlgorithm algo = null;
+
             try
             {
-                using var md5 = MD5.Create();
+                switch (algorithm)
+                {
+                    case @"sha":
+                    case @"sha1":
+                        algo = SHA1.Create();
+                        break;
+                    case @"sha256":
+                        algo = SHA256.Create();
+                        break;
+                    default:
+                        algo = MD5.Create();
+                        break;
+                }
+
                 stream.Position = 0;
-                var hash = md5.ComputeHash(stream);
+                var hash = algo.ComputeHash(stream);
                 stream.Position = 0; // reset stream
                 return BitConverter.ToString(hash).Replace(@"-", "").ToLowerInvariant();
             }
             catch (Exception e)
             {
-                MLog.Error(@"I/O ERROR CALCULATING CHECKSUM OF STREAM");
+                MLog.Error($@"I/O ERROR CALCULATING {algo.GetType()} OF STREAM");
                 MLog.Error(e);
                 return "";
+            }
+            finally
+            {
+                algo.Dispose();
             }
         }
 
@@ -131,6 +152,12 @@ namespace ME3TweaksCore.Helpers
 #endif
             using (Stream stream = GetResourceStream(internalResourceName))
             {
+#if AZURE
+                if (stream == null)
+                {
+                    throw new Exception($@"Failed to find internal resource stream: {internalResourceName}");
+                }
+#endif
                 MemoryStream ms = new MemoryStream();
                 stream.CopyTo(ms);
                 ms.Position = 0;
@@ -470,7 +497,7 @@ namespace ME3TweaksCore.Helpers
                 Directory.CreateDirectory(directoryPath);
                 return true;
             }
-            catch (UnauthorizedAccessException uae)
+            catch (UnauthorizedAccessException)
             {
                 //Must have admin rights.
                 MLog.Information(@"We need admin rights to create this directory");

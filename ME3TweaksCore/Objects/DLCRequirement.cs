@@ -39,7 +39,8 @@ namespace ME3TweaksCore.Objects
                     return true; // No min version
 
                 var metas = target.GetMetaMappedInstalledDLC(installedDLC: installedDLC);
-                if (metas.TryGetValue(DLCFolderName, out var meta) && Version.TryParse(meta.Version, out var version))
+                // if no metacmm file is found it will be mapped to null. In this case we just set it to version 0 because user did not use M3 and we have no way to determine version
+                if (metas.TryGetValue(DLCFolderName, out var meta) && Version.TryParse(meta?.Version ?? @"0.0.0.0", out var version))
                 {
                     if (ProperVersion.IsGreaterThanOrEqual(version, MinVersion))
                     {
@@ -47,7 +48,14 @@ namespace ME3TweaksCore.Objects
                     }
                     else
                     {
-                        MLog.Information($@"DLCRequirement not met: {version} is less than MinVersion {MinVersion}");
+                        if (meta == null)
+                        {
+                            MLog.Error($@"DLCRequirement not met: The version of the DLC mod {DLCFolderName} could not be determined; there is no mod manager metadata file with the DLC mod. Manually installed mods are not supported for version checks.");
+                        }
+                        else
+                        {
+                            MLog.Information($@"DLCRequirement not met: {version} is less than MinVersion {MinVersion}");
+                        }
                     }
                 }
             }
@@ -69,9 +77,18 @@ namespace ME3TweaksCore.Objects
             if (!supportsVersion)
                 return new DLCRequirement() { DLCFolderName = inputString };
 
+            // Mod Manager 8.1 changed from () to [] but we still try to support () for older versions
+            // This is due to how string struct parser strips ()
+            var verStart = inputString.IndexOf('[');
+            var verEnd = inputString.IndexOf(']');
 
-            var verStart = inputString.IndexOf('(');
-            var verEnd = inputString.IndexOf(')');
+            if (verStart == -1 && verEnd == -1)
+            {
+                // Try legacy
+                verStart = inputString.IndexOf('(');
+                verEnd = inputString.IndexOf(')');
+            }
+
 
             if (verStart == -1 && verEnd == -1)
                 return new DLCRequirement() { DLCFolderName = inputString };
@@ -106,7 +123,9 @@ namespace ME3TweaksCore.Objects
                 return $"?{Serialize(false)}"; // do not localize
 
             if (MinVersion != null)
-                return $@"{DLCFolderName}({MinVersion})";
+                // Mod Manager 8.1: We serialize as [] instead of ()
+                // Since moddesc editor only supports latest version we use this instead.
+                return $@"{DLCFolderName}[{MinVersion}]";
             return DLCFolderName;
         }
 

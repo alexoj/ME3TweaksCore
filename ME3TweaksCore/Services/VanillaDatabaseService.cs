@@ -26,7 +26,7 @@ namespace ME3TweaksCore.Services
     /// <summary>
     /// Class for querying information about game and fetching vanilla files.
     /// </summary>
-    public class VanillaDatabaseService
+    public static class VanillaDatabaseService
     {
         public static CaseInsensitiveDictionary<List<(int size, string md5)>> ME1VanillaDatabase = new CaseInsensitiveDictionary<List<(int size, string md5)>>();
         public static CaseInsensitiveDictionary<List<(int size, string md5)>> ME2VanillaDatabase = new CaseInsensitiveDictionary<List<(int size, string md5)>>();
@@ -67,7 +67,7 @@ namespace ME3TweaksCore.Services
                     ParseDatabase(le1stream, LE1VanillaDatabase);
                     return LE1VanillaDatabase;
                 case MEGame.LE2:
-                    if (ME2VanillaDatabase.Count > 0) return LE2VanillaDatabase;
+                    if (LE2VanillaDatabase.Count > 0) return LE2VanillaDatabase;
                     var le2stream = MUtilities.ExtractInternalFileToStream($@"{assetPrefix}.bin");
                     ParseDatabase(le2stream, LE2VanillaDatabase);
                     return LE2VanillaDatabase;
@@ -301,7 +301,7 @@ namespace ME3TweaksCore.Services
         public static bool IsFileVanilla(MEGame game, string fullpath, string relativepath, bool isME1Polish, bool md5check = false)
         {
             if (game.IsLEGame() && relativepath.StartsWith(@"BioGame\Config\"))
-                return true; // Don't consider these as modified they are modified
+                return true; // Don't consider these as modified, they differ per user
             var database = LoadDatabaseFor(game, isME1Polish);
             if (database.TryGetValue(relativepath, out var info))
             {
@@ -318,7 +318,7 @@ namespace ME3TweaksCore.Services
 
                 if (md5check)
                 {
-                    var md5 = MUtilities.CalculateMD5(fullpath);
+                    var md5 = MUtilities.CalculateHash(fullpath);
                     return info.Any(x => x.md5 == md5);
                 }
                 return true;
@@ -326,8 +326,6 @@ namespace ME3TweaksCore.Services
 
             return false;
         }
-
-        private static readonly string[] BasegameTFCs = { @"CharTextures", @"Movies", @"Textures", @"Lighting" };
 
         /// <summary>
         /// Returns if the specified TFC name is a vanilla TFC game TFC name
@@ -347,7 +345,7 @@ namespace ME3TweaksCore.Services
         /// <param name="failedValidationCallback"></param>
         /// <param name="strictCheck">If true, TOC files and bink files are included in the check.</param>
         /// <returns></returns>
-        public static bool ValidateTargetAgainstVanilla(GameTarget target, Action<string> failedValidationCallback, bool strictCheck)
+        public static bool ValidateTargetAgainstVanilla(GameTarget target, Action<string> failedValidationCallback, bool strictCheck, bool md5check = false)
         {
             bool isVanilla = true;
             CaseInsensitiveDictionary<List<(int size, string md5)>> vanillaDB = null;
@@ -405,9 +403,22 @@ namespace ME3TweaksCore.Services
                     {
                         var localFileInfo = new FileInfo(file);
                         var extension = Path.GetExtension(file);
-                        bool sfar = extension == @".sfar";
+                        if (extension != @".sfar")
+                        {
+                            // Normal file
+                            var isVanila = IsFileVanilla(target.Game, file, shortname, false, md5check);
+                            if (!isVanila)
+                            {
+                                failedValidationCallback?.Invoke(file);
+                                isVanilla = false;
+                            }
+
+                            continue;
+                        }
+
+                        // SFAR
                         bool correctSize;
-                        if (sfar && localFileInfo.Length == 32)
+                        if (localFileInfo.Length == 32)
                         {
                             correctSize = false; //We don't treat 32byte as "correct" for vanilla purposes.
                         }
@@ -415,24 +426,33 @@ namespace ME3TweaksCore.Services
                         {
                             correctSize = fileInfo.Any(x => x.size == localFileInfo.Length);
                         }
-                        if (correctSize && !sfar) continue; //OK
-                        if (sfar && correctSize)
+
+                        if (correctSize)
                         {
-                            //Inconsistency check
-                            if (!SFARObject.HasUnpackedFiles(file)) continue; //Consistent
+                            if (md5check)
+                            {
+                                var md5 = MUtilities.CalculateHash(file);
+                                if (fileInfo.All(x => x.md5 != md5))
+                                {
+                                    failedValidationCallback?.Invoke(file);
+                                    isVanilla = false;
+                                    continue; // This SFAR failed to validate
+                                }
+                            }
+
+                            if (!SFARObject.HasUnpackedFiles(file))
+                                continue; //Consistent
                         }
+
+                        // File has wrong size.
                         failedValidationCallback?.Invoke(file);
                         isVanilla = false;
-                    }
-                    else
-                    {
-                        //Debug.WriteLine(@"File not in Vanilla DB: " + shortname);
                     }
                 }
             }
             else
             {
-                MLog.Error(@"Directory to validate doesn't exist: " + target.TargetPath);
+                MLog.Error(@"Target directory to validate doesn't exist: " + target.TargetPath);
             }
 
             return isVanilla;
@@ -558,7 +578,7 @@ namespace ME3TweaksCore.Services
             string md5 = null;
             if (target.Game != MEGame.ME1 || !reverseME1)
             {
-                md5 = MUtilities.CalculateMD5(exe);
+                md5 = MUtilities.CalculateHash(exe);
             }
 
             switch (target.Game)

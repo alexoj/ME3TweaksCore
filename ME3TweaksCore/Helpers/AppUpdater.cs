@@ -83,7 +83,7 @@ namespace ME3TweaksCore.Helpers
         /// </summary>
         public static async void PerformGithubAppUpdateCheck(AppUpdateInteropPackage interopPackage)
         {
-            MLog.Information($@"Checking for application updates from github. Mode: {(interopPackage.AllowPrereleaseBuilds ? @"Beta" : @"Stable")}");
+            MLog.Information($@"Checking for application updates from github. Mode: {(interopPackage.AllowPrereleaseBuilds ? @"Beta" : @"Stable")}"); // do not localize
             var currentAppVersionInfo = MLibraryConsumer.GetAppVersion();
             var client = new GitHubClient(new ProductHeaderValue(interopPackage.RequestHeader));
             try
@@ -97,7 +97,6 @@ namespace ME3TweaksCore.Helpers
                     //The release we want to check is always the latest
                     Release latest = null;
                     Version latestVer = new Version(@"0.0.0.0");
-                    bool betaAvailableButOnStable = false;
                     foreach (Release onlineRelease in releases)
                     {
                         Version onlineReleaseVersion = new Version(onlineRelease.TagName);
@@ -116,7 +115,6 @@ namespace ME3TweaksCore.Helpers
 
                         if (!interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
                         {
-                            betaAvailableButOnStable = true;
                             continue;
                         }
 
@@ -203,7 +201,7 @@ namespace ME3TweaksCore.Helpers
 
 
                                 var asset = latest.Assets.First(x => x.Name.StartsWith(interopPackage.UpdateAssetPrefix));
-                                var downloadResult = await MOnlineContent.DownloadToMemory(asset.BrowserDownloadUrl, interopPackage.ProgressCallback,
+                                var downloadResult = MOnlineContent.DownloadToMemory(asset.BrowserDownloadUrl, interopPackage.ProgressCallback,
                                     logDownload: true, cancellationTokenSource: interopPackage.cancellationTokenSource);
 
                                 // DEBUG ONLY
@@ -286,7 +284,7 @@ namespace ME3TweaksCore.Helpers
                 // Mapping of MD5 patches to destination. Value is a list of mirrors we can use, preferring github first. AI only uses Github
                 var patchMappingSourceMd5ToLinks = new Dictionary<string, List<(string downloadhash, string downloadLink, string timetamp)>>();
 
-                var localExecutableHash = MUtilities.CalculateMD5(MLibraryConsumer.GetExecutablePath());
+                var localExecutableHash = MUtilities.CalculateHash(MLibraryConsumer.GetExecutablePath());
 
                 // Find applicable patch
                 foreach (var asset in latestRelease.Assets.Where(x => x.Name.StartsWith(@"upd-")))
@@ -322,7 +320,7 @@ namespace ME3TweaksCore.Helpers
                     {
                         MLog.Information($@"Downloading patch file {downloadInfo.downloadLink}");
                         var patchUpdate = MOnlineContent.DownloadToMemory(downloadInfo.downloadLink, progressCallback,
-                            downloadInfo.downloadhash, cancellationTokenSource: cancellationTokenSource).Result;
+                            downloadInfo.downloadhash, cancellationTokenSource: cancellationTokenSource);
                         if (patchUpdate.errorMessage != null)
                         {
                             MLog.Warning($@"Patch update download failed: {patchUpdate.errorMessage}");
@@ -370,7 +368,7 @@ namespace ME3TweaksCore.Helpers
 
                 MemoryStream outStream = new MemoryStream();
                 JPatch.ApplyJPatch(currentBuildStream, patchStream, outStream);
-                var calculatedHash = MUtilities.CalculateMD5(outStream);
+                var calculatedHash = MUtilities.CalculateHash(outStream);
                 if (calculatedHash == expectedFinalHash)
                 {
                     MLog.Information(@"Patch application successful: Writing new executable to disk");

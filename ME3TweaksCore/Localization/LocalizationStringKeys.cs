@@ -203,6 +203,32 @@ namespace ME3TweaksCore.Localization
 		public const string string_installingTextures = "string_installingTextures";
 		public const string string_verifyingTextures = "string_verifyingTextures";
 		public const string string_installingMarkers = "string_installingMarkers";
+		public const string string_preparingToInstallTextures = "string_preparingToInstallTextures";
+		public const string string_interp_lastFileBeingProcessedWasX = "string_interp_lastFileBeingProcessedWasX";
+		public const string string_interp_textureReferencesTFCNotFoundY = "string_interp_textureReferencesTFCNotFoundY";
+		public const string string_interp_XIsNotCompatibleWithY = "string_interp_XIsNotCompatibleWithY";
+		public const string string_interp_anErrorOccurredDuringInstallationX = "string_interp_anErrorOccurredDuringInstallationX";
+		public const string string_checkingCurrentInstallation = "string_checkingCurrentInstallation";
+		public const string string_checkingForExistingMarkers = "string_checkingForExistingMarkers";
+		public const string string_checkingTextureMapConsistency = "string_checkingTextureMapConsistency";
+		public const string string_interp_fileWasRemovedX = "string_interp_fileWasRemovedX";
+		public const string string_interp_fileWasAddedX = "string_interp_fileWasAddedX";
+		public const string string_interp_fileWasReplacedX = "string_interp_fileWasReplacedX";
 		public const string string_deleting = "string_deleting";
+		public const string string_nameNotListedInMemBrackets = "string_nameNotListedInMemBrackets";
+		public const string string_interp_targetGameXnotInstalled = "string_interp_targetGameXnotInstalled";
+		public const string string_interp_targetFileDoesntExistX = "string_interp_targetFileDoesntExistX";
+		public const string string_interp_XhoursYMinutes = "string_interp_XhoursYMinutes";
+		public const string string_narrative = "string_narrative";
+		public const string string_casual = "string_casual";
+		public const string string_normal = "string_normal";
+		public const string string_veteran = "string_veteran";
+		public const string string_hardcore = "string_hardcore";
+		public const string string_insanity = "string_insanity";
+		public const string string_debugDifficulty = "string_debugDifficulty";
+		public const string string_interp_unknownDifficultyLevelX = "string_interp_unknownDifficultyLevelX";
+		public const string string_interp_XDoesNotSupportGameY = "string_interp_XDoesNotSupportGameY";
+		public const string string_interp_failedToLoadPackageXY = "string_interp_failedToLoadPackageXY";
+		public const string string_interp_copyDidntWorkX = "string_interp_copyDidntWorkX";
 	}
 }

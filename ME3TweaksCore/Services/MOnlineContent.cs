@@ -62,7 +62,7 @@ namespace ME3TweaksCore.Services
         /// <param name="hash">Hash check value (md5). Leave null if no hash check</param>
         /// <returns></returns>
 
-        public static async Task<(MemoryStream result, string errorMessage)> DownloadToMemory(string url,
+        public static (MemoryStream result, string errorMessage) DownloadToMemory(string url,
             Action<long, long> progressCallback = null,
             string hash = null,
             bool logDownload = false,
@@ -103,7 +103,7 @@ namespace ME3TweaksCore.Services
             }
 
             if (hash == null) return (responseStream, downloadError);
-            var md5 = MUtilities.CalculateMD5(responseStream);
+            var md5 = MUtilities.CalculateHash(responseStream);
             responseStream.Position = 0;
             if (md5 != hash)
             {

@@ -57,6 +57,7 @@ namespace ME3TweaksCore.Localization
         private static bool LoadLanguage(string langcode)
         {
             Stopwatch sw = Stopwatch.StartNew();
+            MLog.Information($@"Loading localization xaml for {langcode}");
             var localizationXaml = LoadLocalizationXaml($"{langcode.ToLower()}.xaml.lzma");
             if (localizationXaml == null)
             {

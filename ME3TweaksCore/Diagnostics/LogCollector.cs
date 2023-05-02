@@ -75,6 +75,7 @@ namespace ME3TweaksCore.Diagnostics
             public int NexusUpdateCode { get; set; }
             public string InstalledBy { get; set; }
             public string VersionInstalled { get; set; }
+            public DateTime? InstallTime { get; set; }
             public IEnumerable<string> InstalledOptions { get; set; }
             public bool IsOfficialDLC { get; set; }
 
@@ -111,17 +112,18 @@ namespace ME3TweaksCore.Diagnostics
                     sb.Append(@";;");
 
                     // It's a modded DLC
+                    string installTime = InstallTime == null ? @"" : $@" on {InstallTime.ToString()}";
                     if (string.IsNullOrWhiteSpace(InstalledBy))
                     {
-                        sb.Append(@"Not installed by managed installer"); // Invalid metacmm or not present
+                        sb.Append($@"Not installed by managed installer{installTime}"); // Invalid metacmm or not present
                     }
                     else if (int.TryParse(InstalledBy, out var _))
                     {
-                        sb.Append($@"Installed by Mod Manager Build {InstalledBy}"); // Legacy (and M3) - only list build number
+                        sb.Append($@"Installed by Mod Manager Build {InstalledBy}{installTime}"); // Legacy (and M3) - only list build number
                     }
                     else
                     {
-                        sb.Append($@"Installed by {InstalledBy}"); // The metacmm lists the string
+                        sb.Append($@"Installed by {InstalledBy}{installTime}"); // The metacmm lists the string
                     }
 
                     // Nexus Update Code
@@ -582,7 +584,6 @@ namespace ME3TweaksCore.Diagnostics
                     //BINK
                     MLog.Information(@"Checking if Bink ASI loader is installed");
 
-
                     if (package.DiagnosticTarget.IsBinkBypassInstalled())
                     {
                         if (package.DiagnosticTarget.Game.IsOTGame())
@@ -605,6 +606,22 @@ namespace ME3TweaksCore.Diagnostics
                             addDiagLine(@"bink2w64 ASI loader is not installed. ASI mods will not load", ME3TweaksLogViewer.LogSeverity.WARN);
                         }
                     }
+
+                    bool enhancedBinkInstalled = false;
+                    if (package.DiagnosticTarget.Game.IsLEGame() || package.DiagnosticTarget.Game == MEGame.LELauncher)
+                    {
+                        // ME3Tweakscore 8.1.0 for LE: Enhanced bink2 encoder
+                        enhancedBinkInstalled = package.DiagnosticTarget.IsEnhancedBinkInstalled();
+                        if (enhancedBinkInstalled)
+                        {
+                            addDiagLine(@"Enhanced bink dll is installed", ME3TweaksLogViewer.LogSeverity.GOOD);
+                        }
+                        else
+                        {
+                            addDiagLine(@"Standard bink dll is installed");
+                        }
+                    }
+
 
                     if (package.DiagnosticTarget.Game == MEGame.ME1)
                     {
@@ -658,6 +675,13 @@ namespace ME3TweaksCore.Diagnostics
                 {
                     addDiagLine(@"This operating system is not supported", ME3TweaksLogViewer.LogSeverity.FATAL);
                     addDiagLine(@"Upgrade to a supported operating system if you want support", ME3TweaksLogViewer.LogSeverity.FATAL);
+                }
+                else if (!computerInfo.ActuallyPlatform)
+                {
+                    // Is this actually Windows? Probably not
+                    // Do not waste time supporting these, just give user a message saying it's not supported
+                    addDiagLine(@"This software environment is not supported", ME3TweaksLogViewer.LogSeverity.FATAL);
+                    addDiagLine(@"Only actual Windows platforms are supported; do not report issues with this installation, they will not be fixed", ME3TweaksLogViewer.LogSeverity.FATAL);
                 }
 
                 addDiagLine(verLine, os.Version < ME3TweaksCoreLib.MIN_SUPPORTED_OS ? ME3TweaksLogViewer.LogSeverity.ERROR : ME3TweaksLogViewer.LogSeverity.INFO);
@@ -869,9 +893,13 @@ namespace ME3TweaksCore.Diagnostics
                             addDiagLine($@"{meuitmName} version: {latestInstall.MEUITMVER}");
                         }
                     }
-                    else
+                    else if (package.DiagnosticTarget.Game.IsOTGame())
                     {
                         addDiagLine(@"This installation has been texture modded, but ALOT and/or MEUITM has not been installed");
+                    }
+                    else if (package.DiagnosticTarget.Game.IsLEGame())
+                    {
+                        addDiagLine(@"This installation has been texture modded with MassEffectModder");
                     }
 
                     if (latestInstall.MarkerExtendedVersion >= TextureModInstallationInfo.FIRST_EXTENDED_MARKER_VERSION && !string.IsNullOrWhiteSpace(latestInstall.InstallerVersionFullName))
@@ -884,7 +912,6 @@ namespace ME3TweaksCore.Diagnostics
                     }
 
                     addDiagLine($@"Latest installation used MEM v{latestInstall.MEM_VERSION_USED}");
-
                     addDiagLine(@"Texture mod installation history", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                     addDiagLine(@"The history of texture mods installed into this game is as follows (from latest install to first install):");
 
@@ -1079,7 +1106,6 @@ namespace ME3TweaksCore.Diagnostics
 
                 #region Installed DLCs
                 MLog.Information(@"Collecting installed DLC");
-                var installedDLCInfos = new List<ME3TweaksLogViewer.InstalledDLCStruct>();
 
                 //Get DLCs
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingDLCInformation));
@@ -1107,6 +1133,7 @@ namespace ME3TweaksCore.Diagnostics
                             dlcStruct.VersionInstalled = metaMappedDLC.Version;
                             dlcStruct.InstalledOptions = metaMappedDLC.OptionsSelectedAtInstallTime;
                             dlcStruct.NexusUpdateCode = metaMappedDLC.NexusUpdateCode;
+                            dlcStruct.InstallTime = metaMappedDLC.InstallTime;
                         }
                         else
                         {
@@ -1194,10 +1221,10 @@ namespace ME3TweaksCore.Diagnostics
                         // Is this correct on linux?
                         MLog.Information(@"Checking texture map is in sync with game state");
 
-                        var mapName = $"me{gameID}map";
+                        var mapName = $@"me{gameID}map";
                         if (package.DiagnosticTarget.Game.IsLEGame())
                         {
-                            mapName = $"mele{gameID}"; // LE has different name
+                            mapName = $@"mele{gameID}map"; // LE has different name
                         }
 
                         bool textureMapFileExists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + $@"\MassEffectModder\{mapName}.bin");
@@ -1281,7 +1308,7 @@ namespace ME3TweaksCore.Diagnostics
                         }
                         else
                         {
-                            addDiagLine($@"Texture map file is missing: {package.DiagnosticTarget.Game.ToString().ToLower()}map.bin - was game migrated to new system or are you M3 on a different user account?");
+                            addDiagLine($@"Texture map file is missing: {mapName}.bin - was game migrated to new system or are you running this tool on a different user account than textures were installed with?");
                         }
                     }
 

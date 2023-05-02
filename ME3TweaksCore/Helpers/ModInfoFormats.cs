@@ -6,6 +6,7 @@ using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
+using ME3TweaksCore.Localization;
 
 namespace ME3TweaksCore.Helpers
 {
@@ -15,30 +16,86 @@ namespace ME3TweaksCore.Helpers
 
         public static MEGame GetGameMEMFileIsFor(string file)
         {
+            if (!File.Exists(file))
+                return MEGame.Unknown; // We don't know what file this game is for because it doesn't exist!
+
             try
             {
                 MEGame game = MEGame.Unknown;
                 using var memFile = File.OpenRead(file);
-                var magic = memFile.ReadStringASCII(4);
-                if (magic != @"TMOD")
-                {
-                    return game;
-                }
-                var version = memFile.ReadInt32(); //3 = LE
-                var gameIdOffset = memFile.ReadInt64();
-                memFile.Position = gameIdOffset;
-                var gameId = memFile.ReadInt32();
-
-                if (gameId == 1) game = version < 3 ? MEGame.ME1 : MEGame.LE1;
-                if (gameId == 2) game = version < 3 ? MEGame.ME2 : MEGame.LE2;
-                if (gameId == 3) game = version < 3 ? MEGame.ME3 : MEGame.LE3;
-                return game;
+                return GetGameMEMFileIsFor(memFile);
             }
             catch (Exception e)
             {
                 MLog.Exception(e, $@"Unable to determine game MEM file {file} is for");
                 return MEGame.Unknown;
             }
+        }
+
+        /// <summary>
+        /// Reads the mem file stream and determines the game it is for
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public static MEGame GetGameMEMFileIsFor(Stream stream)
+        {
+            var magic = stream.ReadStringASCII(4);
+            if (magic != @"TMOD")
+            {
+                return MEGame.Unknown;
+            }
+            var version = stream.ReadInt32(); //3 = LE
+            var gameIdOffset = stream.ReadInt64();
+            stream.Position = gameIdOffset;
+            var gameId = stream.ReadInt32();
+
+            if (gameId == 1) return version < 3 ? MEGame.ME1 : MEGame.LE1;
+            if (gameId == 2) return version < 3 ? MEGame.ME2 : MEGame.LE2;
+            if (gameId == 3) return version < 3 ? MEGame.ME3 : MEGame.LE3;
+            return MEGame.Unknown;
+        }
+
+        public static List<string> GetFileListForMEMFile(string file)
+        {
+            try
+            {
+                using var memFile = File.OpenRead(file);
+                return GetFileListForMEMFile(memFile);
+            }
+            catch (Exception e)
+            {
+                MLog.Exception(e, $@"Unable to determine game MEM file {file} is for");
+            }
+            return new List<string>();
+
+        }
+
+        private static List<string> GetFileListForMEMFile(Stream memFile)
+        {
+            var files = new List<string>();
+            var magic = memFile.ReadStringASCII(4);
+            if (magic != @"TMOD")
+            {
+                return files;
+            }
+            var version = memFile.ReadInt32(); //3 = LE
+            var gameIdOffset = memFile.ReadInt64();
+            memFile.Position = gameIdOffset;
+            var gameId = memFile.ReadInt32();
+
+            var numFiles = memFile.ReadInt32();
+            for (int i = 0; i < numFiles; i++)
+            {
+                var tag = memFile.ReadInt32();
+                var name = memFile.ReadStringASCIINull();
+                if (string.IsNullOrWhiteSpace(name)) name = LC.GetString(LC.string_nameNotListedInMemBrackets);
+                var offset = memFile.ReadUInt64();
+                var size = memFile.ReadUInt64();
+                var flags = memFile.ReadUInt64();
+                files.Add(name);
+            }
+
+            return files;
         }
 
         // Mod files are NOT supported in M3
@@ -79,7 +136,7 @@ namespace ME3TweaksCore.Helpers
                     return new ModFileInfo()
                     {
                         ApplicableGames = ApplicableGame.None,
-                        Description = $"Target game ({game.ApplicableGameToMEGame()}) is not installed",
+                        Description = LC.GetString(LC.string_interp_targetGameXnotInstalled, game.ApplicableGameToMEGame()),
                         Usable = false
                     };
                 }
@@ -95,7 +152,7 @@ namespace ME3TweaksCore.Helpers
                         return new ModFileInfo()
                         {
                             ApplicableGames = ApplicableGame.None,
-                            Description = $"Target file doesn't exist: {subBioPath}",
+                            Description = LC.GetString(LC.string_interp_targetFileDoesntExistX, subBioPath),
                             Usable = false
                         };
                     }

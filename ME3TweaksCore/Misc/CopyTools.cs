@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 using Serilog;
 
 namespace ME3TweaksCore.Misc
@@ -14,7 +15,6 @@ namespace ME3TweaksCore.Misc
     /// Helper class for copying a directory with progress
     /// Copied and modified from ALOT Installer
     /// </summary>
-    [Localizable(false)]
     public static class CopyTools
     {
         /// <summary>
@@ -34,7 +34,7 @@ namespace ME3TweaksCore.Misc
             };
             bool result = false;
             object syncObj = new object();
-            downloadClient.DownloadFileCompleted += async (s, e) =>
+            downloadClient.DownloadFileCompleted += (s, e) =>
             {
                 if (e.Error != null)
                 {
@@ -48,8 +48,8 @@ namespace ME3TweaksCore.Misc
                 }
                 else
                 {
-                    MLog.Error($"Destination file doesn't exist after file copy: {destFile}");
-                    errorCallback?.Invoke(new Exception($"Destination file doesn't exist after file copy: {destFile}"));
+                    MLog.Error($@"Destination file doesn't exist after file copy: {destFile}");
+                    errorCallback?.Invoke(new Exception(LC.GetString(LC.string_interp_copyDidntWorkX, destFile)));
                 }
 
                 lock (syncObj)

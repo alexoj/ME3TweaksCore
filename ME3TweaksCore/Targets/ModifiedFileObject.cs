@@ -59,7 +59,7 @@ namespace ME3TweaksCore.Targets
 #if DEBUG
                 else
                 {
-                    ModificationSource = MUtilities.CalculateMD5(fullpath);
+                    ModificationSource = MUtilities.CalculateHash(fullpath);
                 }
 #endif
             }
