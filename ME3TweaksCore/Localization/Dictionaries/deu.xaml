@@ -84,6 +84,7 @@
 	<system:String x:Key="string_cantCreateBackup">Kann kein Backup erstellen</system:String>
 	<system:String x:Key="string_interp_XDoesNotSupportGameY">{0} unterstützt das Spiel {1} nicht</system:String>
 	<system:String x:Key="string_interp_failedToLoadPackageXY">Paket {0} konnte nicht geladen werden: {1}</system:String>
+        <system:String x:Key="string_interp_copyDidntWorkX">Zieldatei existiert nach dem Kopieren der Datei nicht: {0}</system:String>
 	<system:String x:Key="string_dlcRequirementInvalidParenthesis">DLCRequirement-Eingabe ist ungültig: Version muss in Klammern angegeben werden</system:String>
 	<system:String x:Key="string_interp_dlcRequirementInvalidBadVersion">DLCRequirement-Eingabe ist ungültig: Ungültige Versionsangabe '{0}'</system:String>
 	<system:String x:Key="string_cannotBackupGame">Kann kein Backup des Spiels erstellen</system:String>
