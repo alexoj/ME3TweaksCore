@@ -229,5 +229,7 @@ namespace ME3TweaksCore.Localization
 		public const string string_interp_unknownDifficultyLevelX = "string_interp_unknownDifficultyLevelX";
 		public const string string_interp_XDoesNotSupportGameY = "string_interp_XDoesNotSupportGameY";
 		public const string string_interp_failedToLoadPackageXY = "string_interp_failedToLoadPackageXY";
+		public const string string_interp_copyDidntWorkX = "string_interp_copyDidntWorkX";
+		public const string string_interp_copyDidntWorkX = "string_interp_copyDidntWorkX";
 	}
 }

@@ -340,4 +340,8 @@
     <system:String x:Key="string_interp_failedToLoadPackageXY">Failed to load package {0}: {1}</system:String>
     <!-- 0={filepath} 1={exception message} -->
 
+    <!-- Copy Tools -->
+    <system:String x:Key="string_interp_copyDidntWorkX">Destination file doesn't exist after file copy: {0}</system:String>
+    <!-- 0={File path} -->
+
 </ResourceDictionary>
