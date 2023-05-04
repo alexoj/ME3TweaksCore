@@ -1,6 +1,7 @@
 ﻿using LegendaryExplorerCore.Packages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -126,6 +127,30 @@ namespace ME3TweaksCore.Objects
             if (game is MEGame.LE3) return le3languages;
 
             throw new Exception($@"Cannot get language for game {game}");
+        }
+
+        public static string ConvertModManagerLocToGameLoc(string lang, MEGame game)
+        {
+            lang = lang.ToLower();
+            if (lang == @"int") return @"int"; // Technically this can also use INT...
+
+            if (!game.IsGame1()) return lang;
+
+            switch (lang)
+            {
+                case @"deu":
+                    return @"DE";
+                case @"ita":
+                    return @"IT";
+                case @"rus":
+                    return @"RA";
+                case @"pol":
+                    return @"PL";
+                default:
+                    // NOT IMPLEMENTED!
+                    Debug.WriteLine($@"Language code not implemented: {lang}");
+                    return @"";
+            }
         }
     }
 }
