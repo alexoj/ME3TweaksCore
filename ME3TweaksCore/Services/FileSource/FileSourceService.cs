@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Flurl.Http;
 using LegendaryExplorerCore.Gammtek.Extensions.Collections.Generic;
+using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
@@ -263,9 +264,20 @@ namespace ME3TweaksCore.Services.FileSource
         {
             sourceLink = null;
             if (!ServiceLoaded) return false;
-            if (Database.TryGetValue(size, out var md5Map) && md5Map.TryGetValue(hash, out var fssRecord))
+            if (Database.TryGetValue(size, out var md5Map))
             {
-                sourceLink = fssRecord.DownloadLink;
+                // > 128MiB files are checked only on size to improve performance
+                if (size >= FileSize.MebiByte * 128 && md5Map.Count == 1)
+                {
+                    sourceLink = md5Map.First().Value.DownloadLink;
+                }
+                else
+                {
+                    if (md5Map.TryGetValue(hash, out var fssRecord))
+                    {
+                        sourceLink = fssRecord.DownloadLink;
+                    }
+                }
             }
 
             return sourceLink != null;
