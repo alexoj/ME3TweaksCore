@@ -42,7 +42,6 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 
         private static void LoadDatabase(Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> database, JToken serverData = null)
         {
-            var typeStr = @"Local";
             var file = MCoreFilesystem.GetLocalBasegameIdentificationServiceFile();
             if (File.Exists(file))
             {
@@ -54,18 +53,18 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
                                 List<BasegameFileRecord>>>>(
                             File.ReadAllText(file));
                     database.ReplaceAll(db);
-                    MLog.Information($@"Loaded {typeStr} {ServiceLoggingName}");
+                    MLog.Information($@"Loaded {ServiceLoggingName}");
                 }
                 catch (Exception e)
                 {
-                    MLog.Error($@"Error loading {typeStr} {ServiceLoggingName}: {e.Message}");
+                    MLog.Error($@"Error loading {ServiceLoggingName}: {e.Message}");
                     var db = getBlankBGFIDB();
                     database.ReplaceAll(db);
                 }
             }
             else
             {
-                MLog.Information($@"Loaded blank {typeStr} {ServiceLoggingName}");
+                MLog.Information($@"Loaded blank {ServiceLoggingName}");
                 var db = getBlankBGFIDB();
                 database.ReplaceAll(db);
             }
