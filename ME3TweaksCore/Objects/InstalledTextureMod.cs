@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LegendaryExplorerCore.Helpers;
+using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Localization;
 
 namespace ME3TweaksCore.Objects
@@ -89,8 +90,9 @@ namespace ME3TweaksCore.Objects
         /// </summary>
         /// <param name="inStream"></param>
         /// <param name="extendedMarkerVersion"></param>
-        public InstalledTextureMod(Stream inStream, int extendedMarkerVersion)
+        public InstalledTextureMod(Stream inStream, int extendedMarkerVersion, MEGame game)
         {
+            Game = game;
             // V4 marker version - DEFAULT (Extended Version 2)
             ModType = (InstalledTextureModType)inStream.ReadByte();
             ModName = extendedMarkerVersion == 0x02 ? inStream.ReadStringUnicodeNull() : inStream.ReadUnrealString();
@@ -105,6 +107,11 @@ namespace ME3TweaksCore.Objects
                 }
             }
         }
+
+        /// <summary>
+        /// The game this marker is on.
+        /// </summary>
+        public MEGame Game { get; init; }
 
         public InstalledTextureMod()
         {

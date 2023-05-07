@@ -339,7 +339,7 @@ namespace ME3TweaksCore.Targets
                                     var fileCount = fs.ReadInt32();
                                     for (int i = 0; i < fileCount; i++)
                                     {
-                                        tmii.InstalledTextureMods.Add(new InstalledTextureMod(fs, tmii.MarkerExtendedVersion));
+                                        tmii.InstalledTextureMods.Add(new InstalledTextureMod(fs, tmii.MarkerExtendedVersion, Game));
                                     }
                                 }
                                 else if (tmii.MarkerExtendedVersion == 0x04)
@@ -350,7 +350,7 @@ namespace ME3TweaksCore.Targets
                                     var fileCount = fs.ReadInt32();
                                     for (int i = 0; i < fileCount; i++)
                                     {
-                                        tmii.InstalledTextureMods.Add(new InstalledTextureMod(fs, tmii.MarkerExtendedVersion));
+                                        tmii.InstalledTextureMods.Add(new InstalledTextureMod(fs, tmii.MarkerExtendedVersion, Game));
                                     }
                                 }
 
