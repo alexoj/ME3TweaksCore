@@ -147,7 +147,7 @@ namespace ME3TweaksCore.Targets
             }
             catch (Exception e)
             {
-                Log.Error(@"Unable to toggle DLC: " + e.Message);
+                MLog.Error(@"Unable to toggle DLC: " + e.Message);
             }
             //TriggerPropertyChangedFor(nameof(DLCFolderName));
         }

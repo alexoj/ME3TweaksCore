@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using LegendaryExplorerCore.GameFilesystem;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Services;
@@ -116,7 +117,7 @@ namespace ME3TweaksCore.Targets
                         {
                             if (!file.EndsWith(@".sfar"))
                             {
-                                Log.Information(@"Deleting unpacked file: " + file);
+                                MLog.Information(@"Deleting unpacked file: " + file);
                                 File.Delete(file);
                             }
                         }
@@ -124,7 +125,7 @@ namespace ME3TweaksCore.Targets
                         // Check if we actually need to restore SFAR
                         if (new FileInfo(targetFile).Length == 32 || !VanillaDatabaseService.IsFileVanilla(target, targetFile, false))
                         {
-                            Log.Information($@"Restoring SFAR from backup: {backupFile} -> {targetFile}");
+                            MLog.Information($@"Restoring SFAR from backup: {backupFile} -> {targetFile}");
                             XCopy.Copy(backupFile, targetFile, true, true,
                                 (o, pce) =>
                                 {

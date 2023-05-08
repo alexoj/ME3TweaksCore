@@ -356,7 +356,7 @@ namespace ME3TweaksCore.Targets
 
                                 if (fs.Position != memiExtendedEndPos)
                                 {
-                                    Log.Warning($@"Sanity check for MEMI extended marker failed. We did not read data until the marker info offset. Should be at 0x{memiExtendedEndPos:X6}, but ended at 0x{fs.Position:X6}");
+                                    MLog.Warning($@"Sanity check for MEMI extended marker failed. We did not read data until the marker info offset. Should be at 0x{memiExtendedEndPos:X6}, but ended at 0x{fs.Position:X6}");
                                 }
                             }
                             if (startPos == -1) cachedTextureModInfo = tmii;
@@ -375,7 +375,7 @@ namespace ME3TweaksCore.Targets
                 }
                 catch (Exception e)
                 {
-                    Log.Error($@"Error reading texture mod marker file for {Game}. Installed info will be returned as null (nothing installed). " + e.Message);
+                    MLog.Error($@"Error reading texture mod marker file for {Game}. Installed info will be returned as null (nothing installed). " + e.Message);
                     return null;
                 }
             }
@@ -819,7 +819,7 @@ namespace ME3TweaksCore.Targets
             }
             catch (Exception e)
             {
-                Log.Error($@"Error writing debug texture mod installation marker file: {e.Message}");
+                MLog.Error($@"Error writing debug texture mod installation marker file: {e.Message}");
             }
 #endif
         }
@@ -836,11 +836,11 @@ namespace ME3TweaksCore.Targets
                     fs.SeekEnd();
                     fs.WriteUInt32(1234); //erase memi tag
                 }
-                Log.Information(@"Changed MEMI Tag for game to 1234.");
+                MLog.Information(@"Changed MEMI Tag for game to 1234.");
             }
             catch (Exception e)
             {
-                Log.Error($@"Error stripping debug ALOT marker file for {Game}. {e.Message}");
+                MLog.Error($@"Error stripping debug ALOT marker file for {Game}. {e.Message}");
             }
 #endif
         }
@@ -910,7 +910,7 @@ namespace ME3TweaksCore.Targets
             }
             catch (Exception e)
             {
-                Log.Error($@"Error populating extras for target {TargetPath}: " + e.Message);
+                MLog.Error($@"Error populating extras for target {TargetPath}: " + e.Message);
             }
         }
 
@@ -974,7 +974,7 @@ namespace ME3TweaksCore.Targets
             }
             catch (Exception e)
             {
-                Log.Error(@"Error fetching list of installed ASIs: " + e.Message);
+                MLog.Error(@"Error fetching list of installed ASIs: " + e.Message);
             }
 
             return installedASIs;
