@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Services.Backup;
@@ -83,7 +84,7 @@ namespace ME3TweaksCore.Targets
                 try
                 {
                     Restoring = true;
-                    Log.Information(@"Restoring basegame file: " + targetFile);
+                    MLog.Information(@"Restoring basegame file: " + targetFile);
                     notifyRestoringCallback?.Invoke();
                     var tfi = new FileInfo(targetFile);
                     if (tfi.IsReadOnly)
@@ -97,7 +98,7 @@ namespace ME3TweaksCore.Targets
                 {
                     Restoring = false;
                     notifyRestoredCallback?.Invoke(this);
-                    Log.Error($@"Error restoring file {targetFile}: " + e.Message);
+                    MLog.Error($@"Error restoring file {targetFile}: " + e.Message);
                 }
             }
         }

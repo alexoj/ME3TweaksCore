@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using Serilog;
 
@@ -55,7 +56,7 @@ namespace ME3TweaksCore.Targets
                 }
                 catch (Exception e)
                 {
-                    Log.Error($@"Error deleting extra file {FilePath}: {e.Message}");
+                    MLog.Error($@"Error deleting extra file {FilePath}: {e.Message}");
                 }
             }
         }

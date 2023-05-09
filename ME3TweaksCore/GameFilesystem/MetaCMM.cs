@@ -55,7 +55,7 @@ namespace ME3TweaksCore.GameFilesystem
         /// <summary>
         /// The code used to check for nexus updates - this is not for updating the mod, but just checking the installed version against the server version, mostly for logging.
         /// </summary>
-        public int NexusUpdateCode { get; }
+        public int NexusUpdateCode { get; set; }
 
         /// <summary>
         /// If this mod makes use of the enhanced 2022.5 bink encoder (LE only)

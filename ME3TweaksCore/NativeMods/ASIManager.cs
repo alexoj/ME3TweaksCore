@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Xml.Linq;
+using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
@@ -85,6 +86,7 @@ namespace ME3TweaksCore.NativeMods
             {
                 LoadManifestFromDisk(ManifestLocation);
                 MLog.Information(@"Loaded cached ASI manifest");
+                logManifestInfo();
                 return;
             }
 
@@ -127,6 +129,7 @@ namespace ME3TweaksCore.NativeMods
                 MLog.Information(@"Loading local ASI manifest");
                 LoadManifestFromDisk(ManifestLocation, false);
                 MLog.Information(@"Loaded local ASI manifest");
+                logManifestInfo();
             }
             else
             {
@@ -136,12 +139,26 @@ namespace ME3TweaksCore.NativeMods
             }
         }
 
+        private static void logManifestInfo()
+        {
+            MLog.Information(@"Loaded ASI information:");
+            var masterGroups = new[]
+            {
+                MasterME1ASIUpdateGroups, MasterME2ASIUpdateGroups, MasterME3ASIUpdateGroups, MasterLE1ASIUpdateGroups,
+                MasterLE2ASIUpdateGroups, MasterLE3ASIUpdateGroups
+            };
+
+            for (int i = 0; i < masterGroups.Length; i++)
+            {
+                MLog.Information($@"{GameNumConversion.FromGameNum(i + 1).ToGameName(true)} has ASI groups {string.Join(',', masterGroups[i].Select(x => x.UpdateGroupId))} available");
+            }
+        }
+
         /// <summary>
         /// Loads the data using a ServiceLoader system. This is treated like an online fetch.
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public static bool LoadService(JToken data)
         {
             // The data is just the xml string.
@@ -502,7 +519,7 @@ namespace ME3TweaksCore.NativeMods
                     {
                         embeddedAssetPath = $@"ME3TweaksCore.NativeMods.CachedASI.{destinationFilename}";
                     }
-                    
+
                     var existsEmbedded = MUtilities.DoesEmbeddedAssetExist(embeddedAssetPath);
                     if (existsEmbedded)
                     {
@@ -615,7 +632,7 @@ namespace ME3TweaksCore.NativeMods
             if (group == null)
             {
                 // Cannot find ASI!
-                MLog.Error($@"Cannot find ASI with update group ID {updateGroup} for game {gameTarget.Game}");
+                MLog.Error($@"Cannot find ASI ({nameForLogging}) with update group ID {updateGroup} for game {gameTarget.Game}");
                 return false;
             }
 
