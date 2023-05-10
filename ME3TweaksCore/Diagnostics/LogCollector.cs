@@ -2275,6 +2275,11 @@ namespace ME3TweaksCore.Diagnostics
         public LogItem SelectedLog { get; set; }
 
         /// <summary>
+        /// List of filename attachments to include
+        /// </summary>
+        public Dictionary<string, string> Attachments { get; set; }
+
+        /// <summary>
         /// If a full texture chekc should be performed. This only occurs if DiagnosticTarget is not null.
         /// </summary>
         public bool PerformFullTexturesCheck { get; set; }
