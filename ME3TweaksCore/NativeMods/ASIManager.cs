@@ -104,6 +104,13 @@ namespace ME3TweaksCore.NativeMods
                     onlineManifest = preloadedManifestData;
                 }
 
+                if (onlineManifest == null)
+                {
+                    MLog.Warning(@"Cannot load ASI manifest: Could not fetch online manifest and no local manifest exists");
+                    LoadEmbeddedManifest();
+                    return;
+                }
+
                 onlineManifest = onlineManifest.Trim();
                 try
                 {
@@ -134,9 +141,17 @@ namespace ME3TweaksCore.NativeMods
             else
             {
                 //can't get manifest or local manifest.
-                //Todo: some sort of handling here as we are running in panel startup
-                MLog.Error(@"Cannot load ASI manifest: Could not fetch online manifest and no local manifest exists");
+                MLog.Warning(@"Cannot load ASI manifest: Could not fetch online manifest and no local manifest exists");
+                LoadEmbeddedManifest();
             }
+        }
+
+        private static void LoadEmbeddedManifest()
+        {
+            var resource = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.NativeMods.CachedASI.asimanifest.xml");
+            var embeddedManifest = new StreamReader(resource).ReadToEnd();
+            ParseManifest(embeddedManifest, false);
+
         }
 
         private static void logManifestInfo()

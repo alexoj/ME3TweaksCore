@@ -23,8 +23,9 @@
 		<EmbeddedResource Include="GameFilesystem\Bink\**\*.dll" />
 		<EmbeddedResource Include="Assets\**\*.exe" />
 		<EmbeddedResource Include="Assets\**\*.bin" />
+		<EmbeddedResource Include="NativeMods\CachedASI\asimanifest.xml" />
+		<EmbeddedResource Include="NativeMods\CachedASI\**\*.asi" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="submodules\ComputerInfo\ComputerInfo\ComputerInfo.csproj" />
 		<ProjectReference Include="submodules\LegendaryExplorer\LegendaryExplorer\LegendaryExplorerCore\LegendaryExplorerCore.csproj" />
