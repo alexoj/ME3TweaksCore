@@ -97,7 +97,7 @@ namespace ME3TweaksCore.NativeMods
                 if (preloadedManifestData == null)
                 {
                     MLog.Information(@"Fetching ASI manifest from online source");
-                    onlineManifest = MOnlineContent.FetchRemoteString(@"https://me3tweaks.com/mods/asi/getmanifest?AllGames=1");
+                    onlineManifest = MOnlineContent.FetchRemoteString(@"https://xxxme3tweaks.com/mods/asi/getmanifest?AllGames=1");
                 }
                 else
                 {
@@ -130,24 +130,40 @@ namespace ME3TweaksCore.NativeMods
                     MLog.Error(@"Error parsing online ASI manifest: " + e.Message);
                     internalLoadManifest(true); //force local load instead
                 }
+
+                return;
             }
-            else if (File.Exists(ManifestLocation))
+
+            if (File.Exists(ManifestLocation))
             {
                 MLog.Information(@"Loading local ASI manifest");
-                LoadManifestFromDisk(ManifestLocation, false);
-                MLog.Information(@"Loaded local ASI manifest");
-                logManifestInfo();
+                try
+                {
+                    LoadManifestFromDisk(ManifestLocation, false);
+                    MLog.Information(@"Loaded local ASI manifest");
+                    logManifestInfo();
+                }
+                catch (Exception e)
+                {
+                    MLog.Exception(e, @"Error loading cached manifest: ");
+                    //can't use local manifest - use the embedded one
+                    LoadEmbeddedManifest();
+                    logManifestInfo();
+                }
+
+                return;
             }
-            else
-            {
-                //can't get manifest or local manifest.
-                MLog.Warning(@"Cannot load ASI manifest: Could not fetch online manifest and no local manifest exists");
-                LoadEmbeddedManifest();
-            }
+
+
+            //can't get manifest or local manifest.
+            LoadEmbeddedManifest();
+            logManifestInfo();
         }
+
 
         private static void LoadEmbeddedManifest()
         {
+            MLog.Warning(@"Loading embedded ASI manifest as no on-disk or network based version could be used");
             var resource = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.NativeMods.CachedASI.asimanifest.xml");
             var embeddedManifest = new StreamReader(resource).ReadToEnd();
             ParseManifest(embeddedManifest, false);
