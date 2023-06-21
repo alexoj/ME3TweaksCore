@@ -28,17 +28,17 @@ namespace ME3TweaksCore.Services
     /// </summary>
     public static class VanillaDatabaseService
     {
-        public static CaseInsensitiveDictionary<List<(int size, string md5)>> ME1VanillaDatabase = new CaseInsensitiveDictionary<List<(int size, string md5)>>();
-        public static CaseInsensitiveDictionary<List<(int size, string md5)>> ME2VanillaDatabase = new CaseInsensitiveDictionary<List<(int size, string md5)>>();
-        public static CaseInsensitiveDictionary<List<(int size, string md5)>> ME3VanillaDatabase = new CaseInsensitiveDictionary<List<(int size, string md5)>>();
+        public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> ME1VanillaDatabase = new();
+        public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> ME2VanillaDatabase = new();
+        public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> ME3VanillaDatabase = new();
 
-        public static CaseInsensitiveDictionary<List<(int size, string md5)>> LE1VanillaDatabase = new CaseInsensitiveDictionary<List<(int size, string md5)>>();
-        public static CaseInsensitiveDictionary<List<(int size, string md5)>> LE2VanillaDatabase = new CaseInsensitiveDictionary<List<(int size, string md5)>>();
-        public static CaseInsensitiveDictionary<List<(int size, string md5)>> LE3VanillaDatabase = new CaseInsensitiveDictionary<List<(int size, string md5)>>();
-        public static CaseInsensitiveDictionary<List<(int size, string md5)>> LELauncherVanillaDatabase = new CaseInsensitiveDictionary<List<(int size, string md5)>>();
+        public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> LE1VanillaDatabase = new();
+        public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> LE2VanillaDatabase = new();
+        public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> LE3VanillaDatabase = new();
+        public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> LELauncherVanillaDatabase = new();
 
 
-        public static CaseInsensitiveDictionary<List<(int size, string md5)>> LoadDatabaseFor(MEGame game, bool isMe1PL = false)
+        public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> LoadDatabaseFor(MEGame game, bool isMe1PL = false)
         {
             string assetPrefix = $@"ME3TweaksCore.Assets.VanillaDatabase.{game.ToString().ToLower()}";
             if (game == MEGame.LELauncher)
@@ -148,7 +148,7 @@ namespace ME3TweaksCore.Services
             return null;
         }
 
-        private static void ParseDatabase(MemoryStream stream, Dictionary<string, List<(int size, string md5)>> targetDictionary, bool trimLERoots = false)
+        private static void ParseDatabase(MemoryStream stream, IDictionary<string, List<(int size, string md5)>> targetDictionary, bool trimLERoots = false)
         {
             if (stream.ReadStringASCII(4) != @"MD5T")
             {
@@ -207,7 +207,7 @@ namespace ME3TweaksCore.Services
                 targetDictionary.TryGetValue(path, out list);
                 if (list == null)
                 {
-                    list = new List<(int size, string md5)>();
+                    list = new List<(int size, string md5)>(3);
                     targetDictionary[path] = list;
                 }
                 list.Add((size, sb.ToString()));
@@ -348,7 +348,7 @@ namespace ME3TweaksCore.Services
         public static bool ValidateTargetAgainstVanilla(GameTarget target, Action<string> failedValidationCallback, bool strictCheck, bool md5check = false)
         {
             bool isVanilla = true;
-            CaseInsensitiveDictionary<List<(int size, string md5)>> vanillaDB = null;
+            CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> vanillaDB = null;
             switch (target.Game)
             {
                 case MEGame.ME1:
@@ -382,9 +382,9 @@ namespace ME3TweaksCore.Services
                 default:
                     throw new Exception(@"Cannot vanilla check against game that is not ME1/ME2/ME3/LE1/LE2/LE3/LELauncher");
             }
+
             if (Directory.Exists(target.TargetPath))
             {
-
                 foreach (string file in Directory.EnumerateFiles(target.TargetPath, @"*", SearchOption.AllDirectories))
                 {
                     if (!strictCheck)
@@ -517,14 +517,14 @@ namespace ME3TweaksCore.Services
         }
 
         /// <summary>
-        /// Gets vanilla information about the specfied relative filepath (relative to the specified gametarget)
+        /// Gets vanilla information about the specified relative filepath (relative to the specified gametarget)
         /// </summary>
         /// <param name="target"></param>
         /// <param name="relativeFilepath"></param>
         /// <returns></returns>
         public static List<(int size, string md5)> GetVanillaFileInfo(GameTarget target, string relativeFilepath)
         {
-            CaseInsensitiveDictionary<List<(int size, string md5)>> vanillaDB = null;
+            CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> vanillaDB = null;
             switch (target.Game)
             {
                 case MEGame.ME1:
