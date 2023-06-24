@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -60,7 +61,8 @@ namespace ME3TweaksCore.Diagnostics
             TPMI,
             SUB,
             BOLDBLUE,
-            SUPERCEDANCE_FILE
+            SUPERCEDANCE_FILE,
+            SAVE_FILE_HASH_NAME,
         }
         public class InstalledDLCStruct
         {
@@ -391,6 +393,9 @@ namespace ME3TweaksCore.Diagnostics
                     case ME3TweaksLogViewer.LogSeverity.SUPERCEDANCE_FILE:
                         diagStringBuilder.Append($@"[SSF]{message}");
                         break;
+                    case ME3TweaksLogViewer.LogSeverity.SAVE_FILE_HASH_NAME:
+                        diagStringBuilder.Append($@"[SF]{message}");
+                        break;
                     default:
                         Debugger.Break();
                         break;
@@ -404,6 +409,11 @@ namespace ME3TweaksCore.Diagnostics
             MLog.Information(@"Beginning to build diagnostic output");
 
             addDiagLine(package.DiagnosticTarget.Game.ToGameNum().ToString(), ME3TweaksLogViewer.LogSeverity.GAMEID);
+            if (package.SelectedSaveFilePath != null && File.Exists(package.SelectedSaveFilePath))
+            {
+                // This will allow server to locate the save file that is uploaded and tell user what it is 
+                addDiagLine(MUtilities.CalculateHash(package.SelectedSaveFilePath)+@"|"+ Path.GetFileName(package.SelectedSaveFilePath), ME3TweaksLogViewer.LogSeverity.SAVE_FILE_HASH_NAME);
+            }
             addDiagLine($@"{MLibraryConsumer.GetHostingProcessname()} {MLibraryConsumer.GetAppVersion()} Game Diagnostic");
             addDiagLine($@"ME3TweaksCore version: {MLibraryConsumer.GetLibraryVersion()}");
             addDiagLine($@"Diagnostic for {package.DiagnosticTarget.Game.ToGameName()}");
@@ -1696,6 +1706,7 @@ namespace ME3TweaksCore.Diagnostics
                 addDiagLine($@"{package.DiagnosticTarget.Game.ToGameName()} crash logs found in Event Viewer", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                 if (entries.Any())
                 {
+                    addDiagLine($@"Crash event logs are often not useful except for determining if the executable or a library crashed the game");
                     addDiagLine(@"Click to view events", ME3TweaksLogViewer.LogSeverity.SUB);
                     foreach (var entry in entries)
                     {
@@ -2036,7 +2047,7 @@ namespace ME3TweaksCore.Diagnostics
                 }
                 catch (Exception e)
                 {
-                    MLog.Error($@"Error reading partition type on {partitionLetter}: {e.Message}. This may be an expected error due to how WMI works");
+                    MLog.Warning($@"Error reading partition type on {partitionLetter}: {e.Message}. This may be an expected error due to how WMI works");
                     return -1;
                 }
             }
@@ -2201,12 +2212,31 @@ namespace ME3TweaksCore.Diagnostics
                 //this doesn't need to technically be async, but library doesn't have non-async method.
                 package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_uploadingToME3Tweaks));
 
-                string responseString = package.UploadEndpoint.PostUrlEncodedAsync(new
+                dynamic data = new ExpandoObject();
+                IDictionary<string, object> dictionary = (IDictionary<string, object>)data;
+
+                dictionary.Add(@"LogData", Convert.ToBase64String(lzmalog));
+                if (package.Attachments != null)
                 {
-                    LogData = Convert.ToBase64String(lzmalog),
-                    ToolName = MLibraryConsumer.GetHostingProcessname(),
-                    ToolVersion = MLibraryConsumer.GetAppVersion()
-                }).ReceiveString().Result;
+                    foreach (var attachment in package.Attachments)
+                    {
+                        // For save files this will be a filename ending with .pcsav
+                        dictionary.Add(attachment.Key, Convert.ToBase64String(attachment.Value));
+                    }
+                }
+                dictionary.Add(@"ToolName", MLibraryConsumer.GetHostingProcessname());
+                dictionary.Add(@"ToolVersion", MLibraryConsumer.GetAppVersion());
+
+
+                string responseString = package.UploadEndpoint.PostUrlEncodedAsync(dictionary)
+                //new
+                //{
+                //    LogData = Convert.ToBase64String(lzmalog),
+                //    Attachments = package.Attachments,
+                //    ToolName = MLibraryConsumer.GetHostingProcessname(),
+                //    ToolVersion = MLibraryConsumer.GetAppVersion()
+                //})
+                    .ReceiveString().Result;
                 Uri uriResult;
                 bool result = Uri.TryCreate(responseString, UriKind.Absolute, out uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
                 if (result)
@@ -2275,12 +2305,12 @@ namespace ME3TweaksCore.Diagnostics
         public LogItem SelectedLog { get; set; }
 
         /// <summary>
-        /// List of filename attachments to include
+        /// The save file to upload, if any
         /// </summary>
-        public Dictionary<string, string> Attachments { get; set; }
+        public string SelectedSaveFilePath { get; set; }
 
         /// <summary>
-        /// If a full texture chekc should be performed. This only occurs if DiagnosticTarget is not null.
+        /// If a full texture check should be performed. This only occurs if DiagnosticTarget is not null.
         /// </summary>
         public bool PerformFullTexturesCheck { get; set; }
 
@@ -2298,5 +2328,10 @@ namespace ME3TweaksCore.Diagnostics
         /// Invoked when a taskbar state should be updated (or progressbar)
         /// </summary>
         public Action<MTaskbarState> UpdateTaskbarProgressStateCallback { get; set; }
+
+        /// <summary>
+        /// Mapping of any attachments that are also included in the upload
+        /// </summary>
+        public Dictionary<string, byte[]> Attachments { get; set; }
     }
 }
