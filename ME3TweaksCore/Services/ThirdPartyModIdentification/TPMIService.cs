@@ -110,7 +110,7 @@ namespace ME3TweaksCore.Services.ThirdPartyModIdentification
                 }
             }
 
-            MLog.Information($@"Unable to load {ServiceLoggingName} service: No cached content or online content was available to load");
+            MLog.Warning($@"Unable to load {ServiceLoggingName} service: No cached content or online content was available to load");
             return false;
         }
 
