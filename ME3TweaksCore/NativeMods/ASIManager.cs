@@ -97,7 +97,7 @@ namespace ME3TweaksCore.NativeMods
                 if (preloadedManifestData == null)
                 {
                     MLog.Information(@"Fetching ASI manifest from online source");
-                    onlineManifest = MOnlineContent.FetchRemoteString(@"https://xxxme3tweaks.com/mods/asi/getmanifest?AllGames=1");
+                    onlineManifest = MOnlineContent.FetchRemoteString(@"https://me3tweaks.com/mods/asi/getmanifest?AllGames=1");
                 }
                 else
                 {
