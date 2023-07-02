@@ -37,6 +37,7 @@ namespace ME3TweaksCore.Services
         public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> LE3VanillaDatabase = new();
         public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> LELauncherVanillaDatabase = new();
 
+        private static bool? ME1LoadedDatabaseIsPL = null;
 
         public static CaseInsensitiveConcurrentDictionary<List<(int size, string md5)>> LoadDatabaseFor(MEGame game, bool isMe1PL = false)
         {
@@ -47,9 +48,19 @@ namespace ME3TweaksCore.Services
             switch (game)
             {
                 case MEGame.ME1:
-                    ME1VanillaDatabase.Clear();
+                    if (ME1LoadedDatabaseIsPL != null)
+                    {
+                        if (ME1LoadedDatabaseIsPL.Value != isMe1PL)
+                        {
+                            ME1VanillaDatabase.Clear();
+                        }
+                    }
+                    
+                    if (ME1VanillaDatabase.Count > 0)
+                        return ME1VanillaDatabase;
                     var me1stream = MUtilities.ExtractInternalFileToStream($@"{assetPrefix}{(isMe1PL ? @"pl" : @"")}.bin"); //do not localize
                     ParseDatabase(me1stream, ME1VanillaDatabase);
+                    ME1LoadedDatabaseIsPL = isMe1PL;
                     return ME1VanillaDatabase;
                 case MEGame.ME2:
                     if (ME2VanillaDatabase.Count > 0) return ME2VanillaDatabase;
