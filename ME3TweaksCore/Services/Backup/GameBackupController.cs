@@ -109,18 +109,21 @@ namespace ME3TweaksCore.Services.Backup
 
             GameLanguage[] allGameLangauges = targetToBackup.Game != MEGame.LELauncher ? GameLanguage.GetLanguagesForGame(targetToBackup.Game) : null;
             GameLanguage[] selectedLanguages = null;
-
-
-
+            
             if (!targetToBackup.IsCustomOption)
             {
                 MLog.Information($@"PerformBackup() on {targetToBackup.TargetPath}");
                 // Backup target
                 if (MUtilities.IsGameRunning(targetToBackup.Game))
                 {
+                    MLog.Error("PerformBackup: Cannot backup game while game is running");
                     EndBackup();
                     BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotBackupGame), LC.GetString(LC.string_interp_cannotBackupGameIsRunning, targetToBackup.Game.ToGameName()));
                     return false;
+                }
+                else
+                {
+                    MLog.Information("PerformBackup: Game is not running");
                 }
 
                 // Language selection

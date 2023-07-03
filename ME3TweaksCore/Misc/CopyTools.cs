@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -27,19 +28,21 @@ namespace ME3TweaksCore.Misc
         /// <returns></returns>
         public static bool CopyFileWithProgress(string sourceFile, string destFile, Action<long, long> progressCallback, Action<Exception> errorCallback)
         {
-            WebClient downloadClient = new WebClient();
+            using WebClient downloadClient = new WebClient();
             downloadClient.DownloadProgressChanged += (s, e) =>
             {
+                Debug.WriteLine("ProgressChanged");
                 progressCallback?.Invoke(e.BytesReceived, e.TotalBytesToReceive);
             };
             bool result = false;
             object syncObj = new object();
             downloadClient.DownloadFileCompleted += (s, e) =>
             {
+                Debug.WriteLine("DownloadFileCompleted");
+                errorCallback?.Invoke(new Exception("TEST EXCEPTION"));
                 if (e.Error != null)
                 {
-                    MLog.Error(@"An error occurred copying the file to the destination:");
-                    MLog.Error(e.Error);
+                    MLog.Exception(e.Error, @"An error occurred copying the file to the destination:");
                     errorCallback?.Invoke(e.Error);
                 }
                 else if (File.Exists(destFile))
@@ -54,12 +57,23 @@ namespace ME3TweaksCore.Misc
 
                 lock (syncObj)
                 {
+                    Debug.WriteLine("Pulse");
                     Monitor.Pulse(syncObj);
                 }
             };
-            downloadClient.DownloadFileAsync(new Uri(sourceFile), destFile);
+            downloadClient.DownloadFileTaskAsync(new Uri(sourceFile), destFile).ContinueWith(x =>
+            {
+                Debug.WriteLine("ContinueWith");
+
+                // Weird async exception handling
+                if (x.Exception != null)
+                {
+                    throw x.Exception;
+                }
+            });
             lock (syncObj)
             {
+                Debug.WriteLine("Wait");
                 Monitor.Wait(syncObj);
             }
             return result;
@@ -76,9 +90,10 @@ namespace ME3TweaksCore.Misc
             string[] ignoredExtensions = null,
             bool testrun = false,
             Action<string, long, long> bigFileProgressCallback = null,
-            bool copyTimestamps = false)
+            bool copyTimestamps = false,
+            bool continueCopying = true)
         {
-            if (total == -1)
+            if (total == -1 && continueCopying)
             {
                 //calculate number of files
                 total = Directory.GetFiles(source.FullName, @"*.*", SearchOption.AllDirectories).Length;
@@ -86,7 +101,7 @@ namespace ME3TweaksCore.Misc
             }
 
             int numdone = done;
-            if (!testrun)
+            if (!testrun && continueCopying)
             {
                 Directory.CreateDirectory(target.FullName);
             }
@@ -94,6 +109,8 @@ namespace ME3TweaksCore.Misc
             // Copy each file into the new directory.
             foreach (FileInfo fi in source.GetFiles())
             {
+                if (!continueCopying)
+                    continue; // Skip em'
                 if (ignoredExtensions != null)
                 {
                     bool skip = false;
@@ -122,15 +139,27 @@ namespace ME3TweaksCore.Misc
                 var shouldCopy = aboutToCopyCallback?.Invoke(fi.FullName);
                 if (aboutToCopyCallback == null || (shouldCopy.HasValue && shouldCopy.Value))
                 {
+                    // This is a bad way of doing it
+                    // ... but I don't care!!
+                    Exception asyncException = null;
+
                     try
                     {
+
                         if (!testrun)
                         {
                             var destPath = Path.Combine(target.FullName, fi.Name);
-                            if (bigFileProgressCallback != null && fi.Length > 1024 * 1024 * 128)
+                            if (true || bigFileProgressCallback != null && fi.Length > 1024 * 1024 * 128)
                             {
                                 //128MB or bigger
-                                CopyTools.CopyFileWithProgress(fi.FullName, destPath, (bdone, btotal) => bigFileProgressCallback.Invoke(fi.FullName, bdone, btotal), exception => throw exception);
+                                CopyTools.CopyFileWithProgress(fi.FullName, destPath, 
+                                    (bdone, btotal) => bigFileProgressCallback.Invoke(fi.FullName, bdone, btotal), 
+                                    exception =>
+                                    {
+                                        // Debug.WriteLine("hi");
+                                        continueCopying = false;
+                                        asyncException = exception;
+                                    });
                             }
                             else
                             {
@@ -138,20 +167,28 @@ namespace ME3TweaksCore.Misc
                                 fi.CopyTo(destPath, true);
                             }
 
-                            FileInfo dest = new FileInfo(destPath);
-                            if (dest.IsReadOnly) dest.IsReadOnly = false;
-                            if (copyTimestamps)
+                            if (continueCopying)
                             {
-                                MUtilities.CopyTimestamps(fi.FullName, destPath);
+                                FileInfo dest = new FileInfo(destPath);
+                                if (dest.IsReadOnly) dest.IsReadOnly = false;
+                                if (copyTimestamps)
+                                {
+                                    MUtilities.CopyTimestamps(fi.FullName, destPath);
+                                }
                             }
                         }
                     }
                     catch (Exception e)
                     {
                         MLog.Error(@"Error copying file: " + fi + @" -> " + Path.Combine(target.FullName, fi.Name) + @": " + e.Message);
+                        continueCopying = false;
                         throw;
                     }
+
+                    if (asyncException != null)
+                        throw asyncException; // Rethrow it here so it goes up
                 }
+
 
 
                 // MLog.Information(@"Copying {0}\{1}", target.FullName, fi.Name);
@@ -162,8 +199,13 @@ namespace ME3TweaksCore.Misc
             // Copy each subdirectory using recursion.
             foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
             {
-                DirectoryInfo nextTargetSubDir = testrun ? null : target.CreateSubdirectory(diSourceSubDir.Name);
-                numdone = CopyAll_ProgressBar(diSourceSubDir, nextTargetSubDir, totalItemsToCopyCallback, fileCopiedCallback, aboutToCopyCallback, total, numdone, null, testrun, bigFileProgressCallback, copyTimestamps);
+                if (continueCopying)
+                {
+                    DirectoryInfo nextTargetSubDir = testrun ? null : target.CreateSubdirectory(diSourceSubDir.Name);
+                    numdone = CopyAll_ProgressBar(diSourceSubDir, nextTargetSubDir, totalItemsToCopyCallback,
+                        fileCopiedCallback, aboutToCopyCallback, total, numdone, null, testrun, bigFileProgressCallback,
+                        copyTimestamps, continueCopying);
+                }
             }
             return numdone;
         }
