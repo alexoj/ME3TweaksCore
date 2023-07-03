@@ -31,15 +31,12 @@ namespace ME3TweaksCore.Misc
             using WebClient downloadClient = new WebClient();
             downloadClient.DownloadProgressChanged += (s, e) =>
             {
-                Debug.WriteLine("ProgressChanged");
                 progressCallback?.Invoke(e.BytesReceived, e.TotalBytesToReceive);
             };
             bool result = false;
             object syncObj = new object();
             downloadClient.DownloadFileCompleted += (s, e) =>
             {
-                Debug.WriteLine("DownloadFileCompleted");
-                errorCallback?.Invoke(new Exception("TEST EXCEPTION"));
                 if (e.Error != null)
                 {
                     MLog.Exception(e.Error, @"An error occurred copying the file to the destination:");
@@ -57,14 +54,11 @@ namespace ME3TweaksCore.Misc
 
                 lock (syncObj)
                 {
-                    Debug.WriteLine("Pulse");
                     Monitor.Pulse(syncObj);
                 }
             };
             downloadClient.DownloadFileTaskAsync(new Uri(sourceFile), destFile).ContinueWith(x =>
             {
-                Debug.WriteLine("ContinueWith");
-
                 // Weird async exception handling
                 if (x.Exception != null)
                 {
@@ -73,7 +67,6 @@ namespace ME3TweaksCore.Misc
             });
             lock (syncObj)
             {
-                Debug.WriteLine("Wait");
                 Monitor.Wait(syncObj);
             }
             return result;
@@ -149,14 +142,13 @@ namespace ME3TweaksCore.Misc
                         if (!testrun)
                         {
                             var destPath = Path.Combine(target.FullName, fi.Name);
-                            if (true || bigFileProgressCallback != null && fi.Length > 1024 * 1024 * 128)
+                            if (bigFileProgressCallback != null && fi.Length > 1024 * 1024 * 128)
                             {
                                 //128MB or bigger
                                 CopyTools.CopyFileWithProgress(fi.FullName, destPath, 
                                     (bdone, btotal) => bigFileProgressCallback.Invoke(fi.FullName, bdone, btotal), 
                                     exception =>
                                     {
-                                        // Debug.WriteLine("hi");
                                         continueCopying = false;
                                         asyncException = exception;
                                     });
