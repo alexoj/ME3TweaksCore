@@ -415,6 +415,7 @@ namespace ME3TweaksCore.Diagnostics
                 addDiagLine(MUtilities.CalculateHash(package.SelectedSaveFilePath)+@"|"+ Path.GetFileName(package.SelectedSaveFilePath), ME3TweaksLogViewer.LogSeverity.SAVE_FILE_HASH_NAME);
             }
             addDiagLine($@"{MLibraryConsumer.GetHostingProcessname()} {MLibraryConsumer.GetAppVersion()} Game Diagnostic");
+            addDiagLine($@"Build date: {MLibraryConsumer.GetSigningDate()}");
             addDiagLine($@"ME3TweaksCore version: {MLibraryConsumer.GetLibraryVersion()}");
             addDiagLine($@"Diagnostic for {package.DiagnosticTarget.Game.ToGameName()}");
             addDiagLine($@"Diagnostic generated at {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}");
