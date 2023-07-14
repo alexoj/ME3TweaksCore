@@ -33,7 +33,7 @@ namespace ME3TweaksCore.Helpers
             subkey.SetValue(value, data ? 1 : 0, RegistryValueKind.DWord);
         }
 
-        private static RegistryKey CreateRegistryPath(string subpath)
+        public static RegistryKey CreateRegistryPath(string subpath)
         {
             int i = 0;
             List<string> subkeys = subpath.Split('\\').ToList();
@@ -96,12 +96,26 @@ namespace ME3TweaksCore.Helpers
 
         public static string GetRegistryString(string key, string valueName)
         {
-            return (string)Registry.GetValue(key, valueName, null);
+            try
+            {
+                return (string)Registry.GetValue(key, valueName, null);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static int GetRegistryInt(string key, string valueName)
         {
-            return (int)Registry.GetValue(key, valueName, 0);
+            try
+            {
+                return (int)Registry.GetValue(key, valueName, 0);
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         public static bool GetRegistryBool(string key, string valueName)
