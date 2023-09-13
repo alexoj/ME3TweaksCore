@@ -574,7 +574,7 @@ namespace ME3TweaksCore.Services.Backup
             if (!targetToBackup.IsCustomOption && Directory.Exists(backupPath))
             {
                 var files = Directory.GetFiles(backupPath);
-                var dirs = Directory.GetFiles(backupPath);
+                var dirs = Directory.GetDirectories(backupPath);
                 if (files.Length > 0 || dirs.Length > 0)
                 {
                     //Directory not empty
