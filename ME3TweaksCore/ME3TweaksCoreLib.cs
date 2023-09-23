@@ -67,7 +67,7 @@ namespace ME3TweaksCore
             MEPackageHandler.GlobalSharedCacheEnabled = false; // ME3Tweaks tools (non LEX) do not use the global package cache
             LegendaryExplorerCoreLib.InitLib(null, logger: Log.Logger, 
                 packageSavingFailed: package.LECPackageSaveFailedCallback, 
-                objectDBsToLoad: new[] { MEGame.ME1, MEGame.ME2, MEGame.ME3, MEGame.LE1, MEGame.LE2, MEGame.LE3 }); // Might need to change off of null for scheduler
+                objectDBsToLoad: package.PropertyDatabasesToLoad); // Might need to change off of null for scheduler
 
             try
             {

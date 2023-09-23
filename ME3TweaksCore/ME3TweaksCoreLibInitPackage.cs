@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
@@ -108,6 +109,11 @@ namespace ME3TweaksCore
         /// The localization language to load after loading the INT one to initially set the strings
         /// </summary>
         public string InitialLanguage { get; init; }
+
+        /// <summary>
+        /// The list of property databases to load when Legendary Explorer Core loads. Default is all ME games
+        /// </summary>
+        public MEGame[] PropertyDatabasesToLoad { get; set; } = new[] { MEGame.ME1, MEGame.ME2, MEGame.ME3, MEGame.LE1, MEGame.LE2, MEGame.LE3 };
 
         /// <summary>
         /// Installs the callbacks specified in this package into ME3TweaksCore.
