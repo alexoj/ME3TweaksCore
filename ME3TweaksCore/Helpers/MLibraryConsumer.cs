@@ -1,9 +1,12 @@
-﻿using System;
+﻿using AuthenticodeExaminer;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -48,6 +51,23 @@ namespace ME3TweaksCore.Helpers
         public static string GetHostingProcessname() => @"ME3TweaksCore";
 #else
         public static string GetHostingProcessname() => Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.ModuleName);
+
+        /// <summary>
+        /// Gets the signing date of the executable. Depends on it being signed
+        /// </summary>
+        /// <returns></returns>
+        internal static string GetSigningDate()
+        {
+            var info = new FileInspector(GetExecutablePath());
+            var signTime = info.GetSignatures().FirstOrDefault()?.TimestampSignatures.FirstOrDefault()?.TimestampDateTime?.UtcDateTime;
+
+            if (signTime != null)
+            {
+                return signTime.Value.ToLocalTime().ToString(@"MMMM dd, yyyy @ hh:mm");
+            }
+      
+            return "Build not signed";
+        }
 #endif
     }
 }

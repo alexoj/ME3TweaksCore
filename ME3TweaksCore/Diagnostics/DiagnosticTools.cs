@@ -26,6 +26,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <returns></returns>
         public static List<string> VerifyPackages(GameTarget target, Action<int, int> progressCallback = null)
         {
+            MLog.Information($@"Running diagnostic tool: VerifyPackages on {target.TargetPath}");
             List<string> errors = new List<string>();
 
             var loadedPackages = MELoadedFiles
@@ -41,6 +42,7 @@ namespace ME3TweaksCore.Diagnostics
                 }
                 catch (Exception e)
                 {
+                    MLog.Exception(e, @"Error opening package file: ");
                     errors.Add(LC.GetString(LC.string_interp_failedToLoadPackageXY, packPath, e.FlattenException())); // Fat stack is probably more useful as it can trace where code failed.
                 }
 

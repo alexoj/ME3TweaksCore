@@ -132,7 +132,7 @@ namespace ME3TweaksCore.Config
             DebugFileName = dlcFolderName;
 #endif
 
-            if (game == MEGame.LE2)
+            if (game.IsGame2())
             {
                 var iniFiles = Directory.GetFiles(cookedDir, @"*.ini", SearchOption.TopDirectoryOnly);
                 foreach (var ini in iniFiles)
@@ -143,7 +143,7 @@ namespace ME3TweaksCore.Config
                     Assets[fname] = ConfigFileProxy.LoadIni(ini);
                 }
             }
-            else if (game == MEGame.LE3)
+            else if (game.IsGame3())
             {
                 var coalFile = Path.Combine(cookedDir, $@"Default_{dlcFolderName}.bin");
                 if (File.Exists(coalFile))
@@ -152,7 +152,7 @@ namespace ME3TweaksCore.Config
                 }
                 else
                 {
-                    MLog.Error($@"LE3 config file does not exist: {coalFile}, using blank assets");
+                    MLog.Error($@"{game} config file does not exist: {coalFile}, using blank assets");
                 }
             }
             else
@@ -194,12 +194,16 @@ namespace ME3TweaksCore.Config
                 compiledStream.WriteToFile(outPath);
                 HasChanges = false;
             }
-            else if (Game == MEGame.LE3)
+            else if (Game.IsGame3())
             {
                 // This is kind of a hack, but it works.
                 var compiled = CoalescedConverter.CompileFromMemory(Assets.ToDictionary(x => x.Key, x => x.Value.ToXmlString()));
                 compiled.WriteToFile(outPath);
                 HasChanges = false;
+            }
+            else
+            {
+                MLog.Error($@"Unsupported game for single-file config merge: {Game}");
             }
         }
 
@@ -208,7 +212,7 @@ namespace ME3TweaksCore.Config
         /// </summary>
         public void CommitDLCAssets(string outPath = null)
         {
-            if (Game == MEGame.LE2)
+            if (Game.IsGame2())
             {
                 foreach (var v in Assets)
                 {
@@ -217,7 +221,7 @@ namespace ME3TweaksCore.Config
                 }
                 HasChanges = false;
             }
-            else if (Game == MEGame.LE3)
+            else if (Game.IsGame3())
             {
                 var coalFile = Path.Combine(outPath ?? CookedDir, $@"Default_{DLCFolderName}.bin");
                 CommitAssets(coalFile);
