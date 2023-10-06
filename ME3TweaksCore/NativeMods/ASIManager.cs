@@ -101,6 +101,7 @@ namespace ME3TweaksCore.NativeMods
                 }
                 else
                 {
+                    MLog.Information(@"Using ASI manifest from online source");
                     onlineManifest = preloadedManifestData;
                 }
 
@@ -108,6 +109,7 @@ namespace ME3TweaksCore.NativeMods
                 {
                     MLog.Warning(@"Cannot load ASI manifest: Could not fetch online manifest and no local manifest exists");
                     LoadEmbeddedManifest();
+                    logManifestInfo();
                     return;
                 }
 
@@ -124,6 +126,7 @@ namespace ME3TweaksCore.NativeMods
                 try
                 {
                     ParseManifest(onlineManifest, true);
+                    logManifestInfo();
                 }
                 catch (Exception e)
                 {
