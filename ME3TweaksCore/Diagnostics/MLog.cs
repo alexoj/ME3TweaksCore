@@ -9,15 +9,19 @@ namespace ME3TweaksCore.Diagnostics
     /// </summary>
     public class MLog
     {
-        public static void SetLogger(ILogger logger)
-        {
-            Log.Logger = logger;
-        }
-
         /// <summary>
         /// Logging prefix for ME3TWEAKSCORE logs.
         /// </summary>
-        private const string LoggingPrefix = @"[ME3TWEAKSCORE] ";
+        private const string InternalLoggingPrefix = @"ME3TWEAKSCORE";
+
+        /// <summary>
+        /// Denotes a new session in the log
+        /// </summary>
+        /// <param name="customPrefix"></param>
+        public static void LogSessionStart(string customPrefix = InternalLoggingPrefix)
+        {
+            Log.Information($"[{customPrefix}] ===========================================================================");
+        }
 
         /// <summary>
         /// Logs a string to the log. You can specify a boolean for log checking (for making calls easier)
@@ -25,11 +29,24 @@ namespace ME3TweaksCore.Diagnostics
         /// <param name="message"></param>
         /// <param name="prefix"></param>
         /// <param name="shouldLog"></param>
-        public static void Information(string message, bool shouldLog = true)
+        public static void Information(string message, bool shouldLog = true, string customPrefix = InternalLoggingPrefix)
         {
             if (shouldLog)
             {
-                Log.Information($@"{LoggingPrefix}{message}");
+                Log.Information($@"[{customPrefix}] {message}");
+            }
+        }
+
+        /// <summary>
+        /// Logs a string to the log. You can specify a boolean for log checking (for making calls easier)
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="shouldLog"></param>
+        public static void Warning(string message, bool shouldLog = true, string customPrefix = InternalLoggingPrefix)
+        {
+            if (shouldLog)
+            {
+                Log.Warning($@"[{customPrefix}] {message}");
             }
         }
 
@@ -39,11 +56,11 @@ namespace ME3TweaksCore.Diagnostics
         /// <param name="message"></param>
         /// <param name="prefix"></param>
         /// <param name="shouldLog"></param>
-        internal static void Warning(string message, bool shouldLog = true)
+        public static void Error(string message, bool shouldLog = true, string customPrefix = InternalLoggingPrefix)
         {
             if (shouldLog)
             {
-                Log.Warning($@"{LoggingPrefix}{message}");
+                Log.Error($@"[{customPrefix}] {message}");
             }
         }
 
@@ -53,11 +70,11 @@ namespace ME3TweaksCore.Diagnostics
         /// <param name="message"></param>
         /// <param name="prefix"></param>
         /// <param name="shouldLog"></param>
-        public static void Error(string message, string prefix = null, bool shouldLog = true)
+        public static void Error(Exception ex, bool shouldLog = true, string customPrefix = InternalLoggingPrefix)
         {
             if (shouldLog)
             {
-                Log.Error($@"{prefix ?? LoggingPrefix}{message}");
+                Log.Error($@"[{customPrefix}] {ex.FlattenException()}");
             }
         }
 
@@ -67,25 +84,11 @@ namespace ME3TweaksCore.Diagnostics
         /// <param name="message"></param>
         /// <param name="prefix"></param>
         /// <param name="shouldLog"></param>
-        public static void Error(Exception ex, bool shouldLog = true)
+        public static void Fatal(string message, bool shouldLog = true, string customPrefix = InternalLoggingPrefix)
         {
             if (shouldLog)
             {
-                Log.Error($@"{LoggingPrefix}{ex.FlattenException()}");
-            }
-        }
-
-        /// <summary>
-        /// Logs a string to the log. You can specify a boolean for log checking (for making calls easier)
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="prefix"></param>
-        /// <param name="shouldLog"></param>
-        internal static void Fatal(string message, string prefix = null, bool shouldLog = true)
-        {
-            if (shouldLog)
-            {
-                Log.Fatal($@"{prefix ?? LoggingPrefix}{message}");
+                Log.Fatal($@"[{customPrefix}] {message}");
             }
         }
 
@@ -95,12 +98,18 @@ namespace ME3TweaksCore.Diagnostics
         public static void CloseAndFlush()
         {
             Log.CloseAndFlush();
-
         }
 
-        public static void Exception(Exception exception, string preMessage, bool fatal = false)
+        /// <summary>
+        /// Writes a pre-message and a stacktrace to the log.
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <param name="preMessage"></param>
+        /// <param name="fatal"></param>
+        /// <param name="customPrefix"></param>
+        public static void Exception(Exception exception, string preMessage, bool fatal = false, string customPrefix = InternalLoggingPrefix)
         {
-            Log.Error($@"{LoggingPrefix}{preMessage}");
+            Log.Error($@"[{customPrefix}] {preMessage}");
 
             // Log exception
             while (exception != null)
@@ -109,9 +118,9 @@ namespace ME3TweaksCore.Diagnostics
                 foreach (var line in line1.Split("\n")) // do not localize
                 {
                     if (fatal)
-                        Log.Fatal(LoggingPrefix + line);
+                        Log.Fatal(customPrefix + line);
                     else
-                        Log.Error(LoggingPrefix + line);
+                        Log.Error(customPrefix + line);
 
                 }
 
@@ -120,9 +129,9 @@ namespace ME3TweaksCore.Diagnostics
                     foreach (var line in exception.StackTrace.Split("\n")) // do not localize
                     {
                         if (fatal)
-                            Log.Fatal(LoggingPrefix + line);
+                            Log.Fatal(customPrefix + line);
                         else
-                            Log.Error(LoggingPrefix + line);
+                            Log.Error(customPrefix + line);
                     }
                 }
 
@@ -130,12 +139,18 @@ namespace ME3TweaksCore.Diagnostics
             }
         }
 
-        public static void Debug(string message, string prefix = null, bool shouldLog = true)
+        /// <summary>
+        /// Writes a debug log statement
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="prefix"></param>
+        /// <param name="shouldLog"></param>
+        /// <param name="customPrefix"></param>
+        public static void Debug(string message, bool shouldLog = true, string customPrefix = InternalLoggingPrefix)
         {
             if (shouldLog)
             {
-                Log.Debug($@"{prefix ?? LoggingPrefix}{message}");
-                System.Diagnostics.Debug.WriteLine($@"{prefix ?? LoggingPrefix}{message}");
+                Log.Debug($@"[{customPrefix}] {message}");
             }
         }
     }

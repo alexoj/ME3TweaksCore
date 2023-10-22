@@ -153,10 +153,13 @@ namespace ME3TweaksCore.Diagnostics
         /// Closing tag for a collapsable subsection
         /// </summary>
         private const string END_SUB = @"[/SUB]";
-        public static List<LogItem> GetLogsList()
+        public static List<LogItem> GetLogsList(string activeLogPath = null)
         {
             var logs = Directory.GetFiles(MCoreFilesystem.GetLogDir(), @"*.txt");
-            return logs.Select(x => new LogItem(x)).ToList();
+            return logs.Select(x => new LogItem(x)
+            {
+                IsActiveLog = x == activeLogPath
+            }).ToList();
         }
 
         public static string CollectLogs(string logfile)
@@ -2228,9 +2231,10 @@ namespace ME3TweaksCore.Diagnostics
                 dictionary.Add(@"ToolName", MLibraryConsumer.GetHostingProcessname());
                 dictionary.Add(@"ToolVersion", MLibraryConsumer.GetAppVersion());
 
-
-                string responseString = package.UploadEndpoint.PostUrlEncodedAsync(dictionary)
-                //new
+                //10/22/2023 - Change to unified endpoint
+                string responseString = "https://me3tweaks.com/modmanager/logservice/shared/logupload".PostUrlEncodedAsync(dictionary)
+                
+                    //new
                 //{
                 //    LogData = Convert.ToBase64String(lzmalog),
                 //    Attachments = package.Attachments,
@@ -2290,10 +2294,11 @@ namespace ME3TweaksCore.Diagnostics
     /// </summary>
     public class LogUploadPackage
     {
-        /// <summary>
-        /// Endpoint for uploading to. This is required.
-        /// </summary>
-        public string UploadEndpoint { get; set; }
+        // 10/22/2023 - Change to unified/abstracted log system serverside
+        ///// <summary>
+        ///// Endpoint for uploading to. This is required.
+        ///// </summary>
+        //public string UploadEndpoint { get; set; }
 
         /// <summary>
         /// Target to perform diagnostic on (can be null)
