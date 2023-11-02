@@ -28,6 +28,16 @@ namespace ME3TweaksCore
         public bool LoadAuxiliaryServices { get; set; } = true;
 
         /// <summary>
+        /// Indicates that the BuildHelper class should get information about the hosting executable when the library is loaded
+        /// </summary>
+        public bool LoadBuildInfo { get; set; } = true;
+
+        /// <summary>
+        /// Defines the list of authorized names on authenticode signatures to treat this build as genuine
+        /// </summary>
+        public BuildHelper.BuildSigner[] AllowedSigners { get; set; }
+
+        /// <summary>
         /// The run on ui thread delegate. If you are not using WPF, this should just return a thread.
         /// </summary>
         [DisallowNull]
@@ -123,6 +133,12 @@ namespace ME3TweaksCore
             CheckOptions();
             LogCollector.CreateLogger = CreateLogger;
             Log.Logger ??= LogCollector.CreateLogger?.Invoke();
+
+            if (LoadBuildInfo)
+            {
+                BuildHelper.ReadRuildInfo(AllowedSigners);
+            }
+
 
             ME3TweaksCoreLib.RunOnUIThread = RunOnUiThreadDelegate;
 
