@@ -83,6 +83,26 @@ namespace ME3TweaksCore.Helpers
     public class AppUpdater
     {
         /// <summary>
+        /// Gets the actual release tag. Returns null if the tag doesn't match the prefix, if specified.
+        /// </summary>
+        /// <param name="releaseTag"></param>
+        /// <param name="interopPackage"></param>
+        /// <returns></returns>
+        private static string GetRealReleaseTag(string releaseTag, AppUpdateInteropPackage interopPackage)
+        {
+            if (interopPackage.TagPrefix != null)
+            {
+                if (!releaseTag.StartsWith(interopPackage.TagPrefix))
+                {
+                    return null; // This release is not for us.
+                }
+                releaseTag = releaseTag.Substring(interopPackage.TagPrefix.Length);
+            }
+
+            return releaseTag;
+        }
+
+        /// <summary>
         /// Checks for application updates. The hosting app must implement the reboot and swap logic
         /// </summary>
         public static async void PerformGithubAppUpdateCheck(AppUpdateInteropPackage interopPackage)
@@ -101,18 +121,14 @@ namespace ME3TweaksCore.Helpers
                     //The release we want to check is always the latest
                     Release latest = null;
                     Version latestVer = new Version(@"0.0.0.0");
+                    string realReleaseTag = null;
                     foreach (Release onlineRelease in releases)
                     {
-                        var realReleaseTag = onlineRelease.TagName;
-                        if (interopPackage.TagPrefix != null)
+                        realReleaseTag = GetRealReleaseTag(onlineRelease.TagName, interopPackage);
+                        if (realReleaseTag == null)
                         {
-                            if (!realReleaseTag.StartsWith(interopPackage.TagPrefix))
-                            {
-                                continue; // This release is not for us.
-                            }
-                            realReleaseTag = realReleaseTag.Substring(interopPackage.TagPrefix.Length);
+                            continue; // Not for us
                         }
-
                         if (Version.TryParse(realReleaseTag, out var onlineReleaseVersion))
                         {
                             if (ProperVersion.IsLessThan(onlineReleaseVersion, currentAppVersionInfo) && ((interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease) || !onlineRelease.Prerelease))
@@ -152,8 +168,8 @@ namespace ME3TweaksCore.Helpers
 
                     if (latest != null)
                     {
-                        MLog.Information(@"Latest available applicable update: " + latest.TagName);
-                        Version releaseName = new Version(latest.TagName);
+                        MLog.Information($@"Latest available applicable update: {latest.TagName}");
+                        Version releaseName = new Version(realReleaseTag);
                         if (ProperVersion.IsGreaterThan(releaseName, currentAppVersionInfo))
                         {
                             bool upgrade = false;
@@ -295,8 +311,7 @@ namespace ME3TweaksCore.Helpers
                 var destMd5 = hashLine.Substring(5).Trim();
                 if (destMd5.Length != 32)
                 {
-                    MLog.Warning(
-                        $@"Release {latestRelease.TagName} has invalid hash length in body, cannot use patch update strategy");
+                    MLog.Warning($@"Release {latestRelease.TagName} has invalid hash length in body, cannot use patch update strategy");
                     return false; //no hash
                 }
 
