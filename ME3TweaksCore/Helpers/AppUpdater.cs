@@ -74,6 +74,10 @@ namespace ME3TweaksCore.Helpers
         /// If the application can update to PreRelease builds (on GitHub)
         /// </summary>
         public bool AllowPrereleaseBuilds { get; set; }
+        /// <summary>
+        /// Prefix for tags in the Github repo. If this is not set, the entire tag name will be used instead.
+        /// </summary>
+        public string TagPrefix { get; set; }
     }
 
     public class AppUpdater
@@ -99,35 +103,50 @@ namespace ME3TweaksCore.Helpers
                     Version latestVer = new Version(@"0.0.0.0");
                     foreach (Release onlineRelease in releases)
                     {
-                        Version onlineReleaseVersion = new Version(onlineRelease.TagName);
-
-                        if (ProperVersion.IsLessThan(onlineReleaseVersion,currentAppVersionInfo)  && ((interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease) || !onlineRelease.Prerelease))
+                        var realReleaseTag = onlineRelease.TagName;
+                        if (interopPackage.TagPrefix != null)
                         {
-                            MLog.Information($@"The version of {interopPackage.ApplicationName} that we have is higher than/equal to the latest release from github, no updates available. Latest applicable github release is {onlineReleaseVersion}");
-                            break;
+                            if (!realReleaseTag.StartsWith(interopPackage.TagPrefix))
+                            {
+                                continue; // This release is not for us.
+                            }
+                            realReleaseTag = realReleaseTag.Substring(interopPackage.TagPrefix.Length);
                         }
 
-                        // Check if applicable
-                        if (onlineRelease.Assets.All(x => !x.Name.StartsWith(interopPackage.UpdateAssetPrefix)))
+                        if (Version.TryParse(realReleaseTag, out var onlineReleaseVersion))
                         {
-                            continue; //This release is not applicable to us
-                        }
+                            if (ProperVersion.IsLessThan(onlineReleaseVersion, currentAppVersionInfo) && ((interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease) || !onlineRelease.Prerelease))
+                            {
+                                MLog.Information($@"The version of {interopPackage.ApplicationName} that we have is higher than/equal to the latest release from github, no updates available. Latest applicable github release is {onlineReleaseVersion}");
+                                break;
+                            }
 
-                        if (!interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
-                        {
-                            continue;
-                        }
+                            // Check if applicable
+                            if (onlineRelease.Assets.All(x => !x.Name.StartsWith(interopPackage.UpdateAssetPrefix)))
+                            {
+                                continue; //This release is not applicable to us
+                            }
 
-                        // Checked values (M): M.X.M.X
-                        if (currentAppVersionInfo.Major == onlineReleaseVersion.Major && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
-                        {
-                            myReleaseAge++;
-                        }
+                            if (!interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
+                            {
+                                continue;
+                            }
 
-                        if (ProperVersion.IsGreaterThan(onlineReleaseVersion, latestVer))
+                            // Checked values (M): M.X.M.X
+                            if (currentAppVersionInfo.Major == onlineReleaseVersion.Major && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
+                            {
+                                myReleaseAge++;
+                            }
+
+                            if (ProperVersion.IsGreaterThan(onlineReleaseVersion, latestVer))
+                            {
+                                latest = onlineRelease;
+                                latestVer = onlineReleaseVersion;
+                            }
+                        }
+                        else
                         {
-                            latest = onlineRelease;
-                            latestVer = onlineReleaseVersion;
+                            MLog.Warning($@"Invalid release name for this updater: {realReleaseTag}, skipping");
                         }
                     }
 
