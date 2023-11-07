@@ -121,10 +121,9 @@ namespace ME3TweaksCore.Helpers
                     //The release we want to check is always the latest
                     Release latest = null;
                     Version latestVer = new Version(@"0.0.0.0");
-                    string realReleaseTag = null;
                     foreach (Release onlineRelease in releases)
                     {
-                        realReleaseTag = GetRealReleaseTag(onlineRelease.TagName, interopPackage);
+                        var realReleaseTag = GetRealReleaseTag(onlineRelease.TagName, interopPackage);
                         if (realReleaseTag == null)
                         {
                             continue; // Not for us
@@ -133,7 +132,12 @@ namespace ME3TweaksCore.Helpers
                         {
                             if (ProperVersion.IsLessThan(onlineReleaseVersion, currentAppVersionInfo) && ((interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease) || !onlineRelease.Prerelease))
                             {
-                                MLog.Information($@"The version of {interopPackage.ApplicationName} that we have is higher than/equal to the latest release from github, no updates available. Latest applicable github release is {onlineReleaseVersion}");
+                                if (latest == null)
+                                {
+                                    // We haven't seen a newer version than ours
+                                    MLog.Information($@"The version of {interopPackage.ApplicationName} that we have is higher than/equal to the latest release from github, no updates available. Latest applicable github release is {onlineReleaseVersion}");
+                                }
+
                                 break;
                             }
 
@@ -169,8 +173,7 @@ namespace ME3TweaksCore.Helpers
                     if (latest != null)
                     {
                         MLog.Information($@"Latest available applicable update: {latest.TagName}");
-                        Version releaseName = new Version(realReleaseTag);
-                        if (ProperVersion.IsGreaterThan(releaseName, currentAppVersionInfo))
+                        if (ProperVersion.IsGreaterThan(latestVer, currentAppVersionInfo))
                         {
                             bool upgrade = false;
                             bool canCancel = true;
@@ -204,7 +207,7 @@ namespace ME3TweaksCore.Helpers
                                 }
 
                                 uiVersionInfo += LC.GetString(LC.string_upd_interp_releasedX, ageStr);
-                                string title = LC.GetString(LC.string_upd_interp_XYisAvailable, interopPackage.ApplicationName, releaseName);
+                                string title = LC.GetString(LC.string_upd_interp_XYisAvailable, interopPackage.ApplicationName, latestVer);
 
                                 var message = latest.Body;
                                 var msgLines = latest.Body.Split('\n');
