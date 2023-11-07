@@ -172,7 +172,7 @@ namespace ME3TweaksCore.Helpers
 
                     if (latest != null)
                     {
-                        MLog.Information($@"Latest available applicable update: {latest.TagName}");
+                        MLog.Information($@"Latest available applicable update: {latestVer}. Our version: {currentAppVersionInfo}");
                         if (ProperVersion.IsGreaterThan(latestVer, currentAppVersionInfo))
                         {
                             bool upgrade = false;
