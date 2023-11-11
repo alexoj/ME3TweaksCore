@@ -230,5 +230,13 @@ namespace ME3TweaksCore.Localization
 		public const string string_interp_XDoesNotSupportGameY = "string_interp_XDoesNotSupportGameY";
 		public const string string_interp_failedToLoadPackageXY = "string_interp_failedToLoadPackageXY";
 		public const string string_interp_copyDidntWorkX = "string_interp_copyDidntWorkX";
+		public const string string_generatingMod = "string_generatingMod";
+		public const string string_interp_sk_sqmNoBackup = "string_interp_sk_sqmNoBackup";
+		public const string string_interp_sk_sqmBackupMissingRequiredFile = "string_interp_sk_sqmBackupMissingRequiredFile";
+		public const string string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive = "string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive";
+		public const string string_errorReadingSquadmateOutfitManifestFileSeeLogs = "string_errorReadingSquadmateOutfitManifestFileSeeLogs";
+		public const string string_someSquadmateOutfitsWereNotMergedSeeLogs = "string_someSquadmateOutfitsWereNotMergedSeeLogs";
+		public const string string_interp_errorCompilingConditionalFunction = "string_interp_errorCompilingConditionalFunction";
+		public const string string_synchronizingSquadmateOutfits = "string_synchronizingSquadmateOutfits";
 	}
 }

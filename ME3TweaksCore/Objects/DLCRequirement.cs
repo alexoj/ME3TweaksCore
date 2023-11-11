@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Misc;

@@ -344,4 +344,22 @@
     <system:String x:Key="string_interp_copyDidntWorkX">Destination file doesn't exist after file copy: {0}</system:String>
     <!-- 0={File path} -->
 
+    <!-- DLC Mod Generator -->
+    <system:String x:Key="string_generatingMod">Generating mod</system:String>
+
+    <!-- Starter Kit Addins -->
+    <system:String x:Key="string_interp_sk_sqmNoBackup">No backup available for {0}, cannot generate squadmate merge files</system:String>
+    <!-- 0={game (ME1, ME2, etc)} -->
+    <system:String x:Key="string_interp_sk_sqmBackupMissingRequiredFile">Required file for squadmate merge not available in backup: {0}</system:String>
+    <!-- 0={filename} -->
+
+    <!-- Squadmate Merge -->
+    <system:String x:Key="string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive">Invalid hench name: {0}. Value is case sensitive.</system:String>
+    <!-- 0={Squadmate hench name (Marine, Tali, etc)} -->
+    <system:String x:Key="string_errorReadingSquadmateOutfitManifestFileSeeLogs">Error reading squadmate outfit manifest file for mod(s), see logs</system:String>
+    <system:String x:Key="string_someSquadmateOutfitsWereNotMergedSeeLogs">Some squadmate outfits were not merged, see logs</system:String>
+    <system:String x:Key="string_interp_errorCompilingConditionalFunction">Error compiling conditional function {0}: {1}</system:String>
+    <!-- 0={Entry full name} 1={error messages}-->
+    <system:String x:Key="string_synchronizingSquadmateOutfits">Synchronizing squadmate outfits</system:String>
+
 </ResourceDictionary>
