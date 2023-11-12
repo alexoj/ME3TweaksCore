@@ -10,7 +10,7 @@ using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Services.Backup;
-using ME3TweaksCore.Services.BasegameFileIdentification;
+using ME3TweaksCore.Services.Shared.BasegameFileIdentification;
 using PropertyChanged;
 using Serilog;
 

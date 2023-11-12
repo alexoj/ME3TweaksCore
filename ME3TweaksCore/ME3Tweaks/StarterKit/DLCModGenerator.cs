@@ -14,8 +14,8 @@ using LegendaryExplorerCore.TLK.ME1;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
+using ME3TweaksCore.ME3Tweaks.M3Merge;
 using ME3TweaksCore.Objects;
-using ME3TweaksModManager.modmanager.squadmates;
 using ME3TweaksModManager.modmanager.starterkit;
 
 namespace ME3TweaksCore.ME3Tweaks.StarterKit

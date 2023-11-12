@@ -7,13 +7,8 @@ using Flurl.Http;
 using LegendaryExplorerCore.Gammtek.Extensions.Collections.Generic;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
-using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
-using ME3TweaksCore.Misc;
-using ME3TweaksCore.Services.BasegameFileIdentification;
-using ME3TweaksCore.Services.ThirdPartyModIdentification;
-using ME3TweaksCore.Targets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

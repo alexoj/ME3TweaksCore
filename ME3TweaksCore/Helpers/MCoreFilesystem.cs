@@ -24,6 +24,23 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public delegate string GetAppDataFolderDelegate(bool createIfMissing = true);
 
+
+        /// <summary>
+        /// Gets the appdata directory for app data storage. The default implementation's folder name can be changed via AppDataFolderName. This method can be overridden by assigning it a delegate.
+        /// </summary>
+        /// <param name="createIfMissing"></param>
+        /// <returns></returns>
+        public static string GetSharedME3TweaksDataFolder(bool createIfMissing = true)
+        {
+            var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"ME3Tweaks");
+            if (createIfMissing && !Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            return folder;
+        }
+
         /// <summary>
         /// Gets the appdata directory for app data storage. The default implementation's folder name can be changed via AppDataFolderName. This method can be overridden by assigning it a delegate.
         /// </summary>
@@ -59,12 +76,21 @@ namespace ME3TweaksCore.Helpers
         }
 
         /// <summary>
+        /// Returns the path to where the cached online service responses reside on disk.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetSharedME3TweaksServicesCache()
+        {
+            return Directory.CreateDirectory(Path.Combine(GetSharedME3TweaksDataFolder(), @"ServicesCache")).FullName;
+        }
+
+        /// <summary>
         /// Returns the path to where the cached local BasegameIdentificationService file resides on disk.
         /// </summary>
         /// <returns></returns>
-        public static string GetLocalBasegameIdentificationServiceFile()
+        public static string GetSharedBasegameIdentificationServiceFile()
         {
-            return Path.Combine(GetME3TweaksServicesCache(), @"localbasegamefileidentificationservice.json");
+            return Path.Combine(GetSharedME3TweaksServicesCache(), @"basegamefileidentificationservice.json");
         }
 
         /// <summary>
@@ -74,15 +100,6 @@ namespace ME3TweaksCore.Helpers
         public static string GetFileSourceServiceFile()
         {
             return Path.Combine(GetME3TweaksServicesCache(), @"filesourceservice.json");
-        }
-
-        /// <summary>
-        /// Returns the path to where the cached server BasegameIdentificationService file resides on disk.
-        /// </summary>
-        /// <returns></returns>
-        public static string GetME3TweaksBasegameFileIdentificationServiceFile()
-        {
-            return Path.Combine(GetME3TweaksServicesCache(), @"me3tweaksbasegamefileidentificationservice.json");
         }
 
         public static string GetThirdPartyIdentificationCachedFile()

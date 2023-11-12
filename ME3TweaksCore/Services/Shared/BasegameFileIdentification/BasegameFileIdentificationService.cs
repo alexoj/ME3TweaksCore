@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using LegendaryExplorerCore.Gammtek.Extensions.Collections.Generic;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
@@ -12,7 +13,7 @@ using ME3TweaksCore.Targets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ME3TweaksCore.Services.BasegameFileIdentification
+namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
 {
     public class BasegameFileIdentificationService
     {
@@ -32,7 +33,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
         /// </summary>
         private const string ServiceLoggingName = @"Basegame File Identification Service";
 
-        private static void LoadLocalBasegameIdentificationService()
+        private static void LoadSharedBasegameIdentificationService()
         {
             if (Database != null) return;
             Database = new CaseInsensitiveDictionary<CaseInsensitiveDictionary<List<BasegameFileRecord>>>();
@@ -42,24 +43,29 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 
         private static void LoadDatabase(Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> database, JToken serverData = null)
         {
-            var file = MCoreFilesystem.GetLocalBasegameIdentificationServiceFile();
+            var file = MCoreFilesystem.GetSharedBasegameIdentificationServiceFile();
             if (File.Exists(file))
             {
-                try
+                var attemptsLeft = 3;
+
+                while (attemptsLeft > 0)
                 {
-                    var db = JsonConvert
-                        .DeserializeObject<
-                            Dictionary<string, CaseInsensitiveDictionary<
-                                List<BasegameFileRecord>>>>(
-                            File.ReadAllText(file));
-                    database.ReplaceAll(db);
-                    MLog.Information($@"Loaded {ServiceLoggingName}");
-                }
-                catch (Exception e)
-                {
-                    MLog.Error($@"Error loading {ServiceLoggingName}: {e.Message}");
-                    var db = getBlankBGFIDB();
-                    database.ReplaceAll(db);
+                    attemptsLeft--;
+
+                    try
+                    {
+                        var db = JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>(File.ReadAllText(file));
+                        database.ReplaceAll(db);
+                        MLog.Information($@"Loaded {ServiceLoggingName}");
+                        break;
+                    }
+                    catch (Exception e)
+                    {
+                        MLog.Error($@"Error loading {ServiceLoggingName}: {e.Message}");
+                        var db = getBlankBGFIDB();
+                        database.ReplaceAll(db);
+                        Thread.Sleep(1000); // This should be more than enough time for the record to resave
+                    }
                 }
             }
             else
@@ -72,7 +78,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
 
         public static void AddLocalBasegameIdentificationEntries(List<BasegameFileRecord> entries)
         {
-            LoadLocalBasegameIdentificationService();
+            LoadSharedBasegameIdentificationService();
 
             bool updated = false;
             // Update the DB
@@ -109,7 +115,6 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
             else
             {
                 MLog.Information($@"Local {ServiceLoggingName} did not need updating");
-
             }
         }
 
@@ -124,16 +129,24 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
  JsonConvert.SerializeObject(Database, new JsonSerializerSettings() { NullValueHandling =
  NullValueHandling.Ignore });
 #endif
-            try
+            var attemptsLeft = 6;
+            while (attemptsLeft > 0)
             {
-                File.WriteAllText(MCoreFilesystem.GetLocalBasegameIdentificationServiceFile(), outText);
-                MLog.Information($@"Updated local {ServiceLoggingName}");
+                attemptsLeft--;
+                try
+                {
+                    MLog.Information($@"Updating shared {ServiceLoggingName}");
+                    File.WriteAllText(MCoreFilesystem.GetSharedBasegameIdentificationServiceFile(), outText);
+                    MLog.Information($@"Updated shared {ServiceLoggingName}");
+                    break;
 
-            }
-            catch (Exception e)
-            {
-                // bwomp bwomp
-                MLog.Error($@"Error saving local BGFIS: {e.Message}");
+                }
+                catch (Exception e)
+                {
+                    // bwomp bwomp
+                    MLog.Error($@"Error saving shared BGFIS: {e.Message}");
+                }
+                Thread.Sleep(500);
             }
         }
 
@@ -145,7 +158,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
         /// <returns></returns>
         public static BasegameFileRecord GetBasegameFileSource(GameTarget target, string fullfilepath, string md5 = null)
         {
-            LoadLocalBasegameIdentificationService();
+            LoadSharedBasegameIdentificationService();
             if (Database.TryGetValue(target.Game.ToString(), out var infosForGameL))
             {
                 var relativeFilename = fullfilepath.Substring(target.TargetPath.Length + 1).ToUpper();
@@ -185,7 +198,7 @@ namespace ME3TweaksCore.Services.BasegameFileIdentification
         // This service doesn't take any data but uses the service loader model.
         public static bool LoadService(JToken data)
         {
-            LoadLocalBasegameIdentificationService();
+            LoadSharedBasegameIdentificationService();
             ServiceLoaded = true;
             return true;
         }

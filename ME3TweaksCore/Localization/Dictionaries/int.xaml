@@ -362,4 +362,13 @@
     <!-- 0={Entry full name} 1={error messages}-->
     <system:String x:Key="string_synchronizingSquadmateOutfits">Synchronizing squadmate outfits</system:String>
 
+    <!-- LE1 Config Merge -->
+    <system:String x:Key="string_m3ConsoleKeybinds">M3 Console Keybinds</system:String>
+    <!-- This is the name assigned to the entry that is shown in Modified Basegame Files when you set the keybinds for LE1 and they persist across merges. It's a mod name essentially, but its OK to localize for the user-->
+
+    <!-- Game 2 Email Merge -->
+    <system:String x:Key="string_synchronizingEmails">Synchronizing Emails</system:String>
+    <system:String x:Key="string_emailsNotMergedMessagesFileNotFound">Emails not merged: Messages file not found</system:String>
+    <system:String x:Key="string_game2EmailMergeWrongGame">Game 2 email merge manifest targets incorrect game</system:String>
+
 </ResourceDictionary>

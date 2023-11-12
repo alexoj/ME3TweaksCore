@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using LegendaryExplorerCore.Coalesced;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Gammtek.Extensions.Collections.Generic;
@@ -21,13 +20,12 @@ using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
-using ME3TweaksCore.ME3Tweaks.M3Merge;
 using ME3TweaksCore.ME3Tweaks.StarterKit.LE2;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.Targets;
 using Newtonsoft.Json;
 
-namespace ME3TweaksModManager.modmanager.squadmates
+namespace ME3TweaksCore.ME3Tweaks.M3Merge
 {
     public class SQMOutfitMerge
     {

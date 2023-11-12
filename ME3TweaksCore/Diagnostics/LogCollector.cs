@@ -29,7 +29,7 @@ using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Objects;
 using ME3TweaksCore.Services;
-using ME3TweaksCore.Services.BasegameFileIdentification;
+using ME3TweaksCore.Services.Shared.BasegameFileIdentification;
 using ME3TweaksCore.Services.ThirdPartyModIdentification;
 using ME3TweaksCore.Targets;
 using Microsoft.Win32;

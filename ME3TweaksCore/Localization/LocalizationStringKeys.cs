@@ -238,5 +238,9 @@ namespace ME3TweaksCore.Localization
 		public const string string_someSquadmateOutfitsWereNotMergedSeeLogs = "string_someSquadmateOutfitsWereNotMergedSeeLogs";
 		public const string string_interp_errorCompilingConditionalFunction = "string_interp_errorCompilingConditionalFunction";
 		public const string string_synchronizingSquadmateOutfits = "string_synchronizingSquadmateOutfits";
+		public const string string_m3ConsoleKeybinds = "string_m3ConsoleKeybinds";
+		public const string string_synchronizingEmails = "string_synchronizingEmails";
+		public const string string_emailsNotMergedMessagesFileNotFound = "string_emailsNotMergedMessagesFileNotFound";
+		public const string string_game2EmailMergeWrongGame = "string_game2EmailMergeWrongGame";
 	}
 }
