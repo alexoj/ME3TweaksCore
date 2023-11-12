@@ -74,10 +74,34 @@ namespace ME3TweaksCore.Helpers
         /// If the application can update to PreRelease builds (on GitHub)
         /// </summary>
         public bool AllowPrereleaseBuilds { get; set; }
+        /// <summary>
+        /// Prefix for tags in the Github repo. If this is not set, the entire tag name will be used instead.
+        /// </summary>
+        public string TagPrefix { get; set; }
     }
 
     public class AppUpdater
     {
+        /// <summary>
+        /// Gets the actual release tag. Returns null if the tag doesn't match the prefix, if specified.
+        /// </summary>
+        /// <param name="releaseTag"></param>
+        /// <param name="interopPackage"></param>
+        /// <returns></returns>
+        private static string GetRealReleaseTag(string releaseTag, AppUpdateInteropPackage interopPackage)
+        {
+            if (interopPackage.TagPrefix != null)
+            {
+                if (!releaseTag.StartsWith(interopPackage.TagPrefix))
+                {
+                    return null; // This release is not for us.
+                }
+                releaseTag = releaseTag.Substring(interopPackage.TagPrefix.Length);
+            }
+
+            return releaseTag;
+        }
+
         /// <summary>
         /// Checks for application updates. The hosting app must implement the reboot and swap logic
         /// </summary>
@@ -99,43 +123,57 @@ namespace ME3TweaksCore.Helpers
                     Version latestVer = new Version(@"0.0.0.0");
                     foreach (Release onlineRelease in releases)
                     {
-                        Version onlineReleaseVersion = new Version(onlineRelease.TagName);
-
-                        if (ProperVersion.IsLessThan(onlineReleaseVersion,currentAppVersionInfo)  && ((interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease) || !onlineRelease.Prerelease))
+                        var realReleaseTag = GetRealReleaseTag(onlineRelease.TagName, interopPackage);
+                        if (realReleaseTag == null)
                         {
-                            MLog.Information($@"The version of {interopPackage.ApplicationName} that we have is higher than/equal to the latest release from github, no updates available. Latest applicable github release is {onlineReleaseVersion}");
-                            break;
+                            continue; // Not for us
                         }
-
-                        // Check if applicable
-                        if (onlineRelease.Assets.All(x => !x.Name.StartsWith(interopPackage.UpdateAssetPrefix)))
+                        if (Version.TryParse(realReleaseTag, out var onlineReleaseVersion))
                         {
-                            continue; //This release is not applicable to us
+                            if (ProperVersion.IsLessThan(onlineReleaseVersion, currentAppVersionInfo) && ((interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease) || !onlineRelease.Prerelease))
+                            {
+                                if (latest == null)
+                                {
+                                    // We haven't seen a newer version than ours
+                                    MLog.Information($@"The version of {interopPackage.ApplicationName} that we have is higher than/equal to the latest release from github, no updates available. Latest applicable github release is {onlineReleaseVersion}");
+                                }
+
+                                break;
+                            }
+
+                            // Check if applicable
+                            if (onlineRelease.Assets.All(x => !x.Name.StartsWith(interopPackage.UpdateAssetPrefix)))
+                            {
+                                continue; //This release is not applicable to us
+                            }
+
+                            if (!interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
+                            {
+                                continue;
+                            }
+
+                            // Checked values (M): M.X.M.X
+                            if (currentAppVersionInfo.Major == onlineReleaseVersion.Major && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
+                            {
+                                myReleaseAge++;
+                            }
+
+                            if (ProperVersion.IsGreaterThan(onlineReleaseVersion, latestVer))
+                            {
+                                latest = onlineRelease;
+                                latestVer = onlineReleaseVersion;
+                            }
                         }
-
-                        if (!interopPackage.AllowPrereleaseBuilds && onlineRelease.Prerelease && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
+                        else
                         {
-                            continue;
-                        }
-
-                        // Checked values (M): M.X.M.X
-                        if (currentAppVersionInfo.Major == onlineReleaseVersion.Major && currentAppVersionInfo.Build < onlineReleaseVersion.Build)
-                        {
-                            myReleaseAge++;
-                        }
-
-                        if (ProperVersion.IsGreaterThan(onlineReleaseVersion, latestVer))
-                        {
-                            latest = onlineRelease;
-                            latestVer = onlineReleaseVersion;
+                            MLog.Warning($@"Invalid release name for this updater: {realReleaseTag}, skipping");
                         }
                     }
 
                     if (latest != null)
                     {
-                        MLog.Information(@"Latest available applicable update: " + latest.TagName);
-                        Version releaseName = new Version(latest.TagName);
-                        if (ProperVersion.IsGreaterThan(releaseName, currentAppVersionInfo))
+                        MLog.Information($@"Latest available applicable update: {latestVer}. Our version: {currentAppVersionInfo}");
+                        if (ProperVersion.IsGreaterThan(latestVer, currentAppVersionInfo))
                         {
                             bool upgrade = false;
                             bool canCancel = true;
@@ -169,7 +207,7 @@ namespace ME3TweaksCore.Helpers
                                 }
 
                                 uiVersionInfo += LC.GetString(LC.string_upd_interp_releasedX, ageStr);
-                                string title = LC.GetString(LC.string_upd_interp_XYisAvailable, interopPackage.ApplicationName, releaseName);
+                                string title = LC.GetString(LC.string_upd_interp_XYisAvailable, interopPackage.ApplicationName, latestVer);
 
                                 var message = latest.Body;
                                 var msgLines = latest.Body.Split('\n');
@@ -276,8 +314,7 @@ namespace ME3TweaksCore.Helpers
                 var destMd5 = hashLine.Substring(5).Trim();
                 if (destMd5.Length != 32)
                 {
-                    MLog.Warning(
-                        $@"Release {latestRelease.TagName} has invalid hash length in body, cannot use patch update strategy");
+                    MLog.Warning($@"Release {latestRelease.TagName} has invalid hash length in body, cannot use patch update strategy");
                     return false; //no hash
                 }
 

@@ -59,7 +59,6 @@ namespace ME3TweaksCore.Config
             else if (Game == MEGame.LE3)
             {
                 Assets = CoalescedConverter.DecompileGame3ToAssets(stream, filename ?? @"Coalesced.bin", stripExtensions: true);
-
             }
             else
             {
@@ -131,8 +130,22 @@ namespace ME3TweaksCore.Config
 #if DEBUG
             DebugFileName = dlcFolderName;
 #endif
-
-            if (game.IsGame2())
+            if (game == MEGame.LE1)
+            {
+                // Load any M3CD files and merge them together to produce the final results DLC configuration bundle.
+                var m3cds = Directory.GetFiles(cookedDir, @"*" + ConfigMerge.CONFIG_MERGE_EXTENSION,
+                        SearchOption.TopDirectoryOnly)
+                    .Where(x => Path.GetFileName(x).StartsWith(ConfigMerge.CONFIG_MERGE_PREFIX))
+                    .ToList(); // Find CoalescedMerge-*.m3cd files
+                
+                foreach (var m3cd in m3cds)
+                {
+                    MLog.Information($@"Merging M3 Config Delta {m3cd} in {dlcFolderName}");
+                    var m3cdasset = ConfigFileProxy.LoadIni(m3cd);
+                    ConfigMerge.PerformMerge(this, m3cdasset);
+                }
+            }
+            else if (game.IsGame2())
             {
                 var iniFiles = Directory.GetFiles(cookedDir, @"*.ini", SearchOption.TopDirectoryOnly);
                 foreach (var ini in iniFiles)

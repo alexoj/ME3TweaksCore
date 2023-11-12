@@ -51,6 +51,13 @@ namespace ME3TweaksCore
                 throw new Exception(@"The ME3TweaksCoreLibInitPackage object was null! This object is required to initialize the library.");
             }
 
+            if (Log.Logger == Serilog.Core.Logger.None && package.CreateLogger != null)
+            {
+                // Start logger if it is not already created.
+                Log.Logger = package.CreateLogger.Invoke();
+                MLog.Information(@"------------------------------------");
+            }
+
             MLog.Information($@"Initializing ME3TweaksCore library {MLibraryConsumer.GetLibraryVersion()}");
             package.InstallInitPackage();
 

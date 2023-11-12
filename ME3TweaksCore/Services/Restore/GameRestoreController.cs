@@ -112,7 +112,7 @@ namespace ME3TweaksCore.Services.Restore
         /// <returns></returns>
         private static string RestoreEverythingDefault(MEGame game)
         {
-            return LC.GetString(LC.string_interp_restoringWillDeleteEverythingMessage);
+            return LC.GetString(LC.string_interp_restoringWillDeleteEverythingMessage, game.ToGameName());
         }
 
         /// <summary>
