@@ -36,6 +36,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
         }
         #endregion
 
+        public const int MERGE_DLC_MOUNT_PRIORITY = 1900000000;
         public const string MERGE_DLC_FOLDERNAME = @"DLC_MOD_M3_MERGE";
         private const string MERGE_DLC_GUID_ATTRIBUTE_NAME = @"MergeDLCGUID";
 
@@ -99,7 +100,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                 ModInternalTLKID = 1928304430,
                 ModMountFlag = Target.Game.IsGame3() ? new MountFlag(EME3MountFileFlag.LoadsInSingleplayer) : new MountFlag(0, true),
                 ModDeveloper = @"ME3TweaksCore",
-                ModMountPriority = 1900000000,
+                ModMountPriority = MERGE_DLC_MOUNT_PRIORITY,
                 ModDLCFolderNameSuffix = MERGE_DLC_FOLDERNAME.Substring(@"DLC_MOD_".Length),
                 ModModuleNumber = 48955 // GAME 2
             };

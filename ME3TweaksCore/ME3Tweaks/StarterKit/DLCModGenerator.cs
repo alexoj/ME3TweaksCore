@@ -75,7 +75,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 {
                     var langExt = lang.FileCode == @"INT" ? "" : $@"_{lang.FileCode}"; // do not localize
                     var tlkPath = $@"{tlkGlobalFile}{langExt}.{extension}";
-                    MUtilities.ExtractInternalFile($@"ME3TweaksModManager.modmanager.starterkit.BlankTlkFile.{extension}", tlkPath, true);
+                    MUtilities.ExtractInternalFile($@"ME3TweaksCore.ME3Tweaks.StarterKit.{skOption.ModGame}.BlankTlkFile.{extension}", tlkPath, true);
 
                     var tlkFile = MEPackageHandler.OpenMEPackage(tlkPath);
                     var tlk1 = new ME1TalkFile(tlkFile.GetUExport(1));
@@ -142,7 +142,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     bioEngineIni[@"DLCInfo"][@"Flags"].Value = ((int)skOption.ModMountFlag.FlagValue).ToString();
                     bioEngineIni[@"DLCInfo"][@"Name"].Value = skOption.ModInternalTLKID.ToString();
                     MLog.Information(@"Saving BioEngine file");
-                   bioEngineIni.WriteToFile(Path.Combine(cookedDir, @"BIOEngine.ini"), new UTF8Encoding(false));
+                    bioEngineIni.WriteToFile(Path.Combine(cookedDir, @"BIOEngine.ini"), new UTF8Encoding(false));
                 }
 
                 var tlkFilePrefix = skOption.ModGame.IsGame3() ? dlcFolderName : $@"DLC_{skOption.ModModuleNumber}";
