@@ -2,11 +2,11 @@ $projectRoot = (Get-Item $PSScriptRoot).parent.FullName
 $buildRoot = Join-Path -Path $projectRoot -ChildPath "Build"
 $lzmaExe = Join-Path -Path $projectRoot -ChildPath "Build" | Join-Path -ChildPath "lzma.exe"
 $localizationDir = Join-Path -Path $projectRoot -ChildPath "Localization" | Join-Path -ChildPath "Dictionaries"
-$filesToCompress = Get-ChildItem $localizationDir -Filter *.xaml 
+$filesToCompress = Get-ChildItem $localizationDir -Filter "*.xaml"
 
-
-foreach ($xaml in $filesToCompress){
+foreach ($xaml in $filesToCompress) {
     $hashFile = Join-Path -Path $buildRoot -ChildPath "$($xaml.Name).hash"
+    $xamlFile = $xaml.FullName
     $lzmaFile = $xaml.FullName + ".lzma"
     $needsCompiled = $true
 
@@ -16,9 +16,23 @@ foreach ($xaml in $filesToCompress){
     elseif (Test-Path $hashFile)
     {
         # Local builds can skip compilation if hash file is up to date
-        $hashLast = Get-Content $hashFile
-        $currentHash = Get-FileHash $lzmaFile -Algorithm SHA256
+        $hashes = Get-Content $hashFile
+        $hashLast = $hashes[0]
+
+        $currentHash = Get-FileHash $xamlFile -Algorithm SHA256
         $needsCompiled = $hashLast -ne $currentHash.Hash;
+
+        # Check LZMA
+        $hashLastLzma = $hashes[1]
+        $currentHashLzma = Get-FileHash $lzmaFile -Algorithm SHA256
+        if ($needsCompiled -eq $false){ # We must compute this anyways as it may be stored
+            $needsCompiled = $hashLastLzma -ne $currentHashLzma.Hash;
+        }
+
+        #Write-Output "HASHES for $($xaml.Name):"
+        #$currentHash
+        #$currentHashLzma
+
         # If hash file exists we can check if it doesn't need compiled. If it doesn't, it will always need compiled
         if ($needsCompiled -eq $false)
         {
@@ -38,6 +52,6 @@ foreach ($xaml in $filesToCompress){
     $processOptions.FilePath
     Start-Process @processOptions
 
-    $currentHash = Get-FileHash $lzmaFile -Algorithm SHA256
-    Set-Content -Path $hashFile -Value $currentHash.Hash
+    $currentHashLzma = Get-FileHash $lzmaFile -Algorithm SHA256
+    Set-Content -Path $hashFile -Value "$($currentHash.Hash)`n$($currentHashLzma.Hash)"
 }
