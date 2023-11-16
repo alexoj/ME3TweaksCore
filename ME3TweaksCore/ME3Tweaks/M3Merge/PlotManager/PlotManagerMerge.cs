@@ -34,6 +34,27 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.PlotManager
         /// </summary>
         public const string PLOT_MANAGER_UPDATE_FILENAME = @"PlotManagerUpdate.pmu";
 
+        /// <summary>
+        /// Returns if the specified target has any email merge files.
+        /// </summary>
+        /// <param name="target"></param>
+        public static bool NeedsMerged(GameTarget target)
+        {
+            if (!target.Game.IsGame1() && !target.Game.IsGame2()) return false;
+            try
+            {
+                var emailSupercedances = target.GetFileSupercedances(new[] { PLOT_MANAGER_UPDATE_EXTENSION });
+                return emailSupercedances.TryGetValue(PLOT_MANAGER_UPDATE_FILENAME, out var infoList) &&
+                       infoList.Count > 0;
+            }
+            catch (Exception e)
+            {
+                MLog.Exception(e, @"Error getting file supercedences:");
+            }
+
+            return false;
+        }
+
         public static bool RunPlotManagerMerge(GameTarget target, bool verboseLogging = false)
         {
             MLog.Information($@"Updating PlotManager for game: {target.TargetPath}");

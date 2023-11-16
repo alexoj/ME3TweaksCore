@@ -8,7 +8,8 @@ using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.ME3Tweaks.M3Merge.Game2Email;
-using ME3TweaksCore.ME3Tweaks.M3Merge.LE1CfgMerge;
+using ME3TweaksCore.ME3Tweaks.M3Merge.LE1Config;
+using ME3TweaksCore.ME3Tweaks.M3Merge.PlotManager;
 using ME3TweaksCore.ME3Tweaks.StarterKit;
 using ME3TweaksCore.Targets;
 
@@ -175,7 +176,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
         }
 
         /// <summary>
-        /// Runs an full merge (via MergeDLC) on the specific target.
+        /// Runs a full merge (via MergeDLC) on the specific target.
         /// </summary>
         /// <param name="target"></param>
         public static void RunCompleteMerge(GameTarget target, Action<string> setStatus = null)
@@ -183,9 +184,17 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
             // This doesn't use MergeDLC but runs at the same time, technically.
             if (target.Game == MEGame.LE1)
             {
-                LE1ConfigMerge.RunCoalescedMerge(target, null, null); // Todo: Shared settings with M3 for console keybinds.
+                LE1ConfigMerge.RunCoalescedMerge(target, null, null, true); // Todo: Shared settings with M3 for console keybinds.
             }
 
+            // This also does not use the MergeDLC component.
+            if ((target.Game.IsGame1() || target.Game.IsGame2()) && PlotManagerMerge.NeedsMerged(target))
+            {
+                // Todo: Verbose logging pass through.
+                PlotManagerMerge.RunPlotManagerMerge(target, false);
+            }
+
+            // The following do use the merge DLC component
             var mergeDLC = new M3MergeDLC(target);
             if (target.Game.IsGame2() && ME2EmailMerge.NeedsMergedGame2(target))
             {
@@ -199,11 +208,6 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                 SQMOutfitMerge.RunSquadmateOutfitMerge(mergeDLC, setStatus);
             }
 
-            // Todo: Plot Sync
-            if (target.Game.IsGame1() || target.Game.IsGame2())
-            {
-
-            }
         }
     }
 }
