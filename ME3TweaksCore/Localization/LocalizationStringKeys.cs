@@ -242,5 +242,8 @@ namespace ME3TweaksCore.Localization
 		public const string string_synchronizingEmails = "string_synchronizingEmails";
 		public const string string_emailsNotMergedMessagesFileNotFound = "string_emailsNotMergedMessagesFileNotFound";
 		public const string string_game2EmailMergeWrongGame = "string_game2EmailMergeWrongGame";
+		public const string string_interp_plotManagerSyncForX = "string_interp_plotManagerSyncForX";
+		public const string string_interp_errorCompilingFunctionReason = "string_interp_errorCompilingFunctionReason";
+		public const string string_interp_fileLibInitFailedPlotManager = "string_interp_fileLibInitFailedPlotManager";
 	}
 }

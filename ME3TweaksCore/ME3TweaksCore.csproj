@@ -30,7 +30,8 @@
 		<EmbeddedResource Include="ME3Tweaks\**\*.sfar" />
 		<EmbeddedResource Include="ME3Tweaks\**\*.png" />
 		<EmbeddedResource Include="ME3Tweaks\**\*.uc" />
-		<EmbeddedResource Include="ME3Tweaks\M3Merge\LE1CfgMerge\Coalesced_INT.bin" />
+		<EmbeddedResource Include="ME3Tweaks\M3Merge\LE1Config\Coalesced_INT.bin" />
+		<EmbeddedResource Include="ME3Tweaks\M3Merge\PlotManager\ME1\PlotManager.u" />
 		<EmbeddedResource Include="NativeMods\CachedASI\asimanifest.xml" />
 		<EmbeddedResource Include="NativeMods\CachedASI\**\*.asi" />
 	</ItemGroup>
@@ -38,8 +39,12 @@
 	<ItemGroup>
 	  <None Remove="ME3Tweaks\M3Merge\Game2Email\LE2\103Message_Templates_LE2.pcc" />
 	  <None Remove="ME3Tweaks\M3Merge\Game2Email\ME2\103Message_Templates_ME2.pcc" />
-	  <None Remove="ME3Tweaks\M3Merge\LE1CfgMerge\Coalesced_INT.bin" />
-	  <None Remove="ME3Tweaks\M3Merge\SquadmateMerge\HasOutfitOnConditional.txt" />
+	  <None Remove="ME3Tweaks\M3Merge\LE1Config\Coalesced_INT.bin" />
+	  <None Remove="ME3Tweaks\M3Merge\PlotManager\LE1\PlotManager.pcc" />
+	  <None Remove="ME3Tweaks\M3Merge\PlotManager\LE2\PlotManager.pcc" />
+	  <None Remove="ME3Tweaks\M3Merge\PlotManager\ME1\PlotManager.u" />
+	  <None Remove="ME3Tweaks\M3Merge\PlotManager\ME2\PlotManager.pcc" />
+	  <None Remove="ME3Tweaks\M3Merge\Squadmate\HasOutfitOnConditional.txt" />
 	  <None Remove="ME3Tweaks\StarterKit\BlankTlkFile.pcc" />
 	  <None Remove="ME3Tweaks\StarterKit\BlankTlkFile.upk" />
 	  <None Remove="ME3Tweaks\StarterKit\Default.sfar" />
@@ -63,9 +68,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="ME3Tweaks\M3Merge\Bio2DAMerge\" />
-	  <Folder Include="ME3Tweaks\M3Merge\PlotManagerMerge\" />
-	  <Folder Include="ME3Tweaks\M3Merge\SquadmateMerge\Game3\" />
+	  <Folder Include="ME3Tweaks\M3Merge\Bio2DATable\" />
+	  <Folder Include="ME3Tweaks\M3Merge\Squadmate\Game3\" />
 	  <Folder Include="ME3Tweaks\StarterKit\LE1\Classes\" />
 	</ItemGroup>
 

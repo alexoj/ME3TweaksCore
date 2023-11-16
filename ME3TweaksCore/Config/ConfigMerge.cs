@@ -1,29 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LegendaryExplorerCore.Coalesced;
-using LegendaryExplorerCore.Coalesced.Xml;
-using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
-using ME3TweaksCore.GameFilesystem;
 
 namespace ME3TweaksCore.Config
 {
     /// <summary>
     /// Class for handling merging config deltas
     /// </summary>
-    public class ConfigMerge
+    public static class ConfigMerge
     {
+        // DO NOT CHANGE
         public const string CONFIG_MERGE_PREFIX = @"ConfigDelta-";
         public const string CONFIG_MERGE_EXTENSION = @".m3cd";
 
 #if DEBUG
+        // Change to true to generate log output for config merge.
         private static readonly bool DebugConfigMerge = false;
 #else
         private static readonly bool DebugConfigMerge = false;
