@@ -234,7 +234,11 @@ namespace ME3TweaksCore.Helpers
             assembly ??= Assembly.GetExecutingAssembly();
 #if DEBUG
             // For debugging
-            var res = assembly.GetManifestResourceNames();
+            var res = assembly.GetManifestResourceNames(); // Do not remove. Makes debugger way more useful.
+            var asset = assembly.GetManifestResourceStream(assemblyResource);
+            if (asset == null)
+                Debugger.Break();
+            return asset;
 #endif
             return assembly.GetManifestResourceStream(assemblyResource);
         }

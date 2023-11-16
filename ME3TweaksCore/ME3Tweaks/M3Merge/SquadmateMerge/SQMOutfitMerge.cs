@@ -364,7 +364,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                 {
                     // LE2
                     var startupF = Path.Combine(cookedDir, $@"Startup_{M3MergeDLC.MERGE_DLC_FOLDERNAME}.pcc");
-                    var startup = MEPackageHandler.OpenMEPackageFromStream(MUtilities.GetResourceStream($@"ME3TweaksModManager.modmanager.merge.dlc.{mergeDLC.Target.Game}.Startup_{M3MergeDLC.MERGE_DLC_FOLDERNAME}.pcc"), $@"Startup_{M3MergeDLC.MERGE_DLC_FOLDERNAME}.pcc");
+                    var startup = MEPackageHandler.OpenMEPackageFromStream(MUtilities.GetResourceStream($@"ME3TweaksCore.ME3Tweaks.M3Merge.Startup.{mergeDLC.Target.Game}.Startup_{M3MergeDLC.MERGE_DLC_FOLDERNAME}.pcc"), $@"Startup_{M3MergeDLC.MERGE_DLC_FOLDERNAME}.pcc");
                     var conditionalClass = startup.FindExport($@"PlotManager{M3MergeDLC.MERGE_DLC_FOLDERNAME}.BioAutoConditionals");
 
                     // Add Conditional Functions
@@ -377,7 +377,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                     }
 
 
-                    var scTextOrig = new StreamReader(MUtilities.GetResourceStream($@"ME3TweaksModManager.modmanager.squadmates.{mergeDLC.Target.Game}.HasOutfitOnConditional.txt"))
+                    var scTextOrig = new StreamReader(MUtilities.GetResourceStream($@"ME3TweaksCore.ME3Tweaks.M3Merge.SquadmateMerge.{mergeDLC.Target.Game}.HasOutfitOnConditional.uc"))
                         .ReadToEnd();
                     foreach (var sqm in appearanceInfo.Values)
                     {
@@ -447,7 +447,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                     updateUIText?.Invoke(LC.GetString(LC.string_synchronizingSquadmateOutfits) + @" 0%");
                     var packagesToInjectInto = new[]
                         { @"BioH_SelectGUI.pcc", @"BioP_Exp1Lvl2.pcc", @"BioP_Exp1Lvl3.pcc", @"BioP_Exp1Lvl4.pcc" };
-                    using var swfStream = MUtilities.ExtractInternalFileToStream($@"ME3TweaksModManager.modmanager.merge.dlc.{mergeDLC.Target.Game}.TeamSelect.swf");
+                    using var swfStream = MUtilities.ExtractInternalFileToStream($@"ME3TweaksCore.ME3Tweaks.M3Merge.SquadmateMerge.{mergeDLC.Target.Game}.TeamSelect.swf");
                     var swfData = swfStream.ToArray();
                     Parallel.ForEach(packagesToInjectInto, package =>
                     {

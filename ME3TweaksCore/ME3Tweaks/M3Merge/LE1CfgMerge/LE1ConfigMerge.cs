@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LegendaryExplorerCore.Coalesced;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Helpers;
@@ -16,9 +13,8 @@ using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Services.Shared.BasegameFileIdentification;
 using ME3TweaksCore.Targets;
-using WinRT;
 
-namespace ME3TweaksCore.ME3Tweaks.M3Merge
+namespace ME3TweaksCore.ME3Tweaks.M3Merge.LE1CfgMerge
 {
     public class ConsoleKeybinding
     {
@@ -36,7 +32,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
         public static bool RunCoalescedMerge(GameTarget target, ConsoleKeybinding consoleKey, ConsoleKeybinding miniConsoleKey, bool log = false)
         {
             MLog.Information($@"Performing Coaleseced Merge for game: {target.TargetPath}");
-            var coalescedStream = MUtilities.ExtractInternalFileToStream(@"ME3TweaksModManager.modmanager.merge.coalesced.LE1.Coalesced_INT.bin");
+            var coalescedStream = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.M3Merge.LE1ConfigMerge.Coalesced_INT.bin");
             var configBundle = ConfigAssetBundle.FromSingleStream(MEGame.LE1, coalescedStream);
 
             var dlcMountsInOrder = MELoadedDLC.GetDLCNamesInMountOrder(target.Game, target.TargetPath);

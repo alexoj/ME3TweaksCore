@@ -137,14 +137,14 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Game2Email
             using IMEPackage pcc = MEPackageHandler.OpenMEPackage(pccFile);
 
             // Path to Message templates file - different files for ME2/LE2
-            var resourcesFilePath = $@"ME3TweaksModManager.modmanager.merge.game2email.{mergeDLC.Target.Game}.103Message_Templates_{mergeDLC.Target.Game}.pcc";
+            var resourcesFilePath = $@"ME3TweaksCore.ME3Tweaks.M3Merge.Game2Email.{mergeDLC.Target.Game}.103Message_Templates_{mergeDLC.Target.Game}.pcc";
             using IMEPackage resources = MEPackageHandler.OpenMEPackageFromStream(MUtilities.GetResourceStream(resourcesFilePath));
 
             // Startup file to place conditionals and transitions into
             var startupInstalled = loadedFiles.ContainsKey(StartupFileName);
             using IMEPackage startup = startupInstalled
                 ? MEPackageHandler.OpenMEPackage(loadedFiles[StartupFileName])
-                : MEPackageHandler.OpenMEPackageFromStream(MUtilities.GetResourceStream($@"ME3TweaksModManager.modmanager.merge.dlc.{mergeDLC.Target.Game}.{StartupFileName}"), StartupFileName);
+                : MEPackageHandler.OpenMEPackageFromStream(MUtilities.GetResourceStream($@"ME3TweaksCore..modmanager.merge.dlc.{mergeDLC.Target.Game}.{StartupFileName}"), StartupFileName);
 
             var emailInfos = new List<ME2EmailMergeFile>();
             var jsonSupercedances = M3Directories.GetFileSupercedances(mergeDLC.Target, new[] { EMAIL_MERGE_FILE_SUFFIX });

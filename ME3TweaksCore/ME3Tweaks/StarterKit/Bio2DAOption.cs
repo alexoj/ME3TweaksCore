@@ -4,7 +4,6 @@ using LegendaryExplorerCore.Packages;
 using LegendaryExplorerCore.Packages.CloningImportingAndRelinking;
 using LegendaryExplorerCore.Unreal;
 using LegendaryExplorerCore.Unreal.Classes;
-using ME3TweaksModManager.modmanager.starterkit;
 using PropertyChanged;
 
 namespace ME3TweaksCore.ME3Tweaks.StarterKit

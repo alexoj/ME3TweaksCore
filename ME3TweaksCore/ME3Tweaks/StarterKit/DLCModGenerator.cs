@@ -16,7 +16,6 @@ using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.ME3Tweaks.M3Merge;
 using ME3TweaksCore.Objects;
-using ME3TweaksModManager.modmanager.starterkit;
 
 namespace ME3TweaksCore.ME3Tweaks.StarterKit
 {
@@ -116,11 +115,11 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     if (skOption.ModGame == MEGame.ME3)
                     {
                         //Extract Default.Sfar
-                        MUtilities.ExtractInternalFile(@"ME3TweaksModManager.modmanager.starterkit.Default.sfar", Path.Combine(cookedDir, @"Default.sfar"), true);
+                        MUtilities.ExtractInternalFile(@"ME3TweaksCore.ME3Tweaks.StarterKit.ME3.Default.sfar", Path.Combine(cookedDir, @"Default.sfar"), true);
                     }
 
                     //Generate Coalesced.bin for mod
-                    var memory = MUtilities.ExtractInternalFileToStream(@"ME3TweaksModManager.modmanager.starterkit.Default_DLC_MOD_StarterKit.bin");
+                    var memory = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.Game3.Default_DLC_MOD_StarterKit.bin");
                     var files = CoalescedConverter.DecompileGame3ToMemory(memory);
                     //Modify coal files for this mod.
                     files[@"BioEngine.xml"] = files[@"BioEngine.xml"].Replace(@"StarterKit", skOption.ModDLCFolderNameSuffix); //update bioengine

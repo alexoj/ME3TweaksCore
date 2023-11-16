@@ -18,12 +18,11 @@ using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.ME3Tweaks.ModManager.Interfaces;
-using ME3TweaksCore.ME3Tweaks.StarterKit;
 using ME3TweaksCore.Services.Backup;
 using Newtonsoft.Json;
 using static LegendaryExplorerCore.Unreal.CNDFile;
 
-namespace ME3TweaksModManager.modmanager.starterkit
+namespace ME3TweaksCore.ME3Tweaks.StarterKit
 {
     /// <summary>
     /// Info about what to add to a coalesced file
@@ -40,7 +39,7 @@ namespace ME3TweaksModManager.modmanager.starterkit
     public class StarterKitAddins
     {
         #region RESOURCES
-        private const string LE3ModSettingsClassTextAsset = @"ME3TweaksModManager.modmanager.starterkit.scripts.SFXGUIData_ModSettings.uc";
+        private const string LE3ModSettingsClassTextAsset = @"ME3TweaksCore.ME3Tweaks.StarterKit.LE3.Classes.SFXGUIData_ModSettings.uc";
         #endregion
 
         #region STARTUP FILE
@@ -250,7 +249,7 @@ namespace ME3TweaksModManager.modmanager.starterkit
                 AddToObjectReferencer(exp);
                 exp.ObjectName = new NameReference($@"{henchHumanName}0", 0);
                 var t2d = new Texture2D(exp);
-                var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksModManager.modmanager.starterkit.henchimages.placeholder_available.png").GetBuffer();
+                var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.M3Merge.StarterKit.LE3..placeholder_available.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
 
                 // Silouette
@@ -258,7 +257,7 @@ namespace ME3TweaksModManager.modmanager.starterkit
                 AddToObjectReferencer(exp);
                 exp.ObjectName = new NameReference($@"{henchHumanName}0_locked", 0);
                 t2d = new Texture2D(exp);
-                imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksModManager.modmanager.starterkit.henchimages.placeholder_silo.png").GetBuffer();
+                imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.M3Merge.StarterKit.LE3..placeholder_silo.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
 
                 // Chosen
@@ -266,7 +265,7 @@ namespace ME3TweaksModManager.modmanager.starterkit
                 AddToObjectReferencer(exp);
                 exp.ObjectName = new NameReference($@"{henchHumanName}0Glow", 0);
                 t2d = new Texture2D(exp);
-                imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksModManager.modmanager.starterkit.henchimages.placeholder_chosen.png").GetBuffer();
+                imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.M3Merge.StarterKit.LE3..placeholder_chosen.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
 
                 ipackage.Save();
@@ -279,19 +278,19 @@ namespace ME3TweaksModManager.modmanager.starterkit
                 // Available
                 var exp = ipackage.FindExport($@"GUI_Henchmen_Images.{henchHumanName}0");
                 var t2d = new Texture2D(exp);
-                var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksModManager.modmanager.starterkit.henchimages.placeholder_available.png").GetBuffer();
+                var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.M3Merge.StarterKit.LE3..placeholder_available.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
 
                 // Silouette
                 exp = ipackage.FindExport($@"GUI_Henchmen_Images.{henchHumanName}0_locked");
                 t2d = new Texture2D(exp);
-                imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksModManager.modmanager.starterkit.henchimages.placeholder_silo.png").GetBuffer();
+                imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.M3Merge.StarterKit.LE3..placeholder_silo.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
 
                 // Chosen
                 exp = ipackage.FindExport($@"GUI_Henchmen_Images.{henchHumanName}0Glow");
                 t2d = new Texture2D(exp);
-                imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksModManager.modmanager.starterkit.henchimages.placeholder_chosen.png").GetBuffer();
+                imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.M3Merge.StarterKit.LE3..placeholder_chosen.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
 
                 ReplaceNameIfExists(ipackage, $@"GUI_Henchmen_Images", $@"GUI_Henchmen_Images_{dlcName}");
