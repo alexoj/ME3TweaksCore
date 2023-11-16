@@ -82,6 +82,15 @@ namespace ME3TweaksCore.Config
         }
 
         /// <summary>
+        /// Gets an enumerator that returns all asset names.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetAssetNames()
+        {
+            return Assets.Keys;
+        }
+
+        /// <summary>
         /// Generate a ConfigAssetBundle from the specified single packed file (.bin)
         /// </summary>
         /// <param name="game"></param>

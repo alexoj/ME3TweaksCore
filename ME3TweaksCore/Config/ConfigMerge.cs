@@ -235,5 +235,33 @@ namespace ME3TweaksCore.Config
                 configBundle.CommitDLCAssets(); // Commit the final result
             }
         }
+
+        /// <summary>
+        /// Converts a configuration bundle object to a version that can be applied as an M3CD. This does not support double typing!
+        /// </summary>
+        /// <param name="configBundle">Bundle to convert</param>
+        /// <returns></returns>
+        public static string ConvertBundleToM3CD(ConfigAssetBundle configBundle)
+        {
+            var ini = new DuplicatingIni();
+            foreach (var assetName in configBundle.GetAssetNames())
+            {
+                var asset = configBundle.GetAsset(assetName);
+                foreach (var section in asset.Sections)
+                {
+                    var sectionHeader = $"{Path.GetFileNameWithoutExtension(assetName)}.ini {section.Key}";
+                    var m3cdSection = ini.GetOrAddSection(sectionHeader);
+                    foreach (var uniqueProperty in section.Value)
+                    {
+                        foreach (var multiProperty in uniqueProperty.Value)
+                        {
+                            m3cdSection.Entries.Add(new DuplicatingIni.IniEntry($"{ConfigFileProxy.GetGame2IniDataPrefix(multiProperty.ParseAction)}{uniqueProperty.Key}", multiProperty.Value));
+                        }
+                    }
+                }
+            }
+
+            return ini.ToString();
+        }
     }
 }

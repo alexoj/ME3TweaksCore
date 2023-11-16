@@ -7,6 +7,8 @@ using ME3TweaksCore.Config;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.ME3Tweaks.M3Merge.Game2Email;
+using ME3TweaksCore.ME3Tweaks.M3Merge.LE1CfgMerge;
 using ME3TweaksCore.ME3Tweaks.StarterKit;
 using ME3TweaksCore.Targets;
 
@@ -170,6 +172,38 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
             }
 
             configBundle.CommitDLCAssets();
+        }
+
+        /// <summary>
+        /// Runs an full merge (via MergeDLC) on the specific target.
+        /// </summary>
+        /// <param name="target"></param>
+        public static void RunCompleteMerge(GameTarget target, Action<string> setStatus = null)
+        {
+            // This doesn't use MergeDLC but runs at the same time, technically.
+            if (target.Game == MEGame.LE1)
+            {
+                LE1ConfigMerge.RunCoalescedMerge(target, null, null); // Todo: Shared settings with M3 for console keybinds.
+            }
+
+            var mergeDLC = new M3MergeDLC(target);
+            if (target.Game.IsGame2() && ME2EmailMerge.NeedsMergedGame2(target))
+            {
+                if (!mergeDLC.Generated) mergeDLC.GenerateMergeDLC();
+                ME2EmailMerge.RunGame2EmailMerge(mergeDLC, setStatus);
+            }
+
+            if ((target.Game == MEGame.LE2 || target.Game.IsGame3()) && SQMOutfitMerge.NeedsMerged(target))
+            {
+                if (!mergeDLC.Generated) mergeDLC.GenerateMergeDLC();
+                SQMOutfitMerge.RunSquadmateOutfitMerge(mergeDLC, setStatus);
+            }
+
+            // Todo: Plot Sync
+            if (target.Game.IsGame1() || target.Game.IsGame2())
+            {
+
+            }
         }
     }
 }
