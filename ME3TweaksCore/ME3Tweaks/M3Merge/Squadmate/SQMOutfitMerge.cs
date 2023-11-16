@@ -377,7 +377,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                     }
 
 
-                    var scTextOrig = new StreamReader(MUtilities.GetResourceStream($@"ME3TweaksCore.ME3Tweaks.M3Merge.SquadmateMerge.{mergeDLC.Target.Game}.HasOutfitOnConditional.uc"))
+                    var scTextOrig = new StreamReader(MUtilities.GetResourceStream($@"ME3TweaksCore.ME3Tweaks.M3Merge.Squadmate.{mergeDLC.Target.Game}.HasOutfitOnConditional.uc"))
                         .ReadToEnd();
                     foreach (var sqm in appearanceInfo.Values)
                     {
@@ -447,7 +447,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                     updateUIText?.Invoke(LC.GetString(LC.string_synchronizingSquadmateOutfits) + @" 0%");
                     var packagesToInjectInto = new[]
                         { @"BioH_SelectGUI.pcc", @"BioP_Exp1Lvl2.pcc", @"BioP_Exp1Lvl3.pcc", @"BioP_Exp1Lvl4.pcc" };
-                    using var swfStream = MUtilities.ExtractInternalFileToStream($@"ME3TweaksCore.ME3Tweaks.M3Merge.SquadmateMerge.{mergeDLC.Target.Game}.TeamSelect.swf");
+                    using var swfStream = MUtilities.ExtractInternalFileToStream($@"ME3TweaksCore.ME3Tweaks.M3Merge.Squadmate.{mergeDLC.Target.Game}.TeamSelect.swf");
                     var swfData = swfStream.ToArray();
                     Parallel.ForEach(packagesToInjectInto, package =>
                     {
