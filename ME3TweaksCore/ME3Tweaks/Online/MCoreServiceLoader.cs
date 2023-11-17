@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Misc;
+using ME3TweaksCore.NativeMods;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Services.FileSource;
 using ME3TweaksCore.Services.Shared.BasegameFileIdentification;
@@ -48,7 +49,8 @@ namespace ME3TweaksCore.ME3Tweaks.Online
             // Identifies mods by DLC name per game
             { TPMI_SERVICE_KEY, TPMIService.LoadService },
             { BGFI_SERVICE_KEY, BasegameFileIdentificationService.LoadService },
-            { FS_SERVICE_KEY, FileSourceService.LoadService }
+            { FS_SERVICE_KEY, FileSourceService.LoadService },
+            { ASI_MANIFEST_KEY, ASIManager.LoadService },
         };
 
         /// <summary>
@@ -76,6 +78,7 @@ namespace ME3TweaksCore.ME3Tweaks.Online
                     {
                         using var wc = new ShortTimeoutWebClient();
                         Stopwatch sw = Stopwatch.StartNew();
+                        
                         serviceData = wc.DownloadStringAwareOfEncoding(fetchUrl);
                         sw.Stop();
                         MLog.Information($@"Fetched combined services data from endpoint {host} in {sw.ElapsedMilliseconds}ms");

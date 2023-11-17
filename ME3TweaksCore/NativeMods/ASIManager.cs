@@ -93,11 +93,11 @@ namespace ME3TweaksCore.NativeMods
             var shouldNotFetch = forceLocal || (!overrideThrottling && !MOnlineContent.CanFetchContentThrottleCheck()) && File.Exists(ManifestLocation);
             if (!shouldNotFetch) //this cannot be triggered if forceLocal is true
             {
-                string onlineManifest;
+                string onlineManifest = null;
                 if (preloadedManifestData == null)
                 {
-                    MLog.Information(@"Fetching ASI manifest from online source");
-                    onlineManifest = MOnlineContent.FetchRemoteString(@"https://me3tweaks.com/mods/asi/getmanifest?AllGames=1");
+                    MLog.Error(@"Fetching ASI manifest failed: As of 11/16/2023, data must come from combined services. This is a bug.");
+                    Debugger.Break();
                 }
                 else
                 {
@@ -185,6 +185,15 @@ namespace ME3TweaksCore.NativeMods
             for (int i = 0; i < masterGroups.Length; i++)
             {
                 MLog.Information($@"{GameNumConversion.FromGameNum(i + 1).ToGameName(true)} has ASI groups {string.Join(',', masterGroups[i].Select(x => x.UpdateGroupId))} available");
+                foreach (var asiversions in masterGroups[i])
+                {
+                    MLog.Debug($@"ASI Update Group {asiversions.UpdateGroupId} IsHidden: {asiversions.IsHidden} ---------------");
+                    foreach (var asi in asiversions.Versions)
+                    {
+                        MLog.Debug($@"   {asi.Name} v{asi.Version} IsBetaOnly: {asi.IsBeta}");
+                    }
+                }
+
             }
         }
 
@@ -362,6 +371,8 @@ namespace ME3TweaksCore.NativeMods
                 MasterLE2ASIUpdateGroups.Clear();
                 MasterLE3ASIUpdateGroups.Clear();
                 XElement rootElement = XElement.Parse(xmlText.Trim());
+                Debug.WriteLine(rootElement.ToString());
+
 
                 //I Love Linq
                 var updateGroups = (from ugroup in rootElement.Elements(@"updategroup")

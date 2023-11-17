@@ -89,7 +89,6 @@ namespace ME3TweaksCore
                 {
                     MLog.Warning(@"ME3TweaksCoreLib.Initialize() was called with LoadAuxiliaryServices but did not specify a AuxiliaryCombinedOnlineServicesEndpoint! Some services were not loaded.");
                 }
-                ASIManager.LoadManifest();
             }
 
             MLog.Information(@"ME3TweaksCore has initialized");
