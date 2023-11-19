@@ -10,7 +10,6 @@ using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using LegendaryExplorerCore.Unreal;
-using ME3TweaksCore.Config;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using Serilog;

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using LegendaryExplorerCore.Coalesced;
+using LegendaryExplorerCore.Coalesced.Config;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Packages;
-using ME3TweaksCore.Config;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
