@@ -4,11 +4,11 @@
 		<Description>Core library for ME3Tweaks software</Description>
 		<Company>ME3Tweaks</Company>
 		<Authors>ME3Tweaks</Authors>
-		<Version>8.2.2</Version>
+		<Version>9.0.0</Version>
 		<!-- Windows 2004 -->
 		<TargetFrameworks>net6.0-windows10.0.19041</TargetFrameworks>
 		<Platforms>x64</Platforms>
-		<Copyright>2021-2023 ME3Tweaks</Copyright>
+		<Copyright>2021-2024 ME3Tweaks</Copyright>
 	</PropertyGroup>
 
 	<ItemGroup>
