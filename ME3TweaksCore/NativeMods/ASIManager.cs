@@ -671,6 +671,18 @@ namespace ME3TweaksCore.NativeMods
         /// <param name="nameForLogging"></param>
         /// <param name="gameTarget"></param>
         /// <param name="version">The versio nto install. The default is 0, which means the latest</param>
+        public static bool InstallASIToTargetByGroupID(ASIModUpdateGroupID updateGroup, string nameForLogging, GameTarget gameTarget, int version = 0, bool includeHiddenASIs = false)
+        {
+            return InstallASIToTargetByGroupID((int)updateGroup, nameForLogging, gameTarget, version, includeHiddenASIs);
+        }
+
+        /// <summary>
+        /// Installs the specified ASI (by update group ID) to the target. If a version is not specified, the latest version is installed.
+        /// </summary>
+        /// <param name="updateGroup"></param>
+        /// <param name="nameForLogging"></param>
+        /// <param name="gameTarget"></param>
+        /// <param name="version">The versio nto install. The default is 0, which means the latest</param>
         public static bool InstallASIToTargetByGroupID(int updateGroup, string nameForLogging, GameTarget gameTarget, int version = 0, bool includeHiddenASIs = false)
         {
             var group = GetASIModsByGame(gameTarget.Game).FirstOrDefault(x => x.UpdateGroupId == updateGroup);
@@ -708,6 +720,41 @@ namespace ME3TweaksCore.NativeMods
                 default:
                     return null;
             }
+        }
+
+        /// <summary>
+        /// Retreives an ASI mod version via the game, group, and optionally the version.
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="updateGroup"></param>
+        /// <param name="asiModVersion"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public static ASIModVersion GetASIModVersion(MEGame game, int updateGroup, int? asiModVersion = null, bool includeHidden = false)
+        {
+            var mods = GetASIModsByGame(game);
+            var group = mods.FirstOrDefault(x => x.UpdateGroupId == updateGroup);
+            if (group == null)
+            {
+                MLog.Warning($@"Unable to find requested ASI mod updategroup: Game: {group}, UpdateGroup: {updateGroup}");
+                return null;
+            }
+
+            ASIModVersion result = null;
+            if (asiModVersion != null)
+            {
+                result = group.Versions.FirstOrDefault(x => x.Version == asiModVersion);
+            }
+            else
+            {
+                result = includeHidden ? group.LatestVersionIncludingHidden : group.LatestVersion;
+            }
+            if (result == null)
+            {
+                MLog.Warning($@"Unable to find requested ASI mod version in updategroup: Game: {group}, UpdateGroup: {updateGroup}, Version: {asiModVersion?.ToString() ?? "(Latest)"}");
+            }
+            return result;
+
         }
     }
 }

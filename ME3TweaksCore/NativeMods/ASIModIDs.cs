@@ -1,39 +1,80 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ME3TweaksCore.NativeMods
+﻿namespace ME3TweaksCore.NativeMods
 {
+
     /// <summary>
-    /// Contains (some, not all) ASI Update Group IDs that can be used to request install of an ASI. Makes code easier to read.
+    /// Enumeration of ASI Manager Update Groups.
     /// </summary>
-    public static class ASIModIDs
+    public enum ASIModUpdateGroupID
     {
-        // This is not comprehensive list. Just here for convenience.
+        ME1_DLCModEnabler = 16,
 
-        // ME1 ============================================
-        public static readonly int ME1_DLC_MOD_ENABLER = 16;
+        ME2_KismetLogger = 14,
+        ME2_FunctionLogger = 15,
+        ME2_AceSlammer = 18,
+        ME2_SplashEnabler = 20,
+        ME2_KasumiCrashFix = 23,
+        ME2_StreamingLevelsHUD = 25,
+        ME2_DeathCounterLS = 26,
+        ME2_SeqAct_LogEnabler = 27,
+        ME2_CombolutionSupport = 28,
 
-        // ME2 ============================================
+        ME3_MouseDisabler = 0,
+        ME3_OriginMPStatus = 1,
+        ME3_ME3ClientMessageExposer = 2,
+        ME3_OriginUnlinker = 4,
+        ME3_BalanceChangesReplacer = 5,
+        ME3_LiveTLKReplacer = 6,
+        ME3_ME3Parallelization = 7,
+        ME3_ME3Logger = 8,
+        ME3_AutoTOC = 9,
+        ME3_KismetLogger = 10,
+        ME3_RetaliationBugfix = 11,
+        ME3_FullGAW = 12,
+        ME3_POCCCMovingSpawnPoints = 13,
+        ME3_DocumentsRedirector = 17,
+        ME3_SeqAct_LogEnabler = 19,
+        ME3_SplashEnabler = 21,
+        ME3_GarbageCollectionForcer = 22,
+        ME3_StreamingLevelsHUD = 24,
+        ME3_ControllerInputTester = 33,
 
-        // ME3 ============================================
-        public static readonly int ME3_BALANCE_CHANGES_REPLACER = 5;
-        public static readonly int ME3_AUTOTOC = 9;
-        public static readonly int ME3_LOGGER = 8;
+        LE1_AutoTOCLE = 29, // All LE uses the same ASI. But ASI Manager design forces a new ID for a different game.
+        LE1_AutoloadEnabler = 32,
+        LE1_AutoloadEnablerDebug = 34,
+        LE1_StreamingLevelsHUD = 35,
+        LE1_KismetLogger = 36,
+        LE1_SeqAct_LogEnabler = 37,
+        LE1_LEXInterop = 42,
+        LE1_2DAPrinter = 43,
+        LE1_PNGScreenShots = 44,
+        LE1_LinkerPrinter = 47,
+        LE1_DebugLogger = 70,
+        LE1_ConsoleExtension = 75,
+        LE1_ScriptDebugger = 82,
+        LE1_FunctionLogger = 83,
 
-        // LE1 ============================================
-        public static readonly int LE1_AUTOTOC = 29;
-        public static readonly int LE1_AUTOLOAD_ENABLER = 32;
-        public static readonly int LE1_DEBUGLOGGER_DEV = 70;
-
-        // LE2 ============================================
-        public static readonly int LE2_AUTOTOC = 30;
-        public static readonly int LE2_DEBUGLOGGER_DEV = 71;
-
-        // LE3 ============================================
-        public static readonly int LE3_AUTOTOC = 31;
-        public static readonly int LE3_DEBUGLOGGER_DEV = 72;
+        LE2_AutoTOCLE = 30, // All LE uses the same ASI. But ASI Manager design forces a new ID for a different game.
+        LE2_StreamingLevelsHUD = 38,
+        LE2_KismetLogger = 41,
+        LE2_PNGScreenShots = 45,
+        LE2_LinkerPrinter = 48,
+        LE2_DebugLogger = 71,
+        LE2_SeqAct_LogEnabler = 73,
+        LE2_ConsoleExtension = 76,
+        LE2_HotReload = 78,
+        LE2_LEXInterop = 79,
+        LE2_ScriptDebugger = 81,
+        LE2_FunctionLogger = 84,
+        
+        LE3_AutoTOCLE = 31, // All LE uses the same ASI. But ASI Manager design forces a new ID for a different game.
+        LE3_StreamingLevelsHUD = 39,
+        LE3_KismetLogger = 40,
+        LE3_PNGScreenShots = 46,
+        LE3_LinkerPrinter = 49,
+        LE3_DebugLogger = 72,
+        LE3_SeqAct_LogEnabler = 74,
+        LE3_ConsoleExtension = 77,
+        LE3_LEXInterop = 80,
+        LE3_FunctionLogger = 85
     }
 }
