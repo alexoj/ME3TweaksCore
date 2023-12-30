@@ -1,0 +1,24 @@
+﻿[
+  {
+    "comment": "You can put any text here. It is not read and is only for user convenience.",
+
+    "packagefile": "Engine.pcc", // This is the game's folder
+    "mergepackagefile": "2DAM_MyMerge1.pcc", // This file is in your mod's folder
+    "mergetables": [
+      "UI_Sounds_part_2", // These are names of exports in your package file to be merged. They must use the _part name
+      // The reason is that I don't want people to just take Engine.pcc, edit it, and then ship the whole thing
+      // in a DLC and try to use this. I want them to try to make it more proper by having a bit more work required.
+      // The part number doesn't matter. But it must contain _part like normal ones do.
+      "Character_LevelUp_part_1"
+    ]
+  },
+  {
+    "comment": "This is a second entry in the file",
+
+    "packagefile": "SFXGame.pcc", // You can only target the same set of files as MergeMods
+    "mergepackagefile": "2DAM_MyMerge1.pcc", // Can be same package as others.
+    "mergetabels": [
+      "SomeSFXTable_part_5"
+    ]
+  }
+]
