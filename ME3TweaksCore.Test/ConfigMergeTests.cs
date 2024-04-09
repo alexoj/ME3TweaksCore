@@ -26,7 +26,6 @@ namespace ME3TweaksCore.Test
 #else
             Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 #endif
-            //Log.SetLogger(Log.Logger);
         }
 
         // [TestMethod]
