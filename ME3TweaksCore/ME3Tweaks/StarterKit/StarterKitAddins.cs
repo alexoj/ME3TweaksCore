@@ -435,7 +435,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             var cols = new[] { @"Id", @"Credits", @"Eezo", @"Palladium", @"Platinum", @"Iridium", @"Description" };
             Create2DA(plotPackageExport, new NameReference(@"Plot_Treasure_Resources_part", rand.Next(100000) + 1000), cols, true);
 
-            cols = new[] { @"nmLevel", @"nmTreasure", @"nmTech", @"nmResource", @"nPrice", @"nmRequiredTech", @"nRequiredTechLevel", @"nNoAnimation", @"nMultiLevel" };
+            cols = new[] { @"nmLevel", @"nmTreasure", @"nmTech", @"nmResource", @"nPrice", @"nmRequiredTech", @"nRequiredTechLevel", @"nDiscoverTechLevel",@"nNoAnimation", @"nMultiLevel" };
             Create2DA(plotPackageExport, new NameReference(@"Plot_Treasure_Treasure_part", rand.Next(100000) + 1000), cols, false);
 
             if (startupFile.IsModified)
