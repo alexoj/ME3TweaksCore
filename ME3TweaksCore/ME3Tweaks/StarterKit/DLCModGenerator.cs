@@ -257,7 +257,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 File.WriteAllText(sqmPath, sqmText);
             }
 
-            return null;
+            return modPath;
         }
     }
 }
