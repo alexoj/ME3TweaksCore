@@ -30,6 +30,7 @@
 		<EmbeddedResource Include="ME3Tweaks\**\*.sfar" />
 		<EmbeddedResource Include="ME3Tweaks\**\*.png" />
 		<EmbeddedResource Include="ME3Tweaks\**\*.uc" />
+		<EmbeddedResource Include="ME3Tweaks\StarterKit\**\*.bin" />
 		<EmbeddedResource Include="ME3Tweaks\M3Merge\LE1Config\Coalesced_INT.bin" />
 		<EmbeddedResource Include="ME3Tweaks\M3Merge\PlotManager\ME1\PlotManager.u" />
 		<EmbeddedResource Include="NativeMods\CachedASI\asimanifest.xml" />
