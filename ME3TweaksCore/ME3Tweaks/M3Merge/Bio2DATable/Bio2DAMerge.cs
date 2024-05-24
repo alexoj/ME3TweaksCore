@@ -34,6 +34,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
         {
             "Engine.pcc",
             "SFXGame.pcc",
+            "EntryMenu.pcc",
 
             // Bring Down The Sky
             "BIOG_2DA_UNC_AreaMap_X.pcc",
@@ -67,22 +68,21 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
 
 
             // Step 1: Load all modifiable packages
-            var loadedFiles = M3Directories.GetFilesLoadedInGame(target);
-            var modificationCache = new PackageCache() { CacheMaxSize = Mergable2DAFiles.Length };
+            var loadedFiles = target.GetFilesLoadedInGame();
+            var packageContainer = new Bio2DAMergePackageContainer();
             foreach (var file in Mergable2DAFiles)
             {
                 if (loadedFiles.TryGetValue(file, out var filepath))
                 {
                     var package = MEPackageHandler.OpenMEPackage(filepath);
-                    modificationCache.InsertIntoCache(package);
-                    modificationCache.AddResidentPackage(package); // This is how we denote targets in the cache vs cached mod 2DAs
+                    packageContainer.InsertTargetPackage(package);
                 }
             }
 
             // Step 2: Reset all tables
             var vanillaTables = MEPackageHandler.OpenMEPackageFromStream(MUtilities.ExtractInternalFileToStream("ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable.VanillaTables.pcc"));
             var vanilla2DAs = vanillaTables.Exports.Where(x => x.IsA("Bio2DA")).ToList();
-            foreach (var file in modificationCache.Cache.Values)
+            foreach (var file in packageContainer.GetTargetablePackages())
             {
                 foreach (var exp in vanilla2DAs)
                 {
@@ -99,7 +99,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
 
             foreach (var dlc in dlcMountsInOrder)
             {
-                var dlcCookedPath = Path.Combine(M3Directories.GetDLCPath(target), dlc, target.Game.CookedDirName());
+                var dlcCookedPath = Path.Combine(target.GetDLCPath(), dlc, target.Game.CookedDirName());
 
                 MLog.Information($@"Looking for {BIO2DA_MERGE_FILE_SUFFIX} files in {dlcCookedPath}");
                 var m3das = Directory.GetFiles(dlcCookedPath, @"*" + BIO2DA_MERGE_FILE_SUFFIX, SearchOption.AllDirectories).ToList(); // Find all M3DA files
@@ -108,18 +108,19 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                 foreach (var m3daF in m3das)
                 {
                     MLog.Information($@"Merging M3 Bio2DA Merge Manifest {m3daF}");
-                    var result = MergeManifest(dlcCookedPath, m3daF, target, recordMerge, modificationCache);
+                    var result = MergeManifest(dlcCookedPath, m3daF, target, recordMerge, packageContainer);
                 }
 
 
             }
 
-            foreach (var file in modificationCache.Cache.Values)
+            foreach (var file in packageContainer.GetTargetablePackages())
             {
                 // Todo: Record merges for BGFIS
 
                 if (file.IsModified)
                 {
+                    MLog.Information($"Saving 2DA merged package {file.FilePath}");
                     file.Save();
                 }
             }
@@ -134,9 +135,9 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
         /// <param name="mergeFilePath"></param>
         /// <param name="target"></param>
         /// <param name="recordMerge"></param>
-        /// <param name="cache"></param>
+        /// <param name="packageContainer"></param>
         /// <returns></returns>
-        private static bool MergeManifest(string dlcCookedPath, string mergeFilePath, GameTarget target, Action<string> recordMerge, PackageCache cache)
+        private static bool MergeManifest(string dlcCookedPath, string mergeFilePath, GameTarget target, Action<string> recordMerge, Bio2DAMergePackageContainer packageContainer)
         {
             var mergeData = File.ReadAllText(mergeFilePath);
             var mergeObject = JsonConvert.DeserializeObject<List<Bio2DAMergeManifest>>(mergeData);
@@ -144,8 +145,8 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
 
             foreach (var obj in mergeObject)
             {
-                var destPackage = cache.GetCachedPackage(Path.Combine(target.GetCookedPath(), obj.GamePackageFile), false);
-                if (destPackage == null || !cache.IsResidentPackage(destPackage))
+                var destPackage = packageContainer.GetTargetPackage(Path.Combine(target.GetCookedPath(), obj.GamePackageFile));
+                if (destPackage == null)
                 {
                     MLog.Error($"Bio2DA merge 'packagefile' is invalid: {obj.GamePackageFile} - cannot merge into non-basegame/Bring Down The Sky 2DA files");
                     return false;
@@ -165,9 +166,14 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     return false;
                 }
 
-                var baseFile = cache.GetCachedPackage(basePackagePath);
-                var modFile = cache.GetCachedPackage(modPackagePath);
-
+                var baseFile = packageContainer.GetTargetPackage(basePackagePath);
+                var modFile = packageContainer.GetModPackage(modPackagePath);
+                if (modFile == null)
+                {
+                    // Needs opened and cached
+                    modFile = MEPackageHandler.OpenMEPackage(modPackagePath);
+                    packageContainer.InsertModPackage(modFile);
+                }
                 foreach (var table in obj.ModTables)
                 {
                     var objName = NameReference.FromInstancedString(table);
@@ -186,7 +192,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                         return false;
                     }
 
-                    var baseTable = baseFile.Exports.FirstOrDefault(x => !x.IsDefaultObject && x.IsA("Bio2DA") && x.ObjectName.Instanced == tableName);
+                    var baseTable = baseFile.Exports.FirstOrDefault(x => !x.IsDefaultObject && x.IsA("Bio2DA") && x.ObjectName.Instanced.CaseInsensitiveEquals(tableName));
                     if (baseTable == null)
                     {
                         MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - could not find basegame table with base name '{tableName}' name in package '{basePackagePath}'");
