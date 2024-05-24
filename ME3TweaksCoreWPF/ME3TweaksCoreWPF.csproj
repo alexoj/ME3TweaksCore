@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<!--Version info-->
@@ -24,7 +24,7 @@
 	<ItemGroup>
 		<PackageReference Include="FontAwesome5" Version="2.1.11" />
 		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
-		<PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="2.12.0.2" />
+		<PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
 	</ItemGroup>
 
 </Project>
