@@ -22,7 +22,8 @@ namespace ME3TweaksCore.Targets
     public class InstalledDLCMod
     {
         protected string dlcFolderPath;
-        public string EnableDisableText => DLCFolderName.StartsWith(@"xDLC") ? LC.GetString(LC.string_enable) : LC.GetString(LC.string_disable);
+        public bool IsEnabled => DLCFolderName.StartsWith("DLC_");
+        public string EnableDisableText => IsEnabled ? LC.GetString(LC.string_disable) : LC.GetString(LC.string_enable);
         public string DeleteText { get; set; } = LC.GetString(LC.string_delete);
         public string EnableDisableTooltip { get; set; }
         public string ModName { get; private set; }
@@ -130,7 +131,7 @@ namespace ME3TweaksCore.Targets
             }
         }
 
-        protected void ToggleDLC()
+        public void ToggleDLC()
         {
             var source = dlcFolderPath;
             var dlcdir = Directory.GetParent(dlcFolderPath).FullName;
@@ -152,7 +153,7 @@ namespace ME3TweaksCore.Targets
             //TriggerPropertyChangedFor(nameof(DLCFolderName));
         }
 
-        protected bool CanToggleDLC() => (game is MEGame.ME3 || game.IsLEGame() || DLCFolderName.StartsWith('x')) && !MUtilities.IsGameRunning(game);
+        public bool CanToggleDLC() => (game is MEGame.ME3 || game.IsLEGame() || DLCFolderName.StartsWith('x')) && !MUtilities.IsGameRunning(game);
 
         public bool EnableDisableVisible => game is MEGame.ME3 || game.IsLEGame() || DLCFolderName.StartsWith('x');
         protected bool CanDeleteDLCMod() => !MUtilities.IsGameRunning(game);

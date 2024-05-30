@@ -1,11 +1,14 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Data;
+using System.Windows.Input;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Targets;
+using ME3TweaksCoreWPF.UI;
 using PropertyChanged;
+using System.Linq;
 
 namespace ME3TweaksCoreWPF.Targets
 {
@@ -18,8 +21,43 @@ namespace ME3TweaksCoreWPF.Targets
     {
         public GameTargetWPF(MEGame game, string targetRootPath, bool currentRegistryActive, bool isCustomOption = false, bool isTest = false, bool skipInit = false) : base(game, targetRootPath, currentRegistryActive, isCustomOption, isTest, skipInit)
         {
-
+            LoadCommands();
         }
+
+        private void LoadCommands()
+        {
+            EnableAllDLCModsCommand = new GenericCommand(EnableAllDLCMods, AnyDLCModsDisabled);
+            DisableAllDLCModsCommand = new GenericCommand(DisableAllDLCMods, AnyDLCModsEnabled);
+        }
+
+        private void DisableAllDLCMods()
+        {
+            foreach (var mod in UIInstalledDLCMods.Where(x => x.IsEnabled && x.CanToggleDLC()))
+            {
+                mod.ToggleDLC();
+            }
+        }
+
+        private void EnableAllDLCMods()
+        {
+            foreach (var mod in UIInstalledDLCMods.Where(x=>!x.IsEnabled && x.CanToggleDLC()))
+            {
+                mod.ToggleDLC();
+            }
+        }
+
+        private bool AnyDLCModsDisabled()
+        {
+            return UIInstalledDLCMods.Any(x => !x.IsEnabled && x.CanToggleDLC());
+        }
+
+        private bool AnyDLCModsEnabled()
+        {
+            return UIInstalledDLCMods.Any(x => x.IsEnabled && x.CanToggleDLC());
+        }
+
+        public ICommand EnableAllDLCModsCommand { get; set; }
+        public ICommand DisableAllDLCModsCommand { get; set; }
 
         /// <summary>
         /// View for filtering modified basegame files
