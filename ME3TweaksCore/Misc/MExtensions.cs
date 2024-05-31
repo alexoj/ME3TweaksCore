@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using LegendaryExplorerCore.Compression;
+using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
 
 namespace ME3TweaksCore.Misc
@@ -142,6 +144,36 @@ namespace ME3TweaksCore.Misc
             }
 
             return (length < value.Length) ? value.Substring(value.Length - length) : value;
+        }
+
+        /// <summary>
+        /// Reads an LZMA compressed string
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public static string ReadCompressedUnrealString(this Stream stream)
+        {
+            var decompressedSize = stream.ReadUInt32();
+            var compressedSize = stream.ReadUInt32();
+            var binary = stream.ReadToBuffer(compressedSize);
+            var decompressed = LZMA.Decompress(binary, decompressedSize);
+            var ms = new MemoryStream(decompressed);
+            return ms.ReadUnrealString();
+        }
+
+        /// <summary>
+        /// Writes an LZMA compressed string
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="str"></param>
+        public static void WriteCompressedUnrealString(this Stream stream, string str)
+        {
+            using MemoryStream ms = new MemoryStream();
+            ms.WriteUnrealString(str, MEGame.LE3); // LE3 forces unicode.
+            stream.WriteUInt32((uint)ms.Length); // Decompressed size
+            var compressed = LZMA.Compress(ms.ToArray());
+            stream.WriteUInt32((uint)compressed.Length);
+            stream.Write(compressed);
         }
     }
 }
