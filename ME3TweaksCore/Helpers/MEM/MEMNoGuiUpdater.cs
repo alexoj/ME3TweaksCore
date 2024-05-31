@@ -38,12 +38,12 @@ namespace ME3TweaksCore.Helpers.MEM
         /// <summary>
         /// Checks for and updates mem if necessary. This method is blocking.
         /// </summary>
-        public static bool UpdateMEM(bool classicMEM, bool bypassSoakGate, Action<long, long> downloadProgressChanged = null, Action<Exception> exceptionUpdating = null, Action<string> statusMessageUpdate = null)
+        public static bool UpdateMEM(bool classicMEM, bool bypassSoakGate, Action<long, long> downloadProgressChanged = null, Action<Exception> exceptionUpdating = null, Action<string> statusMessageUpdate = null, bool forceOnlineUpdate = false)
         {
             int memVersion = 0;
             var mempath = MCoreFilesystem.GetMEMNoGuiPath(classicMEM);
-            var downloadMEM = !File.Exists(mempath);
-            if (!downloadMEM)
+            var localMemExecutableExists = File.Exists(mempath);
+            if (localMemExecutableExists)
             {
                 // File exists
                 memVersion = MEMIPCHandler.GetMemVersion(classicMEM);
@@ -235,8 +235,14 @@ namespace ME3TweaksCore.Helpers.MEM
             catch (Exception e)
             {
                 MLog.Exception(e, @"An error occurred running MassEffectModderNoGui updater: ");
-                exceptionUpdating?.Invoke(e);
-                return false;
+                if (forceOnlineUpdate || !localMemExecutableExists)
+                {
+                    exceptionUpdating?.Invoke(e);
+                    return false;
+                }
+
+                // Just return if a local copy exists
+                return localMemExecutableExists;
             }
 
             // OK

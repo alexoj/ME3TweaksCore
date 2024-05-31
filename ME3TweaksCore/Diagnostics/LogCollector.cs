@@ -319,7 +319,7 @@ namespace ME3TweaksCore.Diagnostics
             // Ensure MEM NOGUI
             if (package.DiagnosticTarget != null)
             {
-                hasMEM = MEMNoGuiUpdater.UpdateMEM(package.DiagnosticTarget.Game.IsOTGame(), false, setPercentDone, failedToExtractMEM, currentTaskCallback);
+                hasMEM = MEMNoGuiUpdater.UpdateMEM(package.DiagnosticTarget.Game.IsOTGame(), false, setPercentDone, failedToExtractMEM, currentTaskCallback, false);
             }
 
             //wait for tool fetch
