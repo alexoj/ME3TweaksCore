@@ -736,7 +736,7 @@ namespace ME3TweaksCore.NativeMods
             var group = mods.FirstOrDefault(x => x.UpdateGroupId == updateGroup);
             if (group == null)
             {
-                MLog.Warning($@"Unable to find requested ASI mod updategroup: Game: {group}, UpdateGroup: {updateGroup}");
+                MLog.Warning($@"Unable to find requested ASI mod updategroup: Game: {game}, UpdateGroup: {updateGroup}");
                 return null;
             }
 
