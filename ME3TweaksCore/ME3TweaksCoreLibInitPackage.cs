@@ -166,7 +166,7 @@ namespace ME3TweaksCore
                 MExtendedClassGenerators.GenerateUnknownInstalledASIMod = GenerateUnknownInstalledASIModDelegate;
 
             // BETA FEATURES - These will require a reboot of the consuming app to properly fully work if changed during runtime
-            ASIManager.SetUsingBeta(BetaMode);
+            ASIManager.Options.BetaMode = BetaMode;
 
             // Load strings
             LC.InternalSetLanguage(@"int"); // Load INT as it is the default language. Non-INT can be loaded later over the top of this

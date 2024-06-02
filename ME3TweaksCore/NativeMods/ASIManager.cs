@@ -17,7 +17,6 @@ using ME3TweaksCore.Services;
 using ME3TweaksCore.Targets;
 using Newtonsoft.Json.Linq;
 using PropertyChanged;
-using Serilog;
 
 namespace ME3TweaksCore.NativeMods
 {
@@ -25,7 +24,7 @@ namespace ME3TweaksCore.NativeMods
     /// Backend for ASI Management
     /// </summary>
     [AddINotifyPropertyChangedInterface]
-    public class ASIManager
+    public static class ASIManager
     {
         public static readonly string CachedASIsFolder = Directory.CreateDirectory(Path.Combine(MCoreFilesystem.GetAppDataFolder(), @"CachedASIs")).FullName;
 
@@ -46,20 +45,9 @@ namespace ME3TweaksCore.NativeMods
         public static IEnumerable<ASIMod> AllASIMods => MasterLE1ASIUpdateGroups.Concat(MasterLE2ASIUpdateGroups).Concat(MasterLE3ASIUpdateGroups).Concat(MasterME1ASIUpdateGroups).Concat(MasterME2ASIUpdateGroups).Concat(MasterME3ASIUpdateGroups);
 
         /// <summary>
-        /// If ASI Manager is using Beta ASI mods
+        /// ASI Manager 
         /// </summary>
-        public static bool UsingBeta { get; private set; }
-
-        /// <summary>
-        /// Use to set if ASI mods should use beta
-        /// </summary>
-        /// <param name="usingBeta"></param>
-        public static void SetUsingBeta(bool usingBeta)
-        {
-            UsingBeta = usingBeta;
-
-            // Other logic here
-        }
+        public static readonly ASIManagerOptions Options = new ASIManagerOptions();
 
         /// <summary>
         /// Loads the ASI manifest. This should only be done at startup or when the online manifest is refreshed. ForceLocal only works if there is local ASI manifest present
@@ -69,7 +57,7 @@ namespace ME3TweaksCore.NativeMods
         /// <param name="preloadedManifestData">Preloaded data if it was loaded from something else, such as a combined manifest</param>
         public static void LoadManifest(bool forceLocal = false, bool overrideThrottling = false, string preloadedManifestData = null)
         {
-            MLog.Information($@"Loading ASI manifest. Using beta ASIs: {UsingBeta}");
+            MLog.Information($@"Loading ASI manifest.");
             try
             {
                 internalLoadManifest(forceLocal, overrideThrottling, preloadedManifestData);
@@ -392,6 +380,7 @@ namespace ME3TweaksCore.NativeMods
                                             DownloadLink = (string)version.Element(@"downloadlink"),
                                             IsBeta = TryConvert.ToBoolFromInt(version.Element(@"beta")?.Value),
                                             Hidden = TryConvert.ToBoolFromInt(version.Element(@"hidden")?.Value),
+                                            DevModeOnly = TryConvert.ToBoolFromInt(version.Element(@"devsonly")?.Value),
                                             _otherGroupsToDeleteOnInstallInternal = version.Element(@"autoremovegroups")?.Value,
 
                                             Game = intToGame((int)ugroup.Attribute(@"game")), // use ugroup element to pull from outer group
@@ -405,11 +394,12 @@ namespace ME3TweaksCore.NativeMods
                     Debug.WriteLine($@"Read {v.Game} ASI group {v.UpdateGroupId}: {v.LatestVersionIncludingHidden}. Beta: {v.LatestVersionIncludingHidden.IsBeta}");
 #endif
                     // If all ASIs are hidden mark entire group as hidden.
+                    // Should this be moved to ShouldShowInUI?
                     if (v.Versions.All(x => x.Hidden))
                     {
                         v.IsHidden = true;
                     }
-
+                    
                     switch (v.Game)
                     {
                         case MEGame.ME1:

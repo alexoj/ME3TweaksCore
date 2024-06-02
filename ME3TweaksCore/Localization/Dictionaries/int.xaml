@@ -24,7 +24,7 @@
     <!-- 0=filepath  1=filepath -->
     <system:String x:Key="string_cannotCreateBackup">Cannot create backup</system:String>
     <system:String x:Key="string_someDlcNotInstalled">Some DLC not installed</system:String>
-    <system:String x:Key="string_dialog_notAllDLCInstalled" xml:space="preserve">This target does not have have all OFFICIAL DLC installed. Ensure you have installed all OFFICIAL DLC you want to include in your backup, otherwise a game restore will not include all of it.\n\nThe following DLC is not installed:\n{0}\n\nNote that you don't need all DLC in a backup (such as DLC you have not purchased), however some Mod Manager features depend on specific DLC being installed, such as ME3Tweaks ModMaker.\n\nMake a backup of this target?</system:String>
+    <system:String x:Key="string_dialog_notAllDLCInstalled" xml:space="preserve">This target does not have all OFFICIAL DLC installed. Ensure you have installed all OFFICIAL DLC you want to include in your backup, otherwise a game restore will not include all of it.\n\nThe following DLC is not installed:\n{0}\n\nNote that you don't need all DLC in a backup (such as DLC you have not purchased), however some Mod Manager features depend on specific DLC being installed, such as ME3Tweaks ModMaker.\n\nMake a backup of this target?</system:String>
     <!-- 0 = bulleted list of DLC -->
     <system:String x:Key="string_interp_dialog_linkFailedSubdirectoryOfGameDocumentsFolder">The Documents/BioWare/ directory (and its descendants) cannot be used as a backup location, as the game can load files from it. Please choose another directory.</system:String>
     <system:String x:Key="string_locationNotAllowedForBackup">Location not allowed for backup</system:String>
