@@ -21,6 +21,7 @@ namespace ME3TweaksCore.GameFilesystem
         public static readonly string PrefixRequiredDLC = @"[REQUIREDDLC]";
         public static readonly string PrefixExtendedAttributes = @"[EXTENDEDATTRIBUTE]";
         public static readonly string PrefixModDescPath = @"[SOURCEMODDESC]";
+        public static readonly string PrefixModDescHash = @"[SOURCEMODDESCHASH]";
         public static readonly string PrefixNexusUpdateCode = @"[NEXUSUPDATECODE]";
         public static readonly string PrefixUsesEnhancedBink = @"[USESENHANCEDBINK]";
         public static readonly string PrefixInstallTime = @"[INSTALLTIME]";
@@ -68,6 +69,11 @@ namespace ME3TweaksCore.GameFilesystem
         public DateTime? InstallTime { get; set; }
 
         /// <summary>
+        /// Hash of the moddesc that installed this mod
+        /// </summary>
+        public string ModdescSourceHash { get; set; }
+
+        /// <summary>
         /// Writes the metacmm file to the specified filepath.
         /// </summary>
         /// <param name="path">Filepath to write to</param>
@@ -97,6 +103,14 @@ namespace ME3TweaksCore.GameFilesystem
                 sb.AppendLine($@"{PrefixModDescPath}{ModdescSourcePath}");
             }
 
+            // Mod Manager 9: Instead, use the moddesc hash so we can also track archives.
+            if (ModdescSourceHash != null)
+            {
+                sb.AppendLine($@"{PrefixModDescHash}{ModdescSourceHash}");
+            }
+
+
+
             if (RequiredDLC.Any())
             {
                 sb.AppendLine($@"{PrefixRequiredDLC}{string.Join(';', RequiredDLC)}");
@@ -117,6 +131,8 @@ namespace ME3TweaksCore.GameFilesystem
             {
                 sb.AppendLine($@"{PrefixInstallTime}{InstallTime.Value.Ticks}");
             }
+
+
 
             File.WriteAllText(path, sb.ToString());
         }
