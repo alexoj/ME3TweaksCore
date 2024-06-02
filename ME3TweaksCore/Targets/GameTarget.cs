@@ -4,9 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
 using LegendaryExplorerCore.Compression;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Helpers;
@@ -22,8 +20,7 @@ using ME3TweaksCore.NativeMods.Interfaces;
 using ME3TweaksCore.Objects;
 using ME3TweaksCore.Services;
 using ME3TweaksCore.Services.Backup;
-using PropertyChanged;
-using Serilog;
+using ME3TweaksCore.Services.Shared.BasegameFileIdentification;
 
 namespace ME3TweaksCore.Targets
 {
@@ -388,17 +385,19 @@ namespace ME3TweaksCore.Targets
         public ObservableCollectionExtended<ModifiedFileObject> ModifiedBasegameFiles { get; } = new();
         public ObservableCollectionExtended<SFARObject> ModifiedSFARFiles { get; } = new();
 
-        public void PopulateModifiedBasegameFiles(Func<string, bool> restoreBasegamefileConfirmationCallback,
-            Func<string, bool> restoreSfarConfirmationCallback,
-            Action notifySFARRestoringCallback,
-            Action notifyFileRestoringCallback,
-            Action<object> notifyRestoredCallback)
+        public void PopulateModifiedBasegameFiles(Func<string, bool> restoreBasegamefileConfirmationCallback = null,
+            Func<string, bool> restoreSfarConfirmationCallback = null,
+            Action notifySFARRestoringCallback = null,
+            Action notifyFileRestoringCallback = null,
+            Action<object> notifyRestoredCallback = null)
         {
             ModifiedBasegameFiles.ClearEx();
             ModifiedSFARFiles.ClearEx();
 
             List<string> modifiedSfars = new List<string>();
             List<string> modifiedFiles = new List<string>();
+            var trackedBasegameFilesTextureModded = Game.IsLEGame() && TextureModded ? BasegameFileIdentificationService.GetEntriesForGame(Game) : null;
+
             void failedCallback(string file)
             {
                 if (Game == MEGame.ME3 && Path.GetExtension(file).Equals(@".sfar", StringComparison.InvariantCultureIgnoreCase))
@@ -410,28 +409,76 @@ namespace ME3TweaksCore.Targets
                 {
                     return; // Do not report this file as modified
                 }
-                else if (this.Game != MEGame.LELauncher && file == M3Directories.GetTextureMarkerPath(this))
+                if (this.Game != MEGame.LELauncher && file == this.GetTextureMarkerPath())
                 {
                     return; //Do not report this file as modified or user will desync game state with texture state
                 }
+
+                if (Game.IsLEGame() && TextureModded && file.RepresentsPackageFilePath())
+                {
+                    var size = new FileInfo(file).Length;
+                    var relative = file.Substring(TargetPath.Length) + 1;
+                    if (trackedBasegameFilesTextureModded.TryGetValue(relative, out var tracked) && tracked.All(x => x.size != size))
+                    {
+                        // There is no way we will have a match for this
+                        return;
+                    }
+                }
                 modifiedFiles.Add(file);
             }
+
+            // Todo: Maybe add callback to allow skipping texture modded files we know are not tracked
             VanillaDatabaseService.ValidateTargetAgainstVanilla(this, failedCallback, false);
 
-            List<string> inconsistentDLC = new List<string>();
-            VanillaDatabaseService.ValidateTargetDLCConsistency(this, x => inconsistentDLC.Add(x));
+            // SFAR is ME3 only
+            if (Game == MEGame.ME3)
+            {
+                List<string> inconsistentDLC = new List<string>();
+                VanillaDatabaseService.ValidateTargetDLCConsistency(this, x => inconsistentDLC.Add(x));
 
-            modifiedSfars.AddRange(inconsistentDLC.Select(x => Path.Combine(x, @"CookedPCConsole", @"Default.sfar")));
-            modifiedSfars = modifiedSfars.Distinct().ToList(); //filter out if modified + inconsistent
+                modifiedSfars.AddRange(inconsistentDLC.Select(x => Path.Combine(x, @"CookedPCConsole", @"Default.sfar")));
+                modifiedSfars = modifiedSfars.Distinct().ToList(); //filter out if modified + inconsistent
 
-            ModifiedSFARFiles.AddRange(modifiedSfars.Select(file => MExtendedClassGenerators.GenerateSFARObject(file, this, restoreSfarConfirmationCallback, notifySFARRestoringCallback, notifyRestoredCallback)));
+                ModifiedSFARFiles.AddRange(modifiedSfars.Select(file => MExtendedClassGenerators.GenerateSFARObject(file, this, restoreSfarConfirmationCallback, notifySFARRestoringCallback, notifyRestoredCallback)));
+            }
 
             // Filter out packages and TFCs if game is texture modded
-            var modifiedBasegameFiles = modifiedFiles.Where(x => !TextureModded || (!x.RepresentsPackageFilePath() && Path.GetExtension(x) != @".tfc"))
-                .Select(file => MExtendedClassGenerators.GenerateModifiedFileObject(file.Substring(TargetPath.Length + 1), this,
-                restoreBasegamefileConfirmationCallback,
-                notifyFileRestoringCallback,
-                notifyRestoredCallback));
+            List<ModifiedFileObject> modifiedBasegameFiles;
+            if (TextureModded && Game.IsLEGame())
+            {
+                // Non package files initially.
+                modifiedBasegameFiles = modifiedFiles.Where(x=>!x.RepresentsPackageFilePath()).Select(file => MExtendedClassGenerators.GenerateModifiedFileObject(
+                    file.Substring(TargetPath.Length + 1), this,
+                    restoreBasegamefileConfirmationCallback,
+                    notifyFileRestoringCallback,
+                    notifyRestoredCallback)).ToList();
+
+                // Then look for only tracked package files
+                foreach (var trackedFile in BasegameFileIdentificationService.GetEntriesForGame(Game).Where(x=>x.Key.RepresentsPackageFilePath()))
+                {
+                    var path = Path.Combine(TargetPath, trackedFile.Key);
+                    var hash = MUtilities.CalculateHash(path);
+                    var info = trackedFile.Value.FirstOrDefault(x => x.hash == hash);
+                    if (info != null)
+                    {
+                        // Should we allow restoring these...? Seems kinda dangerous
+                        modifiedBasegameFiles.Add(new ModifiedFileObject(trackedFile.Key, this, null, null, null, md5: hash));
+                    }
+                }
+            }
+            else
+            {
+                // Not texture modded
+                modifiedBasegameFiles = modifiedFiles.Where(x =>
+                        // This line is for OT as it doesn't support post-texture mod tracking
+                        !TextureModded || (!x.RepresentsPackageFilePath() && Path.GetExtension(x) != @".tfc"))
+
+                    .Select(file => MExtendedClassGenerators.GenerateModifiedFileObject(
+                        file.Substring(TargetPath.Length + 1), this,
+                        restoreBasegamefileConfirmationCallback,
+                        notifyFileRestoringCallback,
+                        notifyRestoredCallback)).ToList();
+            }
 
             ModifiedBasegameFiles.AddRange(modifiedBasegameFiles);
         }

@@ -28,16 +28,23 @@ namespace ME3TweaksCore.Targets
         private Func<string, bool> restoreBasegamefileConfirmationCallback;
         public bool Restoring { get; set; }
 
+        /// <summary>
+        /// Precalculated MD5 for performance
+        /// </summary>
+        public string MD5 { get; set; }
+
         public ModifiedFileObject(string filePath, GameTarget target,
             Func<string, bool> restoreBasegamefileConfirmationCallback,
             Action notifyRestoringFileCallback,
-            Action<object> notifyRestoredCallback)
+            Action<object> notifyRestoredCallback,
+            string md5 = null)
         {
             this.FilePath = filePath;
             this.target = target;
             this.notifyRestoredCallback = notifyRestoredCallback;
             this.restoreBasegamefileConfirmationCallback = restoreBasegamefileConfirmationCallback;
             this.notifyRestoringCallback = notifyRestoringFileCallback;
+            MD5 = md5;
         }
 
         public string ModificationSource { get; set; }
@@ -51,17 +58,16 @@ namespace ME3TweaksCore.Targets
             if (File.Exists(fullpath))
             {
                 //if (FilePath.Equals(Utilities.Getth, StringComparison.InvariantCultureIgnoreCase)) return; //don't report this file
-                var info = BasegameFileIdentificationService.GetBasegameFileSource(target, fullpath);
+                var info = BasegameFileIdentificationService.GetBasegameFileSource(target, fullpath, MD5);
                 if (info != null)
                 {
                     ModificationSource = info.source;
                 }
-                // TODO: MAKE LOCAL DB??
 #if DEBUG
-                else
-                {
-                    ModificationSource = MUtilities.CalculateHash(fullpath);
-                }
+                //else
+                //{
+                //    ModificationSource = MUtilities.CalculateHash(fullpath);
+                //}
 #endif
             }
         }
