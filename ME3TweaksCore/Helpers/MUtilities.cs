@@ -301,8 +301,9 @@ namespace ME3TweaksCore.Helpers
 
         }
 
-        // ME2 and ME3 have same exe names.
         private static (bool isRunning, DateTime lastChecked) le1RunningInfo = (false, DateTime.MinValue.AddSeconds(5));
+        private static (bool isRunning, DateTime lastChecked) le2RunningInfo = (false, DateTime.MinValue.AddSeconds(5));
+        private static (bool isRunning, DateTime lastChecked) le3RunningInfo = (false, DateTime.MinValue.AddSeconds(5));
         private static (bool isRunning, DateTime lastChecked) me1RunningInfo = (false, DateTime.MinValue.AddSeconds(5));
         private static (bool isRunning, DateTime lastChecked) me2RunningInfo = (false, DateTime.MinValue.AddSeconds(5));
         private static (bool isRunning, DateTime lastChecked) me3RunningInfo = (false, DateTime.MinValue.AddSeconds(5));
@@ -315,9 +316,10 @@ namespace ME3TweaksCore.Helpers
         /// Determines if a specific game is running. This method only updates every 3 seconds due to the huge overhead it has
         /// </summary>
         /// <returns>True if running, false otherwise</returns>
-        public static bool IsGameRunning(MEGame gameID)
+        public static bool IsGameRunning(MEGame gameID, bool forceCheckNow = false)
         {
-            (bool isRunning, DateTime lastChecked) runningInfo = (false, DateTime.MinValue.AddSeconds(5));
+            Debug.WriteLine($"IsGameRunning({gameID})");
+            (bool isRunning, DateTime lastChecked) runningInfo = (false, DateTime.MinValue);
             switch (gameID)
             {
                 case MEGame.ME1:
@@ -327,10 +329,14 @@ namespace ME3TweaksCore.Helpers
                     runningInfo = le1RunningInfo;
                     break;
                 case MEGame.LE2:
+                    runningInfo = le2RunningInfo;
+                    break;
                 case MEGame.ME2:
                     runningInfo = me2RunningInfo;
                     break;
                 case MEGame.LE3:
+                    runningInfo = le3RunningInfo;
+                    break;
                 case MEGame.ME3:
                     runningInfo = me3RunningInfo;
                     break;
@@ -341,15 +347,27 @@ namespace ME3TweaksCore.Helpers
 
             var time = runningInfo.lastChecked.AddSeconds(TIME_BETWEEN_PROCESS_CHECKS);
             //Debug.WriteLine(time + " vs " + DateTime.Now);
-            if (time > DateTime.Now)
+            if (!forceCheckNow && time > DateTime.Now)
             {
                 //Debug.WriteLine("CACHED");
                 return runningInfo.isRunning; //cached
             }
             //Debug.WriteLine("IsRunning: " + gameID);
 
-            var processNames = MEDirectories.ExecutableNames(gameID).Select(x => Path.GetFileNameWithoutExtension(x));
-            runningInfo.isRunning = Process.GetProcesses().Any(x => processNames.Contains(x.ProcessName));
+            var processNames = MEDirectories.ExecutableNames(gameID).Select(Path.GetFileNameWithoutExtension);
+            try
+            {
+                // This is in a try catch, as things in MainModule will throw an error if accessed
+                // after the process ends, which it might during the periodic updates of this
+                runningInfo.isRunning = Process.GetProcesses().Any(x =>
+                    processNames.Contains(x.ProcessName) &&
+                    x.MainModule?.FileVersionInfo.FileMajorPart == (gameID.IsOTGame() ? 1 : 2));
+            }
+            catch
+            {
+                // don't really care
+            }
+
             runningInfo.lastChecked = DateTime.Now;
             switch (gameID)
             {
@@ -360,10 +378,14 @@ namespace ME3TweaksCore.Helpers
                     le1RunningInfo = runningInfo;
                     break;
                 case MEGame.ME2:
-                case MEGame.LE2:
                     me2RunningInfo = runningInfo;
                     break;
+                case MEGame.LE2:
+                    le2RunningInfo = runningInfo;
+                    break;
                 case MEGame.ME3:
+                    le3RunningInfo = runningInfo;
+                    break;
                 case MEGame.LE3:
                     me3RunningInfo = runningInfo;
                     break;
@@ -374,6 +396,17 @@ namespace ME3TweaksCore.Helpers
 
             return runningInfo.isRunning;
         }
+
+        /// <summary>
+        /// Checks if a process is running. This should not be used for game detection, as it also uses version info.
+        /// </summary>
+        /// <param name="processName"></param>
+        /// <returns></returns>
+        public static bool IsProcessRunning(string processName)
+        {
+            return Process.GetProcesses().Any(x => x.ProcessName.Equals(processName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
 
         /// <summary>
         /// Deletes the contents of the specified folder, as well as the directory itself unless deleteDirectoryItself = false
