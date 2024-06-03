@@ -1095,7 +1095,7 @@ namespace ME3TweaksCore.Targets
         private const string ME1ASILoaderHash = @"30660f25ab7f7435b9f3e1a08422411a";
         private const string ME2ASILoaderHash = @"a5318e756893f6232284202c1196da13";
         private const string ME3ASILoaderHash = @"1acccbdae34e29ca7a50951999ed80d5";
-        private const string LEASILoaderHash = @"bf50b297e9c4013abc20854c48064516"; // Will need changed as game is updated // bink 2.0.0.11 by ME3Tweaks 01/29/2023
+        private const string LEASILoaderHash = @"19d444d944d89b173a81339859ec3e93"; // bink 2.0.0.12 by ME3Tweaks 06/02/2024
 
         /// <summary>
         /// Determines if the enhanced bink video library file is installed
