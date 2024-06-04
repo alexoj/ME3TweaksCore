@@ -29,6 +29,11 @@ namespace ME3TweaksCore.Targets
     {
         public const uint MEMI_TAG = 0x494D454D;
 
+        // Used in UIs determining game source
+        public const string GAME_SOURCE_EA_APP = @"EA App";
+        public const string GAME_SOURCE_STEAM = @"Steam";
+        public const string GAME_SOURCE_DVD = @"DVD";
+
         public MEGame Game { get; }
         public string TargetPath { get; }
         public bool RegistryActive { get; set; }
@@ -112,7 +117,7 @@ namespace ME3TweaksCore.Targets
                         }
                         else
                         {
-                            if (GameSource.Contains(@"Origin") && (Game is MEGame.ME3 or MEGame.LELauncher || Game.IsLEGame()))
+                            if (GameSource.Contains(GAME_SOURCE_EA_APP) && (Game is MEGame.ME3 or MEGame.LELauncher || Game.IsLEGame()))
                             {
                                 // Check for steam
                                 var testPath = Game == MEGame.ME3 ? TargetPath : Directory.GetParent(TargetPath).FullName;

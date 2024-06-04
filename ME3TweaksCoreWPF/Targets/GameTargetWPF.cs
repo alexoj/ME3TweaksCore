@@ -75,9 +75,9 @@ namespace ME3TweaksCoreWPF.Targets
             {
                 if (IsCustomOption) return null; // No icon as this is not actual game
                 if (GameSource == null) return @"/images/unknown.png";
-                if (GameSource.Contains(@"Steam")) return @"/images/steam.png"; //higher priority than Origin in icon will make the Steam/Origin mix work
-                if (GameSource.Contains(@"Origin")) return @"/images/origin.png";
-                if (GameSource.Contains(@"DVD")) return @"/images/dvd.png";
+                if (GameSource.Contains(GameTarget.GAME_SOURCE_STEAM)) return @"/images/steam.png"; //higher priority than Origin in icon will make the Steam/Origin mix work
+                if (GameSource.Contains(GameTarget.GAME_SOURCE_EA_APP)) return @"/images/ea.png";
+                if (GameSource.Contains(GameTarget.GAME_SOURCE_DVD)) return @"/images/dvd.png";
                 return @"/images/unknown.png";
             }
         }

@@ -629,18 +629,18 @@ namespace ME3TweaksCore.Services
         {
             [@"647b93621389709cab8d268379bd4c47"] = @"Steam",
             [@"fef464b4b92c19ce76add75de6732ccf"] = @"Steam, BioWare signed",
-            [@"ff1f894fa1c2dbf4d4b9f0de85c166e5"] = @"Origin",
+            [@"ff1f894fa1c2dbf4d4b9f0de85c166e5"] = @"EA App",
             [@"73b76699d4e245c92110a93c54980b78"] = @"DVD",
             [@"298c30a399d0959e5e997a9d64b42548"] = @"DVD, Polish",
-            [@"8bba14d838d9c95e10d8ceeb5c958976"] = @"Origin, Vanilla, Alternate1?",
-            [@"a8d61af97159cb62040c07b94e44299e"] = @"Origin, Vanilla, Alternate2?",
+            [@"8bba14d838d9c95e10d8ceeb5c958976"] = @"EA App, Vanilla, Alternate1?",
+            [@"a8d61af97159cb62040c07b94e44299e"] = @"EA App, Vanilla, Alternate2?",
         };
 
         private static Dictionary<string, string> SUPPORTED_HASHES_ME2 = new Dictionary<string, string>
         {
-            [@"73827026bc9629562c4a3f61a752541c"] = @"Origin, ME2Game/MassEffect2 swapped",
-            [@"32fb31b80804040996ed78d14110b54b"] = @"Origin",
-            [@"229173ca9057baeb4fd9f0fb2e569051"] = @"Origin, ME2Game",
+            [@"73827026bc9629562c4a3f61a752541c"] = @"EA App, ME2Game/MassEffect2 swapped",
+            [@"32fb31b80804040996ed78d14110b54b"] = @"EA App",
+            [@"229173ca9057baeb4fd9f0fb2e569051"] = @"EA App, ME2Game",
             [@"16f214ce81ba228347bce7b93fb0f37a"] = @"Steam",
             [@"e26f142d44057628efd086c605623dcf"] = @"DVD, Alternate",
             [@"b1d9c44be87acac610dfa9947e114096"] = @"DVD",
@@ -648,37 +648,37 @@ namespace ME3TweaksCore.Services
 
         private static Dictionary<string, string> SUPPORTED_HASHES_ME3 = new Dictionary<string, string>
         {
-            [@"1d09c01c94f01b305f8c25bb56ce9ab4"] = @"Origin",
-            [@"90d51c84b278b273e41fbe75682c132e"] = @"Origin, Alternate",
-            [@"70dc87862da9010aad1acd7d0c2c857b"] = @"Origin, Russian",
+            [@"1d09c01c94f01b305f8c25bb56ce9ab4"] = @"EA App",
+            [@"90d51c84b278b273e41fbe75682c132e"] = @"EA App, Alternate",
+            [@"70dc87862da9010aad1acd7d0c2c857b"] = @"EA App, Russian",
         };
 
         private static Dictionary<string, string> SUPPORTED_HASHES_LE1 = new Dictionary<string, string>
         {
-            //[@"f4331d60672509b342da12bc42b4622f"] = @"Origin 2.0.0.47902", // May 14 Launch Version
-            //[@"ade71fcaa13224e383a848b90db807f2"] = @"Origin 2.0.0.48204", // May 17
-            [@"92c9915cf4da2b8fb0b8ebb0795ba2d9"] = @"Origin 2.0.0.48602", // June 7
+            //[@"f4331d60672509b342da12bc42b4622f"] = @"EA App 2.0.0.47902", // May 14 Launch Version
+            //[@"ade71fcaa13224e383a848b90db807f2"] = @"EA App 2.0.0.48204", // May 17
+            [@"92c9915cf4da2b8fb0b8ebb0795ba2d9"] = @"EA App 2.0.0.48602", // June 7
         };
 
         private static Dictionary<string, string> SUPPORTED_HASHES_LE2 = new Dictionary<string, string>
         {
-            //[@"3b4dd0078a122476126c3b5c6665db16"] = @"Origin 2.0.0.47902",
-            //[@"fcb4c06b21853ece31a1897e136df45c"] = @"Origin 2.0.0.48204",
-            [@"b584a70f56cfed7b8f35a081420227b0"] = @"Origin 2.0.0.48602",
+            //[@"3b4dd0078a122476126c3b5c6665db16"] = @"EA App 2.0.0.47902",
+            //[@"fcb4c06b21853ece31a1897e136df45c"] = @"EA App 2.0.0.48204",
+            [@"b584a70f56cfed7b8f35a081420227b0"] = @"EA App 2.0.0.48602",
         };
 
         private static Dictionary<string, string> SUPPORTED_HASHES_LE3 = new Dictionary<string, string>
         {
-            //[@"a64622ed97309563a5597adbed4055ca"] = @"Origin 2.0.0.47902",
-            //[@"c55689e54c921739532beb033f0f0ebf"] = @"Origin 2.0.0.48204",
-            [@"11e222d4f8f7c2a123b80a938b76c922"] = @"Origin 2.0.0.48602",
+            //[@"a64622ed97309563a5597adbed4055ca"] = @"EA App 2.0.0.47902",
+            //[@"c55689e54c921739532beb033f0f0ebf"] = @"EA App 2.0.0.48204",
+            [@"11e222d4f8f7c2a123b80a938b76c922"] = @"EA App 2.0.0.48602",
         };
 
         private static Dictionary<string, string> SUPPORTED_HASHES_LEL = new Dictionary<string, string>
         {
-            //[@"e03dd006f2d4f56f46a8f6c014230ba8"] = @"Origin 2.0.0.47902",
-            //[@"a50a5ab69a0de8356ddd8ab69f8ecdc2"] = @"Origin 2.0.0.48204",
-            [@"5e8dc210b4adda2eda1dc367a781c3a8"] = @"Origin 2.0.0.48602",
+            //[@"e03dd006f2d4f56f46a8f6c014230ba8"] = @"EA App 2.0.0.47902",
+            //[@"a50a5ab69a0de8356ddd8ab69f8ecdc2"] = @"EA App 2.0.0.48204",
+            [@"5e8dc210b4adda2eda1dc367a781c3a8"] = @"EA App 2.0.0.48602",
         };
 
         /// <summary>
