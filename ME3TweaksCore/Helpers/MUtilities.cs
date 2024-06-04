@@ -312,46 +312,75 @@ namespace ME3TweaksCore.Helpers
 
         private static int TIME_BETWEEN_PROCESS_CHECKS = 5;
 
+        private static object gameRunningSyncObjME1 = new object();
+        private static object gameRunningSyncObjME2 = new object();
+        private static object gameRunningSyncObjME3 = new object();
+        private static object gameRunningSyncObjLE1 = new object();
+        private static object gameRunningSyncObjLE2 = new object();
+        private static object gameRunningSyncObjLE3 = new object();
+        private static object gameRunningSyncObjLEL = new object();
+
+        /// <summary>
+        /// Returns the object used to enforce concurrency when checking if a game is running
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns></returns>
+        private static object GetSyncObjForGameRunning(MEGame game) => game switch
+        {
+            MEGame.ME1 => gameRunningSyncObjME1,
+            MEGame.ME2 => gameRunningSyncObjME2,
+            MEGame.ME3 => gameRunningSyncObjME3,
+            MEGame.LE1 => gameRunningSyncObjLE1,
+            MEGame.LE2 => gameRunningSyncObjLE2,
+            MEGame.LE3 => gameRunningSyncObjLE3,
+            MEGame.LELauncher => gameRunningSyncObjLEL,
+        };
+
         /// <summary>
         /// Determines if a specific game is running. This method only updates every 3 seconds due to the huge overhead it has
         /// </summary>
         /// <returns>True if running, false otherwise</returns>
         public static bool IsGameRunning(MEGame gameID, bool forceCheckNow = false)
         {
-            Debug.WriteLine($"IsGameRunning({gameID})");
             (bool isRunning, DateTime lastChecked) runningInfo = (false, DateTime.MinValue);
-            switch (gameID)
+            lock (GetSyncObjForGameRunning(gameID))
             {
-                case MEGame.ME1:
-                    runningInfo = me1RunningInfo;
-                    break;
-                case MEGame.LE1:
-                    runningInfo = le1RunningInfo;
-                    break;
-                case MEGame.LE2:
-                    runningInfo = le2RunningInfo;
-                    break;
-                case MEGame.ME2:
-                    runningInfo = me2RunningInfo;
-                    break;
-                case MEGame.LE3:
-                    runningInfo = le3RunningInfo;
-                    break;
-                case MEGame.ME3:
-                    runningInfo = me3RunningInfo;
-                    break;
-                case MEGame.LELauncher:
-                    runningInfo = leLauncherRunningInfo;
-                    break;
+                switch (gameID)
+                {
+                    case MEGame.ME1:
+                        runningInfo = me1RunningInfo;
+                        break;
+                    case MEGame.LE1:
+                        runningInfo = le1RunningInfo;
+                        break;
+                    case MEGame.LE2:
+                        runningInfo = le2RunningInfo;
+                        break;
+                    case MEGame.ME2:
+                        runningInfo = me2RunningInfo;
+                        break;
+                    case MEGame.LE3:
+                        runningInfo = le3RunningInfo;
+                        break;
+                    case MEGame.ME3:
+                        runningInfo = me3RunningInfo;
+                        break;
+                    case MEGame.LELauncher:
+                        runningInfo = leLauncherRunningInfo;
+                        break;
+                }
+
+                var time = runningInfo.lastChecked.AddSeconds(TIME_BETWEEN_PROCESS_CHECKS);
+                //Debug.WriteLine(time + " vs " + DateTime.Now);
+                if (!forceCheckNow && time > DateTime.Now)
+                {
+                    //Debug.WriteLine("CACHED");
+                    return runningInfo.isRunning; //cached
+                }
             }
 
-            var time = runningInfo.lastChecked.AddSeconds(TIME_BETWEEN_PROCESS_CHECKS);
-            //Debug.WriteLine(time + " vs " + DateTime.Now);
-            if (!forceCheckNow && time > DateTime.Now)
-            {
-                //Debug.WriteLine("CACHED");
-                return runningInfo.isRunning; //cached
-            }
+            Debug.WriteLine($"{DateTime.Now} IsGameRunning({gameID}) - stale info, refreshing");
+
             //Debug.WriteLine("IsRunning: " + gameID);
 
             var processNames = MEDirectories.ExecutableNames(gameID).Select(Path.GetFileNameWithoutExtension);
@@ -384,10 +413,10 @@ namespace ME3TweaksCore.Helpers
                     le2RunningInfo = runningInfo;
                     break;
                 case MEGame.ME3:
-                    le3RunningInfo = runningInfo;
+                    me3RunningInfo = runningInfo;
                     break;
                 case MEGame.LE3:
-                    me3RunningInfo = runningInfo;
+                    le3RunningInfo = runningInfo;
                     break;
                 case MEGame.LELauncher:
                     leLauncherRunningInfo = runningInfo;
