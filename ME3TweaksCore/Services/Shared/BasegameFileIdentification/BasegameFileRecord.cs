@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Packages;
@@ -17,6 +18,7 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
         public string source { get; set; }
         public string game { get; set; }
         public int size { get; set; }
+        public List<string> moddeschashes { get; set; } = new List<string>(4);
         public BasegameFileRecord() { }
         public BasegameFileRecord(string relativePathToRoot, int size, MEGame game, string humanName, string md5)
         {

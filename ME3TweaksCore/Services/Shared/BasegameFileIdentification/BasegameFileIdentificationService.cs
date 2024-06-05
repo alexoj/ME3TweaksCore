@@ -236,5 +236,22 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
 
             return new CaseInsensitiveDictionary<List<BasegameFileRecord>>(0); // Return nothing.
         }
+
+        public static CaseInsensitiveDictionary<List<BasegameFileRecord>> GetEntriesForFiles(MEGame game, List<string> files)
+        {
+            CaseInsensitiveDictionary<List<BasegameFileRecord>> records = new(files.Count);
+            if (Database.TryGetValue(game.ToString(), out var gameEntries))
+            {
+                foreach (var f in files)
+                {
+                    if (gameEntries.TryGetValue(f, out var list))
+                    {
+                        records[f] = list;
+                    }
+                }
+            }
+
+            return records;
+        }
     }
 }
