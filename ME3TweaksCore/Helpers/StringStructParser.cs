@@ -14,14 +14,25 @@ namespace ME3TweaksCore.Helpers
     public class StringStructParser
     {
         /// <summary>
-        /// Gets a list of strings that are split by ;
+        /// Gets a list of strings that are split by ;, or a custom separator character.
         /// </summary>
         /// <param name="inputString"></param>
         /// <returns></returns>
-        public static List<string> GetSemicolonSplitList(string inputString)
+        public static List<string> GetSemicolonSplitList(string inputString, char separateChar = ';')
         {
             inputString = inputString.Trim('(', ')');
-            return inputString.Split(';').ToList();
+            return inputString.Split(separateChar).ToList();
+        }
+
+        // This is here because I wanted names to be easier to read on these
+        /// <summary>
+        /// Gets a list of strings that are split by ,. Accepts one incoming set of ( and )
+        /// </summary>
+        /// <param name="inputString"></param>
+        /// <returns></returns>
+        public static List<string> GetCommaSplitList(string inputString)
+        {
+            return GetSemicolonSplitList(inputString, ',');
         }
 
         /// <summary>
