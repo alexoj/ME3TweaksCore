@@ -241,6 +241,10 @@ namespace ME3TweaksCore.GameFilesystem
                                 }
                             }
                         }
+                        else if (line.StartsWith(PrefixModDescHash))
+                        {
+                            ModdescSourceHash = line.Substring(PrefixModDescHash.Length);
+                        }
                         break;
                 }
                 i++;
