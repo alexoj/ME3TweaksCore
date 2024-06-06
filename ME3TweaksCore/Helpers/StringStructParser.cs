@@ -11,7 +11,7 @@ namespace ME3TweaksCore.Helpers
     /// <summary>
     /// Parser class for different types of string structs and list
     /// </summary>
-    public class StringStructParser
+    public static class StringStructParser
     {
         /// <summary>
         /// Gets a list of strings that are split by ;, or a custom separator character.
@@ -229,6 +229,33 @@ namespace ME3TweaksCore.Helpers
         }
 
         /// <summary>
+        /// Trims an equal number of characters off each end of the string.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string TrimSymetrical(this string str, int maxCuts = int.MaxValue, params char[] chars)
+        {
+            string outStr = str;
+
+            // To evenly cut out we must have at least 2 chars remaining, as it could cut down to empty.
+            while (outStr.Length > 1 && maxCuts > 0)
+            {
+                if (chars.Contains(str[0]) && chars.Contains(str[^1]))
+                {
+                    outStr = outStr[1..^1];
+                    maxCuts--;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return outStr;
+        }
+
+
+        /// <summary>
         /// Gets a dictionary of command split value keypairs. This version accepts multiple duplicate keys, as results are stored in lists. Can accept incoming string with 1 outer parenthesis at most.
         /// </summary>
         /// <param name="inputString">The string to split to value</param>
@@ -246,7 +273,7 @@ namespace ME3TweaksCore.Helpers
                 throw new Exception(@"GetSplitMultiValues() can only deal with items encapsulated in a single set of opening and closing characters. The current set has at least two, e.g. ((value)) or [[value]].");
             }
 
-            inputString = inputString.Trim(openChar, closeChar);
+            inputString = inputString.TrimSymetrical(1, openChar, closeChar);
             //Find commas
             int propNameStartPos = 0;
             int lastEqualsPos = -1;
@@ -259,6 +286,9 @@ namespace ME3TweaksCore.Helpers
             var values = canBeCaseInsensitive ? new CaseInsensitiveDictionary<List<string>>() : new Dictionary<string, List<string>>();
             for (int i = 0; i < inputString.Length; i++)
             {
+#if DEBUG
+                var remainingString = inputString.Substring(i);
+#endif
                 // Variables
                 if (inputString[i] == closeChar)
                 {
@@ -305,7 +335,8 @@ namespace ME3TweaksCore.Helpers
                         {
                             //New property
                             {
-                                if (lastEqualsPos < propNameStartPos) throw new Exception(@"ASSERT ERROR: Error parsing string struct: equals cannot come before property name start. Value: " + inputString);
+                                if (lastEqualsPos < propNameStartPos && lastEqualsPos != -1) throw new Exception(@"ASSERT ERROR: Error parsing string struct: equals cannot come before property name start. Value: " + inputString);
+                                if (lastEqualsPos == -1 && propNameStartPos >= 0) throw new Exception(@"ASSERT ERROR: Error parsing string struct: Could not find equals since parsing the previous property (if any). Value: " + inputString);
                                 string propertyName = inputString.Substring(propNameStartPos, lastEqualsPos - propNameStartPos).Trim();
                                 string value = "";
                                 if (openingQuotePos >= 0)
