@@ -243,7 +243,7 @@ namespace ME3TweaksCore.Helpers
             // To evenly cut out we must have at least 2 chars remaining, as it could cut down to empty.
             while (outStr.Length > 1 && maxCuts > 0)
             {
-                if (chars.Contains(str[0]) && chars.Contains(str[^1]))
+                if (chars.Contains(outStr[0]) && chars.Contains(outStr[^1]))
                 {
                     outStr = outStr[1..^1];
                     maxCuts--;
