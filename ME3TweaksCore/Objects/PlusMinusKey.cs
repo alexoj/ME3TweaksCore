@@ -1,4 +1,6 @@
-﻿namespace ME3TweaksCore.Objects
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace ME3TweaksCore.Objects
 {
     /// <summary>
     /// Represents a moddesc.ini key for +/- prefixes and a value.
@@ -31,6 +33,8 @@
             str += Key;
             return str;
         }
+
+        public static implicit operator PlusMinusKey(string d) => new(d);
 
         public PlusMinusKey() { }
 

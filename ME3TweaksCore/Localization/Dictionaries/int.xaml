@@ -280,6 +280,9 @@
     <!-- DLC Requirement -->
     <system:String x:Key="string_dlcRequirementInvalidParenthesis">DLCRequirement input is invalid: Version must be enclosed in parenthesis</system:String>
     <system:String x:Key="string_interp_dlcRequirementInvalidBadVersion">DLCRequirement input is invalid: Invalid version string '{0}'</system:String>
+    <system:String x:Key="string_interp_minVersionAppend">(minimum version: {0})</system:String>
+    <!-- 0={invalid string value} -->
+    <system:String x:Key="string_interp_maxVersionAppend">(maximum version: {0})</system:String>
     <!-- 0={invalid string value} -->
 
     <!-- MEM IPC Handler -->

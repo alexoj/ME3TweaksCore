@@ -211,7 +211,8 @@ namespace ME3TweaksCore.GameFilesystem
                             {
                                 try
                                 {
-                                    RequiredDLC.Add(DLCRequirement.ParseRequirement(s, true));
+                                    // MetaCMM does not write things beyond version. I hope to not regret this decision
+                                    RequiredDLC.Add(DLCRequirement.ParseRequirement(s, true, false));
                                 }
                                 catch
                                 {
