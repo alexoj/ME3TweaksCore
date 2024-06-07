@@ -115,7 +115,7 @@ namespace ME3TweaksCore.Test
 
                 try
                 {
-                    split = StringStructParser.GetSplitMultiValues(test.InputString, true, test.OpenChar,
+                    split = StringStructParser.GetSplitMultiMapValues(test.InputString, true, test.OpenChar,
                         test.CloseChar);
                 }
                 catch (Exception ex)

@@ -20,7 +20,9 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static List<string> GetSemicolonSplitList(string inputString, char separateChar = ';')
         {
-            inputString = inputString.Trim('(', ')');
+            // 06/06/2024 Changed to TrimSymetrical. Revert if this breaks stuff!
+            // inputString = inputString.Trim('(', ')');
+            inputString = inputString.TrimSymetrical(int.MaxValue, '(', ')');
             return inputString.Split(separateChar).ToList();
         }
 
@@ -109,6 +111,7 @@ namespace ME3TweaksCore.Helpers
         }
 
         /// <summary>
+        /// THIS IS THE OLD WAY, SHOULD PROBABLY STOP USING IT.
         /// Gets a dictionary of command split value keypairs. Can accept incoming string with 1 outer parenthesis at most.
         /// </summary>
         /// <param name="inputString">The string to split to value</param>
@@ -254,14 +257,149 @@ namespace ME3TweaksCore.Helpers
             return outStr;
         }
 
+        /// <summary>
+        /// NEW WAY
+        /// Gets a dictionary of command split value keypairs. This version does not accept duplicate keys. Can accept incoming string with 1 outer parenthesis at most.
+        /// </summary>
+        /// <param name="inputString">The string to split to value</param>
+        /// <param name="canBeCaseInsensitive">If the keys can be case insensitive. This changes the return to a case insensitive dictionary type, casted to Dictionary</param>
+        /// <returns></returns>
+        public static Dictionary<string, string> GetSplitMapValues(string inputString, bool canBeCaseInsensitive = false, char openChar = '(', char closeChar = ')')
+        {
+#if DEBUG
+            var origString = inputString;
+#endif
+            inputString = inputString.TrimEnd(';'); // I don't know why bioware does shit like this
+
+            if (inputString[0] == openChar && inputString[1] == openChar && inputString[^1] == closeChar && inputString[^2] == closeChar)
+            {
+                throw new Exception(@"GetSplitMapValues() can only deal with items encapsulated in a single set of opening and closing characters. The current set has at least two, e.g. ((value)) or [[value]].");
+            }
+
+            inputString = inputString.TrimSymetrical(1, openChar, closeChar);
+            //Find commas
+            int propNameStartPos = 0;
+            int lastEqualsPos = -1;
+
+            int openingQuotePos = -1; //quotes if any
+            int closingQuotePos = -1; //quotes if any
+            bool isInQuotes = false;
+
+            int openParenthesisCount = 0;
+            var values = canBeCaseInsensitive ? new CaseInsensitiveDictionary<string>() : new Dictionary<string, string>();
+            for (int i = 0; i < inputString.Length; i++)
+            {
+#if DEBUG
+                var remainingString = inputString.Substring(i);
+#endif
+                // Variables
+                if (inputString[i] == closeChar)
+                {
+                    if (openParenthesisCount <= 0)
+                    {
+                        throw new Exception($@"ASSERT ERROR: StringStructParser cannot handle closing {closeChar} without an opening {openChar} - at position {i}");
+                    }
+
+                    //closingParenthesisPos = i;
+                    openParenthesisCount--;
+                    continue;
+                }
+
+                if (inputString[i] == openChar)
+                {
+                    openParenthesisCount++;
+                    continue;
+                }
+
+                // Constants
+                switch (inputString[i])
+                {
+
+                    case '"':
+                        if (openingQuotePos != -1)
+                        {
+                            closingQuotePos = i;
+                            isInQuotes = false;
+                        }
+                        else
+                        {
+                            openingQuotePos = i;
+                            isInQuotes = true;
+                        }
+                        break;
+                    case '=':
+                        if (!isInQuotes && openParenthesisCount <= 0)
+                        {
+                            lastEqualsPos = i;
+                        }
+                        break;
+                    case ',':
+                        if (!isInQuotes && openParenthesisCount <= 0)
+                        {
+                            //New property
+                            {
+                                if (lastEqualsPos < propNameStartPos && lastEqualsPos != -1) throw new Exception(@"ASSERT ERROR: Error parsing string struct: equals cannot come before property name start. Value: " + inputString);
+                                if (lastEqualsPos == -1 && propNameStartPos >= 0) throw new Exception(@"ASSERT ERROR: Error parsing string struct: Could not find equals since parsing the previous property (if any). Value: " + inputString);
+                                string propertyName = inputString.Substring(propNameStartPos, lastEqualsPos - propNameStartPos).Trim();
+                                string value = "";
+                                if (openingQuotePos >= 0)
+                                {
+                                    value = inputString.Substring(openingQuotePos + 1, closingQuotePos - (openingQuotePos + 1)).Trim();
+                                }
+                                else
+                                {
+                                    value = inputString.Substring(lastEqualsPos + 1, i - (lastEqualsPos + 1)).Trim();
+                                }
+
+                                // Will throw exception on duplicate
+                                values.Add(propertyName, value);
+                            }
+                            //Reset values
+                            propNameStartPos = i + 1;
+                            lastEqualsPos = -1;
+                            openingQuotePos = -1; //quotes if any
+                            closingQuotePos = -1; //quotes if any
+                        }
+                        break;
+                    //todo: Ignore quoted items to avoid matching a ) on quotes
+                    default:
+
+                        //do nothing
+                        break;
+                }
+            }
+            //Finish last property
+            {
+                if (lastEqualsPos > -1) // If the struct is empty there won't be a last equals position
+                {
+                    string propertyName = inputString.Substring(propNameStartPos, lastEqualsPos - propNameStartPos)
+                        .Trim();
+                    string value = "";
+                    if (openingQuotePos >= 0)
+                    {
+                        value = inputString.Substring(openingQuotePos + 1, closingQuotePos - (openingQuotePos + 1))
+                            .Trim();
+                    }
+                    else
+                    {
+                        value = inputString.Substring(lastEqualsPos + 1, inputString.Length - (lastEqualsPos + 1))
+                            .Trim();
+                    }
+
+                    values.Add(propertyName, value);
+                }
+            }
+            return values;
+        }
 
         /// <summary>
+        /// NEW WAY
         /// Gets a dictionary of command split value keypairs. This version accepts multiple duplicate keys, as results are stored in lists. Can accept incoming string with 1 outer parenthesis at most.
         /// </summary>
         /// <param name="inputString">The string to split to value</param>
         /// <param name="canBeCaseInsensitive">If the keys can be case insensitive. This changes the return to a case insensitive dictionary type, casted to Dictionary</param>
         /// <returns></returns>
-        public static Dictionary<string, List<string>> GetSplitMultiValues(string inputString, bool canBeCaseInsensitive = false, char openChar = '(', char closeChar = ')')
+        public static Dictionary<string, List<string>> GetSplitMultiMapValues(string inputString, bool canBeCaseInsensitive = false, char openChar = '(', char closeChar = ')')
         {
 #if DEBUG
             var origString = inputString;
