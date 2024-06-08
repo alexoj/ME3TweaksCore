@@ -44,7 +44,13 @@ namespace ME3TweaksCore.Helpers
         /// <returns></returns>
         public static string BuildCommaSeparatedSplitValueList(Dictionary<string, string> keys, params string[] keyValuesToQuote)
         {
-            string str = @"(";
+            // 06/07/2024 - Repoint to customizable method
+            return BuildSeparatedSplitValueList(keys, ',', '(', ')', true, keyValuesToQuote);
+        }
+
+        public static string BuildSeparatedSplitValueList(Dictionary<string, string> keys, char separator, char openChar, char closeChar, bool quoteValues = true, params string[] keyValuesToQuote)
+        {
+            string str = openChar.ToString();
             bool first = true;
             foreach (var kp in keys)
             {
@@ -54,11 +60,11 @@ namespace ME3TweaksCore.Helpers
                 }
                 else
                 {
-                    str += @",";
+                    str += separator;
                 }
                 str += kp.Key;
                 str += @"=";
-                if (!kp.Value.Contains(@" ") && !keyValuesToQuote.Contains(kp.Key, StringComparer.InvariantCultureIgnoreCase))
+                if (!quoteValues || (!kp.Value.Contains(@" ") && !keyValuesToQuote.Contains(kp.Key, StringComparer.InvariantCultureIgnoreCase)))
                 {
                     str += kp.Value;
                 }
@@ -68,7 +74,7 @@ namespace ME3TweaksCore.Helpers
                     str += $"\"{kp.Value}\""; //do not localize
                 }
             }
-            return str + @")";
+            return str + closeChar;
         }
 
         /// <summary>
@@ -76,7 +82,7 @@ namespace ME3TweaksCore.Helpers
         /// </summary>
         /// <param name="keys"></param>
         /// <returns></returns>
-        public static string BuildCommaSeparatedSplitMultiValueList(Dictionary<string, List<string>> keys, char startChar = '(', char endChar = ')', params string[] keyValuesToQuote)
+        public static string BuildCommaSeparatedSplitMultiValueList(Dictionary<string, List<string>> keys, char startChar = '(', char endChar = ')', bool quoteValues = true, params string[] keyValuesToQuote)
         {
             string str = startChar.ToString();
             bool first = true;
@@ -95,8 +101,7 @@ namespace ME3TweaksCore.Helpers
 
                     str += kp.Key;
                     str += @"=";
-                    if (!val.Contains(@" ") &&
-                        !keyValuesToQuote.Contains(kp.Key, StringComparer.InvariantCultureIgnoreCase))
+                    if (!quoteValues || (!val.Contains(@" ") && !keyValuesToQuote.Contains(kp.Key, StringComparer.InvariantCultureIgnoreCase)))
                     {
                         str += val;
                     }

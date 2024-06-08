@@ -144,7 +144,7 @@ namespace ME3TweaksCore.Objects
             if (DLCOptionKeys != null)
                 keyMap[REQKEY_DLCOPTIONKEY] = DLCOptionKeys.Select(x => x.ToString()).ToList();
 
-            return $@"{DLCFolderName}{StringStructParser.BuildCommaSeparatedSplitMultiValueList(keyMap, '[', ']')}";
+            return $@"{DLCFolderName}{StringStructParser.BuildCommaSeparatedSplitMultiValueList(keyMap, '[', ']', quoteValues: false)}";
         }
         protected bool HasConditions()
         {
@@ -233,9 +233,12 @@ namespace ME3TweaksCore.Objects
                     MLog.Error($@"DLCRequirementBase condition not met: Information about the mod of the DLC mod {DLCFolderName} could not be determined; there is no mod manager metadata file with the DLC mod. Manually installed mods are not supported for extended DLC requirements.");
                     return false;
                 }
+
+                return true; // DLC was found
             }
 
-            return true;
+            // DLC folder was not found
+            return false;
         }
 
         /// <summary>

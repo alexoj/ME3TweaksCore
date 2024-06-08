@@ -78,7 +78,7 @@ namespace ME3TweaksCore.Objects
         /// <exception cref="Exception">If an error occurs parsing the string</exception>
         public static DLCRequirement ParseRequirementKeyed(string input, double featureLevel)
         {
-            return new DLCRequirement(input, featureLevel, false); // RequiredDLC does not support +-
+            return new DLCRequirement(input, featureLevel, featureLevel >= 8.0); // RequiredDLC does not support +- unless feature level 8
         }
 
         public DLCRequirement() { }
@@ -107,7 +107,7 @@ namespace ME3TweaksCore.Objects
                     if (DLCOptionKeys != null)
                         keyMap[REQKEY_DLCOPTIONKEY] = DLCOptionKeys.Select(x => x.ToString()).ToList();
 
-                    return $"{DLCFolderName}{StringStructParser.BuildCommaSeparatedSplitMultiValueList(keyMap, '[', ']')}";
+                    return $"{DLCFolderName}{StringStructParser.BuildCommaSeparatedSplitMultiValueList(keyMap, '[', ']', quoteValues: false)}";
                 }
 
                 // No Conditions.

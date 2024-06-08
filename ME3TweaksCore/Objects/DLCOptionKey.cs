@@ -34,6 +34,21 @@ namespace ME3TweaksCore.Objects
             }
         }
 
+        public override string ToString()
+        {
+            Dictionary<string, string> dict = new Dictionary<string, string>()
+            {
+                { KEY_OPTIONKEY, OptionKey.ToString()}
+            };
+
+            if (!string.IsNullOrWhiteSpace(UIString))
+            {
+                dict[KEY_UISTRING] = UIString;
+            }
+
+            return StringStructParser.BuildSeparatedSplitValueList(dict, ',', '[', ']', quoteValues: false);
+        }
+
         public string ToUIString()
         {
             if (OptionKey.IsPlus == true)
