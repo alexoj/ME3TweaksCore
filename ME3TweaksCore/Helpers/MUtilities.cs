@@ -8,15 +8,12 @@ using System.Management;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using NickStrupat;
-using Serilog;
 
 namespace ME3TweaksCore.Helpers
 {
@@ -158,6 +155,17 @@ namespace ME3TweaksCore.Helpers
                 MLog.Error(e);
                 return "";
             }
+        }
+
+        /// <summary>
+        /// Calculates the hash of the array.
+        /// </summary>
+        /// <param name="data">Data to hash</param>
+        /// <param name="algorithm">Algorithm to use. Use null for MD5.</param>
+        /// <returns></returns>
+        public static string CalculateHash(byte[] data, string algorithm = null)
+        {
+            return CalculateHash(new MemoryStream(data), algorithm);
         }
 
         /// <summary>

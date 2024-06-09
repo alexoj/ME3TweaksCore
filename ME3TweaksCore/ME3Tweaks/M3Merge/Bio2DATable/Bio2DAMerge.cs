@@ -162,7 +162,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                 var modPackagePath = Directory.GetFileSystemEntries(dlcCookedPath, obj.ModPackageFile, SearchOption.AllDirectories).FirstOrDefault();
                 if (modPackagePath == null)
                 {
-                    MLog.Error($"Bio2DA merge 'modpackagefile' is invalid: {obj.GamePackageFile} - could not find in CookedPCConsole folder of mod");
+                    MLog.Error($"Bio2DA merge 'mergepackagefile' is invalid: {obj.GamePackageFile} - could not find in CookedPCConsole folder of mod");
                     return false;
                 }
 
@@ -176,7 +176,14 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                 }
                 foreach (var table in obj.ModTables)
                 {
-                    var objName = NameReference.FromInstancedString(table);
+                    string objNameStr = table;
+                    int dotIdx = objNameStr.LastIndexOf('.');
+                    if (dotIdx > 0)
+                    {
+                        objNameStr = objNameStr[(dotIdx + 1)..];
+                    }
+
+                    var objName = NameReference.FromInstancedString(objNameStr);
                     if (!objName.Name.EndsWith("_part"))
                     {
                         MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - base name of object does not end with _part");
@@ -185,10 +192,16 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
 
                     var tableName = objName.Name.Substring(0, objName.Name.Length - 5); // Remove _part. The table name should not be indexed... probably
 
-                    var modTable = modFile.Exports.FirstOrDefault(x => x.IsA("Bio2DA") && x.ObjectName.Instanced.CaseInsensitiveEquals(objName.Instanced));
+                    var modTable = modFile.FindExport(table); // Find by IFP.
                     if (modTable == null)
                     {
-                        MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - could not find table with that name in package '{modPackagePath}'");
+                        MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - could not find table with that instanced full path in package '{modPackagePath}'");
+                        return false;
+                    }
+
+                    if (!modTable.IsA("Bio2DA"))
+                    {
+                        MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - export is not a Bio2DA or subclass. It was: {modTable.ClassName}");
                         return false;
                     }
 
