@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using LegendaryExplorerCore.Compression;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
+using ME3TweaksCore.Targets;
 
 namespace ME3TweaksCore.Misc
 {
@@ -174,6 +175,17 @@ namespace ME3TweaksCore.Misc
             var compressed = LZMA.Compress(ms.ToArray());
             stream.WriteUInt32((uint)compressed.Length);
             stream.Write(compressed);
+        }
+
+        /// <summary>
+        /// Gets the relative path to the given file from the root of the target.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
+        public static string GetRelativePath(this GameTarget target, string fullPath)
+        {
+            return Path.GetRelativePath(target.TargetPath, fullPath);
         }
     }
 }

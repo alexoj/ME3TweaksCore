@@ -338,6 +338,32 @@ namespace ME3TweaksCore.Services
             return false;
         }
 
+        public static bool IsFileVanilla(MEGame game, string relativepath, bool isME1Polish, int fileSize, string md5 = null)
+        {
+            if (game.IsLEGame() && relativepath.StartsWith(@"BioGame\Config\"))
+                return true; // Don't consider these as modified, they differ per user
+            var database = LoadDatabaseFor(game, isME1Polish);
+            if (database.TryGetValue(relativepath, out var info))
+            {
+                // Size check
+                if (info.All(x => x.size != fileSize))
+                {
+                    return false;
+                }
+
+                // Optional md5 check
+                if (md5 != null)
+                {
+                    return info.Any(x => x.md5 == md5);
+                }
+
+                // File is vanilla
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Returns if the specified TFC name is a vanilla TFC game TFC name
         /// </summary>

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LegendaryExplorerCore.Helpers;
+using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 
 namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
@@ -15,6 +13,8 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
     {
         private readonly List<IMEPackage> TargetPackages = new List<IMEPackage>();
         private readonly List<IMEPackage> ModPackages = new List<IMEPackage>();
+        public readonly CaseInsensitiveDictionary<string> OriginalHashes = new();
+
         public void InsertTargetPackage(IMEPackage targetPackage)
         {
             TargetPackages.Add(targetPackage);

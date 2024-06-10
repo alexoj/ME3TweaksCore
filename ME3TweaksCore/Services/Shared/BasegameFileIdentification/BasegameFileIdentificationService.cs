@@ -151,17 +151,26 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
         }
 
         /// <summary>
-        /// Looks up information about a basegame file using the {ServiceLoggingName}
+        /// Looks up information about a basegame file using the BasegameFileIdentificationService
         /// </summary>
         /// <param name="target"></param>
         /// <param name="fullfilepath"></param>
         /// <returns></returns>
         public static BasegameFileRecord GetBasegameFileSource(GameTarget target, string fullfilepath, string md5 = null)
         {
+            return GetBasegameFileSource(target.Game, target.TargetPath, fullfilepath, md5);
+        }
+
+        /// <summary>
+        /// Looks up information about a basegame file using the BasegameFileIdentificationService
+        /// </summary>
+        /// <returns></returns>
+        public static BasegameFileRecord GetBasegameFileSource(MEGame game, string rootPath, string fullfilepath, string md5 = null)
+        {
             LoadSharedBasegameIdentificationService();
-            if (Database.TryGetValue(target.Game.ToString(), out var infosForGameL))
+            if (Database.TryGetValue(game.ToString(), out var infosForGameL))
             {
-                var relativeFilename = fullfilepath.Substring(target.TargetPath.Length + 1).ToUpper();
+                var relativeFilename = fullfilepath.Substring(rootPath.Length + 1).ToUpper();
 
                 if (infosForGameL.TryGetValue(relativeFilename, out var items))
                 {

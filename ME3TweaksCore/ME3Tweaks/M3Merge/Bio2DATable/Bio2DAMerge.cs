@@ -9,6 +9,7 @@ using LegendaryExplorerCore.Coalesced;
 using LegendaryExplorerCore.Coalesced.Config;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Helpers;
+using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using LegendaryExplorerCore.Packages.CloningImportingAndRelinking;
 using LegendaryExplorerCore.Unreal;
@@ -18,6 +19,9 @@ using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.ME3Tweaks.M3Merge.LE1Config;
+using ME3TweaksCore.Misc;
+using ME3TweaksCore.Services;
+using ME3TweaksCore.Services.Shared.BasegameFileIdentification;
 using ME3TweaksCore.Targets;
 using Newtonsoft.Json;
 
@@ -29,6 +33,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
     public class Bio2DAMerge
     {
         private const string BIO2DA_MERGE_FILE_SUFFIX = @".m3da";
+        private const string BIO2DA_BGFIS_DATA_BLOCK = @"BGFIS-Bio2DAMerge";
 
         private static readonly string[] Mergable2DAFiles = new[]
         {
@@ -47,6 +52,27 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
             "BIOG_2DA_UNC_UI_X.pcc",
         };
 
+#if DEBUG
+        public static void BuildVanillaTables(GameTarget target)
+        {
+            var vPackage = MEPackageHandler.CreateAndOpenPackage(@"B:\UserProfile\source\repos\ME3Tweaks\MassEffectModManager\submodules\ME3TweaksCore\ME3TweaksCore\ME3Tweaks\M3Merge\Bio2DATable\VanillaTables.pcc", MEGame.LE1);
+            var loadedFiles = target.GetFilesLoadedInGame();
+            foreach (var file in Mergable2DAFiles)
+            {
+                if (loadedFiles.TryGetValue(file, out var filepath))
+                {
+                    var package = MEPackageHandler.OpenMEPackage(filepath);
+                    foreach (var exp in package.Exports.Where(x => !x.IsDefaultObject && x.IsA("Bio2DA")))
+                    {
+                        EntryExporter.ExportExportToPackage(exp, vPackage, out _);
+                    }
+                }
+            }
+
+            vPackage.Save();
+        }
+#endif
+
         public static bool RunBio2DAMerge(GameTarget target)
         {
             MLog.Information($@"Performing Bio2DA Merge for game: {target.TargetPath}");
@@ -60,10 +86,21 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
             bool mergedAny = false;
             string recordedMergeName = @"";
 
-            void recordMerge(string displayName)
+
+            // Map: Filepath -> list of applied m3da filenames
+            var recordedApplications = new CaseInsensitiveDictionary<List<string>>();
+            void recordM3DAApplication(IMEPackage package, string displayName)
             {
-                mergedAny = true;
-                recordedMergeName += displayName + "\n"; // do not localize
+                if (!recordedApplications.TryGetValue(package.FilePath, out var list))
+                {
+                    list = new List<string>();
+                    recordedApplications[package.FilePath] = list;
+                }
+
+                if (!list.Contains(displayName, StringComparer.InvariantCultureIgnoreCase))
+                {
+                    list.Add(displayName);
+                }
             }
 
 
@@ -74,7 +111,12 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
             {
                 if (loadedFiles.TryGetValue(file, out var filepath))
                 {
-                    var package = MEPackageHandler.OpenMEPackage(filepath);
+                    // Hash the files before we open them so we can pull the information from Basegame File Identification Service.
+                    var packageData = MEPackageHandler.ReadAllFileBytesIntoMemoryStream(filepath);
+                    packageContainer.OriginalHashes[target.GetRelativePath(filepath)] =
+                        MUtilities.CalculateHash(packageData);
+
+                    var package = MEPackageHandler.OpenMEPackageFromStream(packageData, filepath);
                     packageContainer.InsertTargetPackage(package);
                 }
             }
@@ -89,9 +131,16 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     var matchingExp = file.FindExport(exp.InstancedFullPath);
                     if (matchingExp != null)
                     {
+                        if (matchingExp.ObjectName == "GalaxyMap_Cluster")
+                            Debug.WriteLine("hi");
                         // Reset the 2DA to prepare for changes
                         EntryImporter.ImportAndRelinkEntries(EntryImporter.PortingOption.ReplaceSingularWithRelink, exp,
                             file, matchingExp, true, new RelinkerOptionsPackage(), out _);
+
+                        if (matchingExp.DataChanged)
+                        {
+                            Debug.WriteLine($@"Reset table: {matchingExp} in {file.FileNameNoExtension}");
+                        }
                     }
                 }
             }
@@ -102,30 +151,99 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                 var dlcCookedPath = Path.Combine(target.GetDLCPath(), dlc, target.Game.CookedDirName());
 
                 MLog.Information($@"Looking for {BIO2DA_MERGE_FILE_SUFFIX} files in {dlcCookedPath}");
-                var m3das = Directory.GetFiles(dlcCookedPath, @"*" + BIO2DA_MERGE_FILE_SUFFIX, SearchOption.AllDirectories).ToList(); // Find all M3DA files
+                var m3das = Directory
+                    .GetFiles(dlcCookedPath, @"*" + BIO2DA_MERGE_FILE_SUFFIX, SearchOption.AllDirectories)
+                    .ToList(); // Find all M3DA files
                 MLog.Information($@"Found {m3das.Count} m3da files to parse");
 
                 foreach (var m3daF in m3das)
                 {
                     MLog.Information($@"Merging M3 Bio2DA Merge Manifest {m3daF}");
-                    var result = MergeManifest(dlcCookedPath, m3daF, target, recordMerge, packageContainer);
+                    var result = MergeManifest(dlcCookedPath, m3daF, target, recordM3DAApplication, packageContainer);
+                    if (!result)
+                    {
+                        // Merge failed. // Todo: Hook up to the UI in M3 via the params
+                    }
                 }
 
 
             }
 
+            var records = new List<BasegameFileRecord>();
             foreach (var file in packageContainer.GetTargetablePackages())
             {
                 // Todo: Record merges for BGFIS
-
                 if (file.IsModified)
                 {
                     MLog.Information($"Saving 2DA merged package {file.FilePath}");
-                    file.Save();
+                    var outStream = file.SaveToStream(true); // We only support LE1 so its always true
+
+                    recordedApplications.TryGetValue(file.FilePath, out var recordedMergesForFile);
+                    var record = CreateRecord(target, packageContainer, file, outStream, recordedMergesForFile, out var savedVanilla);
+                    if (!savedVanilla)
+                    {
+                        outStream.WriteToFile(file.FilePath); // Save to disk
+                    }
+
+                    // Create record
+                    records.Add(record);
                 }
             }
 
-            return mergedAny;
+            // Set the BGFIS record name
+            if (records.Any())
+            {
+                // Submit to BGFIS
+                BasegameFileIdentificationService.AddLocalBasegameIdentificationEntries(records);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static BasegameFileRecord CreateRecord(GameTarget target, Bio2DAMergePackageContainer packageContainer, IMEPackage finalPackage, MemoryStream finalPackageStream, List<string> recordedMerges, out bool savedVanilla)
+        {
+            savedVanilla = false;
+
+            // We are going to check if this is the vanilla package. We must strip off the LECL tag. MEM marker will not be here since it was saved with LEC.
+            finalPackageStream.Seek(-8, SeekOrigin.End);
+            var tagSize = finalPackageStream.ReadInt32();
+            finalPackageStream.Seek(tagSize - 8, SeekOrigin.Current);
+
+            var lecllessSize = (int)finalPackageStream.Position;
+            var isVanilla = VanillaDatabaseService.IsFileVanilla(target.Game, target.GetRelativePath(finalPackage.FilePath), false, lecllessSize);
+
+            if (isVanilla)
+            {
+                savedVanilla = true;
+                // If this file had not been saved with LECLData, it would be vanilla. We are going to truncate it here.
+                finalPackageStream.SetLength(lecllessSize);
+                finalPackageStream.WriteToFile(finalPackage.FilePath);
+                return null;
+            }
+
+            // It is not vanilla.
+            var finalHash = MUtilities.CalculateHash(finalPackageStream); // The saved package.
+            var originalHash = packageContainer.OriginalHashes[target.GetRelativePath(finalPackage.FilePath)];
+            var originalInfo = BasegameFileIdentificationService.GetBasegameFileSource(target, finalPackage.FilePath, originalHash);
+            var newInfoString = @"";
+
+            if (originalInfo != null)
+            {
+                newInfoString = originalInfo.GetWithoutBlock(BIO2DA_BGFIS_DATA_BLOCK);
+            }
+
+            if (recordedMerges != null && recordedMerges.Any())
+            {
+                if (!string.IsNullOrWhiteSpace(newInfoString))
+                {
+                    newInfoString += @", ";
+                }
+                newInfoString += BasegameFileRecord.CreateBlock(BIO2DA_BGFIS_DATA_BLOCK, string.Join(", ", recordedMerges));
+            }
+
+            return new BasegameFileRecord(finalPackage.FilePath, target, newInfoString);
+
         }
 
         /// <summary>
@@ -137,7 +255,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
         /// <param name="recordMerge"></param>
         /// <param name="packageContainer"></param>
         /// <returns></returns>
-        private static bool MergeManifest(string dlcCookedPath, string mergeFilePath, GameTarget target, Action<string> recordMerge, Bio2DAMergePackageContainer packageContainer)
+        private static bool MergeManifest(string dlcCookedPath, string mergeFilePath, GameTarget target, Action<IMEPackage, string> recordMerge, Bio2DAMergePackageContainer packageContainer)
         {
             var mergeData = File.ReadAllText(mergeFilePath);
             var mergeObject = JsonConvert.DeserializeObject<List<Bio2DAMergeManifest>>(mergeData);
@@ -220,6 +338,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                         MLog.Information($"Bio2DA merged {mergedCount.Count} rows from {table} into {tableName}");
                         mergedResult |= mergedCount.Any();
                         base2DA.Write2DAToExport();
+                        recordMerge(baseFile, Path.GetFileName(mergeFilePath)); // Record we applied this m3cd to this package
                     }
                     else
                     {

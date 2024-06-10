@@ -24,6 +24,9 @@ using ME3TweaksCore.Services.Shared.BasegameFileIdentification;
 
 namespace ME3TweaksCore.Targets
 {
+    /// <summary>
+    /// GameTarget is the main class for interacting with an installation of a Mass Effect game.
+    /// </summary>
     [DebuggerDisplay(@"GameTarget {Game} {TargetPath}")]
     public class GameTarget : IEqualityComparer<GameTarget>, INotifyPropertyChanged
     {
