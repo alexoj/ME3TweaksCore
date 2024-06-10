@@ -50,6 +50,7 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
         // Data block - used so we can add and remove blocks from the record text. It's essentially a crappy struct.
         public static readonly string BLOCK_OPENING = @"[[";
         public static readonly string BLOCK_CLOSING = @"]]";
+        public static readonly string BLOCK_SEPARATOR = @"|"; // This character cannot be in a filename, so it will work better
 
         public static string CreateBlock(string blockName, string blockData)
         {
@@ -61,7 +62,7 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
             string parsingStr = source;
             int openIdx = parsingStr.IndexOf(BLOCK_OPENING);
             int closeIdx = parsingStr.IndexOf(BLOCK_CLOSING);
-            while (openIdx >= 0 && closeIdx >= 0 && openIdx > closeIdx)
+            while (openIdx >= 0 && closeIdx >= 0 && closeIdx > openIdx)
             {
                 var blockText = parsingStr.Substring(openIdx + BLOCK_OPENING.Length, closeIdx - (openIdx + BLOCK_OPENING.Length));
                 var blockEqIdx = blockText.IndexOf('=');
@@ -71,13 +72,58 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
                     if (pBlockName.CaseInsensitiveEquals(blockName))
                     {
                         // The lazy way: Just do a replacement with nothing.
-                        return source.Replace(parsingStr.Substring(openIdx, closeIdx - (openIdx + BLOCK_OPENING.Length + BLOCK_CLOSING.Length)), @"");
+                        return source.Replace(parsingStr.Substring(openIdx, closeIdx - openIdx + BLOCK_CLOSING.Length), @"");
                     }
                 }
             }
 
             // There is edge case where you have ]][[ in the string. Is anyone going to do that? Please don't.
             // We did not find the data block.
+            return parsingStr;
+        }
+
+        /// <summary>
+        /// Gets a string for displaying in a UI - stripping out the block storage
+        /// </summary>
+        /// <returns></returns>
+        public string GetSourceForUI()
+        {
+            List<string> blockNames = new List<string>();
+            List<string> blockValues = new List<string>();
+
+            string parsingStr = source;
+            int openIdx = parsingStr.IndexOf(BLOCK_OPENING);
+            int closeIdx = parsingStr.IndexOf(BLOCK_CLOSING);
+            while (openIdx >= 0 && closeIdx >= 0 && closeIdx > openIdx)
+            {
+                var blockText = parsingStr.Substring(openIdx + BLOCK_OPENING.Length, closeIdx - (openIdx + BLOCK_OPENING.Length));
+                var blockEqIdx = blockText.IndexOf('=');
+                if (blockEqIdx > 0)
+                {
+                    var pBlockName = blockText.Substring(0, blockEqIdx);
+                    blockNames.Add(pBlockName);
+                    var blockData = blockText[(blockEqIdx+1)..];
+                    blockValues.AddRange(blockData.Split(BLOCK_SEPARATOR));
+                }
+
+                // Continue
+                parsingStr = parsingStr[(closeIdx + BLOCK_CLOSING.Length)..];
+                openIdx = parsingStr.IndexOf(BLOCK_OPENING);
+                closeIdx = parsingStr.IndexOf(BLOCK_CLOSING);
+            }
+
+            parsingStr = source;
+            foreach (var block in blockNames)
+            {
+                parsingStr = GetWithoutBlock(block);
+            }
+
+            if (!string.IsNullOrWhiteSpace(parsingStr) && blockValues.Any())
+            {
+                parsingStr += "\n"; // do not localize
+                parsingStr += string.Join("\n", blockValues); // do not localize
+            }
+            
             return parsingStr;
         }
     }
