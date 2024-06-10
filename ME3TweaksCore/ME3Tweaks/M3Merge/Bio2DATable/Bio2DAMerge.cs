@@ -152,7 +152,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
 
                 MLog.Information($@"Looking for {BIO2DA_MERGE_FILE_SUFFIX} files in {dlcCookedPath}");
                 var m3das = Directory
-                    .GetFiles(dlcCookedPath, @"*" + BIO2DA_MERGE_FILE_SUFFIX, SearchOption.AllDirectories)
+                    .GetFiles(dlcCookedPath, $@"{dlc}-*" + BIO2DA_MERGE_FILE_SUFFIX, SearchOption.AllDirectories)
                     .ToList(); // Find all M3DA files
                 MLog.Information($@"Found {m3das.Count} m3da files to parse");
 
@@ -237,12 +237,21 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
             {
                 if (!string.IsNullOrWhiteSpace(newInfoString))
                 {
-                    newInfoString += @", ";
+                    newInfoString += "\n"; // do not localize
                 }
-                newInfoString += BasegameFileRecord.CreateBlock(BIO2DA_BGFIS_DATA_BLOCK, string.Join(", ", recordedMerges));
+                newInfoString += BasegameFileRecord.CreateBlock(BIO2DA_BGFIS_DATA_BLOCK, string.Join(BasegameFileRecord.BLOCK_SEPARATOR, recordedMerges));
             }
 
-            return new BasegameFileRecord(finalPackage.FilePath, target, newInfoString);
+            if (recordedMerges == null && string.IsNullOrWhiteSpace(newInfoString))
+            {
+                // Edge case: Names were added to the name table for our custom merged 2DA.
+                // Unfortunately we have no way to reset this because we have no idea what names were 
+                // added unless we compared to something else and figured out if any were
+                // still in use, and that would be slow. So that's not really helpful here...
+                newInfoString = @"(Vanilla - all M3DAs reverted)"; // This is not localized as it will show in diagnostics.
+            }
+
+            return new BasegameFileRecord(target.GetRelativePath(finalPackage.FilePath), (int)finalPackageStream.Length, target.Game, newInfoString, finalHash);
 
         }
 
