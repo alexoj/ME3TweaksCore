@@ -41,14 +41,31 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         public bool AddPlotManagerData { get; set; }
         public bool AddModSettingsMenu { get; set; }
         public List<Bio2DAOption> Blank2DAsToGenerate { get; set; } = new();
-        public bool AddAshleySQM { get; set; }
+
+        // Shared LE2/3
         public bool AddGarrusSQM { get; set; }
+        public bool AddTaliSQM { get; set; }
+
+        // LE2 specific
+        public bool AddMirandaSQM { get; set; }
+        public bool AddJacobSQM { get; set; }
+        public bool AddMordinSQM { get; set; }
+        public bool AddJackSQM { get; set; }
+        public bool AddGruntSQM { get; set; }
+        public bool AddSamaraSQM { get; set; }
+        public bool AddThaneSQM { get; set; }
+        public bool AddLegionSQM { get; set; }
+        public bool AddKasumiSQM { get; set; }
+        public bool AddZaeedSQM { get; set; }
+
+
+        // ME3/LE3 specific
+        public bool AddAshleySQM { get; set; }
         public bool AddLiaraSQM { get; set; }
         public bool AddJamesSQM { get; set; }
         public bool AddEDISQM { get; set; }
         public bool AddKaidanSQM { get; set; }
         public bool AddJavikSQM { get; set; }
-        public bool AddTaliSQM { get; set; }
         #endregion
 
 

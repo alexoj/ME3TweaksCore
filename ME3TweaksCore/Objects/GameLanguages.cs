@@ -1,5 +1,6 @@
 ﻿using LegendaryExplorerCore.Packages;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -87,6 +88,34 @@ namespace ME3TweaksCore.Objects
             new GameLanguage(@"JPN", @"jp-jp", @"Japanese", MELocalization.JPN)
         };
 
+        // VOICEOVER
+
+        private static GameLanguage[] game1volanguages = {
+            new GameLanguage(@"INT", @"en-us", @"International English", MELocalization.INT),
+            new GameLanguage(@"DE", @"de-de", @"German", MELocalization.DEU),
+            new GameLanguage(@"RA", @"ru-ru", @"Russian", MELocalization.RUS),
+            new GameLanguage(@"FR", @"fr-fr", @"French", MELocalization.FRA),
+            new GameLanguage(@"IT", @"it-it", @"Italian", MELocalization.ITA),
+            new GameLanguage(@"PLPC", @"pl-pl", @"Polish", MELocalization.POL),
+        };
+
+        private static GameLanguage[] game2volanguages = {
+            new GameLanguage(@"INT", @"en-us", @"International English", MELocalization.INT),
+            new GameLanguage(@"DEU", @"de-de", @"German", MELocalization.RUS),
+            new GameLanguage(@"FRA", @"fr-fr", @"French", MELocalization.FRA),
+            new GameLanguage(@"ITA", @"it-it", @"Italian", MELocalization.ITA),
+            new GameLanguage(@"POL", @"pl-pl", @"Polish", MELocalization.POL),
+        };
+
+        private static GameLanguage[] game3volanguages = {
+            new GameLanguage(@"INT", @"en-us", @"International English", MELocalization.INT),
+            new GameLanguage(@"DEU", @"de-de", @"German", MELocalization.RUS),
+            new GameLanguage(@"RUS", @"ru-ru", @"Russian", MELocalization.RUS),
+            new GameLanguage(@"FRA", @"fr-fr", @"French", MELocalization.FRA),
+            new GameLanguage(@"ITA", @"it-it", @"Italian", MELocalization.ITA),
+        };
+
+
         /// <summary>
         /// The language code - filenames will be suffixed with this to denote the specific language (e.g. POL or FRA - no underscore)
         /// </summary>
@@ -151,6 +180,16 @@ namespace ME3TweaksCore.Objects
                     Debug.WriteLine($@"Language code not implemented: {lang}");
                     return @"";
             }
+        }
+
+        public static GameLanguage[] GetVOLanguagesForGame(MEGame game)
+        {
+            // In OT these are a mess across different SKUs.
+            if (game.IsGame1()) return game1volanguages;
+            if (game.IsGame2()) return game2volanguages;
+            if (game.IsGame3()) return game3volanguages;
+
+            throw new Exception($@"Cannot get VO language for game {game}");
         }
     }
 }
