@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using LegendaryExplorerCore.Gammtek.Collections.ObjectModel;
+using LegendaryExplorerCore.Gammtek.Extensions.Collections.Generic;
 using LegendaryExplorerCore.Misc;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
@@ -17,6 +18,7 @@ namespace ME3TweaksCore.GameFilesystem
     {
         #region Info Prefixes
         public static readonly string PrefixOptionsSelectedOnInstall = @"[INSTALLOPTIONS]";
+        public static readonly string PrefixOptionKeysSelectedOnInstall = @"[OPTIONKEYS]";
         public static readonly string PrefixIncompatibleDLC = @"[INCOMPATIBLEDLC]";
         public static readonly string PrefixRequiredDLC = @"[REQUIREDDLC]";
         public static readonly string PrefixExtendedAttributes = @"[EXTENDEDATTRIBUTE]";
@@ -44,7 +46,7 @@ namespace ME3TweaksCore.GameFilesystem
         /// </summary>
         public ObservableCollectionExtended<DLCRequirement> RequiredDLC { get; } = new ObservableCollectionExtended<DLCRequirement>();
         /// <summary>
-        /// List of selected install-time options
+        /// List of selected install-time options (human readable)
         /// </summary>
         public ObservableCollectionExtended<string> OptionsSelectedAtInstallTime { get; } = new ObservableCollectionExtended<string>();
         /// <summary>
@@ -67,6 +69,13 @@ namespace ME3TweaksCore.GameFilesystem
         /// </summary>
         public DateTime? InstallTime { get; set; }
 
+
+        /// <summary>
+        /// List of option keys that were installed. This is similar to <see cref="OptionsSelectedAtInstallTime"/> but this is for programatic access.
+        /// </summary>
+        public List<string> OptionKeysSelectedAtInstallTime { get; set; } = new();
+
+
         /// <summary>
         /// Writes the metacmm file to the specified filepath.
         /// </summary>
@@ -84,6 +93,12 @@ namespace ME3TweaksCore.GameFilesystem
             if (OptionsSelectedAtInstallTime.Any())
             {
                 sb.AppendLine($@"{PrefixOptionsSelectedOnInstall}{string.Join(';', OptionsSelectedAtInstallTime)}");
+            }
+
+            // Mod Manager 9: track option keys used during install
+            if (OptionKeysSelectedAtInstallTime.Any())
+            {
+                sb.AppendLine($@"{PrefixOptionKeysSelectedOnInstall}{string.Join(';', OptionKeysSelectedAtInstallTime)}");
             }
             if (IncompatibleDLC.Any())
             {
@@ -153,6 +168,11 @@ namespace ME3TweaksCore.GameFilesystem
                         {
                             var parsedline = line.Substring(PrefixOptionsSelectedOnInstall.Length);
                             OptionsSelectedAtInstallTime.ReplaceAll(StringStructParser.GetSemicolonSplitList(parsedline));
+                        }
+                        else if (line.StartsWith(PrefixOptionKeysSelectedOnInstall))
+                        {
+                            var parsedline = line.Substring(PrefixOptionKeysSelectedOnInstall.Length);
+                            OptionKeysSelectedAtInstallTime.ReplaceAll(StringStructParser.GetSemicolonSplitList(parsedline));
                         }
                         else if (line.StartsWith(PrefixIncompatibleDLC))
                         {
