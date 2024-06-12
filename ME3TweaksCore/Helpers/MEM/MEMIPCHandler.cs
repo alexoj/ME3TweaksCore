@@ -83,7 +83,7 @@ namespace ME3TweaksCore.Helpers.MEM
         public static short GetMemVersion(bool classicMEM)
         {
             // If the current version doesn't support the --version --ipc, we just assume it is 0.
-            MEMIPCHandler.RunMEMIPCUntilExit(classicMEM, @"--version --ipc", ipcCallback: (command, param) =>
+            MEMIPCHandler.RunMEMIPCUntilExit(classicMEM, @"--version --ipc", false, ipcCallback: (command, param) =>
             {
                 if (command == @"VERSION")
                 {
@@ -103,6 +103,8 @@ namespace ME3TweaksCore.Helpers.MEM
 
         public static void RunMEMIPCUntilExit(bool classicMEM,
             string arguments,
+            bool shouldWaitforExit,
+            string reasonCannotBeSafelyTerminated = null,
             Action<int> applicationStarted = null,
             Action<string, string> ipcCallback = null,
             Action<string> applicationStdErr = null,
@@ -117,6 +119,7 @@ namespace ME3TweaksCore.Helpers.MEM
             {
                 MLog.Information($@"MassEffectModderNoGui launched, process ID: {processID}");
                 applicationStarted?.Invoke(processID);
+                MEMProcessHandler.AddProcess(Process.GetProcessById(processID), shouldWaitforExit, reasonCannotBeSafelyTerminated);
             }
 
             void appExited(int code)
@@ -276,7 +279,7 @@ namespace ME3TweaksCore.Helpers.MEM
             int exitcode = 0;
             string args =
                 $"--set-game-data-path --gameid {targetGame.ToMEMGameNum()} --path \"{targetPath}\""; //do not localize
-            MEMIPCHandler.RunMEMIPCUntilExit(classicMEM, args, applicationExited: x => exitcode = x);
+            MEMIPCHandler.RunMEMIPCUntilExit(classicMEM, args, false, applicationExited: x => exitcode = x);
             if (exitcode != 0)
             {
                 MLog.Error($@"Non-zero MassEffectModderNoGui exit code setting game path: {exitcode}");
@@ -333,7 +336,7 @@ namespace ME3TweaksCore.Helpers.MEM
             int exitcode = -1;
             // We don't care about IPC on this
             MEMIPCHandler.RunMEMIPCUntilExit(true, args,
-                null, null,
+                false, null, null, null,
                 x => MLog.Error($@"StdError setting LODs: {x}"),
                 x => exitcode = x); //Change to catch exit code of non zero.        
             if (exitcode != 0)
@@ -357,16 +360,16 @@ namespace ME3TweaksCore.Helpers.MEM
 
             int exitcode = -1;
             MEMIPCHandler.RunMEMIPCUntilExit(false, args,
-                null,
-                (command, param) =>
+                false, null,
+                ipcCallback: (command, param) =>
                 {
                     if (command == @"FILENAME")
                     {
                         fileListing.Add(param);
                     }
                 },
-                x => MLog.Error($@"StdError getting file listing for file {file}: {x}"),
-                x => exitcode = x); //Change to catch exit code of non zero.        
+                applicationStdErr: x => MLog.Error($@"StdError getting file listing for file {file}: {x}"),
+                applicationExited: x => exitcode = x); //Change to catch exit code of non zero.        
             if (exitcode != 0)
             {
                 MLog.Error(
@@ -386,7 +389,7 @@ namespace ME3TweaksCore.Helpers.MEM
             Dictionary<string, string> lods = new Dictionary<string, string>();
             var args = $@"--print-lods --gameid {game.ToMEMGameNum()} --ipc";
             int exitcode = -1;
-            MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(), args, ipcCallback: (command, param) =>
+            MEMIPCHandler.RunMEMIPCUntilExit(game.IsOTGame(), args, false, ipcCallback: (command, param) =>
             {
                 switch (command)
                 {
@@ -441,6 +444,7 @@ namespace ME3TweaksCore.Helpers.MEM
         {
             Dictionary<GameDirPath, string> result = new Dictionary<GameDirPath, string>();
             MEMIPCHandler.RunMEMIPCUntilExit(originalTrilogy, $@"--get-game-paths --ipc",
+                false,
                 ipcCallback: (command, param) =>
                 {
                     // THIS CODE ONLY WORKS ON OT
@@ -520,6 +524,8 @@ namespace ME3TweaksCore.Helpers.MEM
 
             currentActionCallback?.Invoke(LC.GetString(LC.string_preparingToInstallTextures));
             MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $"--install-mods --gameid {target.Game.ToMEMGameNum()} --input \"{memFileListFile}\" --verify --ipc", // do not localize
+                true,
+                "Textures are currently installing. Terminating this process is likely to leave the game in an unusable state.",
                 applicationExited: code => { result.ExitCode = code; },
                 applicationStarted: pid =>
                 {
@@ -638,6 +644,7 @@ namespace ME3TweaksCore.Helpers.MEM
             }
 
             MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $@"--check-for-markers --gameid {target.Game.ToMEMGameNum()} --ipc",
+                false,
                 applicationExited: code => result.ExitCode = code,
                 applicationStarted: pid =>
                 {
@@ -713,6 +720,7 @@ namespace ME3TweaksCore.Helpers.MEM
             {
                 stageMultiplier++;
                 MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), args,
+                    false,
                     applicationExited: code => result.ExitCode = code,
                     applicationStarted: pid =>
                     {

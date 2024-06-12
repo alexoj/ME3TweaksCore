@@ -415,7 +415,7 @@ namespace ME3TweaksCore.Diagnostics
             if (package.SelectedSaveFilePath != null && File.Exists(package.SelectedSaveFilePath))
             {
                 // This will allow server to locate the save file that is uploaded and tell user what it is 
-                addDiagLine(MUtilities.CalculateHash(package.SelectedSaveFilePath)+@"|"+ Path.GetFileName(package.SelectedSaveFilePath), ME3TweaksLogViewer.LogSeverity.SAVE_FILE_HASH_NAME);
+                addDiagLine(MUtilities.CalculateHash(package.SelectedSaveFilePath) + @"|" + Path.GetFileName(package.SelectedSaveFilePath), ME3TweaksLogViewer.LogSeverity.SAVE_FILE_HASH_NAME);
             }
             addDiagLine($@"{MLibraryConsumer.GetHostingProcessname()} {MLibraryConsumer.GetAppVersion()} Game Diagnostic");
             addDiagLine($@"Build date: {MLibraryConsumer.GetSigningDate()}");
@@ -1075,7 +1075,7 @@ namespace ME3TweaksCore.Diagnostics
                     package.UpdateStatusCallback?.Invoke(@"Checking for blacklisted mods");
                     args = $@"--detect-bad-mods --gameid {gameID} --ipc";
                     var blacklistedMods = new List<string>();
-                    MEMIPCHandler.RunMEMIPCUntilExit(package.DiagnosticTarget.Game.IsOTGame(), args, setMEMCrashLog: memExceptionOccured, ipcCallback: (string command, string param) =>
+                    MEMIPCHandler.RunMEMIPCUntilExit(package.DiagnosticTarget.Game.IsOTGame(), args, false, setMEMCrashLog: memExceptionOccured, ipcCallback: (string command, string param) =>
                     {
                         switch (command)
                         {
@@ -1251,7 +1251,7 @@ namespace ME3TweaksCore.Diagnostics
                             List<string> removedFiles = new List<string>();
                             List<string> addedFiles = new List<string>();
                             List<string> replacedFiles = new List<string>();
-                            MEMIPCHandler.RunMEMIPCUntilExit(package.DiagnosticTarget.Game.IsOTGame(), args, setMEMCrashLog: memExceptionOccured, ipcCallback: (string command, string param) =>
+                            MEMIPCHandler.RunMEMIPCUntilExit(package.DiagnosticTarget.Game.IsOTGame(), args, false, setMEMCrashLog: memExceptionOccured, ipcCallback: (string command, string param) =>
                             {
                                 switch (command)
                                 {
@@ -1400,6 +1400,8 @@ namespace ME3TweaksCore.Diagnostics
                         string memCrashText = null;
                         MEMIPCHandler.RunMEMIPCUntilExit(package.DiagnosticTarget.Game.IsOTGame(),
                             args,
+                            true,
+                            reasonCannotBeSafelyTerminated: "Texture check is in progress. Exiting could break the game. (TEST STRING.)",
                             ipcCallback: handleIPC,
                             applicationExited: x => exitcode = x,
                             setMEMCrashLog: x => memCrashText = x
@@ -2233,14 +2235,14 @@ namespace ME3TweaksCore.Diagnostics
 
                 //10/22/2023 - Change to unified endpoint
                 string responseString = "https://me3tweaks.com/modmanager/logservice/shared/logupload".PostUrlEncodedAsync(dictionary)
-                
+
                     //new
-                //{
-                //    LogData = Convert.ToBase64String(lzmalog),
-                //    Attachments = package.Attachments,
-                //    ToolName = MLibraryConsumer.GetHostingProcessname(),
-                //    ToolVersion = MLibraryConsumer.GetAppVersion()
-                //})
+                    //{
+                    //    LogData = Convert.ToBase64String(lzmalog),
+                    //    Attachments = package.Attachments,
+                    //    ToolName = MLibraryConsumer.GetHostingProcessname(),
+                    //    ToolVersion = MLibraryConsumer.GetAppVersion()
+                    //})
                     .ReceiveString().Result;
                 Uri uriResult;
                 bool result = Uri.TryCreate(responseString, UriKind.Absolute, out uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
