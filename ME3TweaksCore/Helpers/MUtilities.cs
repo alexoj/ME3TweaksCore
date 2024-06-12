@@ -14,6 +14,7 @@ using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using NickStrupat;
+using ThreadState = System.Diagnostics.ThreadState;
 
 namespace ME3TweaksCore.Helpers
 {
@@ -396,7 +397,7 @@ namespace ME3TweaksCore.Helpers
             {
                 // This is in a try catch, as things in MainModule will throw an error if accessed
                 // after the process ends, which it might during the periodic updates of this
-                runningInfo.isRunning = Process.GetProcesses().Any(x => processNames.Contains(x.ProcessName) && !x.HasExited && 
+                runningInfo.isRunning = Process.GetProcesses().Any(x => processNames.Contains(x.ProcessName) && !IsProcessSuspended(x) && 
                                                                         x.MainModule?.FileVersionInfo.FileMajorPart == (gameID.IsOTGame() ? 1 : 2));
             }
             catch
@@ -431,6 +432,21 @@ namespace ME3TweaksCore.Helpers
             }
 
             return runningInfo.isRunning;
+        }
+
+        private static bool IsProcessSuspended(Process proc)
+        {
+#if DEBUG
+            if (proc.Threads.Count == 0) return true; // App is in some weird broken state. I see this in dev machine all the time, requires a restart to fix.
+            var isWaiting = proc.Threads[0].ThreadState == ThreadState.Wait;
+            if (isWaiting)
+            {
+                return proc.Threads[0].WaitReason == ThreadWaitReason.Suspended;
+            }
+
+            return isWaiting;
+#endif
+            return proc.Threads[0].ThreadState == ThreadState.Wait;
         }
 
         /// <summary>
