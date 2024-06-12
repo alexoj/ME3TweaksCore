@@ -396,9 +396,8 @@ namespace ME3TweaksCore.Helpers
             {
                 // This is in a try catch, as things in MainModule will throw an error if accessed
                 // after the process ends, which it might during the periodic updates of this
-                runningInfo.isRunning = Process.GetProcesses().Any(x =>
-                    processNames.Contains(x.ProcessName) &&
-                    x.MainModule?.FileVersionInfo.FileMajorPart == (gameID.IsOTGame() ? 1 : 2));
+                runningInfo.isRunning = Process.GetProcesses().Any(x => processNames.Contains(x.ProcessName) && !x.HasExited && 
+                                                                        x.MainModule?.FileVersionInfo.FileMajorPart == (gameID.IsOTGame() ? 1 : 2));
             }
             catch
             {
