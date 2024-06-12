@@ -1400,8 +1400,7 @@ namespace ME3TweaksCore.Diagnostics
                         string memCrashText = null;
                         MEMIPCHandler.RunMEMIPCUntilExit(package.DiagnosticTarget.Game.IsOTGame(),
                             args,
-                            true,
-                            reasonCannotBeSafelyTerminated: "Texture check is in progress. Exiting could break the game. (TEST STRING.)",
+                            false,
                             ipcCallback: handleIPC,
                             applicationExited: x => exitcode = x,
                             setMEMCrashLog: x => memCrashText = x

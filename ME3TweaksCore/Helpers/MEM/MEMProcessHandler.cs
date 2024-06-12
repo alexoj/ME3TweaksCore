@@ -70,7 +70,14 @@ namespace ME3TweaksCore.Helpers.MEM
                 foreach (var f in Processes.Where(x => !x.RunningProcess.HasExited).ToList())
                 {
                     MLog.Information($@"Killing MassEffectModderNoGui process {f.RunningProcess.Id}");
-                    f.RunningProcess.Kill();
+                    try
+                    {
+                        f.RunningProcess.Kill();
+                    }
+                    catch
+                    {
+                        // We really don't care.
+                    }
                 }
 
                 ClearRunningProcesses();
