@@ -110,7 +110,6 @@ namespace ME3TweaksCore.Objects
         private static GameLanguage[] game3volanguages = {
             new GameLanguage(@"INT", @"en-us", @"International English", MELocalization.INT),
             new GameLanguage(@"DEU", @"de-de", @"German", MELocalization.RUS),
-            new GameLanguage(@"RUS", @"ru-ru", @"Russian", MELocalization.RUS),
             new GameLanguage(@"FRA", @"fr-fr", @"French", MELocalization.FRA),
             new GameLanguage(@"ITA", @"it-it", @"Italian", MELocalization.ITA),
         };

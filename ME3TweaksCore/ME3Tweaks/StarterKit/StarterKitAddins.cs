@@ -184,7 +184,9 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 return LC.GetString(LC.string_interp_sk_sqmNoBackup, game);
             }
             var sourceBaseFiles = MELoadedFiles.GetFilesLoadedInGame(game, true, gameRootOverride: sourceBaseDir);
+#if DEBUG
             var filesDebug = sourceBaseFiles.Where(x => x.Key.StartsWith("BioH_")).Select(x => x.Key).ToList();
+#endif
 
             // File list
             // Main
@@ -445,7 +447,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             }
         }
 
-        private static string GetHumanName(string henchName)
+        public static string GetHumanName(string henchName)
         {
             // Game3
             if (henchName == @"Marine") return @"James";
