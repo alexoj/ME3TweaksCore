@@ -43,6 +43,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
     public class StarterKitAddins
     {
         #region RESOURCES
+        private const string LE1ModSettingsClassTextAsset = @"ME3TweaksCore.ME3Tweaks.StarterKit.LE1.Classes.ModSettingsSubmenu.uc";
         private const string LE3ModSettingsClassTextAsset = @"ME3TweaksCore.ME3Tweaks.StarterKit.LE3.Classes.SFXGUIData_ModSettings.uc";
         #endregion
 
@@ -345,8 +346,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 using var ipackage = MEPackageHandler.CreateAndOpenPackage(idestpath, MEGame.LE2);
 
                 // Setup the first texture from nothing.
-                ExportEntry exp = CreateTextureExport(ipackage, henchHumanName);
-
+                ExportEntry exp = Texture2D.CreateTexture(ipackage, henchHumanName, 8, 16, PixelFormat.DXT5, false); // We just specify correct aspect ratio as the replacement code will properly do it for us.
 
                 // Available
                 var t2d = new Texture2D(exp);
@@ -355,31 +355,13 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
 
 
                 // Chosen
-                exp = exp = CreateTextureExport(ipackage, $"{henchHumanName}Glow");
+                exp = Texture2D.CreateTexture(ipackage, $"{henchHumanName}Glow", 8, 16, PixelFormat.DXT5, false); // We just specify correct aspect ratio as the replacement code will properly do it for us.
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE2.HenchImages.placeholder_selected.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.DXT5), exp.GetProperties(), isPackageStored: true);
-                
+
                 ipackage.Save(idestpath);
             }
-        }
-
-        private static ExportEntry CreateTextureExport(IMEPackage ipackage, string exportName)
-        {
-            var exp = ExportCreator.CreateExport(ipackage, exportName, @"Texture2D", indexed: false);
-            var props = exp.GetProperties();
-            props.AddOrReplaceProp(new EnumProperty(@"PF_DXT5", @"EPixelFormat", ipackage.Game, @"Format"));
-            props.AddOrReplaceProp(new IntProperty(8, @"SizeX"));
-            props.AddOrReplaceProp(new IntProperty(16, @"SizeY"));
-            props.AddOrReplaceProp(new BoolProperty(true, @"NeverStream"));
-            props.AddOrReplaceProp(new BoolProperty(true, @"CompressionNoMipmaps"));
-            props.AddOrReplaceProp(new EnumProperty(@"TEXTUREGROUP_UI", @"TextureGroup", ipackage.Game, @"LODGroup"));
-            exp.WriteProperties(props);
-
-            UTexture2D texTemp = UTexture2D.Create();
-            texTemp.Mips.Add(new UTexture2D.Texture2DMipMap(Texture2D.CreateBlankTextureMip(8, 16, PixelFormat.DXT5), 8, 16));
-            exp.WriteBinary(texTemp);
-            return exp;
         }
 
         private static void InstallGame3Images(MEGame game, string cookedPath, string henchHumanName, string dlcName,
@@ -943,10 +925,10 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         #endregion
 
         #region LE3 Mod Settings Menu
-        public static void AddModSettingsMenu(IM3Mod mod, MEGame game, string dlcFolderPath, List<Action<DuplicatingIni>> moddescAddinDelegates, Func<List<string>> getModDLCRequirements = null)
+        public static void AddLE3ModSettingsMenu(IM3Mod mod, MEGame game, string dlcFolderPath, List<Action<DuplicatingIni>> moddescAddinDelegates, Func<List<string>> getModDLCRequirements = null)
         {
             if (game != MEGame.LE3)
-                return; // Do nothing. Maybe in future this will be something that can be used.
+                return;
 
             var dlcName = Path.GetFileName(dlcFolderPath);
             var cookedPath = Path.Combine(dlcFolderPath, game.CookedDirName());
@@ -1014,7 +996,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 (_, MessageLog log1) = UnrealScriptCompiler.CompileClass(guiDataPackage, new StreamReader(MUtilities.ExtractInternalFileToStream(LE3ModSettingsClassTextAsset)).ReadToEnd(), fileLib, parent: settingsData);
                 if (log1.HasErrors)
                 {
-                    MLog.Error($@"Failed to compile SFXGUIData_ModSettings for sfxguidata package: {fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString())}");
+                    MLog.Error($@"Failed to compile SFXGUIData_ModSettings for sfxguidata package: {log1.AllErrors.Select(msg => msg.ToString())}");
                     return;
                 }
 
@@ -1022,39 +1004,37 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 (_, MessageLog log2) = UnrealScriptCompiler.CompileClass(guiDataPackage, GetCustomLE3ModSettingsClassText(dlcName), fileLib, parent: container);
                 if (log2.HasErrors)
                 {
-                    MLog.Error($@"Failed to compile {className} for sfxguidata package: {fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString())}");
+                    MLog.Error($@"Failed to compile {className} for sfxguidata package: {log2.AllErrors.Select(msg => msg.ToString())}");
                     return;
                 }
 
                 guiDataPackage.Save();
             }
 
-            if (game == MEGame.LE3)
-            {
-                MountFile mf = new MountFile(Path.Combine(dlcFolderPath, game.CookedDirName(), @"mount.dlc"));
-                // Add the dynamic load mapping for our class.
-                Dictionary<string, string> dlm = new CaseInsensitiveDictionary<string>
+            MountFile mf = new MountFile(Path.Combine(dlcFolderPath, game.CookedDirName(), @"mount.dlc"));
+            // Add the dynamic load mapping for our class.
+            Dictionary<string, string> dlm = new CaseInsensitiveDictionary<string>
                 {
                     { @"ObjectName", modSettingsClassPath },
                     { @"SeekFreePackageName", Path.GetFileNameWithoutExtension(guiDataFName) }
                 };
-                AddCoalescedReference(game, dlcName, cookedPath, @"BioEngine", @"sfxgame.sfxengine",
-                    @"dynamicloadmapping",
-                    StringStructParser.BuildCommaSeparatedSplitValueList(dlm, dlm.Keys.ToArray()),
-                    CoalesceParseAction.AddUnique);
+            AddCoalescedReference(game, dlcName, cookedPath, @"BioEngine", @"sfxgame.sfxengine",
+                @"dynamicloadmapping",
+                StringStructParser.BuildCommaSeparatedSplitValueList(dlm, dlm.Keys.ToArray()),
+                CoalesceParseAction.AddUnique);
 
-                // Add BioUI references so our menu loads
-                AddCoalescedReference(game, dlcName, cookedPath, @"BioUI", modSettingsClassPath,
-                    @"confirmationmessageatextoverride", @"247370", CoalesceParseAction.New);
-                AddCoalescedReference(game, dlcName, cookedPath, @"BioUI", modSettingsClassPath, @"m_sratext",
-                    @"247370", CoalesceParseAction.New);
-                AddCoalescedReference(game, dlcName, cookedPath, @"BioUI", modSettingsClassPath, @"m_srbtext",
-                    @"576055", CoalesceParseAction.New);
-                AddCoalescedReference(game, dlcName, cookedPath, @"BioUI", modSettingsClassPath, @"m_srtitle",
-                    @"3248043", CoalesceParseAction.New); // Point to mod TLK ID?
+            // Add BioUI references so our menu loads
+            AddCoalescedReference(game, dlcName, cookedPath, @"BioUI", modSettingsClassPath,
+                @"confirmationmessageatextoverride", @"247370", CoalesceParseAction.New);
+            AddCoalescedReference(game, dlcName, cookedPath, @"BioUI", modSettingsClassPath, @"m_sratext",
+                @"247370", CoalesceParseAction.New);
+            AddCoalescedReference(game, dlcName, cookedPath, @"BioUI", modSettingsClassPath, @"m_srbtext",
+                @"576055", CoalesceParseAction.New);
+            AddCoalescedReference(game, dlcName, cookedPath, @"BioUI", modSettingsClassPath, @"m_srtitle",
+                @"3248043", CoalesceParseAction.New); // Point to mod TLK ID?
 
-                // Add root menu reference to our menu
-                Dictionary<string, string> msmr = new CaseInsensitiveDictionary<string>
+            // Add root menu reference to our menu
+            Dictionary<string, string> msmr = new CaseInsensitiveDictionary<string>
                 {
                     { @"SubMenuClassName", modSettingsClassPath },
                     {
@@ -1067,37 +1047,36 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     },
                     { @"Images[0]", modSettingsClassPath },
                 };
-                AddCoalescedReference(game, dlcName, cookedPath, @"BioUI",
-                    @"sfxgamecontent.sfxguidata_modsettings_root", @"modsettingitemarray",
-                    StringStructParser.BuildCommaSeparatedSplitValueList(msmr, @"SubMenuClassName", @"Images[0]"),
-                    CoalesceParseAction.AddUnique);
+            AddCoalescedReference(game, dlcName, cookedPath, @"BioUI",
+                @"sfxgamecontent.sfxguidata_modsettings_root", @"modsettingitemarray",
+                StringStructParser.BuildCommaSeparatedSplitValueList(msmr, @"SubMenuClassName", @"Images[0]"),
+                CoalesceParseAction.AddUnique);
 
 
-                // Add DLC requirements
-                // If mod is null, we haven't generated mod yet, so it will say there is no dependency on this yet.
-                bool requiresLE3Patch = mod != null && mod.RequiredDLC.Any(x => x.DLCFolderName.Key.CaseInsensitiveEquals(@"DLC_MOD_LE3Patch"));
-                bool requiresLE3Framework = mod != null && mod.RequiredDLC.Any(x => x.DLCFolderName.Key.CaseInsensitiveEquals(@"DLC_MOD_Framework"));
-                if (!requiresLE3Framework || !requiresLE3Patch)
+            // Add DLC requirements
+            // If mod is null, we haven't generated mod yet, so it will say there is no dependency on this yet.
+            bool requiresLE3Patch = mod != null && mod.RequiredDLC.Any(x => x.DLCFolderName.Key.CaseInsensitiveEquals(@"DLC_MOD_LE3Patch"));
+            bool requiresLE3Framework = mod != null && mod.RequiredDLC.Any(x => x.DLCFolderName.Key.CaseInsensitiveEquals(@"DLC_MOD_Framework"));
+            if (!requiresLE3Framework || !requiresLE3Patch)
+            {
+                // Mod has a dependency on LE3 Comm Patch so we add that to the moddesc
+                moddescAddinDelegates.Add(x =>
                 {
-                    // Mod has a dependency on LE3 Comm Patch so we add that to the moddesc
-                    moddescAddinDelegates.Add(x =>
+                    var reqDlc = x[@"ModInfo"][@"requireddlc"];
+                    if (!requiresLE3Patch)
                     {
-                        var reqDlc = x[@"ModInfo"][@"requireddlc"];
-                        if (!requiresLE3Patch)
-                        {
-                            if (!string.IsNullOrWhiteSpace(reqDlc.Value)) reqDlc.Value += @";";
-                            reqDlc.Value += @"DLC_MOD_LE3Patch";
-                        }
+                        if (!string.IsNullOrWhiteSpace(reqDlc.Value)) reqDlc.Value += @";";
+                        reqDlc.Value += @"DLC_MOD_LE3Patch";
+                    }
 
-                        if (!requiresLE3Framework)
-                        {
-                            if (!string.IsNullOrWhiteSpace(reqDlc.Value)) reqDlc.Value += @";";
-                            reqDlc.Value += @"DLC_MOD_Framework";
-                        }
+                    if (!requiresLE3Framework)
+                    {
+                        if (!string.IsNullOrWhiteSpace(reqDlc.Value)) reqDlc.Value += @";";
+                        reqDlc.Value += @"DLC_MOD_Framework";
+                    }
 
-                        x[@"ModInfo"][@"requireddlc"] = reqDlc;
-                    });
-                }
+                    x[@"ModInfo"][@"requireddlc"] = reqDlc;
+                });
             }
         }
 
@@ -1112,6 +1091,186 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         }
         #endregion
 
-        // Might need to port TLK Handler from ME2R...
+        #region LE1 Mod Settings Menu
+        // Documentation:
+
+        /// <summary>
+        /// The class text for the custom menu class, split to its own func for clarity
+        /// </summary>
+        /// <param name="dlcName"></param>
+        /// <returns></returns>
+        private static string GetCustomLE1ModSettingsClassText(string dlcName)
+        {
+            return $"Class ModSettingsSubmenu_{dlcName} extends ModSettingsSubmenu config(UI); defaultproperties {{ }}";
+        }
+
+        public static void AddLE1ModSettingsMenu(IM3Mod mod, MEGame game, string dlcFolderPath,
+            List<Action<DuplicatingIni>> moddescAddinDelegates, Func<List<string>> getModDLCRequirements = null)
+        {
+            if (game != MEGame.LE1)
+                return;
+
+            var dlcName = Path.GetFileName(dlcFolderPath);
+            var cookedPath = Path.Combine(dlcFolderPath, game.CookedDirName());
+
+            #region Menu class
+
+            {
+                // MSM contains the class that mod settings menu will dynamic load
+                var msmDataFName = $@"{dlcName}_ModSettingsSubmenus.pcc";
+                var msmPackageFilePath = Path.Combine(cookedPath, msmDataFName);
+                if (!File.Exists(msmPackageFilePath))
+                {
+                    // Generate MSM package. We will re-open it.
+                    using var package = MEPackageHandler.CreateAndOpenPackage(msmPackageFilePath, game, true);
+                    // CreateObjectReferencer(package, false); // Don't think this is needed...
+                    package.Save();
+                }
+
+                // Create package (this is not in above in case it already exists for some reason...)
+                var className = $@"ModSettingsSubmenu_{dlcName}";
+                string modSettingsClassPath = $@"ModSettingsMenu.ModSettingsSubmenu"; // Base class
+                using var msmDataPackage = MEPackageHandler.OpenMEPackage(msmPackageFilePath);
+                var testPath = msmDataPackage.FindExport(modSettingsClassPath);
+                if (testPath == null)
+                {
+                    // Does not contain the export, we need to create it.
+
+                    var container = msmDataPackage.FindExport(@"ModSettingsMenu", @"Package");
+                    if (container != null)
+                    {
+                        MLog.Information(@"Found existing ModSettingsMenu in MSM package, using that as parent");
+                    }
+                    else
+                    {
+                        container = ExportCreator.CreatePackageExport(msmDataPackage, @"ModSettingsMenu");
+                    }
+
+                    // Compile the classes
+                    var fileLib = new FileLib(msmDataPackage);
+                    if (!fileLib.Initialize())
+                    {
+                        MLog.Error(
+                            $@"Error intitializing filelib for msmdata package: {string.Join(", ", fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString()))}");
+                        throw new Exception(
+                            $@"Failed to initialize filelib for ModSettingsMenu data package: {string.Join(", ", fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString()))}");
+                    }
+
+                    // 1. Parent class
+                    (_, MessageLog log0) = UnrealScriptCompiler.CompileClass(msmDataPackage,
+                        @"Class ModSettingsSubmenu;",
+                        fileLib, parent: container); // works around self-referencing issues.
+                    (_, MessageLog log1) = UnrealScriptCompiler.CompileClass(msmDataPackage,
+                        new StreamReader(MUtilities.ExtractInternalFileToStream(LE1ModSettingsClassTextAsset))
+                            .ReadToEnd(),
+                        fileLib, export: msmDataPackage.FindExport(modSettingsClassPath, "Class"));
+                    if (log1.HasErrors)
+                    {
+                        MLog.Error(
+                            $@"Failed to compile ModSettingsSubmenu for msmdata package: {log1.AllErrors.Select(msg => msg.ToString())}");
+                        throw new Exception(
+                            $@"Failed to compile parent ModSettingsMenu class for ModSettingsMenu data package: {string.Join(", ", log1.AllErrors.Select(msg => msg.ToString()))}");
+                    }
+
+                    // 2. Our custom class
+                    (_, MessageLog log2) = UnrealScriptCompiler.CompileClass(msmDataPackage,
+                        GetCustomLE1ModSettingsClassText(dlcName), fileLib);
+                    if (log2.HasErrors)
+                    {
+                        MLog.Error(
+                            $@"Failed to compile {className} for msmdata package: {log2.AllErrors.Select(msg => msg.ToString())}");
+                        throw new Exception(
+                            $@"Failed to compile {className} for ModSettingsMenu data package: {string.Join(", ", log2.AllErrors.Select(msg => msg.ToString()))}");
+                    }
+
+                    msmDataPackage.Save();
+                }
+            }
+
+            #endregion
+
+            #region Base UI image
+            var baseImageMemoryPath = $@"GUI_Images_{dlcName}.MenuRootImage";
+            {
+                // Add UI image
+                // MSM contains the class that mod settings menu will dynamic load
+                var guiImagesFName = $@"GUI_Images_{dlcName}.pcc";
+                var guiImagesPackageFilePath = Path.Combine(cookedPath, guiImagesFName);
+                if (!File.Exists(guiImagesPackageFilePath))
+                {
+                    // Generate GUI images package. We will re-open it.
+                    using var package = MEPackageHandler.CreateAndOpenPackage(guiImagesPackageFilePath, game, true);
+                    package.Save();
+                }
+
+                // Create package (this is not in above in case it already exists for some reason...)
+                string modBaseImagePath = @"MenuRootImage_I1";
+                using var guiImagePackage = MEPackageHandler.OpenMEPackage(guiImagesPackageFilePath);
+                var testPath = guiImagePackage.FindExport(modBaseImagePath, @"GFxMovieInfo");
+                if (testPath == null)
+                {
+                    var createdImage = Texture2D.CreateTexture(guiImagePackage, modBaseImagePath, 2048, 1024, PixelFormat.DXT5, false);
+                    Texture2D.CreateSWFForTexture(createdImage);
+
+                    var t2d = new Texture2D(createdImage);
+                    var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE1.Images.msm_placeholder.jpg").ToArray();
+                    var image = Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.DXT5);
+                    t2d.Replace(image, createdImage.GetProperties(), isPackageStored: true);
+                    guiImagePackage.Save();
+                }
+            }
+
+            #endregion
+
+
+            var autoload = Path.Combine(dlcFolderPath, "Autoload.ini");
+
+            int strId = 157152; // You should not be messing with things you don't understand.
+            if (File.Exists(autoload))
+            {
+                var autoLoadIni = DuplicatingIni.LoadIni(autoload);
+                var gui = autoLoadIni.GetSection("GUI");
+                if (gui != null)
+                {
+                    var nameStrRef = gui.GetValue("NameStrRef");
+                    if (nameStrRef.HasValue)
+                        int.TryParse(nameStrRef.Value, out strId); // Parse to mod name.
+                }
+            }
+
+            // Add root menu reference to our menu
+            Dictionary<string, string> msmr = new CaseInsensitiveDictionary<string>
+                {
+                    { @"srCenterText", strId.ToString() },
+                    { @"srDescriptionTitleText", strId.ToString() },
+                    { @"srDescriptionText", @"181072" }, // "Settings"
+                    { @"Images", $"(\"{baseImageMemoryPath}\")" }, // do not localize
+                };
+
+
+            var m3cdData = $@"[BioUI.ini ModSettings_Submenus_LE1CP.ModSettingsSubmenu_Root]" + Environment.NewLine;
+            m3cdData += $@"+menuitems={StringStructParser.BuildCommaSeparatedSplitValueList(msmr, @"SubmenuClassName")}";
+            var m3cdPath = Path.Combine(cookedPath, @"ConfigDelta-ModSettingsMenu.m3cd");
+            File.WriteAllText(m3cdPath, m3cdData);
+
+
+
+            // Add DLC requirements
+            // If mod is null, we haven't generated mod yet, so it will say there is no dependency on this yet.
+            bool requiresLE1Patch = mod != null && mod.RequiredDLC.Any(x => x.DLCFolderName.Key.CaseInsensitiveEquals(@"DLC_MOD_LE1CP"));
+            if (!requiresLE1Patch)
+            {
+                // Mod has a dependency on LE1 Comm Patch so we add that to the moddesc
+                moddescAddinDelegates.Add(x =>
+                {
+                    var reqDlc = x[@"ModInfo"][@"requireddlc"];
+                    if (!string.IsNullOrWhiteSpace(reqDlc.Value)) reqDlc.Value += @";";
+                    reqDlc.Value += @"DLC_MOD_LE1CP";
+                    x[@"ModInfo"][@"requireddlc"] = reqDlc;
+                });
+            }
+        }
+
+        #endregion
     }
 }

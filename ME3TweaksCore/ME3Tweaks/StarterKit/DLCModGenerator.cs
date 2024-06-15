@@ -191,7 +191,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             if (skOption.AddModSettingsMenu)
             {
                 UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Mod Settings Menu");
-                StarterKitAddins.AddModSettingsMenu(null, skOption.ModGame, contentDirectory, moddescAddinDelegates);
+                StarterKitAddins.AddLE3ModSettingsMenu(null, skOption.ModGame, contentDirectory, moddescAddinDelegates);
             }
 
             if (skOption.Blank2DAsToGenerate.Any())
