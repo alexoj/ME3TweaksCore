@@ -1206,7 +1206,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 // Create package (this is not in above in case it already exists for some reason...)
                 string modBaseImagePath = @"MenuRootImage_I1";
                 using var guiImagePackage = MEPackageHandler.OpenMEPackage(guiImagesPackageFilePath);
-                var testPath = guiImagePackage.FindExport(modBaseImagePath, @"GFxMovieInfo");
+                var testPath = guiImagePackage.FindExport(modBaseImagePath, @"Texture2D");
                 if (testPath == null)
                 {
                     var createdImage = Texture2D.CreateTexture(guiImagePackage, modBaseImagePath, 2048, 1024, PixelFormat.DXT5, false);
