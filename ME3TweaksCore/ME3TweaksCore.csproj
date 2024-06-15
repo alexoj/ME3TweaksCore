@@ -50,6 +50,7 @@
 	  <None Remove="ME3Tweaks\StarterKit\BlankTlkFile.upk" />
 	  <None Remove="ME3Tweaks\StarterKit\Default.sfar" />
 	  <None Remove="ME3Tweaks\StarterKit\Default_DLC_MOD_StarterKit.bin" />
+	  <None Remove="ME3Tweaks\StarterKit\LE1\ModSettingsSubmenu.uc" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="submodules\ComputerInfo\ComputerInfo\ComputerInfo.csproj" />
@@ -72,7 +73,6 @@
 	  <Folder Include="ME3Tweaks\M3Merge\Bio2DATable\Vanilla\LE1\" />
 	  <Folder Include="ME3Tweaks\M3Merge\Bio2DATable\Vanilla\LE2\" />
 	  <Folder Include="ME3Tweaks\M3Merge\Squadmate\Game3\" />
-	  <Folder Include="ME3Tweaks\StarterKit\LE1\Classes\" />
 	</ItemGroup>
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
