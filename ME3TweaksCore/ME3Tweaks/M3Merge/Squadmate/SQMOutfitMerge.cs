@@ -209,10 +209,11 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                             // This is the 'slot' of the outfit for this squadmate
                             outfit.AppearanceId = list.Any() ? (list.MaxBy(x => x.AppearanceId).AppearanceId + 1) : GetFirstAvailableSquadmateAppearanceIndexLE2(outfit.HenchName); // Get first unused slot
 
-                            // Todo: If higher than 9 we have too many outfits!!!!
-                            if (outfit.AppearanceId > 9)
+                            // 06/17/2024 - Update to 32 with changes by Nanuke
+                            // Todo: If higher than 32 we have too many outfits!!!!
+                            if (outfit.AppearanceId > 32)
                             {
-                                MLog.Error(@"Squadmate outfit merge for LE2 only supports 9 outfits per character currently!");
+                                MLog.Error(@"Squadmate outfit merge for LE2 only supports 32 outfits per character currently!");
                                 MLog.Error($@"This outfit for {outfit.HenchName} will be skipped.");
                                 result = LC.GetString(LC.string_someSquadmateOutfitsWereNotMergedSeeLogs);
                                 continue;
