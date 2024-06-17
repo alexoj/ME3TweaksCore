@@ -27,6 +27,7 @@ namespace ME3TweaksCoreWPF.NativeMods
         /// both lists of targets is populated, so you can bind to either as necessary.
         /// </summary>
         public ObservableCollectionExtended<GameTargetWPF> GameTargetsWPF { get; } = new();
+
         /// <summary>
         /// Current selected WPF target
         /// </summary>
@@ -51,11 +52,9 @@ namespace ME3TweaksCoreWPF.NativeMods
         //Do not delete - fody will link this
         public void OnCurrentGameTargetWPFChanged()
         {
-            if (CurrentGameTarget != null)
-            {
-                RefreshBinkStatus();
-                RefreshASIStates();
-            }
+            // Map our WPF target to the base class. This is due to some 
+            // ... "fun" WPF binding issues with the target selector using WPF only classes
+            CurrentGameTarget = CurrentGameTargetWPF;
         }
     }
 }
