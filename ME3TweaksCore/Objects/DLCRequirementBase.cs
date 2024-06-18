@@ -156,7 +156,7 @@ namespace ME3TweaksCore.Objects
         /// </summary>
         /// <param name="target">Can be null if metas is populated.</param>
         /// <returns></returns>
-        public bool IsRequirementMet(GameTarget target, CaseInsensitiveDictionary<MetaCMM> metas = null)
+        public bool IsRequirementMet(GameTarget target, CaseInsensitiveDictionary<MetaCMM> metas = null, bool checkOptionKeys = true)
         {
             metas ??= target.GetMetaMappedInstalledDLC();
             if (DLCFolderName.IsPlus == false)
@@ -197,7 +197,7 @@ namespace ME3TweaksCore.Objects
                     }
 
                     // OPTION KEYS
-                    if (DLCOptionKeys != null)
+                    if (checkOptionKeys && DLCOptionKeys != null)
                     {
                         // Hard yes/no on all reqs
                         foreach (var key in DLCOptionKeys.Where(x => x.OptionKey.IsPlus != null))
