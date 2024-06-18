@@ -133,7 +133,7 @@ namespace ME3TweaksCore.Services.Restore
         /// <summary>
         /// Restores the game to the specified directory (game location). Pass in null if you wish to restore to a custom location. Refreshes the target on completion. This call is blocking, it should be run on a background thread.
         /// </summary>
-        /// <param name="destinationDirectory">Game directory that will be replaced with backup</param>
+        /// <param name="destinationDirectory">Game directory that will be replaced with backup. If null, it will prompt for a custom directory.</param>
         /// <returns></returns>
         public bool PerformRestore(GameTarget restoreTarget, string destinationDirectory)
         {
