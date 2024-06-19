@@ -1129,6 +1129,8 @@ namespace ME3TweaksCore.Diagnostics
                 addDiagLine(@"Installed DLC", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                 addDiagLine(@"The following DLC is installed:");
 
+                var mountPriorities = new Dictionary<int, string>();
+
                 var officialDLC = MEDirectories.OfficialDLC(package.DiagnosticTarget.Game);
                 foreach (var dlc in installedDLCs)
                 {
@@ -1137,6 +1139,7 @@ namespace ME3TweaksCore.Diagnostics
                         DLCFolderName = dlc.Key
                     };
 
+                    string errorLine = null;
                     if (!officialDLC.Contains(dlc.Key, StringComparer.InvariantCultureIgnoreCase))
                     {
                         var metaMappedDLC = dlc.Value;
@@ -1153,6 +1156,21 @@ namespace ME3TweaksCore.Diagnostics
                         {
 
                         }
+
+                        var dlcPath = Path.Combine(package.DiagnosticTarget.GetDLCPath(), dlc.Key);
+                        var mount = MELoadedDLC.GetMountPriority(dlcPath, package.DiagnosticTarget.Game);
+                        if (mount != 0)
+                        {
+                            if (mountPriorities.TryGetValue(mount, out var existingDLC))
+                            {
+                                errorLine =
+                                    $@"   >>> This DLC has the same mount priority ({mount}) as {existingDLC}. This will cause undefined game behavior! Please contact the developers of these mods.";
+                            }
+                            else
+                            {
+                                mountPriorities[mount] = dlc.Key;
+                            }
+                        }
                     }
                     else
                     {
@@ -1160,6 +1178,10 @@ namespace ME3TweaksCore.Diagnostics
                     }
 
                     dlcStruct.PrintToDiag(addDiagLine);
+                    if (errorLine != null)
+                    {
+                        addDiagLine(errorLine, ME3TweaksLogViewer.LogSeverity.FATAL);
+                    }
                 }
 
                 if (installedDLCs.Any())
