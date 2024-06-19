@@ -193,8 +193,9 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             // Main
             if (game == MEGame.LE2)
             {
-                sourcefiles.Add($@"BioH_{henchName}_00.pcc"); // Used everywhere but SM
-                sourcefiles.Add($@"BioH_END_{henchName}_00.pcc"); // Used at suicide mission
+                // We use 01 as they are subclassed for unrealscript type checking safety against the base class.
+                sourcefiles.Add($@"BioH_{henchName}_01.pcc"); // Used everywhere but SM
+                sourcefiles.Add($@"BioH_END_{henchName}_01.pcc"); // Used at suicide mission
             }
             else if (game.IsGame3())
             {
@@ -240,6 +241,10 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             {
                 var path = sourceBaseFiles[f];
                 var destFName = Path.GetFileName(f);
+                if (game == MEGame.LE2)
+                {
+                    destFName = destFName.Replace("_01", "");
+                }
                 destFName = destFName.Replace(henchName, $@"{henchName}_{dlcName}");
 
                 var destpath = Path.Combine(cookedPath, destFName);
@@ -266,12 +271,12 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                         var actorType = pawnClassDefaults.GetProperty<ObjectProperty>("ActorType").ResolveToEntry(package) as ExportEntry;
 
                         // Replace class and default names
-                        ReplaceNameIfExists(package, pawnClass.ObjectName, $@"{pawnClass.ObjectName}_{dlcName}");
-                        ReplaceNameIfExists(package, pawnClassDefaults.ObjectName, $@"{pawnClass.ObjectName}_{dlcName}"); ReplaceNameIfExists(package, actorType.ObjectName, $@"{actorType.ObjectName}_{dlcName.ToLower()}");
-
+                        ReplaceNameIfExists(package, pawnClass.ObjectName, $@"{pawnClass.ObjectName.Name.Replace("_01", "")}_{dlcName}");
+                        ReplaceNameIfExists(package, pawnClassDefaults.ObjectName, $@"{pawnClass.ObjectName.Name.Replace("_01", "")}_{dlcName}");
+                        actorType.ObjectName = $@"{actorType.ObjectName.Name.Replace("_01", "")}_{dlcName.ToLower()}";
 
                         // Replace package export name.
-                        ReplaceNameIfExists(package, package.FileNameNoExtension, $@"{package.FileNameNoExtension[..^3]}_{dlcName}_00");
+                        ReplaceNameIfExists(package, package.FileNameNoExtension, $@"{package.FileNameNoExtension[..^3]}_{dlcName}");
                         ReplaceNameIfExists(package, @"SFXGamePawns", $@"SFXGamePawns_{dlcName}");
                     }
                 }
@@ -352,13 +357,14 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 var t2d = new Texture2D(exp);
                 var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE2.HenchImages.placeholder_unselected.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.DXT5), exp.GetProperties(), isPackageStored: true);
-
+                exp.WriteProperty(new BoolProperty(false, "sRGB"));
 
                 // Chosen
                 exp = Texture2D.CreateTexture(ipackage, $"{henchHumanName}Glow", 8, 16, PixelFormat.DXT5, false); // We just specify correct aspect ratio as the replacement code will properly do it for us.
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE2.HenchImages.placeholder_selected.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.DXT5), exp.GetProperties(), isPackageStored: true);
+                exp.WriteProperty(new BoolProperty(false, "sRGB"));
 
                 ipackage.Save(idestpath);
             }
