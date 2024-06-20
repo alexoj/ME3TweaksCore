@@ -293,6 +293,9 @@ namespace ME3TweaksCore.Services.Restore
                         packagesToCheck.Add(failedItem);
                 }
 
+                backupStatus.BackupLocationStatus = "Comparing game against vanilla database";
+                UpdateStatusCallback?.Invoke(backupStatus.BackupLocationStatus);
+
                 VanillaDatabaseService.ValidateTargetAgainstVanilla(destTarget, addNonVanillaFile, false);
 
                 // For each package that failed validation, we should check the size.
