@@ -15,6 +15,39 @@ using ME3TweaksCore.Targets;
 
 namespace ME3TweaksCore.ME3Tweaks.M3Merge
 {
+    public static class TargetMergeExtensions
+    {
+        /// <summary>
+        /// If this game supports AutoTOC
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns></returns>
+        public static bool SupportsAutoTOC(this MEGame game) => game == MEGame.ME3 || game.IsLEGame();
+
+        /// <summary>
+        /// If this game supports plot manager sync (merge DLC pmu files)
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns></returns>
+        public static bool SupportsPlotManagerSync(this MEGame game) => game.IsGame1() || game.IsGame2();
+
+        /// <summary>
+        /// If this game supports plot manager sync (merge DLC pmu files)
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns></returns>
+        public static bool SupportsSquadmateMerge(this MEGame game) => game.IsGame1() || game.IsGame2();
+
+        /// <summary>
+        /// If this game supports email merge (merge DLC emm files)
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns></returns>
+        public static bool SupportsEmailMerge(this MEGame game) => game.IsGame2();
+
+    }
+
+
     public class M3MergeDLC
     {
         #region INSTANCE
