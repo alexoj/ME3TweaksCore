@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using LegendaryExplorerCore.Helpers;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
@@ -17,36 +18,30 @@ using Serilog;
 namespace ME3TweaksCore.Targets
 {
     [AddINotifyPropertyChangedInterface]
-    public class ModifiedFileObject
+    public class ModifiedFileObject(
+        string filePath,
+        GameTarget target,
+        bool canRestoreTextureModded,
+        Func<string, bool> restoreBasegamefileConfirmationCallback,
+        Action notifyRestoringFileCallback,
+        Action<object> notifyRestoredCallback,
+        string md5 = null)
     {
         private bool canRestoreFile;
         private bool checkedForBackupFile;
-        public string FilePath { get; }
-        private GameTarget target;
-        private Action<object> notifyRestoredCallback;
-        private Action notifyRestoringCallback;
-        private Func<string, bool> restoreBasegamefileConfirmationCallback;
+        public string FilePath { get; } = filePath;
+
+        [AlsoNotifyFor(nameof(RestoreButtonText))]
         public bool Restoring { get; set; }
 
         /// <summary>
         /// Precalculated MD5 for performance
         /// </summary>
-        public string MD5 { get; set; }
+        public string MD5 { get; set; } = md5;
 
-        public ModifiedFileObject(string filePath, GameTarget target,
-            Func<string, bool> restoreBasegamefileConfirmationCallback,
-            Action notifyRestoringFileCallback,
-            Action<object> notifyRestoredCallback,
-            string md5 = null)
-        {
-            this.FilePath = filePath;
-            this.target = target;
-            this.notifyRestoredCallback = notifyRestoredCallback;
-            this.restoreBasegamefileConfirmationCallback = restoreBasegamefileConfirmationCallback;
-            this.notifyRestoringCallback = notifyRestoringFileCallback;
-            MD5 = md5;
-        }
-
+        /// <summary>
+        /// String denoting what triggered this modification of the file
+        /// </summary>
         public string ModificationSource { get; set; }
 
         /// <summary>
@@ -91,7 +86,7 @@ namespace ME3TweaksCore.Targets
                 {
                     Restoring = true;
                     MLog.Information(@"Restoring basegame file: " + targetFile);
-                    notifyRestoringCallback?.Invoke();
+                    notifyRestoringFileCallback?.Invoke();
                     var tfi = new FileInfo(targetFile);
                     if (tfi.IsReadOnly)
                     {
@@ -110,7 +105,25 @@ namespace ME3TweaksCore.Targets
         }
 
         //might need to make this more efficient...
-        public string RestoreButtonText => Restoring ? LC.GetString(LC.string_restoring) : (CanRestoreFile() ? LC.GetString(LC.string_restore) : LC.GetString(LC.string_noBackup));
+        public string RestoreButtonText
+        {
+            get
+            {
+                if (Restoring)
+                    return LC.GetString(LC.string_restoring);
+
+                if (CanRestoreFile())
+                    return LC.GetString(LC.string_restore);
+
+                // Can't restore. Determine reason
+             
+                // Unsure how to get a check on this type of modification.
+                if (target.TextureModded)
+                    return "Cannot restore";
+
+                return LC.GetString(LC.string_noBackup);
+            }
+        }
 
         public bool CanRestoreFile()
         {
@@ -121,9 +134,21 @@ namespace ME3TweaksCore.Targets
         {
             if (Restoring && !batchMode) return false;
             if (checkedForBackupFile) return canRestoreFile;
+
+            // Check in backup
             var backupPath = BackupService.GetGameBackupPath(target.Game);
             canRestoreFile = backupPath != null && File.Exists(Path.Combine(backupPath, FilePath));
-            checkedForBackupFile = true;
+            checkedForBackupFile = true; // cache result
+
+            if (canRestoreFile && !canRestoreTextureModded && target.TextureModded)
+            {
+                // Not allowed
+                if (FilePath.RepresentsPackageFilePath())
+                {
+                    canRestoreFile = false;
+                }
+            }
+
             return canRestoreFile;
         }
     }

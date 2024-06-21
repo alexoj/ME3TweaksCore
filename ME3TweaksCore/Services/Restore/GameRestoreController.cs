@@ -275,8 +275,6 @@ namespace ME3TweaksCore.Services.Restore
                         if (tag == @"ThisIsMEMEndOfFileMarker")
                         {
                             fileStream.SetLength(fileStream.Length - 24); // Truncate
-                            fileStream.Dispose();
-                            fileStream.Close();
                             resetDate = true;
                         }
                     }
@@ -295,7 +293,6 @@ namespace ME3TweaksCore.Services.Restore
 
                 Debug.WriteLine($@"Files only texture tagged: {numOnlyTexTagged}");
             }
-
 
             backupStatus.BackupStatus = LC.GetString(LC.string_restoringFromBackup);
             UpdateStatusCallback?.Invoke(backupStatus.BackupStatus);

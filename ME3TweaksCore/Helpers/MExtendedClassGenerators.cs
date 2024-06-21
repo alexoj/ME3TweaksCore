@@ -49,7 +49,7 @@ namespace ME3TweaksCore.Helpers
             return new InstalledExtraFile(filepath, type, game, notifydeleted);
         }
 
-        public delegate ModifiedFileObject GenerateModifiedFileObjectDelegate(string filePath, GameTarget target, Func<string, bool> restoreBasegamefileConfirmationCallback, Action notifyRestoringFileCallback, Action<object> notifyRestoredCallback);
+        public delegate ModifiedFileObject GenerateModifiedFileObjectDelegate(string filePath, GameTarget target, Func<string, bool> restoreBasegamefileConfirmationCallback, Action notifyRestoringFileCallback, Action<object> notifyRestoredCallback, string md5 = null);
         public static GenerateModifiedFileObjectDelegate GenerateModifiedFileObject { get; set; } = InternalGenerateModifiedFileObject;
 
         /// <summary>
@@ -61,9 +61,10 @@ namespace ME3TweaksCore.Helpers
         /// <param name="notifyRestoringFileCallback"></param>
         /// <param name="notifyRestoredCallback"></param>
         /// <returns></returns>
-        private static ModifiedFileObject InternalGenerateModifiedFileObject(string filePath, GameTarget target, Func<string, bool> restoreBasegamefileConfirmationCallback, Action notifyRestoringFileCallback, Action<object> notifyRestoredCallback)
+        private static ModifiedFileObject InternalGenerateModifiedFileObject(string filePath, GameTarget target, Func<string, bool> restoreBasegamefileConfirmationCallback, Action notifyRestoringFileCallback, Action<object> notifyRestoredCallback, string md5 = null)
         {
-            return new ModifiedFileObject(filePath, target, restoreBasegamefileConfirmationCallback, notifyRestoringFileCallback, notifyRestoredCallback);
+            // By default we cannot restore texture modded files like this.
+            return new ModifiedFileObject(filePath, target, false, restoreBasegamefileConfirmationCallback, notifyRestoringFileCallback, notifyRestoredCallback, md5);
         }
 
         public delegate SFARObject GenerateSFARObjectDelegate(string file, GameTarget target, Func<string, bool> restoreSFARCallback, Action startingRestoreCallback, Action<object> notifyNoLongerModifiedCallback);

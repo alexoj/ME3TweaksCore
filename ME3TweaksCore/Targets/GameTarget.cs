@@ -470,7 +470,8 @@ namespace ME3TweaksCore.Targets
                     if (info != null)
                     {
                         // Should we allow restoring these...? Seems kinda dangerous
-                        modifiedBasegameFiles.Add(new ModifiedFileObject(trackedFile.Key, this, null, null, null, md5: hash));
+                        modifiedBasegameFiles.Add(
+                            MExtendedClassGenerators.GenerateModifiedFileObject(trackedFile.Key, this, null, null, null, md5: hash));
                     }
                 }
             }

@@ -14,9 +14,10 @@ namespace ME3TweaksCoreWPF.Targets
         public ICommand RestoreCommand { get; }
 
         public ModifiedFileObjectWPF(string filePath, GameTarget target,
+            bool canRestoreTextureModded,
             Func<string, bool> restoreBasegamefileConfirmationCallback,
             Action notifyRestoringFileCallback,
-            Action<object> notifyRestoredCallback) : base(filePath, target, restoreBasegamefileConfirmationCallback, notifyRestoringFileCallback, notifyRestoredCallback)
+            Action<object> notifyRestoredCallback, string md5 = null) : base(filePath, target, canRestoreTextureModded, restoreBasegamefileConfirmationCallback, notifyRestoringFileCallback, notifyRestoredCallback, md5)
         {
             RestoreCommand = new GenericCommand(RestoreFileWrapper, CanRestoreFile);
         }
@@ -30,9 +31,9 @@ namespace ME3TweaksCoreWPF.Targets
         /// <param name="notifyRestoringFileCallback"></param>
         /// <param name="notifyRestoredCallback"></param>
         /// <returns></returns>
-        public static ModifiedFileObjectWPF GenerateModifiedFileObjectWPF(string filePath, GameTarget target, Func<string, bool> restoreBasegamefileConfirmationCallback, Action notifyRestoringFileCallback, Action<object> notifyRestoredCallback)
+        public static ModifiedFileObjectWPF GenerateModifiedFileObjectWPF(string filePath, GameTarget target, bool canRestoreTextureModded, Func<string, bool> restoreBasegamefileConfirmationCallback, Action notifyRestoringFileCallback, Action<object> notifyRestoredCallback)
         {
-            return new ModifiedFileObjectWPF(filePath, target, restoreBasegamefileConfirmationCallback, notifyRestoringFileCallback, notifyRestoredCallback);
+            return new ModifiedFileObjectWPF(filePath, target, canRestoreTextureModded, restoreBasegamefileConfirmationCallback, notifyRestoringFileCallback, notifyRestoredCallback);
         }
     }
 }
