@@ -94,6 +94,15 @@ namespace ME3TweaksCore.Helpers
         }
 
         /// <summary>
+        /// Returns the path to where the cached local BasegameIdentificationService file resides on disk. This should only be used for legacy reasons!
+        /// </summary>
+        /// <returns></returns>
+        internal static string GetAppSpecificBasegameFileIdentificationServiceFile()
+        {
+            return Path.Combine(GetME3TweaksServicesCache(), @"localbasegamefileidentificationservice.json");
+        }
+
+        /// <summary>
         /// Returns the path to where the local FileSourceService file resides on disk.
         /// </summary>
         /// <returns></returns>

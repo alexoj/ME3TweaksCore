@@ -56,6 +56,15 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
                     {
                         var db = JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>(File.ReadAllText(file));
                         database.ReplaceAll(db);
+
+                        // LEGACY APP-SPECIFIC DB
+                        var legacyFilePath = MCoreFilesystem.GetAppSpecificBasegameFileIdentificationServiceFile();
+                        if (File.Exists(legacyFilePath))
+                        {
+                            // merge in legacy file
+                            var db2 = JsonConvert.DeserializeObject<Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>>>(File.ReadAllText(legacyFilePath));
+                            mergeDatabase(db2, database);
+                        }
                         MLog.Information($@"Loaded {ServiceLoggingName}");
                         break;
                     }
@@ -73,6 +82,43 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
                 MLog.Information($@"Loaded blank {ServiceLoggingName}");
                 var db = getBlankBGFIDB();
                 database.ReplaceAll(db);
+            }
+        }
+
+        /// <summary>
+        /// Merges 2 basegame file identification service databases
+        /// </summary>
+        /// <param name="incoming">Database to merge</param>
+        /// <param name="database">Database to merge into</param>
+        private static void mergeDatabase(Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> incoming, Dictionary<string, CaseInsensitiveDictionary<List<BasegameFileRecord>>> target)
+        {
+            MLog.Information(@"Merging basegame file identification databases (in memory)");
+            foreach (var game in incoming) // For each game
+            {
+                // Find target
+                if (target.TryGetValue(game.Key, out var matchingGame))
+                {
+                    foreach (var entry in game.Value) // For each file in game
+                    {
+                        if (matchingGame.TryGetValue(entry.Key, out var matchingInstances))
+                        {
+                            foreach (var instanceEntry in entry.Value) // For each instance in file
+                            {
+                                if (!matchingInstances.Contains(instanceEntry))
+                                    matchingInstances.Add(instanceEntry); // Merge single instance
+                            }
+                        }
+                        else
+                        {
+                            // Merge whole entry
+                            matchingGame[entry.Key] = entry.Value;
+                        }
+                    }
+                }
+                else
+                {
+                    target[game.Key] = game.Value; // Merge whole game
+                }
             }
         }
 
@@ -227,6 +273,20 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
                     MLog.Information($@"Clearing basegame filedatabase entries for {game}");
                     infosForGameL.Clear();
                     CommitDatabaseToDisk();
+                }
+
+                // Delete legacy file for consistency on older code.s
+                try
+                {
+                    var legacyFile = MCoreFilesystem.GetAppSpecificBasegameFileIdentificationServiceFile();
+                    if (File.Exists(legacyFile))
+                    {
+                        File.Delete(legacyFile);
+                    }
+                }
+                catch
+                {
+                    // Do not care.
                 }
             }
         }

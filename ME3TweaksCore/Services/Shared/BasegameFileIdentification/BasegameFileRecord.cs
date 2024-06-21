@@ -14,6 +14,24 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
     /// </summary>
     public class BasegameFileRecord
     {
+        protected bool Equals(BasegameFileRecord other)
+        {
+            return file == other.file && hash == other.hash && size == other.size;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((BasegameFileRecord)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(file, hash, size);
+        }
+
         public string file { get; set; }
         public string hash { get; set; }
         public string source { get; set; }
