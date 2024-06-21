@@ -24,7 +24,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
     /// </summary>
     public class DLCModGenerator
     {
-        public static string CreateStarterKitMod(string destFolder, StarterKitOptions skOption, Action<string> UITextCallback, out List<Action<DuplicatingIni>> moddescAddinDelegates)
+        public static string CreateStarterKitMod(string destFolder, StarterKitOptions skOption, Action<string> UITextCallback, out List<Action<DuplicatingIni>> moddescAddinDelegates, Func<MEGame, string> getGamePatchModDirectory)
         {
             //NamedBackgroundWorker nbw = new NamedBackgroundWorker(@"StarterKitThread");
             //nbw.DoWork += (sender, args) =>
@@ -211,7 +211,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Ashley SQM");
                     errorMessage =
                         StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Ashley", contentDirectory,
-                            outfits);
+                            outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddEDISQM)
@@ -219,7 +219,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - EDI SQM");
                     errorMessage =
                         StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"EDI", contentDirectory,
-                            outfits);
+                            outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddGarrusSQM)
@@ -227,7 +227,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Garrus SQM");
                     errorMessage =
                         StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Garrus", contentDirectory,
-                            outfits);
+                            outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddKaidanSQM)
@@ -235,7 +235,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Kaidan SQM");
                     errorMessage =
                         StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Kaidan", contentDirectory,
-                            outfits);
+                            outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddJamesSQM)
@@ -243,14 +243,14 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - James SQM");
                     errorMessage =
                         StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Marine", contentDirectory,
-                            outfits);
+                            outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddJavikSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Javik SQM");
                     errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Prothean",
-                        contentDirectory, outfits);
+                        contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddLiaraSQM)
@@ -258,7 +258,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Liara SQM");
                     errorMessage =
                         StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Liara", contentDirectory,
-                            outfits);
+                            outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddTaliSQM)
@@ -266,7 +266,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Tali SQM");
                     errorMessage =
                         StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Tali", contentDirectory,
-                            outfits);
+                            outfits, getGamePatchModDirectory);
                 }
             }
             else if (skOption.ModGame == MEGame.LE2)
@@ -274,73 +274,73 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 if (skOption.AddMirandaSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Miranda SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Vixen", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Vixen", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddJacobSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Jacob SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Leading", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Leading", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddMordinSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Mordin SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Professor", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Professor", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddGarrusSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Garrus SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Garrus", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Garrus", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddJackSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Jack SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Convict", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Convict", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddGruntSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Grunt SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Grunt", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Grunt", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddTaliSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Tali SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Tali", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Tali", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddSamaraSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Samara SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Mystic", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Mystic", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddThaneSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Thane SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Assassin", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Assassin", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddLegionSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Legion SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Geth", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Geth", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddKasumiSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Kasumi SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Thief", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Thief", contentDirectory, outfits, getGamePatchModDirectory);
                 }
 
                 if (errorMessage == null && skOption.AddZaeedSQM)
                 {
                     UITextCallback?.Invoke($@"{LC.GetString(LC.string_generatingMod)} - Zaeed SQM");
-                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Veteran", contentDirectory, outfits);
+                    errorMessage = StarterKitAddins.GenerateSquadmateMergeFiles(skOption.ModGame, @"Veteran", contentDirectory, outfits, getGamePatchModDirectory);
                 }
             }
             if (errorMessage != null)

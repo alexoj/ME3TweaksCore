@@ -170,8 +170,9 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         /// <param name="henchName">The internal name of the henchman</param>
         /// <param name="dlcFolderPath">The path to the DLC folder root to modify</param>
         /// <param name="outfits">The list of outfits to append to</param>
+        /// <param name="getGamePatchModFolder">Delegate that is invoked when trying to layer the main patch mod for the game's files over the top of BioWares, as that is preferable</param>
         /// <returns>Error if failed, null if OK</returns>
-        public static string GenerateSquadmateMergeFiles(MEGame game, string henchName, string dlcFolderPath, List<Dictionary<string, object>> outfits)
+        public static string GenerateSquadmateMergeFiles(MEGame game, string henchName, string dlcFolderPath, List<Dictionary<string, object>> outfits, Func<MEGame, string> getGamePatchModFolder)
         {
             // Setup
             var dlcName = Path.GetFileName(dlcFolderPath);
@@ -185,6 +186,17 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 return LC.GetString(LC.string_interp_sk_sqmNoBackup, game);
             }
             var sourceBaseFiles = MELoadedFiles.GetFilesLoadedInGame(game, true, gameRootOverride: sourceBaseDir);
+
+            // Try to source from game patch if possible.
+            if (getGamePatchModFolder != null)
+            {
+                var gamePatchModFolder = getGamePatchModFolder(game);
+                if (gamePatchModFolder != null)
+                {
+                    MLog.Information($@"Layering patch DLC mod files over backup files for source priority: {gamePatchModFolder}");
+                    MUtilities.LayerFolderOverLoadedFiles(game, sourceBaseFiles, gamePatchModFolder);
+                }
+            }
 #if DEBUG
             var filesDebug = sourceBaseFiles.Where(x => x.Key.StartsWith("BioH_")).Select(x => x.Key).ToList();
 #endif
@@ -243,12 +255,13 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 var destFName = Path.GetFileName(f);
                 if (game == MEGame.LE2)
                 {
-                    destFName = destFName.Replace("_01", "");
+                    destFName = destFName.Replace(@"_01", @"");
                 }
                 destFName = destFName.Replace(henchName, $@"{henchName}_{dlcName}");
 
                 var destpath = Path.Combine(cookedPath, destFName);
 
+                MLog.Information($@"Building squadmate merge asset using source file {path}");
                 using var package = MEPackageHandler.OpenMEPackage(path);
                 if (package.Localization == MELocalization.None)
                 {

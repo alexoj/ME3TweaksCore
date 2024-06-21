@@ -11,6 +11,7 @@ using System.Security.Principal;
 using System.Threading;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Helpers;
+using LegendaryExplorerCore.Misc;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using NickStrupat;
@@ -397,7 +398,7 @@ namespace ME3TweaksCore.Helpers
             {
                 // This is in a try catch, as things in MainModule will throw an error if accessed
                 // after the process ends, which it might during the periodic updates of this
-                runningInfo.isRunning = Process.GetProcesses().Any(x => processNames.Contains(x.ProcessName) && !IsProcessSuspended(x) && 
+                runningInfo.isRunning = Process.GetProcesses().Any(x => processNames.Contains(x.ProcessName) && !IsProcessSuspended(x) &&
                                                                         x.MainModule?.FileVersionInfo.FileMajorPart == (gameID.IsOTGame() ? 1 : 2));
             }
             catch
@@ -873,6 +874,20 @@ namespace ME3TweaksCore.Helpers
             File.SetLastWriteTime(destFile, bi.LastWriteTime);
             File.SetCreationTime(destFile, bi.CreationTime);
             File.SetLastAccessTime(destFile, bi.LastAccessTime);
+        }
+
+        /// <summary>
+        /// Layers a folder of files over the top of a dictionary of loaded files. The directory is assumed to exist already.
+        /// </summary>
+        /// <param name="loadedFiles">Dictionary of loaded files</param>
+        /// <param name="folder">Folder you are layering on top</param>
+        public static void LayerFolderOverLoadedFiles(MEGame game, CaseInsensitiveDictionary<string> loadedFiles, string folder, bool includeTFC = false, bool includeAFC = false, string[] additionalExtensions = null)
+        {
+            foreach (var file in MELoadedFiles.GetCookedFiles(game, folder, includeTFC, includeAFC, additionalExtensions))
+            {
+                var key = Path.GetFileName(file);
+                loadedFiles[key] = file;
+            }
         }
     }
 }

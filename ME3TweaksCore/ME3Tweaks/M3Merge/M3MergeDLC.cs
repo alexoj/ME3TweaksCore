@@ -141,7 +141,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                 ModModuleNumber = 48955 // GAME 2
             };
 
-            DLCModGenerator.CreateStarterKitMod(Target.GetDLCPath(), sko, null, out _);
+            DLCModGenerator.CreateStarterKitMod(Target.GetDLCPath(), sko, null, out _, null); // not generating anything using patch dlc mod so don't need to specify it
             MetaCMM mcmm = new MetaCMM()
             {
                 ModName = @"ME3TweaksCore Auto-Generated Merge DLC",
