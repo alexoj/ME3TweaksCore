@@ -80,10 +80,6 @@ namespace ME3TweaksCore.Services.Restore
         /// </summary>
         public Func<bool> ShouldLogEveryCopiedFile { get; set; } = ShouldLogEveryCopiedFileDefault;
 
-        /// <summary>
-        /// If the restore should use the legacy full copy implementation (not recommended)
-        /// </summary>
-        public Func<bool> UseLegacyFullCopy { get; set; } = UseLegacyFullCopyDefault;
 
         #region Delegate defaults
         /// <summary>
@@ -137,8 +133,6 @@ namespace ME3TweaksCore.Services.Restore
         /// <returns></returns>
         public bool PerformRestore(GameTarget restoreTarget, string destinationDirectory)
         {
-            var useFullCopyMethod = UseLegacyFullCopy();
-
             if (MUtilities.IsGameRunning(Game))
             {
                 BlockingErrorCallback?.Invoke(LC.GetString(LC.string_cannotRestoreGame), LC.GetString(LC.string_interp_cannotRestoreGameToGameWhileRunning, Game.ToGameName()));
@@ -191,41 +185,6 @@ namespace ME3TweaksCore.Services.Restore
 
                 SetProgressIndeterminateCallback?.Invoke(true);
 
-                if (useFullCopyMethod)
-                {
-                    // Leftover unused code for now
-                    backupStatus.BackupStatus = LC.GetString(LC.string_deletingExistingGameInstallation);
-                    if (Directory.Exists(destinationDirectory))
-                    {
-                        if (Directory.GetFiles(destinationDirectory).Any() || Directory.GetDirectories(destinationDirectory).Any())
-                        {
-                            MLog.Information(@"Deleting existing game directory: " + destinationDirectory);
-                            try
-                            {
-                                bool deletedDirectory = MUtilities.DeleteFilesAndFoldersRecursively(destinationDirectory);
-                                if (deletedDirectory != true)
-                                {
-                                    RestoreErrorCallback?.Invoke(LC.GetString(LC.string_couldNotDeleteGameDirectory), LC.GetString(LC.string_interp_couldNotFullyDeleteGameDirectory, Game.ToGameName()));
-                                    //b.Result = RestoreResult.ERROR_COULD_NOT_DELETE_GAME_DIRECTORY;
-                                    return false;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                //todo: handle this better
-                                MLog.Error($@"Exception deleting game directory: {destinationDirectory}: {ex.Message}");
-                                RestoreErrorCallback?.Invoke(LC.GetString(LC.string_errorDeletingGameDirectory), LC.GetString(LC.string_interp_couldNotFullyDeleteGameDirectoryException, Game.ToGameName(), ex.Message));
-                                //b.Result = RestoreResult.EXCEPTION_DELETING_GAME_DIRECTORY;
-                                return false;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        MLog.Error(@"Game directory not found! Was it removed while the app was running?");
-                    }
-                }
-
                 backupStatus.BackupLocationStatus = LC.GetString(LC.string_preparingGameDirectory);
                 var created = MUtilities.CreateDirectoryWithWritePermission(destinationDirectory);
                 if (!created)
@@ -235,14 +194,9 @@ namespace ME3TweaksCore.Services.Restore
                     return false;
                 }
 
-                if (useFullCopyMethod)
-                {
-                    RestoreUsingFullCopy(backupPath, destinationDirectory);
-                }
-                else
-                {
-                    RestoreUsingRoboCopy(backupPath, restoreTarget, backupStatus, destinationDirectory);
-                }
+
+                RestoreUsingRoboCopy(backupPath, restoreTarget, backupStatus, destinationDirectory);
+
 
                 //Check for cmmvanilla file and remove it present
 
@@ -377,134 +331,6 @@ namespace ME3TweaksCore.Services.Restore
             rc.Start().Wait();
             MLog.Information(@"Robocopy restore has completed");
 
-        }
-
-        private void RestoreUsingFullCopy(string backupPath, string destinationDirectory)
-        {
-            #region callbacks
-
-            void fileCopiedCallback()
-            {
-                ProgressValue++;
-                if (ProgressMax != 0)
-                {
-                    UpdateProgressCallback?.Invoke(ProgressValue, ProgressMax);
-                }
-            }
-
-            string dlcFolderpath = MEDirectories.GetDLCPath(Game, backupPath) + Path.DirectorySeparatorChar; //\ at end makes sure we are restoring a subdir
-            int dlcSubStringLen = dlcFolderpath.Length;
-            //Debug.WriteLine(@"DLC Folder: " + dlcFolderpath);
-            //Debug.Write(@"DLC Folder path len:" + dlcFolderpath);
-
-            // Cached stuff to avoid hitting same codepath thousands of times
-            var officialDLCNames = MEDirectories.OfficialDLCNames(Game);
-
-            bool aboutToCopyCallback(string fileBeingCopied)
-            {
-                if (fileBeingCopied.Contains(@"\cmmbackup\")) return false; //do not copy cmmbackup files
-                Debug.WriteLine(fileBeingCopied);
-                if (fileBeingCopied.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    //It's a DLC!
-                    string dlcname = fileBeingCopied.Substring(dlcSubStringLen);
-                    int index = dlcname.IndexOf(Path.DirectorySeparatorChar);
-                    if (index > 0) //Files directly in the DLC directory won't have path sep
-                    {
-                        try
-                        {
-                            dlcname = dlcname.Substring(0, index);
-                            if (officialDLCNames.TryGetValue(dlcname, out var hrName))
-                            {
-                                UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_restoringX, hrName));
-                            }
-                            else
-                            {
-                                UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_restoringX, dlcname));
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            TelemetryInterposer.TrackError(e, new Dictionary<string, string>()
-                                    {
-                                        {@"Source", @"Restore UI display callback"},
-                                        {@"Value", fileBeingCopied},
-                                        {@"DLC Folder path", dlcFolderpath}
-                                    });
-                        }
-                    }
-                }
-                else
-                {
-                    //It's basegame
-                    if (fileBeingCopied.EndsWith(@".bik"))
-                    {
-                        UpdateStatusCallback?.Invoke(LC.GetString(LC.string_restoringMovies));
-                    }
-                    else if (new FileInfo(fileBeingCopied).Length > 52428800)
-                    {
-                        UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_restoringX, Path.GetFileName(fileBeingCopied)));
-                    }
-                    else
-                    {
-                        UpdateStatusCallback?.Invoke(LC.GetString(LC.string_restoringBasegame));
-                    }
-                }
-
-                return true;
-            }
-
-            void totalFilesToCopyCallback(int total)
-            {
-                ProgressValue = 0;
-                SetProgressIndeterminateCallback?.Invoke(false);
-                ProgressMax = total;
-            }
-
-            void bigFileProgressCallback(string fileBeingCopied, long dataCopied, long totalDataToCopy)
-            {
-                if (fileBeingCopied.StartsWith(dlcFolderpath, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    //It's a DLC!
-                    string dlcname = fileBeingCopied.Substring(dlcSubStringLen);
-                    int index = dlcname.IndexOf(Path.DirectorySeparatorChar);
-                    try
-                    {
-                        string prefix = LC.GetString(LC.string_restoring) + @" ";
-                        dlcname = dlcname.Substring(0, index);
-                        if (officialDLCNames.TryGetValue(dlcname, out var hrName))
-                        {
-                            prefix += hrName;
-                        }
-                        else
-                        {
-                            prefix += dlcname;
-                        }
-
-                        UpdateStatusCallback?.Invoke($@"{prefix} {(int)(dataCopied * 100d / totalDataToCopy)}%");
-                    }
-                    catch
-                    {
-
-                    }
-                }
-                else
-                {
-                    UpdateStatusCallback?.Invoke(LC.GetString(LC.string_interp_restoringX, Path.GetFileName(fileBeingCopied), (int)(dataCopied * 100d / totalDataToCopy)));
-                }
-            }
-
-            #endregion
-
-            UpdateStatusCallback?.Invoke(LC.GetString(LC.string_calculatingHowManyFilesWillBeRestored));
-            MLog.Information($@"Copying backup to game directory: {backupPath} -> {destinationDirectory}");
-            CopyTools.CopyAll_ProgressBar(new DirectoryInfo(backupPath), new DirectoryInfo(destinationDirectory),
-                totalItemsToCopyCallback: totalFilesToCopyCallback,
-                aboutToCopyCallback: aboutToCopyCallback,
-                fileCopiedCallback: fileCopiedCallback,
-                ignoredExtensions: new[] { @"*.pdf", @"*.mp3", @"*.bak" },
-                bigFileProgressCallback: bigFileProgressCallback);
-            MLog.Information(@"Restore of game data has completed");
         }
     }
 
