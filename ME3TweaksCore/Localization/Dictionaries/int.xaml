@@ -39,7 +39,7 @@
     <system:String x:Key="string_interp_cannotBackupGameIsRunning">Cannot backup while {0} is running.</system:String>
     <!-- 0={game name (mass effect, mass effect 2...)} -->
     <system:String x:Key="string_ensureCorrectGameChosen">Ensure correct game chosen</system:String>
-    <system:String x:Key="string_warningLinkedTargetWillNotLoad">The path you specify will be checked if it is a vanilla backup. Once this check is complete it will be marked as a backup and modding tools will refuse to modify it. Ensure this is not your active game path or you will be unable to mod the game.</system:String>
+    <system:String x:Key="string_warningLinkedTargetWillNotLoad">The path you specify will be checked if it is a vanilla backup. Once this check is complete it will be marked as a backup and modding tools will refuse to modify it. Ensure this is not your active game path, or you will be unable to mod the game.</system:String>
     <system:String x:Key="string_iUnderstand">I understand</system:String>
     <system:String x:Key="string_abortLinking">Abort linking</system:String>
     <system:String x:Key="string_cannotLinkTargetWrongGenerationLEneedOT">Cannot use this target as backup: This is the Legendary Edition version of the game, the target you are trying to link is the Original Trilogy version.</system:String>
@@ -278,7 +278,7 @@
     <system:String x:Key="string_calculatingHowManyFilesWillBeRestored">Calculating how many files will be restored</system:String>
 
     <!-- DLC Requirement -->
-    <system:String x:Key="string_dlcRequirementInvalidParenthesis">DLCRequirement input is invalid: Version must be enclosed in parenthesis</system:String>
+    <system:String x:Key="string_dlcRequirementInvalidParenthesis">DLCRequirement input is invalid: Version must be enclosed in parentheses</system:String>
     <system:String x:Key="string_interp_dlcRequirementInvalidBadVersion">DLCRequirement input is invalid: Invalid version string '{0}'</system:String>
     <system:String x:Key="string_interp_minVersionAppend">(minimum version: {0})</system:String>
     <!-- 0={invalid string value} -->
@@ -357,7 +357,7 @@
     <!-- 0={filename} -->
 
     <!-- Squadmate Merge -->
-    <system:String x:Key="string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive">Invalid hench name: {0}. Value is case sensitive.</system:String>
+    <system:String x:Key="string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive">Invalid hench name: {0}. Value is case-sensitive.</system:String>
     <!-- 0={Squadmate hench name (Marine, Tali, etc)} -->
     <system:String x:Key="string_errorReadingSquadmateOutfitManifestFileSeeLogs">Error reading squadmate outfit manifest file for mod(s), see logs</system:String>
     <system:String x:Key="string_someSquadmateOutfitsWereNotMergedSeeLogs">Some squadmate outfits were not merged, see logs</system:String>
