@@ -20,6 +20,7 @@ using LegendaryExplorerCore.UnrealScript.Compiling.Errors;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
+using ME3TweaksCore.ME3Tweaks.M3Merge;
 using ME3TweaksCore.ME3Tweaks.ModManager.Interfaces;
 using ME3TweaksCore.Objects;
 using ME3TweaksCore.Services.Backup;
@@ -150,20 +151,6 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         #region Squadmate Merge
 
         /// <summary>
-        /// Generates the SquadmateOutfitMerge.sqm file from the listed dictionary of outfits.
-        /// </summary>
-        /// <param name="game">The game the merge is for</param>
-        /// <param name="outfits">The outfits</param>
-        /// <returns>Text ready to write to the .sqm file</returns>
-        public static string GenerateOutfitMergeText(MEGame game, List<Dictionary<string, object>> outfits)
-        {
-            var outfitMerge = new Dictionary<string, object>();
-            outfitMerge[@"game"] = game.ToString();
-            outfitMerge[@"outfits"] = outfits;
-            return JsonConvert.SerializeObject(outfitMerge, Formatting.Indented);
-        }
-
-        /// <summary>
         /// Generates squadmate outfit merge files for the specified henchmen
         /// </summary>
         /// <param name="game">The game to generate for</param>
@@ -172,7 +159,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         /// <param name="outfits">The list of outfits to append to</param>
         /// <param name="getGamePatchModFolder">Delegate that is invoked when trying to layer the main patch mod for the game's files over the top of BioWares, as that is preferable</param>
         /// <returns>Error if failed, null if OK</returns>
-        public static string GenerateSquadmateMergeFiles(MEGame game, string henchName, string dlcFolderPath, List<Dictionary<string, object>> outfits, Func<MEGame, string> getGamePatchModFolder)
+        public static string GenerateSquadmateMergeFiles(MEGame game, string henchName, string dlcFolderPath, SQMOutfitMerge.SquadmateMergeInfo outfits, Func<MEGame, string> getGamePatchModFolder)
         {
             // Setup
             var dlcName = Path.GetFileName(dlcFolderPath);
@@ -248,6 +235,8 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
 
             MLog.Information(@"Squadmate merge generator: all required source files found in backup");
 
+            var newHenchIndex = StarterKitAddins.GetNumOutfitsForHenchInDLC(henchName, dlcName, cookedPath);
+            var dlcNameHenchIndex = GetIndexedHenchString(dlcName, newHenchIndex); ;
             // Step 2: Copy files
             foreach (var f in sourcefiles)
             {
@@ -255,7 +244,16 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 var destFName = Path.GetFileName(f);
                 if (game == MEGame.LE2)
                 {
-                    destFName = destFName.Replace(@"_01", @"");
+                    if (newHenchIndex > 0)
+                    {
+                        // we use 1 based indexing. We are based on the _01 files - strip that off for our naming.
+                        destFName = destFName.Replace(@"_01", $"_{newHenchIndex.ToString().PadLeft(2, '0')}");
+                    }
+                    else
+                    {
+                        // First instance of this hench is not indexed
+                        destFName = destFName.Replace(@"_01", @"");
+                    }
                 }
                 destFName = destFName.Replace(henchName, $@"{henchName}_{dlcName}");
 
@@ -267,6 +265,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 {
                     if (game.IsGame3())
                     {
+                        // Todo: Update indexing for multi-outfit
                         ReplaceNameIfExists(package, $@"BioH_{henchName}_00", $@"BioH_{henchName}_{dlcName}_00");
                         ReplaceNameIfExists(package, $@"BioH_{henchName}_00_Explore", $@"BioH_{henchName}_{dlcName}_00_Explore");
                         ReplaceNameIfExists(package, @"VariantA", $@"Variant{dlcName}");
@@ -284,12 +283,12 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                         var actorType = pawnClassDefaults.GetProperty<ObjectProperty>("ActorType").ResolveToEntry(package) as ExportEntry;
 
                         // Replace class and default names
-                        ReplaceNameIfExists(package, pawnClass.ObjectName, $@"{pawnClass.ObjectName.Name.Replace("_01", "")}_{dlcName}");
-                        ReplaceNameIfExists(package, pawnClassDefaults.ObjectName, $@"{pawnClass.ObjectName.Name.Replace("_01", "")}_{dlcName}");
-                        actorType.ObjectName = $@"{actorType.ObjectName.Name.Replace("_01", "")}_{dlcName.ToLower()}";
+                        ReplaceNameIfExists(package, pawnClass.ObjectName, $@"{pawnClass.ObjectName.Name.Replace("_01", "")}_{dlcNameHenchIndex}");
+                        ReplaceNameIfExists(package, pawnClassDefaults.ObjectName, $@"{pawnClassDefaults.ObjectName.Name.Replace("_01", "")}_{dlcNameHenchIndex}");
+                        actorType.ObjectName = $@"{actorType.ObjectName.Name.Replace("_01", "")}_{dlcNameHenchIndex.ToLower()}";
 
                         // Replace package export name.
-                        ReplaceNameIfExists(package, package.FileNameNoExtension, $@"{package.FileNameNoExtension[..^3]}_{dlcName}");
+                        ReplaceNameIfExists(package, package.FileNameNoExtension, $@"{package.FileNameNoExtension[..^3]}_{dlcNameHenchIndex}");
                         ReplaceNameIfExists(package, @"SFXGamePawns", $@"SFXGamePawns_{dlcName}");
                     }
                 }
@@ -301,39 +300,89 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
 
             if (game.IsGame3())
             {
-                InstallGame3Images(game, cookedPath, henchHumanName, dlcName, sourceBaseFiles, isourcefname);
+                InstallGame3Images(game, cookedPath, henchHumanName, dlcName, sourceBaseFiles, isourcefname, newHenchIndex);
             }
             else if (game == MEGame.LE2)
             {
-                InstallLE2Images(game, cookedPath, henchHumanName, dlcName, sourceBaseFiles, isourcefname);
+                InstallLE2Images(game, cookedPath, henchHumanName, dlcName, sourceBaseFiles, isourcefname, newHenchIndex);
             }
 
             // Step 4: Add squadmate outfit merge to the list
-            var outfit = new Dictionary<string, object>();
-            outfit[@"henchname"] = henchName;
-            outfit[@"henchpackage"] = $@"BioH_{henchName}_{dlcName}_00";
+            var outfit = new SquadmateInfoSingle();
+            outfit.HenchName = henchName;
+            outfit.HenchPackage = $@"BioH_{henchName}_{dlcNameHenchIndex}";
 
             if (game.IsGame3())
             {
-                outfit[@"highlightimage"] = $@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}0Glow";
-                outfit[@"availableimage"] = $@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}0";
-                outfit[@"silhouetteimage"] = $@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}0_locked";
-                outfit[@"deadimage"] = @"GUI_Henchmen_Images.PlaceHolder";
-                outfit[@"descriptiontext0"] = 0;
-                outfit[@"customtoken0"] = 0;
+                outfit.HighlightImage = $@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}0Glow";
+                outfit.AvailableImage = $@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}0";
+                outfit.SilhouetteImage = $@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}0_locked";
+                outfit.DescriptionText0 = 0;
+                outfit.CustomToken0 = 0;
             }
             else if (game == MEGame.LE2)
             {
-                outfit[@"highlightimage"] = $@"{henchHumanName}Glow";
-                outfit[@"availableimage"] = henchHumanName;
+                outfit.HighlightImage = GetIndexedHenchString($@"{henchHumanName}Glow", newHenchIndex);
+                outfit.AvailableImage = GetIndexedHenchString(henchHumanName, newHenchIndex);
             }
 
-            outfits.Add(outfit);
+            outfits.Outfits.Add(outfit);
+
+            if (outfits.Outfits.Any())
+            {
+                // Write the .sqm file
+                var sqmPath = Path.Combine(dlcFolderPath, game.CookedDirName(), SQMOutfitMerge.SQUADMATE_MERGE_MANIFEST_FILE);
+                var sqmText = JsonConvert.SerializeObject(outfits, Formatting.Indented, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore});
+                File.WriteAllText(sqmPath, sqmText);
+            }
 
             return null;
         }
 
-        private static void InstallLE2Images(MEGame game, string cookedPath, string henchHumanName, string dlcName, CaseInsensitiveDictionary<string> sourceBaseFiles, string isourcefname)
+        /// <summary>
+        /// Gets number of henchmen outfits, assuming they follow standard rule: BioH_Hench_DLCName.pcc, then following BioH_Hench_DLCName_01, 02... 
+        /// </summary>
+        /// <param name="henchName"></param>
+        /// <param name="dlcName"></param>
+        /// <param name="cookedPath"></param>
+        /// <returns></returns>
+        public static int GetNumOutfitsForHenchInDLC(string henchName, string dlcName, string cookedPath)
+        {
+            var baseFile = $@"BioH_{henchName}_{dlcName}";
+            var testPath = Path.Combine(cookedPath, baseFile + @".pcc");
+            int henchCount = 0;
+            if (File.Exists(testPath))
+            {
+                // Find next available index.
+                henchCount = 1;
+                while (henchCount < 32)
+                {
+                    // We cap at 32 even in Game3
+                    testPath = Path.Combine(cookedPath, baseFile + @"_" + henchCount.ToString(@"00") + @".pcc");
+                    if (!File.Exists(testPath))
+                        break;
+                    henchCount++;
+                }
+            }
+
+            return henchCount;
+        }
+
+        /// <summary>
+        /// Adds _XX on the end of names if index is above 0.
+        /// </summary>
+        /// <param name="inStr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        private static string GetIndexedHenchString(string inStr, int index)
+        {
+            if (index == 0)
+                return inStr;
+
+            return $"{inStr}_{index:00}";
+        }
+
+        private static void InstallLE2Images(MEGame game, string cookedPath, string henchHumanName, string dlcName, CaseInsensitiveDictionary<string> sourceBaseFiles, string isourcefname, int newHenchIndex)
         {
             var idestpath = Path.Combine(cookedPath, $@"SFXHenchImages_{dlcName}.pcc");
             if (File.Exists(idestpath))
@@ -344,15 +393,14 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
 
                 // Available
                 var exp = EntryCloner.CloneEntry(texToClone);
-                AddToObjectReferencer(exp);
-                exp.ObjectName = new NameReference(henchHumanName, 0);
+                exp.ObjectName = new NameReference(GetIndexedHenchString(henchHumanName, newHenchIndex), 0);
                 var t2d = new Texture2D(exp);
                 var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE2.HenchImages.placeholder_unselected.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.DXT5), exp.GetProperties(), isPackageStored: true);
 
                 // Chosen
                 exp = EntryCloner.CloneEntry(texToClone);
-                exp.ObjectName = new NameReference($@"{henchHumanName}Glow", 0);
+                exp.ObjectName = new NameReference(GetIndexedHenchString($@"{henchHumanName}Glow", newHenchIndex), 0);
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE2.HenchImages.placeholder_selected.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.DXT5), exp.GetProperties(), isPackageStored: true);
@@ -364,7 +412,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 using var ipackage = MEPackageHandler.CreateAndOpenPackage(idestpath, MEGame.LE2);
 
                 // Setup the first texture from nothing.
-                ExportEntry exp = Texture2D.CreateTexture(ipackage, henchHumanName, 8, 16, PixelFormat.DXT5, false); // We just specify correct aspect ratio as the replacement code will properly do it for us.
+                ExportEntry exp = Texture2D.CreateTexture(ipackage, GetIndexedHenchString(henchHumanName, newHenchIndex), 8, 16, PixelFormat.DXT5, false); // We just specify correct aspect ratio as the replacement code will properly do it for us.
 
                 // Available
                 var t2d = new Texture2D(exp);
@@ -373,7 +421,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 exp.WriteProperty(new BoolProperty(false, "sRGB"));
 
                 // Chosen
-                exp = Texture2D.CreateTexture(ipackage, $"{henchHumanName}Glow", 8, 16, PixelFormat.DXT5, false); // We just specify correct aspect ratio as the replacement code will properly do it for us.
+                exp = Texture2D.CreateTexture(ipackage, GetIndexedHenchString($"{henchHumanName}Glow", newHenchIndex), 8, 16, PixelFormat.DXT5, false); // We just specify correct aspect ratio as the replacement code will properly do it for us.
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE2.HenchImages.placeholder_selected.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.DXT5), exp.GetProperties(), isPackageStored: true);
@@ -384,9 +432,13 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         }
 
         private static void InstallGame3Images(MEGame game, string cookedPath, string henchHumanName, string dlcName,
-            CaseInsensitiveDictionary<string> sourceBaseFiles, string isourcefname)
+            CaseInsensitiveDictionary<string> sourceBaseFiles, string isourcefname, int newHenchIndex)
         {
             var idestpath = Path.Combine(cookedPath, $@"SFXHenchImages_{dlcName}.pcc");
+            if (newHenchIndex > 0)
+            {
+                henchHumanName += $"_{newHenchIndex:00}";
+            }
             if (File.Exists(idestpath))
             {
                 // Edit existing package

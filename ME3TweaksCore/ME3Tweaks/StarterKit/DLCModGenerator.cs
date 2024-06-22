@@ -16,6 +16,7 @@ using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.ME3Tweaks.M3Merge;
 using ME3TweaksCore.Objects;
+using Newtonsoft.Json;
 
 namespace ME3TweaksCore.ME3Tweaks.StarterKit
 {
@@ -201,7 +202,8 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             }
 
             // Generator needs to accept multiple outfit dictionaries
-            var outfits = new List<Dictionary<string, object>>();
+            var outfits = SQMOutfitMerge.LoadSquadmateMergeInfo(skOption.ModGame, contentDirectory);
+            
             string errorMessage = null;
             if (skOption.ModGame.IsGame3())
             {
@@ -346,14 +348,6 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             if (errorMessage != null)
             {
                 throw new Exception(errorMessage);
-            }
-
-            if (outfits.Any())
-            {
-                // Write the .sqm file
-                var sqmText = StarterKitAddins.GenerateOutfitMergeText(skOption.ModGame, outfits);
-                var sqmPath = Path.Combine(contentDirectory, skOption.ModGame.CookedDirName(), SQMOutfitMerge.SQUADMATE_MERGE_MANIFEST_FILE);
-                File.WriteAllText(sqmPath, sqmText);
             }
 
             return modPath;

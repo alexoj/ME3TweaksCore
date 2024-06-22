@@ -24,15 +24,19 @@ using ME3TweaksCore.ME3Tweaks.StarterKit.LE2;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.Targets;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace ME3TweaksCore.ME3Tweaks.M3Merge
 {
     public class SQMOutfitMerge
     {
+        public const string SQUADMATE_MERGE_MANIFEST_V2_EXTENSION = @".sqm2";
+        
         public const string SQUADMATE_MERGE_MANIFEST_FILE = @"SquadmateMergeInfo.sqm";
         private const string SUICIDE_MISSION_STREAMING_PACKAGE_NAME = @"BioP_EndGm_StuntHench.pcc";
         public class SquadmateMergeInfo
         {
+            [JsonConverter(typeof(StringEnumConverter))]
             [JsonProperty(@"game")]
             public MEGame Game { get; set; }
 
@@ -67,6 +71,28 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                 }
 
                 return true;
+            }
+        }
+
+
+        /// <summary>
+        /// Loads the sqm file from the given DLC directory. Loads a blank if none.
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="contentDirectory"></param>
+        /// <returns></returns>
+        public static SquadmateMergeInfo LoadSquadmateMergeInfo(MEGame game, string contentDirectory)
+        {
+            var sqmPath = Path.Combine(contentDirectory, game.CookedDirName(), SQMOutfitMerge.SQUADMATE_MERGE_MANIFEST_FILE);
+            if (File.Exists(sqmPath))
+            {
+                // Load existing
+                return JsonConvert.DeserializeObject<SQMOutfitMerge.SquadmateMergeInfo>(File.ReadAllText(sqmPath));
+            }
+            else
+            {
+                // Create new.
+                return new SquadmateMergeInfo() { Game = game, Outfits = [] };
             }
         }
 

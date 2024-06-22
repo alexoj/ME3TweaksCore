@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using Newtonsoft.Json;
 
 namespace ME3TweaksCore.ME3Tweaks.M3Merge
@@ -15,15 +16,15 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
         public string HenchPackage { get; set; }
 
         [JsonProperty(@"highlightimage")]
+        [DefaultValue("")]
         public string HighlightImage { get; set; }
 
         [JsonProperty(@"availableimage")]
         public string AvailableImage { get; set; }
         
-        //[JsonProperty(@"deadimage")]
-        //public string DeadImage { get; set; }
 
         [JsonProperty(@"silhouetteimage")]
+        [DefaultValue(null)]
         public string SilhouetteImage { get; set; }
 
         [JsonProperty(@"descriptiontext0")]
@@ -36,6 +37,8 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
         /// The availability integer - defaults to -1 for always available
         /// </summary>
         [JsonProperty(@"plotflag")]
+        [DefaultValue(-1)]
+
         public int PlotFlag { get; set; } = -1;
 
         /// <summary>
