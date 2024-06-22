@@ -36,7 +36,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
         /// </summary>
         /// <param name="game"></param>
         /// <returns></returns>
-        public static bool SupportsSquadmateMerge(this MEGame game) => game.IsGame1() || game.IsGame2();
+        public static bool SupportsSquadmateMerge(this MEGame game) => game == MEGame.LE2 || game.IsGame3();
 
         /// <summary>
         /// If this game supports email merge (merge DLC emm files)
