@@ -233,7 +233,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 }
             }
 
-            MLog.Information(@"Squadmate merge generator: all required source files found in backup");
+            MLog.Information(@"Squadmate merge generator: all required source files found in backup or patch");
 
             var newHenchIndex = StarterKitAddins.GetNumOutfitsForHenchInDLC(henchName, dlcName, cookedPath);
             var dlcNameHenchIndex = GetIndexedHenchString(dlcName, newHenchIndex); ;
@@ -242,7 +242,20 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             {
                 var path = sourceBaseFiles[f];
                 var destFName = Path.GetFileName(f);
-                if (game == MEGame.LE2)
+                if (game.IsGame3())
+                {
+                    if (newHenchIndex > 0)
+                    {
+                        // we use 1 based indexing. We are based on the _01 files - strip that off for our naming.
+                        destFName = destFName.Replace(@"_00", $"_{newHenchIndex.ToString().PadLeft(2, '0')}");
+                    }
+                    else
+                    {
+                        // First instance of this hench is not indexed
+                        destFName = destFName.Replace(@"_00", @"");
+                    }
+                }
+                else if (game == MEGame.LE2)
                 {
                     if (newHenchIndex > 0)
                     {
@@ -266,12 +279,12 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     if (game.IsGame3())
                     {
                         // Todo: Update indexing for multi-outfit
-                        ReplaceNameIfExists(package, $@"BioH_{henchName}_00", $@"BioH_{henchName}_{dlcName}_00");
-                        ReplaceNameIfExists(package, $@"BioH_{henchName}_00_Explore", $@"BioH_{henchName}_{dlcName}_00_Explore");
+                        ReplaceNameIfExists(package, $@"BioH_{henchName}_00", $@"BioH_{henchName}_{dlcNameHenchIndex}");
+                        ReplaceNameIfExists(package, $@"BioH_{henchName}_00_Explore", $@"BioH_{henchName}_{dlcNameHenchIndex}_Explore");
                         ReplaceNameIfExists(package, @"VariantA", $@"Variant{dlcName}");
-                        ReplaceNameIfExists(package, $@"{henchHumanName}A_Combat", $@"{henchHumanName}{dlcName}_Combat");
-                        ReplaceNameIfExists(package, $@"{henchHumanName}A_EX_Combat", $@"{henchHumanName}{dlcName}_EX_Combat");
-                        ReplaceNameIfExists(package, $@"{henchHumanName}A_Conversation", $@"{henchHumanName}{dlcName}_Conversation");
+                        ReplaceNameIfExists(package, $@"{henchHumanName}A_Combat", $@"{henchHumanName}{dlcNameHenchIndex}_Combat");
+                        ReplaceNameIfExists(package, $@"{henchHumanName}A_EX_Combat", $@"{henchHumanName}{dlcNameHenchIndex}_EX_Combat");
+                        ReplaceNameIfExists(package, $@"{henchHumanName}A_Conversation", $@"{henchHumanName}{dlcNameHenchIndex}_Conversation");
                     }
                     else if (game == MEGame.LE2)
                     {
@@ -314,9 +327,9 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
 
             if (game.IsGame3())
             {
-                outfit.HighlightImage = $@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}0Glow";
-                outfit.AvailableImage = $@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}0";
-                outfit.SilhouetteImage = $@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}0_locked";
+                outfit.HighlightImage = GetIndexedHenchString($@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}Glow", newHenchIndex);
+                outfit.AvailableImage = GetIndexedHenchString($@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}", newHenchIndex);
+                outfit.SilhouetteImage = GetIndexedHenchString($@"GUI_Henchmen_Images_{dlcName}.{henchHumanName}_locked", newHenchIndex);
                 outfit.DescriptionText0 = 0;
                 outfit.CustomToken0 = 0;
             }
@@ -332,7 +345,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             {
                 // Write the .sqm file
                 var sqmPath = Path.Combine(dlcFolderPath, game.CookedDirName(), SQMOutfitMerge.SQUADMATE_MERGE_MANIFEST_FILE);
-                var sqmText = JsonConvert.SerializeObject(outfits, Formatting.Indented, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore});
+                var sqmText = JsonConvert.SerializeObject(outfits, Formatting.Indented, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore });
                 File.WriteAllText(sqmPath, sqmText);
             }
 
@@ -435,10 +448,6 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             CaseInsensitiveDictionary<string> sourceBaseFiles, string isourcefname, int newHenchIndex)
         {
             var idestpath = Path.Combine(cookedPath, $@"SFXHenchImages_{dlcName}.pcc");
-            if (newHenchIndex > 0)
-            {
-                henchHumanName += $"_{newHenchIndex:00}";
-            }
             if (File.Exists(idestpath))
             {
                 // Edit existing package
@@ -448,7 +457,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 // Available
                 var exp = EntryCloner.CloneEntry(texToClone);
                 AddToObjectReferencer(exp);
-                exp.ObjectName = new NameReference($@"{henchHumanName}0", 0);
+                exp.ObjectName = new NameReference(GetIndexedHenchString($@"{henchHumanName}", newHenchIndex), 0);
                 var t2d = new Texture2D(exp);
                 var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE3.HenchImages.placeholder_available.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
@@ -456,7 +465,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 // Silouette
                 exp = EntryCloner.CloneEntry(texToClone);
                 AddToObjectReferencer(exp);
-                exp.ObjectName = new NameReference($@"{henchHumanName}0_locked", 0);
+                exp.ObjectName = new NameReference(GetIndexedHenchString($@"{henchHumanName}_locked", newHenchIndex), 0);
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE3.HenchImages.placeholder_silo.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
@@ -464,7 +473,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 // Chosen
                 exp = EntryCloner.CloneEntry(texToClone);
                 AddToObjectReferencer(exp);
-                exp.ObjectName = new NameReference($@"{henchHumanName}0Glow", 0);
+                exp.ObjectName = new NameReference(GetIndexedHenchString($@"{henchHumanName}Glow", newHenchIndex), 0);
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE3.HenchImages.placeholder_chosen.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
@@ -473,6 +482,8 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             }
             else
             {
+                // If new package we don't need to use our indexing code for hench names.
+
                 // Generate new package
                 using var ipackage = MEPackageHandler.OpenMEPackage(sourceBaseFiles[isourcefname]);
 
@@ -481,18 +492,21 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 var t2d = new Texture2D(exp);
                 var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE3.HenchImages.placeholder_available.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
+                exp.ObjectName = $@"{henchHumanName}";
 
                 // Silouette
                 exp = ipackage.FindExport($@"GUI_Henchmen_Images.{henchHumanName}0_locked");
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE3.HenchImages.placeholder_silo.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
+                exp.ObjectName = $@"{henchHumanName}_locked";
 
                 // Chosen
                 exp = ipackage.FindExport($@"GUI_Henchmen_Images.{henchHumanName}0Glow");
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE3.HenchImages.placeholder_chosen.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
+                exp.ObjectName = $"{henchHumanName}Glow";
 
                 ReplaceNameIfExists(ipackage, $@"GUI_Henchmen_Images", $@"GUI_Henchmen_Images_{dlcName}");
                 ReplaceNameIfExists(ipackage, $@"SFXHenchImages{henchHumanName}0", $@"SFXHenchImages_{dlcName}");
