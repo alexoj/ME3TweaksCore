@@ -101,6 +101,7 @@
     <!-- 0={File} -->
     <system:String x:Key="string_interp_directoryNotEmptyWillDeleteEverything">The selected directory is not empty: {0}. ALL NON-GAME FILES AND FOLDERS IN THIS DIRECTORY WILL BE DELETED. Are you sure you want to continue?</system:String>
     <!-- 0={Directory user chose} -->
+    <system:String x:Key="string_cannotRestore">Cannot restore</system:String>
 
     <!-- Messageboxes -->
     <system:String x:Key="string_no">No</system:String>

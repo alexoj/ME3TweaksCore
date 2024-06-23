@@ -1,19 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using LegendaryExplorerCore.Helpers;
 using ME3TweaksCore.Diagnostics;
-using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.Services.Backup;
 using ME3TweaksCore.Services.Shared.BasegameFileIdentification;
 using PropertyChanged;
-using Serilog;
 
 namespace ME3TweaksCore.Targets
 {
@@ -116,10 +108,10 @@ namespace ME3TweaksCore.Targets
                     return LC.GetString(LC.string_restore);
 
                 // Can't restore. Determine reason
-             
+
                 // Unsure how to get a check on this type of modification.
                 if (target.TextureModded)
-                    return "Cannot restore";
+                    return LC.GetString(LC.string_cannotRestore);
 
                 return LC.GetString(LC.string_noBackup);
             }
