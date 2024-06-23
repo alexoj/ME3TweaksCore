@@ -175,7 +175,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                 // Todo: Record merges for BGFIS
                 if (file.IsModified)
                 {
-                    MLog.Information($"Saving 2DA merged package {file.FilePath}");
+                    MLog.Information($@"Saving 2DA merged package {file.FilePath}");
                     var outStream = file.SaveToStream(true); // We only support LE1 so its always true
 
                     recordedApplications.TryGetValue(file.FilePath, out var recordedMergesForFile);
@@ -275,21 +275,21 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                 var destPackage = packageContainer.GetTargetPackage(Path.Combine(target.GetCookedPath(), obj.GamePackageFile));
                 if (destPackage == null)
                 {
-                    MLog.Error($"Bio2DA merge 'packagefile' is invalid: {obj.GamePackageFile} - cannot merge into non-basegame/Bring Down The Sky 2DA files");
+                    MLog.Error($@"Bio2DA merge 'packagefile' is invalid: {obj.GamePackageFile} - cannot merge into non-basegame/Bring Down The Sky 2DA files");
                     return false;
                 }
 
                 var basePackagePath = Path.Combine(target.GetCookedPath(), obj.GamePackageFile);
                 if (!File.Exists(basePackagePath))
                 {
-                    MLog.Error($"Bio2DA merge 'packagefile' is invalid: {obj.GamePackageFile} - could not find in basegame CookedPCConsole folder of target");
+                    MLog.Error($@"Bio2DA merge 'packagefile' is invalid: {obj.GamePackageFile} - could not find in basegame CookedPCConsole folder of target");
                     return false;
                 }
 
                 var modPackagePath = Directory.GetFileSystemEntries(dlcCookedPath, obj.ModPackageFile, SearchOption.AllDirectories).FirstOrDefault();
                 if (modPackagePath == null)
                 {
-                    MLog.Error($"Bio2DA merge 'mergepackagefile' is invalid: {obj.GamePackageFile} - could not find in CookedPCConsole folder of mod");
+                    MLog.Error($@"Bio2DA merge 'mergepackagefile' is invalid: {obj.GamePackageFile} - could not find in CookedPCConsole folder of mod");
                     return false;
                 }
 
@@ -313,7 +313,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     var objName = NameReference.FromInstancedString(objNameStr);
                     if (!objName.Name.EndsWith(@"_part"))
                     {
-                        MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - base name of object does not end with _part");
+                        MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - base name of object does not end with _part");
                         return false;
                     }
 
@@ -322,20 +322,20 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     var modTable = modFile.FindExport(table); // Find by IFP.
                     if (modTable == null)
                     {
-                        MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - could not find table with that instanced full path in package '{modPackagePath}'");
+                        MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - could not find table with that instanced full path in package '{modPackagePath}'");
                         return false;
                     }
 
                     if (!modTable.IsA(@"Bio2DA"))
                     {
-                        MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - export is not a Bio2DA or subclass. It was: {modTable.ClassName}");
+                        MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - export is not a Bio2DA or subclass. It was: {modTable.ClassName}");
                         return false;
                     }
 
                     var baseTable = baseFile.Exports.FirstOrDefault(x => !x.IsDefaultObject && x.IsA(@"Bio2DA") && x.ObjectName.Instanced.CaseInsensitiveEquals(tableName));
                     if (baseTable == null)
                     {
-                        MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - could not find basegame table with base name '{tableName}' name in package '{basePackagePath}'");
+                        MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - could not find basegame table with base name '{tableName}' name in package '{basePackagePath}'");
                         return false;
                     }
 

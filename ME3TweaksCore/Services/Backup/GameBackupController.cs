@@ -116,14 +116,14 @@ namespace ME3TweaksCore.Services.Backup
                 // Backup target
                 if (MUtilities.IsGameRunning(targetToBackup.Game))
                 {
-                    MLog.Error("PerformBackup: Cannot backup game while game is running");
+                    MLog.Error(@"PerformBackup: Cannot backup game while game is running");
                     EndBackup();
                     BlockingActionCallback?.Invoke(LC.GetString(LC.string_cannotBackupGame), LC.GetString(LC.string_interp_cannotBackupGameIsRunning, targetToBackup.Game.ToGameName()));
                     return false;
                 }
                 else
                 {
-                    MLog.Information("PerformBackup: Game is not running");
+                    MLog.Information(@"PerformBackup: Game is not running");
                 }
 
                 // Language selection

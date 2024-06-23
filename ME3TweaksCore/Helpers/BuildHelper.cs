@@ -67,7 +67,7 @@ namespace ME3TweaksCore.Helpers
                 }
                 else
                 {
-                    MLog.Warning($"This build is signed by {signer} - however, no signing names were provided for validation");
+                    MLog.Warning($@"This build is signed by {signer} - however, no signing names were provided for validation");
                 }
             }
             else

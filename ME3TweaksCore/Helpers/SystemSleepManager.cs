@@ -82,7 +82,7 @@ namespace ME3TweaksCore.Helpers
                 if (_wakeTimer == null)
                     return; // The system was already allowed to go to sleep.
 
-                MLog.Information("The system is being allowed to go to sleep again");
+                MLog.Information(@"The system is being allowed to go to sleep again");
                 // Not sure if we should cache this somewhere for use as this probably won't work on SteamDeck
                 // if (OperatingSystemSupported) {
                 SetThreadExecutionState(ExecutionState.EsContinuous);
