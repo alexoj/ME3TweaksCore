@@ -248,7 +248,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     {
                         // we use 1 based indexing. We are based on the _01 files - strip that off for our naming.
                         destFName = destFName.Replace(@"_00", $@"_{newHenchIndex.ToString().PadLeft(2, '0')}");
-                    },
+                    }
                     else
                     {
                         // First instance of this hench is not indexed

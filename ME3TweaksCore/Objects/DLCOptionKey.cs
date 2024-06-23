@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 
@@ -26,7 +23,7 @@ namespace ME3TweaksCore.Objects
             }
             else
             {
-                throw new Exception(LC.GetString(LC.string_interp_dLCOptionKeyStructsMustContainADescriptorNamedKEY_OPTIONKEY, KEY_OPTIONKEY));
+                throw new Exception(LC.GetString(LC.string_interp_dok_mustContainDescriptorX, KEY_OPTIONKEY));
             }
 
             if (map.TryGetValue(KEY_UISTRING, out var uiStr))
