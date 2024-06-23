@@ -199,6 +199,12 @@ namespace ME3TweaksCore.Localization
 		public const string string_interp_dlcRequirementInvalidBadVersion = "string_interp_dlcRequirementInvalidBadVersion";
 		public const string string_interp_minVersionAppend = "string_interp_minVersionAppend";
 		public const string string_interp_maxVersionAppend = "string_interp_maxVersionAppend";
+		public const string string_interp_drb_malformedDR = "string_interp_drb_malformedDR";
+		public const string string_interp_drb_unknownDescriptor = "string_interp_drb_unknownDescriptor";
+		public const string string_interp_drb_notInstalledWithOptionX = "string_interp_drb_notInstalledWithOptionX";
+		public const string string_interp_drb_installedWithIncompatibleOptionX = "string_interp_drb_installedWithIncompatibleOptionX";
+		public const string string_interp_drb_notInstalledWithAtLeastX = "string_interp_drb_notInstalledWithAtLeastX";
+		public const string string_interp_drb_withAtLeastOneOfTheFollowingX = "string_interp_drb_withAtLeastOneOfTheFollowingX";
 		public const string string_unpackingDLC = "string_unpackingDLC";
 		public const string string_checkingGameData = "string_checkingGameData";
 		public const string string_scanningGameTextures = "string_scanningGameTextures";

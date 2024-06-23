@@ -284,6 +284,18 @@
     <!-- 0={invalid string value} -->
     <system:String x:Key="string_interp_maxVersionAppend">(maximum version: {0})</system:String>
     <!-- 0={invalid string value} -->
+    <system:String x:Key="string_interp_drb_malformedDR">Conditions in DLCRequirementBase must be in {0}{1}, comma separated, and use key=value format. Bad value: {2}</system:String>
+    <!-- 0={openingChar} 1={closingChar} 2={inputString} -->
+    <system:String x:Key="string_interp_drb_unknownDescriptor">Unknown descriptor in DLCRequirementBase: {0}</system:String>
+    <!-- 0={string} -->
+    <system:String x:Key="string_interp_drb_notInstalledWithOptionX">Not installed with option {0}</system:String>
+    <!-- 0={option name} -->
+    <system:String x:Key="string_interp_drb_installedWithIncompatibleOptionX">Installed with incompatible option {0}</system:String>
+    <!-- 0={option name} -->
+    <system:String x:Key="string_interp_drb_notInstalledWithAtLeastX">Not installed with at least one of the following required options: {0}</system:String>
+    <!-- 0={comma separated list of option names} -->
+    <system:String x:Key="string_interp_drb_withAtLeastOneOfTheFollowingX">(with at least one of the following options installed: {0})</system:String>
+    <!-- 0={comma separated list of option names} -->
 
     <!-- MEM IPC Handler -->
     <system:String x:Key="string_unpackingDLC">Unpacking DLC</system:String>

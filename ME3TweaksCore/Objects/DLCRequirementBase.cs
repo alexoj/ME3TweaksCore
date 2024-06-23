@@ -8,8 +8,6 @@ using ME3TweaksCore.Targets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LegendaryExplorerCore.Helpers;
 using ME3TweaksCore.Services.ThirdPartyModIdentification;
 
@@ -79,7 +77,7 @@ namespace ME3TweaksCore.Objects
             string attributeStruct = inputString.Substring(structStart + 1, structEnd - (structStart + 1));
             var keyMap = StringStructParser.GetSplitMultiMapValues(attributeStruct, canBeCaseInsensitive: true, openChar: openingChar, closeChar: closingChar);
             if (keyMap.Count == 0)
-                throw new Exception($"Conditions in DLCRequirementBase must be in {openingChar}{closingChar}, comma separated, and use key=value format. Bad value: {inputString}");
+                throw new Exception(LC.GetString(LC.string_interp_drb_malformedDR, openingChar, closingChar, inputString));
 
             // Defaults
             List<PlusMinusKey> dlcOptionKeys = null;
@@ -119,7 +117,7 @@ namespace ME3TweaksCore.Objects
 
                         break;
                     default:
-                        throw new Exception($"Unknown descriptor in DLCRequirementBase: {key.Key}");
+                        throw new Exception(LC.GetString(LC.string_interp_drb_unknownDescriptor, key.Key));
                 }
             }
 
@@ -207,12 +205,12 @@ namespace ME3TweaksCore.Objects
                                 if (key.OptionKey.IsPlus == true)
                                 {
                                     //MLog.Error($@"DLCRequirement not met: DLC Option Key requirement is not met: {DLCFolderName} is not installed with optionkey value specified: {key}");
-                                    LastFailedReason = $"Not installed with option {key.UIString ?? key.OptionKey.Key}";
+                                    LastFailedReason = LC.GetString(LC.string_interp_drb_notInstalledWithOptionX, key.UIString ?? key.OptionKey.Key);
                                 }
                                 else
                                 {
                                     //MLog.Error($@"DLCRequirement not met: DLC Option Key requirement is not met: {DLCFolderName} is not installed with optionkey value specified: {key}");
-                                    LastFailedReason = $"Installed with incompatible option {key.UIString ?? key.OptionKey.Key}";
+                                    LastFailedReason = LC.GetString(LC.string_interp_drb_installedWithIncompatibleOptionX, key.UIString ?? key.OptionKey.Key);
                                 }
                                 return false;
                             }
@@ -223,7 +221,7 @@ namespace ME3TweaksCore.Objects
                         if (shared.Any() && !IsAnyDLCOptionKeyRequirementMet(meta, shared))
                         {
                             var optionsStr = string.Join(',', shared.Select(x => x.UIString ?? x.OptionKey.Key));
-                            LastFailedReason = $"Not installed with at least one of the following required options: {optionsStr}";
+                            LastFailedReason = LC.GetString(LC.string_interp_drb_notInstalledWithAtLeastX, optionsStr);
                             return false;
                         }
                     }
@@ -317,7 +315,7 @@ namespace ME3TweaksCore.Objects
                 var softDeps = DLCOptionKeys.Where(x => x.OptionKey.IsPlus == null).ToList();
                 if (softDeps.Any())
                 {
-                    dlcText += @" " + $"(with at least one of the following options installed: {string.Join(',', softDeps.Select(x => x.ToUIString()))})";
+                    dlcText += @" " + LC.GetString(LC.string_interp_drb_withAtLeastOneOfTheFollowingX, string.Join(',', softDeps.Select(x => x.ToUIString())));
                 }
             }
 
