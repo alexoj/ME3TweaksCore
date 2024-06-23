@@ -151,7 +151,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                     { MERGE_DLC_GUID_ATTRIBUTE_NAME, Guid.NewGuid().ToString() }// A new GUID is generated
                 }
             };
-            mcmm.WriteMetaCMM(Path.Combine(M3Directories.GetDLCPath(Target), MERGE_DLC_FOLDERNAME, @"_metacmm.txt"), $"{Path.GetFileNameWithoutExtension(MLibraryConsumer.GetHostingProcessname())} {MLibraryConsumer.GetAppVersion()}");
+            mcmm.WriteMetaCMM(Path.Combine(M3Directories.GetDLCPath(Target), MERGE_DLC_FOLDERNAME, @"_metacmm.txt"), $@"{Path.GetFileNameWithoutExtension(MLibraryConsumer.GetHostingProcessname())} {MLibraryConsumer.GetAppVersion()}");
 
             Generated = true;
         }

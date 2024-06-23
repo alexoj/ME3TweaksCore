@@ -72,7 +72,7 @@ namespace ME3TweaksCore.Services.Shared.BasegameFileIdentification
 
         public static string CreateBlock(string blockName, string blockData)
         {
-            return $"{BLOCK_OPENING}{blockName}={blockData}{BLOCK_CLOSING}";
+            return $@"{BLOCK_OPENING}{blockName}={blockData}{BLOCK_CLOSING}";
         }
 
         public string GetWithoutBlock(string blockName)

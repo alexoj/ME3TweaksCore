@@ -11,25 +11,25 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
         /// <summary>
         /// Comment for this entry. We do nothing with this except for reading it in the event we ever serialize this object back to disk.
         /// </summary>
-        [JsonProperty("comment")]
+        [JsonProperty(@"comment")]
         public string Comment { get; set; }
 
         /// <summary>
         /// Name of the basegame package file to merge into
         /// </summary>
-        [JsonProperty("packagefile")]
+        [JsonProperty(@"packagefile")]
         public string GamePackageFile { get; set; }
 
         /// <summary>
         /// File name of the package containing tables to merge - in the mod folder
         /// </summary>
-        [JsonProperty("mergepackagefile")]
+        [JsonProperty(@"mergepackagefile")]
         public string ModPackageFile { get; set; }
 
         /// <summary>
         /// List of table exports to merge
         /// </summary>
-        [JsonProperty("mergetables")]
+        [JsonProperty(@"mergetables")]
         public List<string> ModTables { get; set; }
     }
 }

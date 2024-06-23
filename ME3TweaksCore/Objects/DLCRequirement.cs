@@ -107,7 +107,7 @@ namespace ME3TweaksCore.Objects
                     if (DLCOptionKeys != null)
                         keyMap[REQKEY_DLCOPTIONKEY] = DLCOptionKeys.Select(x => x.ToString()).ToList();
 
-                    return $"{DLCFolderName}{StringStructParser.BuildCommaSeparatedSplitMultiValueList(keyMap, '[', ']', quoteValues: false)}";
+                    return $@"{DLCFolderName}{StringStructParser.BuildCommaSeparatedSplitMultiValueList(keyMap, '[', ']', quoteValues: false)}";
                 }
 
                 // No Conditions.

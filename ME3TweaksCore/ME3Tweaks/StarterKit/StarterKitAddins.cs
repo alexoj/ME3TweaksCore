@@ -185,7 +185,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 }
             }
 #if DEBUG
-            var filesDebug = sourceBaseFiles.Where(x => x.Key.StartsWith("BioH_")).Select(x => x.Key).ToList();
+            var filesDebug = sourceBaseFiles.Where(x => x.Key.StartsWith(@"BioH_")).Select(x => x.Key).ToList();
 #endif
 
             // File list
@@ -247,8 +247,8 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     if (newHenchIndex > 0)
                     {
                         // we use 1 based indexing. We are based on the _01 files - strip that off for our naming.
-                        destFName = destFName.Replace(@"_00", $"_{newHenchIndex.ToString().PadLeft(2, '0')}");
-                    }
+                        destFName = destFName.Replace(@"_00", $@"_{newHenchIndex.ToString().PadLeft(2, '0')}");
+                    },
                     else
                     {
                         // First instance of this hench is not indexed
@@ -260,7 +260,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     if (newHenchIndex > 0)
                     {
                         // we use 1 based indexing. We are based on the _01 files - strip that off for our naming.
-                        destFName = destFName.Replace(@"_01", $"_{newHenchIndex.ToString().PadLeft(2, '0')}");
+                        destFName = destFName.Replace(@"_01", $@"_{newHenchIndex.ToString().PadLeft(2, '0')}");
                     }
                     else
                     {
@@ -290,15 +290,15 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     {
                         var actors = package.GetLevelActors();
 
-                        var pawn = actors.FirstOrDefault(x => x.IsA("SFXPawn"));
+                        var pawn = actors.FirstOrDefault(x => x.IsA(@"SFXPawn"));
                         var pawnClass = pawn.Class as ExportEntry;
                         var pawnClassDefaults = pawnClass.GetDefaults();
-                        var actorType = pawnClassDefaults.GetProperty<ObjectProperty>("ActorType").ResolveToEntry(package) as ExportEntry;
+                        var actorType = pawnClassDefaults.GetProperty<ObjectProperty>(@"ActorType").ResolveToEntry(package) as ExportEntry;
 
                         // Replace class and default names
-                        ReplaceNameIfExists(package, pawnClass.ObjectName, $@"{pawnClass.ObjectName.Name.Replace("_01", "")}_{dlcNameHenchIndex}");
-                        ReplaceNameIfExists(package, pawnClassDefaults.ObjectName, $@"{pawnClassDefaults.ObjectName.Name.Replace("_01", "")}_{dlcNameHenchIndex}");
-                        actorType.ObjectName = $@"{actorType.ObjectName.Name.Replace("_01", "")}_{dlcNameHenchIndex.ToLower()}";
+                        ReplaceNameIfExists(package, pawnClass.ObjectName, $@"{pawnClass.ObjectName.Name.Replace(@"_01", "")}_{dlcNameHenchIndex}"); // do not localize
+                        ReplaceNameIfExists(package, pawnClassDefaults.ObjectName, $@"{pawnClassDefaults.ObjectName.Name.Replace(@"_01", "")}_{dlcNameHenchIndex}"); // do not localize
+                        actorType.ObjectName = $@"{actorType.ObjectName.Name.Replace(@"_01", "")}_{dlcNameHenchIndex.ToLower()}"; // do not localize
 
                         // Replace package export name.
                         ReplaceNameIfExists(package, package.FileNameNoExtension, $@"{package.FileNameNoExtension[..^3]}_{dlcNameHenchIndex}");
@@ -392,7 +392,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             if (index == 0)
                 return inStr;
 
-            return $"{inStr}_{index:00}";
+            return $@"{inStr}_{index:00}";
         }
 
         private static void InstallLE2Images(MEGame game, string cookedPath, string henchHumanName, string dlcName, CaseInsensitiveDictionary<string> sourceBaseFiles, string isourcefname, int newHenchIndex)
@@ -431,14 +431,14 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 var t2d = new Texture2D(exp);
                 var imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE2.HenchImages.placeholder_unselected.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.DXT5), exp.GetProperties(), isPackageStored: true);
-                exp.WriteProperty(new BoolProperty(false, "sRGB"));
+                exp.WriteProperty(new BoolProperty(false, @"sRGB"));
 
                 // Chosen
-                exp = Texture2D.CreateTexture(ipackage, GetIndexedHenchString($"{henchHumanName}Glow", newHenchIndex), 8, 16, PixelFormat.DXT5, false); // We just specify correct aspect ratio as the replacement code will properly do it for us.
+                exp = Texture2D.CreateTexture(ipackage, GetIndexedHenchString($@"{henchHumanName}Glow", newHenchIndex), 8, 16, PixelFormat.DXT5, false); // We just specify correct aspect ratio as the replacement code will properly do it for us.
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE2.HenchImages.placeholder_selected.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.DXT5), exp.GetProperties(), isPackageStored: true);
-                exp.WriteProperty(new BoolProperty(false, "sRGB"));
+                exp.WriteProperty(new BoolProperty(false, @"sRGB"));
 
                 ipackage.Save(idestpath);
             }
@@ -506,7 +506,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 t2d = new Texture2D(exp);
                 imageBytes = MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.StarterKit.LE3.HenchImages.placeholder_chosen.png").GetBuffer();
                 t2d.Replace(Image.LoadFromFileMemory(imageBytes, 2, PixelFormat.ARGB), exp.GetProperties(), isPackageStored: true);
-                exp.ObjectName = $"{henchHumanName}Glow";
+                exp.ObjectName = $@"{henchHumanName}Glow";
 
                 ReplaceNameIfExists(ipackage, $@"GUI_Henchmen_Images", $@"GUI_Henchmen_Images_{dlcName}");
                 ReplaceNameIfExists(ipackage, $@"SFXHenchImages{henchHumanName}0", $@"SFXHenchImages_{dlcName}");
@@ -1186,7 +1186,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         /// <returns></returns>
         private static string GetCustomLE1ModSettingsClassText(string dlcName)
         {
-            return $"Class ModSettingsSubmenu_{dlcName} extends ModSettingsSubmenu config(UI); defaultproperties {{ }}";
+            return $@"Class ModSettingsSubmenu_{dlcName} extends ModSettingsSubmenu config(UI); defaultproperties {{ }}";
         }
 
         public static void AddLE1ModSettingsMenu(IM3Mod mod, MEGame game, string dlcFolderPath,
@@ -1235,10 +1235,9 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     var fileLib = new FileLib(msmDataPackage);
                     if (!fileLib.Initialize())
                     {
-                        MLog.Error(
-                            $@"Error intitializing filelib for msmdata package: {string.Join(", ", fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString()))}");
+                        MLog.Error($@"Error intitializing filelib for msmdata package: {string.Join(@", ", fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString()))}");
                         throw new Exception(
-                            $@"Failed to initialize filelib for ModSettingsMenu data package: {string.Join(", ", fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString()))}");
+                            $"Failed to initialize filelib for ModSettingsMenu data package: {string.Join(@", ", fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString()))}");
                     }
 
                     // 1. Parent class
@@ -1248,13 +1247,13 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     (_, MessageLog log1) = UnrealScriptCompiler.CompileClass(msmDataPackage,
                         new StreamReader(MUtilities.ExtractInternalFileToStream(LE1ModSettingsClassTextAsset))
                             .ReadToEnd(),
-                        fileLib, export: msmDataPackage.FindExport(modSettingsClassPath, "Class"));
+                        fileLib, export: msmDataPackage.FindExport(modSettingsClassPath, @"Class"));
                     if (log1.HasErrors)
                     {
                         MLog.Error(
                             $@"Failed to compile ModSettingsSubmenu for msmdata package: {log1.AllErrors.Select(msg => msg.ToString())}");
                         throw new Exception(
-                            $@"Failed to compile parent ModSettingsMenu class for ModSettingsMenu data package: {string.Join(", ", log1.AllErrors.Select(msg => msg.ToString()))}");
+                            $"Failed to compile parent ModSettingsMenu class for ModSettingsMenu data package: {string.Join(", ", log1.AllErrors.Select(msg => msg.ToString()))}"); 
                     }
 
                     // 2. Our custom class
@@ -1265,7 +1264,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                         MLog.Error(
                             $@"Failed to compile {className} for msmdata package: {log2.AllErrors.Select(msg => msg.ToString())}");
                         throw new Exception(
-                            $@"Failed to compile {className} for ModSettingsMenu data package: {string.Join(", ", log2.AllErrors.Select(msg => msg.ToString()))}");
+                            $"Failed to compile {className} for ModSettingsMenu data package: {string.Join(", ", log2.AllErrors.Select(msg => msg.ToString()))}");
                     }
 
                     msmDataPackage.Save();
@@ -1308,16 +1307,16 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             #endregion
 
 
-            var autoload = Path.Combine(dlcFolderPath, "Autoload.ini");
+            var autoload = Path.Combine(dlcFolderPath, @"Autoload.ini");
 
             int strId = 157152; // You should not be messing with things you don't understand.
             if (File.Exists(autoload))
             {
                 var autoLoadIni = DuplicatingIni.LoadIni(autoload);
-                var gui = autoLoadIni.GetSection("GUI");
+                var gui = autoLoadIni.GetSection(@"GUI");
                 if (gui != null)
                 {
-                    var nameStrRef = gui.GetValue("NameStrRef");
+                    var nameStrRef = gui.GetValue(@"NameStrRef");
                     if (nameStrRef.HasValue)
                         int.TryParse(nameStrRef.Value, out strId); // Parse to mod name.
                 }
@@ -1334,7 +1333,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
 
 
             var m3cdData = $@"[BioUI.ini ModSettings_Submenus_LE1CP.ModSettingsSubmenu_Root]" + Environment.NewLine;
-            m3cdData += $@"+menuitems={StringStructParser.BuildCommaSeparatedSplitValueList(msmr, @"SubmenuClassName")}";
+            m3cdData += $@"+menuitems={StringStructParser.BuildCommaSeparatedSplitValueList(msmr, @"SubmenuClassName")}"; // do not localize
             var m3cdPath = Path.Combine(cookedPath, @"ConfigDelta-ModSettingsMenu.m3cd");
             File.WriteAllText(m3cdPath, m3cdData);
 

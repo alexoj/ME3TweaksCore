@@ -2255,7 +2255,7 @@ namespace ME3TweaksCore.Diagnostics
                 dictionary.Add(@"ToolVersion", MLibraryConsumer.GetAppVersion());
 
                 //10/22/2023 - Change to unified endpoint
-                string responseString = "https://me3tweaks.com/modmanager/logservice/shared/logupload".PostUrlEncodedAsync(dictionary)
+                string responseString = @"https://me3tweaks.com/modmanager/logservice/shared/logupload".PostUrlEncodedAsync(dictionary)
 
                     //new
                     //{

@@ -97,7 +97,7 @@ namespace ME3TweaksCore.Helpers
             }
         }
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport(@"kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern ExecutionState SetThreadExecutionState(ExecutionState esFlags);
 
         [Flags]

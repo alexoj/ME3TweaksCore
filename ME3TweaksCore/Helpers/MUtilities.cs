@@ -33,9 +33,9 @@ namespace ME3TweaksCore.Helpers
 
             // Return carriage handling
             // ASCII LINE-FEED character (LF),
-            expression = expression.Replace("\n", newCharacterWithSpace);
+            expression = expression.Replace("\n", newCharacterWithSpace); // do not localize
             // ASCII CARRIAGE-RETURN character (CR)
-            expression = expression.Replace("\r", newCharacterWithSpace);
+            expression = expression.Replace("\r", newCharacterWithSpace); // do not localize
 
             // less than : used to redirect input, allowed in Unix filenames, see Note 1
             expression = expression.Replace(@"<", newCharacter);
@@ -82,10 +82,10 @@ namespace ME3TweaksCore.Helpers
             {
                 // Because then issues to zip
                 // More at : http://www.thesauruslex.com/typo/eng/enghtml.htm
-                expression = expression.Replace(@"ê", "e");
-                expression = expression.Replace(@"ë", "e");
-                expression = expression.Replace(@"ï", "i");
-                expression = expression.Replace(@"œ", "oe");
+                expression = expression.Replace(@"ê", @"e");
+                expression = expression.Replace(@"ë", @"e");
+                expression = expression.Replace(@"ï", @"i");
+                expression = expression.Replace(@"œ", @"oe");
             }
 
             return expression;
@@ -389,7 +389,7 @@ namespace ME3TweaksCore.Helpers
                 }
             }
 
-            Debug.WriteLine($"{DateTime.Now} IsGameRunning({gameID}) - stale info, refreshing");
+            Debug.WriteLine($@"{DateTime.Now} IsGameRunning({gameID}) - stale info, refreshing");
 
             //Debug.WriteLine("IsRunning: " + gameID);
 

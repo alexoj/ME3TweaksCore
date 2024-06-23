@@ -37,19 +37,19 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
 
         private static readonly string[] Mergable2DAFiles = new[]
         {
-            "Engine.pcc",
-            "SFXGame.pcc",
-            "EntryMenu.pcc",
+            @"Engine.pcc",
+            @"SFXGame.pcc",
+            @"EntryMenu.pcc",
 
             // Bring Down The Sky
-            "BIOG_2DA_UNC_AreaMap_X.pcc",
-            "BIOG_2DA_UNC_GalaxyMap_X.pcc",
-            "BIOG_2DA_UNC_GamerProfile_X.pcc",
-            "BIOG_2DA_UNC_Movement_X.pcc",
-            "BIOG_2DA_UNC_Music_X.pcc",
-            "BIOG_2DA_UNC_Talents_X.pcc",
-            "BIOG_2DA_UNC_TreasureTables_X.pcc",
-            "BIOG_2DA_UNC_UI_X.pcc",
+            @"BIOG_2DA_UNC_AreaMap_X.pcc",
+            @"BIOG_2DA_UNC_GalaxyMap_X.pcc",
+            @"BIOG_2DA_UNC_GamerProfile_X.pcc",
+            @"BIOG_2DA_UNC_Movement_X.pcc",
+            @"BIOG_2DA_UNC_Music_X.pcc",
+            @"BIOG_2DA_UNC_Talents_X.pcc",
+            @"BIOG_2DA_UNC_TreasureTables_X.pcc",
+            @"BIOG_2DA_UNC_UI_X.pcc",
         };
 
 #if DEBUG
@@ -62,7 +62,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                 if (loadedFiles.TryGetValue(file, out var filepath))
                 {
                     var package = MEPackageHandler.OpenMEPackage(filepath);
-                    foreach (var exp in package.Exports.Where(x => !x.IsDefaultObject && x.IsA("Bio2DA")))
+                    foreach (var exp in package.Exports.Where(x => !x.IsDefaultObject && x.IsA(@"Bio2DA")))
                     {
                         EntryExporter.ExportExportToPackage(exp, vPackage, out _);
                     }
@@ -122,8 +122,8 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
             }
 
             // Step 2: Reset all tables
-            var vanillaTables = MEPackageHandler.OpenMEPackageFromStream(MUtilities.ExtractInternalFileToStream("ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable.VanillaTables.pcc"));
-            var vanilla2DAs = vanillaTables.Exports.Where(x => x.IsA("Bio2DA")).ToList();
+            var vanillaTables = MEPackageHandler.OpenMEPackageFromStream(MUtilities.ExtractInternalFileToStream(@"ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable.VanillaTables.pcc"));
+            var vanilla2DAs = vanillaTables.Exports.Where(x => x.IsA(@"Bio2DA")).ToList();
             foreach (var file in packageContainer.GetTargetablePackages())
             {
                 foreach (var exp in vanilla2DAs)
@@ -131,8 +131,8 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     var matchingExp = file.FindExport(exp.InstancedFullPath);
                     if (matchingExp != null)
                     {
-                        if (matchingExp.ObjectName == "GalaxyMap_Cluster")
-                            Debug.WriteLine("hi");
+                        //if (matchingExp.ObjectName == "GalaxyMap_Cluster")
+                        //    Debug.WriteLine("hi");
                         // Reset the 2DA to prepare for changes
                         EntryImporter.ImportAndRelinkEntries(EntryImporter.PortingOption.ReplaceSingularWithRelink, exp,
                             file, matchingExp, true, new RelinkerOptionsPackage(), out _);
@@ -311,7 +311,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     }
 
                     var objName = NameReference.FromInstancedString(objNameStr);
-                    if (!objName.Name.EndsWith("_part"))
+                    if (!objName.Name.EndsWith(@"_part"))
                     {
                         MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - base name of object does not end with _part");
                         return false;
@@ -326,13 +326,13 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                         return false;
                     }
 
-                    if (!modTable.IsA("Bio2DA"))
+                    if (!modTable.IsA(@"Bio2DA"))
                     {
                         MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - export is not a Bio2DA or subclass. It was: {modTable.ClassName}");
                         return false;
                     }
 
-                    var baseTable = baseFile.Exports.FirstOrDefault(x => !x.IsDefaultObject && x.IsA("Bio2DA") && x.ObjectName.Instanced.CaseInsensitiveEquals(tableName));
+                    var baseTable = baseFile.Exports.FirstOrDefault(x => !x.IsDefaultObject && x.IsA(@"Bio2DA") && x.ObjectName.Instanced.CaseInsensitiveEquals(tableName));
                     if (baseTable == null)
                     {
                         MLog.Error($"Bio2DA merge 'mergetables' value is invalid: {table} - could not find basegame table with base name '{tableName}' name in package '{basePackagePath}'");
@@ -344,14 +344,14 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     var mergedCount = mod2DA.MergeInto(base2DA, out var result);
                     if (result == Bio2DAMergeResult.OK)
                     {
-                        MLog.Information($"Bio2DA merged {mergedCount.Count} rows from {table} into {tableName}");
+                        MLog.Information($@"Bio2DA merged {mergedCount.Count} rows from {table} into {tableName}");
                         mergedResult |= mergedCount.Any();
                         base2DA.Write2DAToExport();
                         recordMerge(baseFile, Path.GetFileName(mergeFilePath)); // Record we applied this m3cd to this package
                     }
                     else
                     {
-                        MLog.Error($"Bio2DA merge into {tableName} from {table} failed with result {result}");
+                        MLog.Error($@"Bio2DA merge into {tableName} from {table} failed with result {result}");
                         return false;
                     }
                 }

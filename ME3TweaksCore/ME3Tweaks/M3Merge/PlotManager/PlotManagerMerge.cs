@@ -194,8 +194,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.PlotManager
 
                 // STEP 2: UPDATE FUNCTIONS
                 Stopwatch sw = Stopwatch.StartNew();
-                MLog.Information(
-                    $"Initializing plot manager path with relative package cache path {M3Directories.GetBioGamePath(target)}");
+                MLog.Information($@"Initializing plot manager path with relative package cache path {M3Directories.GetBioGamePath(target)}");
                 var fl = new FileLib(plotManager);
                 bool initialized =
                     fl.Initialize(new TargetPackageCache() { RootPath = M3Directories.GetBioGamePath(target) },

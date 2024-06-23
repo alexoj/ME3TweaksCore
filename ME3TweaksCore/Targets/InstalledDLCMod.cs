@@ -22,7 +22,7 @@ namespace ME3TweaksCore.Targets
     public class InstalledDLCMod
     {
         protected string dlcFolderPath;
-        public bool IsEnabled => DLCFolderName.StartsWith("DLC_");
+        public bool IsEnabled => DLCFolderName.StartsWith(@"DLC_");
         public string EnableDisableText => IsEnabled ? LC.GetString(LC.string_disable) : LC.GetString(LC.string_enable);
         public string DeleteText { get; set; } = LC.GetString(LC.string_delete);
         public string EnableDisableTooltip { get; set; }

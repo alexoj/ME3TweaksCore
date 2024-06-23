@@ -545,8 +545,8 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                     }
 
                     // Dynamic load mapping
-                    var bioEngine = configBundle.GetAsset("BioEngine");
-                    var sfxEngine = bioEngine.GetOrAddSection("sfxgame.sfxengine");
+                    var bioEngine = configBundle.GetAsset(@"BioEngine");
+                    var sfxEngine = bioEngine.GetOrAddSection(@"sfxgame.sfxengine");
 
                     foreach (var sqm in appearanceInfo.Values)
                     {
@@ -555,8 +555,8 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge
                             // * <Section name="sfxgame.sfxengine">
                             // <Property name="dynamicloadmapping">
                             // <Value type="3">(ObjectName="BIOG_GesturesConfigDLC.RuntimeData",SeekFreePackageName="GesturesConfigDLC")</Value>
-                            sfxEngine.AddEntry(new CoalesceProperty(@"dynamicloadmapping", new CoalesceValue($"(ObjectName=\"{outfit.AvailableImage}\",SeekFreePackageName=\"SFXHenchImages_{outfit.DLCName}\")", CoalesceParseAction.AddUnique)));
-                            sfxEngine.AddEntry(new CoalesceProperty(@"dynamicloadmapping", new CoalesceValue($"(ObjectName=\"{outfit.HighlightImage}\",SeekFreePackageName=\"SFXHenchImages_{outfit.DLCName}\")", CoalesceParseAction.AddUnique)));
+                            sfxEngine.AddEntry(new CoalesceProperty(@"dynamicloadmapping", new CoalesceValue($"(ObjectName=\"{outfit.AvailableImage}\",SeekFreePackageName=\"SFXHenchImages_{outfit.DLCName}\")", CoalesceParseAction.AddUnique))); // do not localize
+                            sfxEngine.AddEntry(new CoalesceProperty(@"dynamicloadmapping", new CoalesceValue($"(ObjectName=\"{outfit.HighlightImage}\",SeekFreePackageName=\"SFXHenchImages_{outfit.DLCName}\")", CoalesceParseAction.AddUnique))); // do not localize
                         }
                     }
 

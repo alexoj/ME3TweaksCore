@@ -20,7 +20,7 @@ namespace ME3TweaksCore.Diagnostics
         /// <param name="customPrefix"></param>
         public static void LogSessionStart(string customPrefix = InternalLoggingPrefix)
         {
-            Log.Information($"[{customPrefix}] ===========================================================================");
+            Log.Information($@"[{customPrefix}] ===========================================================================");
         }
 
         /// <summary>
