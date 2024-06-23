@@ -1,14 +1,10 @@
 ﻿using AuthenticodeExaminer;
+using ME3TweaksCore.Localization;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ME3TweaksCore.Helpers
 {
@@ -65,8 +61,8 @@ namespace ME3TweaksCore.Helpers
             {
                 return signTime.Value.ToLocalTime().ToString(@"MMMM dd, yyyy @ hh:mm");
             }
-      
-            return "Build not signed";
+
+            return LC.GetString(LC.string_buildNotSigned);
         }
 #endif
     }
