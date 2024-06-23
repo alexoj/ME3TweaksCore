@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Helpers;
-using LegendaryExplorerCore.ME1.Unreal.UnhoodBytecode;
 using LegendaryExplorerCore.Packages;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
-using ME3TweaksCore.Misc;
 using ME3TweaksCore.Services.Backup;
 using ME3TweaksCore.Targets;
 using PropertyChanged;
@@ -247,7 +244,7 @@ namespace ME3TweaksCore.Services.Restore
                         packagesToCheck.Add(failedItem);
                 }
 
-                backupStatus.BackupLocationStatus = "Comparing game against vanilla database";
+                backupStatus.BackupLocationStatus = LC.GetString(LC.string_comparingGameAgainstVanillaDatabase);
                 UpdateStatusCallback?.Invoke(backupStatus.BackupLocationStatus);
 
                 VanillaDatabaseService.ValidateTargetAgainstVanilla(destTarget, addNonVanillaFile, false);

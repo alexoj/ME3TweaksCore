@@ -195,6 +195,7 @@ namespace ME3TweaksCore.Localization
 		public const string string_restoringFromBackup = "string_restoringFromBackup";
 		public const string string_restoringMovies = "string_restoringMovies";
 		public const string string_calculatingHowManyFilesWillBeRestored = "string_calculatingHowManyFilesWillBeRestored";
+		public const string string_comparingGameAgainstVanillaDatabase = "string_comparingGameAgainstVanillaDatabase";
 		public const string string_dlcRequirementInvalidParenthesis = "string_dlcRequirementInvalidParenthesis";
 		public const string string_interp_dlcRequirementInvalidBadVersion = "string_interp_dlcRequirementInvalidBadVersion";
 		public const string string_interp_minVersionAppend = "string_interp_minVersionAppend";
