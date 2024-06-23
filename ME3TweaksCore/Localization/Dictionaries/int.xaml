@@ -324,6 +324,7 @@
     <!-- 0={Filename} -->
     <system:String x:Key="string_interp_fileWasReplacedX">File was replaced: {0}</system:String>
     <!-- 0={Filename} -->
+    <system:String x:Key="string_dialog_memRunningCloseAttempt">Textures are currently installing. Terminating this process is likely to leave the game in an unusable state.</system:String>
 
     <!-- General -->
     <system:String x:Key="string_deleting">Deleting</system:String>

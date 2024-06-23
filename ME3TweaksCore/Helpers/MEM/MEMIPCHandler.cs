@@ -525,7 +525,7 @@ namespace ME3TweaksCore.Helpers.MEM
             currentActionCallback?.Invoke(LC.GetString(LC.string_preparingToInstallTextures));
             MEMIPCHandler.RunMEMIPCUntilExit(target.Game.IsOTGame(), $"--install-mods --gameid {target.Game.ToMEMGameNum()} --input \"{memFileListFile}\" --verify --ipc", // do not localize
                 true,
-                "Textures are currently installing. Terminating this process is likely to leave the game in an unusable state.",
+                LC.GetString(LC.string_dialog_memRunningCloseAttempt),
                 applicationExited: code => { result.ExitCode = code; },
                 applicationStarted: pid =>
                 {
