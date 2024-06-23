@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 
 namespace ME3TweaksCore.Objects
 {
@@ -25,7 +26,7 @@ namespace ME3TweaksCore.Objects
             }
             else
             {
-                throw new Exception($"DLCOptionKey structs must contain a descriptor named '{KEY_OPTIONKEY}'");
+                throw new Exception(LC.GetString(LC.string_interp_dLCOptionKeyStructsMustContainADescriptorNamedKEY_OPTIONKEY, KEY_OPTIONKEY));
             }
 
             if (map.TryGetValue(KEY_UISTRING, out var uiStr))
@@ -52,9 +53,9 @@ namespace ME3TweaksCore.Objects
         public string ToUIString()
         {
             if (OptionKey.IsPlus == true)
-                return $"(with option {UIString ?? OptionKey.Key} installed)";
+                return LC.GetString(LC.string_interp_dok_withOptionXInstalled, UIString ?? OptionKey.Key);
             if (OptionKey.IsPlus == false)
-                return $"(with option {UIString ?? OptionKey.Key} NOT installed)";
+                return LC.GetString(LC.string_interp_dok_withOptionXNotInstalled, UIString ?? OptionKey.Key);
             return "";
         }
     }

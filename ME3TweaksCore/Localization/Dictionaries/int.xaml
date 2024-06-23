@@ -385,4 +385,12 @@
     <!-- Library Consumer -->
     <system:String x:Key="string_buildNotSigned">Build not signed</system:String>
     <!-- Application build is not signed by an authorized signer or is not signed at all -->
+
+    <!-- DLC Option Key -->
+    <system:String x:Key="string_interp_dok_mustContainDescriptorX">DLCOptionKey structs must contain a descriptor named '{0}'</system:String>
+    <!-- 0={Name} -->
+    <system:String x:Key="string_interp_dok_withOptionXInstalled">(with option {0} installed)</system:String>
+    <!-- 0={Option name} -->
+    <system:String x:Key="string_interp_dok_withOptionXNotInstalled">(with option {0} NOT installed)</system:String>
+    <!-- 0={Option name} -->
 </ResourceDictionary>

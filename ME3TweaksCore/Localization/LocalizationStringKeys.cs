@@ -248,5 +248,8 @@ namespace ME3TweaksCore.Localization
 		public const string string_interp_errorCompilingFunctionReason = "string_interp_errorCompilingFunctionReason";
 		public const string string_interp_fileLibInitFailedPlotManager = "string_interp_fileLibInitFailedPlotManager";
 		public const string string_buildNotSigned = "string_buildNotSigned";
+		public const string string_interp_dok_mustContainDescriptorX = "string_interp_dok_mustContainDescriptorX";
+		public const string string_interp_dok_withOptionXInstalled = "string_interp_dok_withOptionXInstalled";
+		public const string string_interp_dok_withOptionXNotInstalled = "string_interp_dok_withOptionXNotInstalled";
 	}
 }
