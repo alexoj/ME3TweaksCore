@@ -1235,9 +1235,9 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                     var fileLib = new FileLib(msmDataPackage);
                     if (!fileLib.Initialize())
                     {
-                        MLog.Error($@"Error intitializing filelib for msmdata package: {string.Join(@", ", fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString()))}");
-                        throw new Exception(
-                            $"Failed to initialize filelib for ModSettingsMenu data package: {string.Join(@", ", fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString()))}");
+                        var errors = string.Join(@", ", fileLib.InitializationLog.AllErrors.Select(msg => msg.ToString()));
+                        MLog.Error($@"Error initializing filelib for msmdata package: {errors}");
+                        throw new Exception(LC.GetString(LC.string_skai_fileLibInitFailedMSM, errors));
                     }
 
                     // 1. Parent class
@@ -1250,10 +1250,9 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                         fileLib, export: msmDataPackage.FindExport(modSettingsClassPath, @"Class"));
                     if (log1.HasErrors)
                     {
-                        MLog.Error(
-                            $@"Failed to compile ModSettingsSubmenu for msmdata package: {log1.AllErrors.Select(msg => msg.ToString())}");
-                        throw new Exception(
-                            $"Failed to compile parent ModSettingsMenu class for ModSettingsMenu data package: {string.Join(", ", log1.AllErrors.Select(msg => msg.ToString()))}"); 
+                        var errors = log1.AllErrors.Select(msg => msg.ToString());
+                        MLog.Error($@"Failed to compile ModSettingsSubmenu for msmdata package: {errors}");
+                        throw new Exception(LC.GetString(LC.string_skai_failedToCompileParentClassMSM, errors));
                     }
 
                     // 2. Our custom class
@@ -1261,10 +1260,9 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                         GetCustomLE1ModSettingsClassText(dlcName), fileLib);
                     if (log2.HasErrors)
                     {
-                        MLog.Error(
-                            $@"Failed to compile {className} for msmdata package: {log2.AllErrors.Select(msg => msg.ToString())}");
-                        throw new Exception(
-                            $"Failed to compile {className} for ModSettingsMenu data package: {string.Join(", ", log2.AllErrors.Select(msg => msg.ToString()))}");
+                        var errors = log2.AllErrors.Select(msg => msg.ToString());
+                        MLog.Error($@"Failed to compile {className} for msmdata package: {errors}");
+                        throw new Exception(LC.GetString(LC.string_skai_failedToCompileClassMSM, className, errors));
                     }
 
                     msmDataPackage.Save();

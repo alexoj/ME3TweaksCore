@@ -224,6 +224,7 @@ namespace ME3TweaksCore.Localization
 		public const string string_interp_fileWasRemovedX = "string_interp_fileWasRemovedX";
 		public const string string_interp_fileWasAddedX = "string_interp_fileWasAddedX";
 		public const string string_interp_fileWasReplacedX = "string_interp_fileWasReplacedX";
+		public const string string_dialog_memRunningCloseAttempt = "string_dialog_memRunningCloseAttempt";
 		public const string string_deleting = "string_deleting";
 		public const string string_nameNotListedInMemBrackets = "string_nameNotListedInMemBrackets";
 		public const string string_interp_targetGameXnotInstalled = "string_interp_targetGameXnotInstalled";
@@ -243,6 +244,9 @@ namespace ME3TweaksCore.Localization
 		public const string string_generatingMod = "string_generatingMod";
 		public const string string_interp_sk_sqmNoBackup = "string_interp_sk_sqmNoBackup";
 		public const string string_interp_sk_sqmBackupMissingRequiredFile = "string_interp_sk_sqmBackupMissingRequiredFile";
+		public const string string_skai_fileLibInitFailedMSM = "string_skai_fileLibInitFailedMSM";
+		public const string string_skai_failedToCompileParentClassMSM = "string_skai_failedToCompileParentClassMSM";
+		public const string string_skai_failedToCompileClassMSM = "string_skai_failedToCompileClassMSM";
 		public const string string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive = "string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive";
 		public const string string_errorReadingSquadmateOutfitManifestFileSeeLogs = "string_errorReadingSquadmateOutfitManifestFileSeeLogs";
 		public const string string_someSquadmateOutfitsWereNotMergedSeeLogs = "string_someSquadmateOutfitsWereNotMergedSeeLogs";

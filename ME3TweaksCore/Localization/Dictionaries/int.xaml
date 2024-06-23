@@ -370,6 +370,12 @@
     <!-- 0={game (ME1, ME2, etc)} -->
     <system:String x:Key="string_interp_sk_sqmBackupMissingRequiredFile">Required file for squadmate merge not available in backup: {0}</system:String>
     <!-- 0={filename} -->
+    <system:String x:Key="string_skai_fileLibInitFailedMSM">Failed to initialize filelib for ModSettingsMenu data package: {0}</system:String>
+    <!-- 0={errors, comma separated} -->
+    <system:String x:Key="string_skai_failedToCompileParentClassMSM">Failed to compile parent ModSettingsMenu class for ModSettingsMenu data package: {0}</system:String>
+    <!-- 0={errors, comma separated} -->
+    <system:String x:Key="string_skai_failedToCompileClassMSM">Failed to compile {0} for ModSettingsMenu data package: {1}</system:String>
+    <!-- 0={className} 1={errors, comma separated} -->
 
     <!-- Squadmate Merge -->
     <system:String x:Key="string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive">Invalid hench name: {0}. Value is case-sensitive.</system:String>
