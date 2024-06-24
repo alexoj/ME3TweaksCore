@@ -7,3 +7,6 @@
 [submodule "ME3TweaksCore/submodules/RoboSharp"]
 	path = ME3TweaksCore/submodules/RoboSharp
 	url = https://github.com/Mgamerz/RoboSharp.git
+[submodule "ME3TweaksCore/submodules/AuthenticodeExaminer"]
+	path = ME3TweaksCore/submodules/AuthenticodeExaminer
+	url = https://github.com/ME3Tweaks/AuthenticodeExaminer
