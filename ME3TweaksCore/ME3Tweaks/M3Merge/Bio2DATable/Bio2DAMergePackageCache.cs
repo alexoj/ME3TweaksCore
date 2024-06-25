@@ -11,6 +11,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
     /// </summary>
     internal class Bio2DAMergePackageContainer
     {
+        public List<string> VanillaTableNames { get; set; }
         private readonly List<IMEPackage> TargetPackages = new List<IMEPackage>();
         private readonly List<IMEPackage> ModPackages = new List<IMEPackage>();
         public readonly CaseInsensitiveDictionary<string> OriginalHashes = new();
