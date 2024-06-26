@@ -29,6 +29,11 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         /// </summary>
         public LEXOpenable TemplateTable { get; set; }
 
+        /// <summary>
+        /// Installed IFP, this variable is transient.
+        /// </summary>
+        public string InstalledInstancedFullPath { get; set; }
+
         public Bio2DAOption(string title, LEXOpenable templateTable)
         {
             Title = title;
@@ -38,22 +43,27 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
         /// <summary>
         /// Generates a blank 2DA with info from this object at the specified path
         /// </summary>
-        /// <param name="fetchTarget"></param>
-        /// <param name="destPackagePath"></param>
-        public void GenerateBlank2DA(ExportEntry sourceTable, string destPackagePath)
+        public ExportEntry GenerateBlank2DA(ExportEntry sourceTable, IMEPackage p)
         {
             var newObjectName = $@"{sourceTable.ObjectName}_part";
             var index = 1;
             var nameRef = new NameReference(newObjectName, index);
 
-            using var p = MEPackageHandler.OpenMEPackage(destPackagePath);
+            // We don't support indexing 
             if (p.Exports.Any(x => x.ObjectName == nameRef))
-                return; // Already exists
+                return null; // Already exists
 
             EntryImporter.ImportAndRelinkEntries(EntryImporter.PortingOption.CloneAllDependencies, sourceTable, p, null, true, new RelinkerOptionsPackage(), out var v);
             if (v is ExportEntry newEntry)
             {
-                newEntry.ExportFlags &= ~UnrealFlags.EExportFlags.ForcedExport; // It is not ForcedExport in these seek free files.
+                if (newEntry.Parent == null)
+                {
+                    newEntry.ExportFlags &= ~UnrealFlags.EExportFlags.ForcedExport; // It is not ForcedExport in these seek free files.
+                }
+                else
+                {
+                    newEntry.ExportFlags |= UnrealFlags.EExportFlags.ForcedExport; // It is ForcedExport if under a package
+                }
 
                 var twoDA = new Bio2DA(newEntry);
                 twoDA.ClearRows();
@@ -61,9 +71,10 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 newEntry.ObjectName = nameRef;
                 var objRef = StarterKitAddins.CreateObjectReferencer(p, false);
                 StarterKitAddins.AddToObjectReferencer(objRef);
+                return newEntry;
             }
-            if (p.IsModified)
-                p.Save();
+
+            return null;
         }
     }
 }

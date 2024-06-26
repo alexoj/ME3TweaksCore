@@ -21,6 +21,7 @@ using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.ME3Tweaks.M3Merge;
+using ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable;
 using ME3TweaksCore.ME3Tweaks.ModManager.Interfaces;
 using ME3TweaksCore.Objects;
 using ME3TweaksCore.Services.Backup;
@@ -673,7 +674,6 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
 
             exp.ObjectFlags |= UnrealFlags.EObjectFlags.Public | UnrealFlags.EObjectFlags.LoadForClient | UnrealFlags.EObjectFlags.LoadForServer | UnrealFlags.EObjectFlags.Standalone;
             exp.ExportFlags |= UnrealFlags.EExportFlags.ForcedExport;
-
             // Since table is blank we don't need to care about the column names property
             Bio2DA bio2DA = new Bio2DA();
             bio2DA.Cells = new Bio2DACell[0, 0];
@@ -832,8 +832,20 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
             }
             else
             {
-                MLog.Error($@"Backup directory doesn't exist, can't generate 2DAs: {bPath}");
+                MLog.Error($@"Backup directory doesn't exist, can't generate 2DAs");
                 return;
+            }
+
+            var newPackageName = $@"BIOG_2DA_{dlcName}";
+            var newPackagePath = Path.Combine(dlcFolderPath, game.CookedDirName(), $@"{newPackageName}{game.PCPackageFileExtension()}");
+            IMEPackage twoDAPackage;
+            if (!File.Exists(newPackagePath))
+            {
+                twoDAPackage = MEPackageHandler.CreateAndOpenPackage(newPackagePath, game);
+            }
+            else
+            {
+                twoDAPackage = MEPackageHandler.OpenMEPackage(newPackagePath);
             }
 
             foreach (var twoDARef in blank2DAsToGenerate)
@@ -843,24 +855,52 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
                 var sourcePackage = MEPackageHandler.UnsafePartialLoad(twoDARef.TemplateTable.FilePath, x => x.UIndex == twoDARef.TemplateTable.EntryUIndex);
                 var sourceTable = sourcePackage.GetUExport(twoDARef.TemplateTable.EntryUIndex);
 
-                var sourceTableName = sourceTable.ObjectName;
-                var sourceTablePackage = sourceTable.Parent.ObjectName.Name;
-                // Todo: Figure out how to choose which name to use as destination path
-                // Maybe BIOG_2DA_|DLC_NAME_|Remainder ?
-                // The actual 
-
-                var newPackageName = $@"BIOG_2DA_{dlcName}_{sourceTablePackage.Substring(9)}";
-                var newPackagePath = Path.Combine(dlcFolderPath, game.CookedDirName(), $@"{newPackageName}{game.PCPackageFileExtension()}");
-                if (!File.Exists(newPackagePath))
+                var gen = twoDARef.GenerateBlank2DA(sourceTable, twoDAPackage);
+                if (gen != null)
                 {
-                    MEPackageHandler.CreateAndSavePackage(newPackagePath, game);
+                    twoDARef.InstalledInstancedFullPath = gen.InstancedFullPath;
+                    if (game == MEGame.ME1)
+                    {
+                        AddAutoloadReferenceGame1(dlcFolderPath, @"Packages", @"2DA", newPackageName);
+                    }
                 }
-
-                twoDARef.GenerateBlank2DA(sourceTable, newPackagePath);
-                AddAutoloadReferenceGame1(dlcFolderPath, @"Packages", @"2DA", newPackageName);
             }
 
+            if (twoDAPackage.IsModified)
+            {
+                if (game == MEGame.LE1)
+                {
+                    GenerateM3DA(dlcFolderPath, blank2DAsToGenerate, twoDAPackage);
+                }
+                twoDAPackage.Save();
+            }
         }
+
+        private static void GenerateM3DA(string dlcFolderPath, List<Bio2DAOption> tables, IMEPackage twoDAPackage)
+        {
+            var m3daPath = Path.Combine(dlcFolderPath, twoDAPackage.Game.CookedDirName(), $"{Path.GetFileName(dlcFolderPath)}-2DAs.m3da");
+            var mml = new List<Bio2DAMergeManifest>();
+            var mapping = new Dictionary<string, Bio2DAMergeManifest>();
+            foreach (var b in tables)
+            {
+                if (!mapping.TryGetValue(Path.GetFileName(b.TemplateTable.FilePath), out var mm))
+                {
+                    mm = new Bio2DAMergeManifest()
+                    {
+                        Comment = @"Starter kit generated table merge",
+                        ModPackageFile = twoDAPackage.FileNameNoExtension + @".pcc",
+                        GamePackageFile = Path.GetFileName(b.TemplateTable.FilePath),
+                        ModTables = new List<string>(),
+                    };
+                    mapping[Path.GetFileName(b.TemplateTable.FilePath)] = mm;
+                    mml.Add(mm);
+                }
+
+                mm.ModTables.Add(b.InstalledInstancedFullPath);
+            }
+            File.WriteAllText(m3daPath, JsonConvert.SerializeObject(mml, Formatting.Indented));
+        }
+
         #endregion
 
         #region Utility 
