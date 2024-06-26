@@ -344,7 +344,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     }
 
                     // Check basetable is actually a vanilla table
-                    if (!packageContainer.VanillaTableNames.Contains(baseTable.InstancedFullPath, StringComparer.InvariantCultureIgnoreCase))
+                    if (!packageContainer.VanillaTableNames.Contains(baseTable.ObjectName.Instanced, StringComparer.InvariantCultureIgnoreCase))
                     {
                         MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - this is not a vanilla table. Bio2DA merge does not work with non-vanilla tables.");
                         throw new Exception($"Bio2DA merge 'mergetables' value is invalid: {table} - this is not a vanilla table. Bio2DA merge does not work with non-vanilla tables.");
