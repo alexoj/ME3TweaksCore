@@ -1883,7 +1883,7 @@ namespace ME3TweaksCore.Diagnostics
             addDiagLine(@"Texture Level of Detail (LOD) settings", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
             if (selectedDiagnosticTarget.Game.IsLEGame())
             {
-                addDiagLine(@"These should always be blank for Legendary Edition games. Legendary Edition modding does not modify LODs due engine changes.", ME3TweaksLogViewer.LogSeverity.INFO);
+                addDiagLine(@"These should always be blank for Legendary Edition games. Legendary Edition modding does not modify LODs due to engine changes.", ME3TweaksLogViewer.LogSeverity.INFO);
             }
 
             string iniPath = M3Directories.GetLODConfigFile(selectedDiagnosticTarget);
