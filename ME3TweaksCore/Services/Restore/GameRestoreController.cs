@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Gammtek.Extensions;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.Packages;
@@ -295,6 +296,19 @@ namespace ME3TweaksCore.Services.Restore
             UpdateStatusCallback?.Invoke(backupStatus.BackupStatus);
 
             string currentRoboCopyFile = null;
+
+            // Backup gamersettings.ini
+            string gamerSettings = null;
+            if (destTarget != null && destTarget.Game.IsLEGame())
+            {
+                var gamerSettingsF = MEDirectories.GetLODConfigFile(destTarget.Game, destTarget.TargetPath);
+                if (File.Exists(gamerSettingsF))
+                {
+                    gamerSettings = File.ReadAllText(gamerSettingsF);
+                    MLog.Information(@"Cached gamersettings.ini in memory");
+                }
+            }
+
             RoboCommand rc = new RoboCommand();
             rc.CopyOptions.Destination = destinationPathOverride ?? destTarget.TargetPath;
             rc.CopyOptions.Source = backupPath;
@@ -325,6 +339,14 @@ namespace ME3TweaksCore.Services.Restore
             rc.Start().Wait();
             MLog.Information(@"Robocopy restore has completed");
 
+            // Restore gamersettings
+            if (gamerSettings != null)
+            {
+                var gamerSettingsF = MEDirectories.GetLODConfigFile(destTarget.Game, destTarget.TargetPath);
+                Directory.GetParent(gamerSettingsF).Create();
+                File.WriteAllText(gamerSettingsF, gamerSettings);
+                MLog.Information(@"Restored gamersettings.ini");
+            }
         }
     }
 
