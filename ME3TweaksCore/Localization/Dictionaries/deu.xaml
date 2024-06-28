@@ -260,7 +260,7 @@
 	<system:String x:Key="string_checkingBackup">Backup wird überprüft</system:String>
 	<system:String x:Key="string_interp_2damerge_invalidTargetFile">Bio2DA-Zusammenführung „Paketdatei“ ist ungültig: {0} – kann nicht in Nicht-Basisspiel-/Bring Down The Sky-2DA-Dateien zusammengeführt werden</system:String>
 	<system:String x:Key="string_interp_2damerge_couldNotFindTarget">Bio2DA-Zusammenführung „Paketdatei“ ist ungültig: {0} – konnte im Basisspiel Ordner CookedPCConsole des Ziels nicht gefunden werden</system:String>
-	<system:String x:Key="string_interp_2damerge_couldNotFindSourcePackage">Bio2DA-Zusammenführung „mergepackagefile“ ist ungültig: {0} – konnte im CookedPCConsole-Ordner der Mod nicht gefunden werden/system:String>
+	<system:String x:Key="string_interp_2damerge_couldNotFindSourcePackage">Bio2DA-Zusammenführung „mergepackagefile“ ist ungültig: {0} – konnte im CookedPCConsole-Ordner der Mod nicht gefunden werden</system:String>
 	<system:String x:Key="string_interp_2damerge_invalidTableNameMissingPart">Bio2DA-Zusammenführungswert „Mergetables“ ist ungültig: {0} – der Basisname des Objekts endet nicht mit _part</system:String>
 	<system:String x:Key="string_interp_2damerge_invalidCouldNotFindSourceTableExport">Bio2DA-Zusammenführungswert „Mergetables“ ist ungültig: {0} – Tabelle mit dem instanziierten vollständigen Pfad konnte im Paket „{1}“ nicht gefunden werden.</system:String>
 	<system:String x:Key="string_interp_2damerge_invalidSourceObjectIsNot2DA">Bio2DA-Zusammenführungswert „Mergetables“ ist ungültig: {0} – Export ist keine Bio2DA oder keine Unterklasse. Er war: {1}</system:String>
