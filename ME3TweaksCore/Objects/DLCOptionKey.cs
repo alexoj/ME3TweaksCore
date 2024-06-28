@@ -53,7 +53,7 @@ namespace ME3TweaksCore.Objects
                 return LC.GetString(LC.string_interp_dok_withOptionXInstalled, UIString ?? OptionKey.Key);
             if (OptionKey.IsPlus == false)
                 return LC.GetString(LC.string_interp_dok_withOptionXNotInstalled, UIString ?? OptionKey.Key);
-            return "";
+            return UIString ?? OptionKey.Key;
         }
     }
 }

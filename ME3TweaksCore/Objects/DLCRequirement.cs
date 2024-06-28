@@ -83,7 +83,10 @@ namespace ME3TweaksCore.Objects
 
         public DLCRequirement() { }
 
-        public DLCRequirement(string input, double featureLevel, bool folderNameIsPlusMinus) : base(input, featureLevel, folderNameIsPlusMinus) { }
+        public DLCRequirement(string input, double featureLevel, bool folderNameIsPlusMinus) : base(input, featureLevel, folderNameIsPlusMinus)
+        {
+            IsKeyedVersion = true;
+        }
 
 
 
