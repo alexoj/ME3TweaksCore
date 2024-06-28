@@ -300,7 +300,7 @@ namespace ME3TweaksCore.Objects
                 dlcText += @" " + LC.GetString(LC.string_interp_minVersionAppend, MinVersion);
             }
 
-            if (MinVersion != null)
+            if (MaxVersion != null)
             {
                 dlcText += @" " + LC.GetString(LC.string_interp_maxVersionAppend, MaxVersion);
             }
