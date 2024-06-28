@@ -83,10 +83,25 @@
 	<system:String x:Key="string_gameNotInstalledRunOnce">Spiel nicht installiert. Führe es mindestens einmal aus, um sicher zu stellen, dass es vollständig eingerichtet ist</system:String>
 	<system:String x:Key="string_cantCreateBackup">Kann kein Backup erstellen</system:String>
 	<system:String x:Key="string_interp_XDoesNotSupportGameY">{0} unterstützt das Spiel {1} nicht</system:String>
+	<system:String x:Key="string_interp_copyDidntWorkX">Zieldatei existiert nach dem Kopieren der Datei nicht: {0}</system:String>
 	<system:String x:Key="string_interp_failedToLoadPackageXY">Paket {0} konnte nicht geladen werden: {1}</system:String>
-        <system:String x:Key="string_interp_copyDidntWorkX">Zieldatei existiert nach dem Kopieren der Datei nicht: {0}</system:String>
-	<system:String x:Key="string_dlcRequirementInvalidParenthesis">DLCRequirement-Eingabe ist ungültig: Version muss in Klammern angegeben werden</system:String>
+	<system:String x:Key="string_generatingMod">Generiere Mod</system:String>
+	<system:String x:Key="string_interp_dok_mustContainDescriptorX">DLCOptionKey-Structs müssen einen Deskriptor mit dem Namen „{0}“ enthalten.</system:String>
+	<system:String x:Key="string_interp_dok_withOptionXInstalled">(mit Option {0} installiert)</system:String>
+	<system:String x:Key="string_interp_dok_withOptionXNotInstalled">(mit Option {0} NICHT installiert)</system:String>
+	<system:String x:Key="string_dlcRequirementInvalidParenthesis">Die DLCRequirement-Eingabe ist ungültig: Die Version muss in Klammern eingeschlossen werden</system:String>
 	<system:String x:Key="string_interp_dlcRequirementInvalidBadVersion">DLCRequirement-Eingabe ist ungültig: Ungültige Versionsangabe '{0}'</system:String>
+	<system:String x:Key="string_interp_minVersionAppend">(Mindestversion: {0})</system:String>
+	<system:String x:Key="string_interp_maxVersionAppend">(Höchstversion: {0})</system:String>
+	<system:String x:Key="string_interp_drb_malformedDR">Bedingungen in DLCRequirementBase müssen in {0}{1}, durch Kommas getrennt und im Schlüssel=Wert-Format vorliegen. Ungültiger Wert: {2}</system:String>
+	<system:String x:Key="string_interp_drb_unknownDescriptor">Unbekannter Deskriptor in DLCRequirementBase: {0}</system:String>
+	<system:String x:Key="string_interp_drb_notInstalledWithOptionX">Nicht mit Option {0} installiert</system:String>
+	<system:String x:Key="string_interp_drb_installedWithIncompatibleOptionX">Mit inkompatibler Option {0} installiert</system:String>
+	<system:String x:Key="string_interp_drb_notInstalledWithAtLeastX">Nicht mit mindestens einer der folgenden erforderlichen Optionen installiert: {0}</system:String>
+	<system:String x:Key="string_interp_drb_withAtLeastOneOfTheFollowingX">(mit mindestens einer der folgenden Optionen installiert: {0})</system:String>
+	<system:String x:Key="string_synchronizingEmails">Synchronisierung von E-Mails</system:String>
+	<system:String x:Key="string_emailsNotMergedMessagesFileNotFound">E-Mails nicht zusammengeführt: Nachrichtendatei nicht gefunden</system:String>
+	<system:String x:Key="string_game2EmailMergeWrongGame">Spiel 2 Manifest zur E-Mail-Zusammenführung zielt auf das falsche Spiel ab</system:String>
 	<system:String x:Key="string_cannotBackupGame">Kann kein Backup des Spiels erstellen</system:String>
 	<system:String x:Key="string_interp_cannotBackupGameIsRunning">Kann kein Backup erstellen während {0} läuft.</system:String>
 	<system:String x:Key="string_ensureCorrectGameChosen">Stelle sicher, dass das richtige Spiel gewählt ist</system:String>
@@ -123,6 +138,7 @@
 	<system:String x:Key="string_restoringFromBackup">Wird aus Backup wiederhergestellt</system:String>
 	<system:String x:Key="string_restoringMovies">Filme werden wiederhergestellt</system:String>
 	<system:String x:Key="string_calculatingHowManyFilesWillBeRestored">Anzahl der wiederherzustellenden Dateien wird berechnet</system:String>
+	<system:String x:Key="string_comparingGameAgainstVanillaDatabase">Vergleich des Spiels mit der Vanilla-Datenbank</system:String>
 	<system:String x:Key="string_interp_invalidTargetMissingFile">Ungültiges Ziel: {0} wurde nicht im Spiel-Installationsordner gefunden.</system:String>
 	<system:String x:Key="string_invalidTargetProtectedByCmmvanilla">Ungültiges Ziel: Dies ist mittels cmm_vanilla-Datei als geschütztes Backup markiert</system:String>
 	<system:String x:Key="string_dialog_cannotRemoveActiveTarget" xml:space="preserve">Das aktive Ziel kann nicht gelöscht werden..\nÄndere das aktive Ziel mit der Liste im Hauptfenster um dieses Ziel entfernen zu können</system:String>
@@ -156,6 +172,8 @@
 	<system:String x:Key="string_tooltip_disableDLC" xml:space="preserve">Deaktiviert das Laden dieser DLC-Mod.&#10;Da keine Dateien verändert werden, ist dies auch nach der Installation von Texturmods sicher möglich</system:String>
 	<system:String x:Key="string_tooltip_enableDLC" xml:space="preserve">Aktiviert das Laden dieser DLC-Mod im Spiel.</system:String>
 	<system:String x:Key="string_other">Andere</system:String>
+	<system:String x:Key="string_m3ConsoleKeybinds">M3-Konsolentastenbelegungen</system:String>
+	<system:String x:Key="string_buildNotSigned">Unsignierte Version</system:String>
 	<system:String x:Key="string_preparingToCollectDiagnosticInfo">Sammeln von Diagnoseinformationen wird vorbereitet</system:String>
 	<system:String x:Key="string_interp_preparingMEMNoGUIX">MEM No GUI wird vorbereitet {0}%</system:String>
 	<system:String x:Key="string_collectingGameInformation">Spielinformationen werden gesammelt</system:String>
@@ -196,6 +214,7 @@
 	<system:String x:Key="string_interp_fileWasRemovedX">Datei wurde entfernt: {0}</system:String>
 	<system:String x:Key="string_interp_fileWasAddedX">Datei wurde hinzugefügt: {0}</system:String>
 	<system:String x:Key="string_interp_fileWasReplacedX">Datei wurde ersetzt: {0}</system:String>
+	<system:String x:Key="string_dialog_memRunningCloseAttempt">Texturen werden gerade installiert. Das Abbrechen dieses Vorgangs kann wahrscheinlich zu einem unbrauchbaren Zustand des Spiels führen.</system:String>
 	<system:String x:Key="string_extractingMassEffectModderNoGui">MassEffectModderNoGui wird entpackt</system:String>
 	<system:String x:Key="string_no">Nein</system:String>
 	<system:String x:Key="string_ok">OK</system:String>
@@ -213,6 +232,9 @@
 	<system:String x:Key="string_debugDifficulty">Debug Schwierigkeitsgrad</system:String>
 	<system:String x:Key="string_interp_unknownDifficultyLevelX">Unbekannter Schwierigkeitsgrad: {0}</system:String>
 	<system:String x:Key="string_interp_onlineContentHashWrong">Prüfsumme der heruntergeladenen Datei ({0}) stimmt nicht mit der erwarteten Prüfsumme überein. Erwartet: {1}, erhalten: {2}</system:String>
+	<system:String x:Key="string_interp_plotManagerSyncForX">PlotManager-Synchronisierung für {0}</system:String>
+	<system:String x:Key="string_interp_errorCompilingFunctionReason" xml:space="preserve">Fehler beim Kompilieren der Funktion {0}: {1}</system:String>
+	<system:String x:Key="string_interp_fileLibInitFailedPlotManager">FileLib für PlotManagerSync konnte nicht initialisiert werden: {0}</system:String>
 	<system:String x:Key="string_insufficientDiskSpace">Nicht genug freier Speicherplatz</system:String>
 	<system:String x:Key="string_interp_restoringXpercent">Wird wiederhergestellt {0}%</system:String>
 	<system:String x:Key="string_interp_restoringX">Stelle {0} wieder her</system:String>
@@ -222,7 +244,26 @@
 	<system:String x:Key="string_fullGameRestore">Komplettes Spiel wiederherstellen</system:String>
 	<system:String x:Key="string_interp_copyingX">{0} wird kopiert</system:String>
 	<system:String x:Key="string_interp_directoryNotEmptyWillDeleteEverything">Das gewählte Verzeichnis ist nicht leer: {0}. ALLE NICHT-SPIELDATEIEN UND -ORDNER IN DIESEM VERZEICHNIS WERDEN GELÖSCHT. Bist du sicher, dass du fortfahren willst?</system:String>
+	<system:String x:Key="string_cannotRestore">Nicht wiederherstellbar</system:String>
+	<system:String x:Key="string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive">Ungültiger Hench-Name: {0}. Beim Wert muss die Groß-/Kleinschreibung beachtet werden.</system:String>
+	<system:String x:Key="string_errorReadingSquadmateOutfitManifestFileSeeLogs">Fehler beim Lesen der Manifestdatei für die Squadmitgliederoutfits für Mod(s), siehe Protokolle</system:String>
+	<system:String x:Key="string_someSquadmateOutfitsWereNotMergedSeeLogs">Einige Squadmitgliederoutfits wurden nicht zusammengeführt, siehe Protokolle</system:String>
+	<system:String x:Key="string_interp_errorCompilingConditionalFunction">Fehler beim Kompilieren der bedingten Funktion {0}: {1}</system:String>
+	<system:String x:Key="string_synchronizingSquadmateOutfits">Synchronisierung der Squadmitgliederoutfits</system:String>
+	<system:String x:Key="string_interp_sk_sqmNoBackup">Für {0} ist kein Backup verfügbar. Dateien für die Zusammenführen von Squadmitgliederoutfits können nicht erstellt werden.</system:String>
+	<system:String x:Key="string_interp_sk_sqmBackupMissingRequiredFile">Erforderliche Datei zum Zusammenführen von Squadmitgliederoutfits nicht im Backup verfügbar: {0}</system:String>
+	<system:String x:Key="string_skai_fileLibInitFailedMSM">Initialisierung der Filelib für das ModSettingsMenu-Datenpaket fehlgeschlagen: {0}</system:String>
+	<system:String x:Key="string_skai_failedToCompileParentClassMSM">Fehler beim Kompilieren der übergeordneten ModSettingsMenu-Klasse für das ModSettingsMenu-Datenpaket: {0}</system:String>
+	<system:String x:Key="string_skai_failedToCompileClassMSM">Fehler beim Kompilieren von {0} für das ModSettingsMenu-Datenpaket: {1}</system:String>
 	<system:String x:Key="string_interp_ssp_unopenedParenthsisFound">Fehler beim Parsen von klammergetrennter Liste: schließende Klammer gefunden, die nicht zu öffnender Klammer an Position {0} in String {1} passt</system:String>
 	<system:String x:Key="string_interp_ssp_unclosedParenthesisFound">Offene Klammer ohne passende schließende Klammer beim Parsen der klammergetrennten Liste in {0} gefunden</system:String>
 	<system:String x:Key="string_checkingBackup">Backup wird überprüft</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidTargetFile">Bio2DA-Zusammenführung „Paketdatei“ ist ungültig: {0} – kann nicht in Nicht-Basisspiel-/Bring Down The Sky-2DA-Dateien zusammengeführt werden</system:String>
+	<system:String x:Key="string_interp_2damerge_couldNotFindTarget">Bio2DA-Zusammenführung „Paketdatei“ ist ungültig: {0} – konnte im Basisspiel Ordner CookedPCConsole des Ziels nicht gefunden werden</system:String>
+	<system:String x:Key="string_interp_2damerge_couldNotFindSourcePackage">Bio2DA-Zusammenführung „mergepackagefile“ ist ungültig: {0} – konnte im CookedPCConsole-Ordner der Mod nicht gefunden werden/system:String>
+	<system:String x:Key="string_interp_2damerge_invalidTableNameMissingPart">Bio2DA-Zusammenführungswert „Mergetables“ ist ungültig: {0} – der Basisname des Objekts endet nicht mit _part</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidCouldNotFindSourceTableExport">Bio2DA-Zusammenführungswert „Mergetables“ ist ungültig: {0} – Tabelle mit dem instanziierten vollständigen Pfad konnte im Paket „{1}“ nicht gefunden werden.</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidSourceObjectIsNot2DA">Bio2DA-Zusammenführungswert „Mergetables“ ist ungültig: {0} – Export ist keine Bio2DA oder keine Unterklasse. Er war: {1}</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidCouldNotFindTargetTable">Bio2DA-Zusammenführungswert „Mergetables“ ist ungültig: {0} – Basisspieltabelle mit Basisnamen „{1}“ konnte im Paket „{2}“ nicht gefunden werden.</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidNotAVanillaTable">Bio2DA-Zusammenführungswert „Mergetables“ ist ungültig: {0} – dies ist keine Standardtabelle. Bio2DA-Zusammenführung funktioniert nicht mit Nicht-Standardtabellen</system:String>
 </ResourceDictionary>
