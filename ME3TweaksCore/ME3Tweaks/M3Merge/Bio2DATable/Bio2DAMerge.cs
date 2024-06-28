@@ -18,6 +18,7 @@ using LegendaryExplorerCore.Unreal.ObjectInfo;
 using ME3TweaksCore.Diagnostics;
 using ME3TweaksCore.GameFilesystem;
 using ME3TweaksCore.Helpers;
+using ME3TweaksCore.Localization;
 using ME3TweaksCore.ME3Tweaks.M3Merge.LE1Config;
 using ME3TweaksCore.Misc;
 using ME3TweaksCore.Services;
@@ -277,21 +278,21 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                 if (destPackage == null)
                 {
                     MLog.Error($@"Bio2DA merge 'packagefile' is invalid: {obj.GamePackageFile} - cannot merge into non-basegame/Bring Down The Sky 2DA files");
-                    throw new Exception($"Bio2DA merge 'packagefile' is invalid: {obj.GamePackageFile} - cannot merge into non-basegame/Bring Down The Sky 2DA files");
+                    throw new Exception(LC.GetString(LC.string_interp_2damerge_invalidTargetFile, obj.GamePackageFile));
                 }
 
                 var basePackagePath = Path.Combine(target.GetCookedPath(), obj.GamePackageFile);
                 if (!File.Exists(basePackagePath))
                 {
                     MLog.Error($@"Bio2DA merge 'packagefile' is invalid: {obj.GamePackageFile} - could not find in basegame CookedPCConsole folder of target");
-                    throw new Exception($"Bio2DA merge 'packagefile' is invalid: {obj.GamePackageFile} - could not find in basegame CookedPCConsole folder of target");
+                    throw new Exception(LC.GetString(LC.string_interp_2damerge_couldNotFindTarget, obj.GamePackageFile));
                 }
 
                 var modPackagePath = Directory.GetFileSystemEntries(dlcCookedPath, obj.ModPackageFile, SearchOption.AllDirectories).FirstOrDefault();
                 if (modPackagePath == null)
                 {
                     MLog.Error($@"Bio2DA merge 'mergepackagefile' is invalid: {obj.GamePackageFile} - could not find in CookedPCConsole folder of mod");
-                    throw new Exception($"Bio2DA merge 'mergepackagefile' is invalid: {obj.GamePackageFile} - could not find in CookedPCConsole folder of mod");
+                    throw new Exception(LC.GetString(LC.string_interp_2damerge_couldNotFindSourcePackage, obj.GamePackageFile));
                 }
 
                 var baseFile = packageContainer.GetTargetPackage(basePackagePath);
@@ -315,7 +316,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     if (!objName.Name.EndsWith(@"_part"))
                     {
                         MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - base name of object does not end with _part");
-                        throw new Exception($"Bio2DA merge 'mergetables' value is invalid: {table} - base name of object does not end with _part");
+                        throw new Exception(LC.GetString(LC.string_interp_2damerge_invalidTableNameMissingPart, table));
                         return false;
                     }
 
@@ -325,14 +326,14 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     if (modTable == null)
                     {
                         MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - could not find table with that instanced full path in package '{modPackagePath}'");
-                        throw new Exception($"Bio2DA merge 'mergetables' value is invalid: {table} - could not find table with that instanced full path in package '{modPackagePath}'");
+                        throw new Exception(LC.GetString(LC.string_interp_2damerge_invalidCouldNotFindSourceTableExport, table, modPackagePath));
                         return false;
                     }
 
                     if (!modTable.IsA(@"Bio2DA"))
                     {
                         MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - export is not a Bio2DA or subclass. It was: {modTable.ClassName}");
-                        throw new Exception($"Bio2DA merge 'mergetables' value is invalid: {table} - export is not a Bio2DA or subclass. It was: {modTable.ClassName}");
+                        throw new Exception(LC.GetString(LC.string_interp_2damerge_invalidSourceObjectIsNot2DA, table, modTable.ClassName));
                         return false;
                     }
 
@@ -340,14 +341,14 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     if (baseTable == null)
                     {
                         MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - could not find basegame table with base name '{tableName}' name in package '{basePackagePath}'");
-                        throw new Exception($"Bio2DA merge 'mergetables' value is invalid: {table} - could not find basegame table with base name '{tableName}' name in package '{basePackagePath}'");
+                        throw new Exception(LC.GetString(LC.string_interp_2damerge_invalidCouldNotFindTargetTable, table, tableName, basePackagePath));
                     }
 
                     // Check basetable is actually a vanilla table
                     if (!packageContainer.VanillaTableNames.Contains(baseTable.ObjectName.Instanced, StringComparer.InvariantCultureIgnoreCase))
                     {
                         MLog.Error($@"Bio2DA merge 'mergetables' value is invalid: {table} - this is not a vanilla table. Bio2DA merge does not work with non-vanilla tables.");
-                        throw new Exception($"Bio2DA merge 'mergetables' value is invalid: {table} - this is not a vanilla table. Bio2DA merge does not work with non-vanilla tables.");
+                        throw new Exception(LC.GetString(LC.string_interp_2damerge_invalidNotAVanillaTable, table));
                     }
 
                     Bio2DA mod2DA = new Bio2DA(modTable);
@@ -364,12 +365,12 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                     {
                         MLog.Error($@"Bio2DA merge into {tableName} from {table} failed with result {result}");
                         // We will not throw an exception here
-                        TelemetryInterposer.TrackError(new Exception("Bio2DA Merge Failed"), new Dictionary<string,string>()
+                        TelemetryInterposer.TrackError(new Exception(@"Bio2DA Merge Failed"), new Dictionary<string, string>()
                         {
-                            {"Table name", baseTable.InstancedFullPath},
-                            {"Result", result.ToString()},
-                            {"Mod Table", modTable.InstancedFullPath},
-                            {"Mod Package", modPackagePath}
+                            {@"Table name", baseTable.InstancedFullPath},
+                            {@"Result", result.ToString()},
+                            {@"Mod Table", modTable.InstancedFullPath},
+                            {@"Mod Package", modPackagePath}
                         });
                         return false;
                     }

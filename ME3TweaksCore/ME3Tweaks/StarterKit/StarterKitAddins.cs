@@ -878,7 +878,7 @@ namespace ME3TweaksCore.ME3Tweaks.StarterKit
 
         private static void GenerateM3DA(string dlcFolderPath, List<Bio2DAOption> tables, IMEPackage twoDAPackage)
         {
-            var m3daPath = Path.Combine(dlcFolderPath, twoDAPackage.Game.CookedDirName(), $"{Path.GetFileName(dlcFolderPath)}-2DAs.m3da");
+            var m3daPath = Path.Combine(dlcFolderPath, twoDAPackage.Game.CookedDirName(), $@"{Path.GetFileName(dlcFolderPath)}-2DAs.m3da");
             var mml = new List<Bio2DAMergeManifest>();
             var mapping = new Dictionary<string, Bio2DAMergeManifest>();
             foreach (var b in tables)

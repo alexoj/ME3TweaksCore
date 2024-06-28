@@ -263,5 +263,13 @@ namespace ME3TweaksCore.Localization
 		public const string string_interp_dok_mustContainDescriptorX = "string_interp_dok_mustContainDescriptorX";
 		public const string string_interp_dok_withOptionXInstalled = "string_interp_dok_withOptionXInstalled";
 		public const string string_interp_dok_withOptionXNotInstalled = "string_interp_dok_withOptionXNotInstalled";
+		public const string string_interp_2damerge_invalidTargetFile = "string_interp_2damerge_invalidTargetFile";
+		public const string string_interp_2damerge_couldNotFindTarget = "string_interp_2damerge_couldNotFindTarget";
+		public const string string_interp_2damerge_couldNotFindSourcePackage = "string_interp_2damerge_couldNotFindSourcePackage";
+		public const string string_interp_2damerge_invalidTableNameMissingPart = "string_interp_2damerge_invalidTableNameMissingPart";
+		public const string string_interp_2damerge_invalidCouldNotFindSourceTableExport = "string_interp_2damerge_invalidCouldNotFindSourceTableExport";
+		public const string string_interp_2damerge_invalidSourceObjectIsNot2DA = "string_interp_2damerge_invalidSourceObjectIsNot2DA";
+		public const string string_interp_2damerge_invalidCouldNotFindTargetTable = "string_interp_2damerge_invalidCouldNotFindTargetTable";
+		public const string string_interp_2damerge_invalidNotAVanillaTable = "string_interp_2damerge_invalidNotAVanillaTable";
 	}
 }

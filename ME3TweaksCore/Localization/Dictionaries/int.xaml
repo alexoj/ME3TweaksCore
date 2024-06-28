@@ -414,4 +414,23 @@
     <!-- 0={Option name} -->
     <system:String x:Key="string_interp_dok_withOptionXNotInstalled">(with option {0} NOT installed)</system:String>
     <!-- 0={Option name} -->
+
+    <!-- Bio2DA Merge -->
+    <system:String x:Key="string_interp_2damerge_invalidTargetFile">Bio2DA merge 'packagefile' is invalid: {0} - cannot merge into non-basegame/Bring Down The Sky 2DA files</system:String>
+    <!-- 0={Filename} -->
+    <system:String x:Key="string_interp_2damerge_couldNotFindTarget">Bio2DA merge 'packagefile' is invalid: {0} - could not find in basegame CookedPCConsole folder of target</system:String>
+    <!-- 0={Filename} -->
+    <system:String x:Key="string_interp_2damerge_couldNotFindSourcePackage">Bio2DA merge 'mergepackagefile' is invalid: {0} - could not find in CookedPCConsole folder of mod</system:String>
+    <!-- 0={Filename} -->
+    <system:String x:Key="string_interp_2damerge_invalidTableNameMissingPart">Bio2DA merge 'mergetables' value is invalid: {0} - base name of object does not end with _part</system:String>
+    <!-- 0={Table InstancedFullPath string} -->
+    <system:String x:Key="string_interp_2damerge_invalidCouldNotFindSourceTableExport">Bio2DA merge 'mergetables' value is invalid: {0} - could not find table with that instanced full path in package '{1}'</system:String>
+    <!-- 0={Table InstancedFullPath string} 1={Filepath} -->
+    <system:String x:Key="string_interp_2damerge_invalidSourceObjectIsNot2DA">Bio2DA merge 'mergetables' value is invalid: {0} - export is not a Bio2DA or subclass. It was: {1}</system:String>
+    <!-- 0={Table InstancedFullPath string} 1={Object class name} -->
+    <system:String x:Key="string_interp_2damerge_invalidCouldNotFindTargetTable">Bio2DA merge 'mergetables' value is invalid: {0} - could not find basegame table with base name '{1}' name in package '{2}'</system:String>
+    <!-- 0={Table InstancedFullPath string} 1={Table name} 2={Filepath} -->
+    <system:String x:Key="string_interp_2damerge_invalidNotAVanillaTable">Bio2DA merge 'mergetables' value is invalid: {0} - this is not a vanilla table. Bio2DA merge does not work with non-vanilla tables</system:String>
+    <!-- 0={Table InstancedFullPath string} -->
+
 </ResourceDictionary>
