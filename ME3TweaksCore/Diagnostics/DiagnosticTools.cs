@@ -29,16 +29,15 @@ namespace ME3TweaksCore.Diagnostics
             MLog.Information($@"Running diagnostic tool: VerifyPackages on {target.TargetPath}");
             List<string> errors = new List<string>();
 
-            var loadedPackages = MELoadedFiles
-                .GetFilesLoadedInGame(target.Game, true, gameRootOverride: target.TargetPath)
-                .Where(x => x.Value.RepresentsPackageFilePath()).ToList();
+            var loadedPackages = MELoadedFiles.GetAllFiles(target.Game)
+                .Where(x => x.RepresentsPackageFilePath()).ToList();
 
             int done = 0;
             foreach (var packPath in loadedPackages)
             {
                 try
                 {
-                    using var package = MEPackageHandler.OpenMEPackage(packPath.Value);
+                    using var package = MEPackageHandler.OpenMEPackage(packPath);
                 }
                 catch (Exception e)
                 {
