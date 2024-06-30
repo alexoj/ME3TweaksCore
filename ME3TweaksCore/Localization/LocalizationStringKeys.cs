@@ -121,6 +121,10 @@ namespace ME3TweaksCore.Localization
 		public const string string_collectingME3SessionLog = "string_collectingME3SessionLog";
 		public const string string_gettingTextureInfo = "string_gettingTextureInfo";
 		public const string string_collectingASILogFiles = "string_collectingASILogFiles";
+		public const string string_collectingBasegameFileModifications = "string_collectingBasegameFileModifications";
+		public const string string_checkingForBlacklistedModsMEM = "string_checkingForBlacklistedModsMEM";
+		public const string string_collectingLODSettings = "string_collectingLODSettings";
+		public const string string_collectingTOCFileInformation = "string_collectingTOCFileInformation";
 		public const string string_interp_ssp_unopenedParenthsisFound = "string_interp_ssp_unopenedParenthsisFound";
 		public const string string_interp_ssp_unclosedParenthesisFound = "string_interp_ssp_unclosedParenthesisFound";
 		public const string string_outdatedVersionInstalled = "string_outdatedVersionInstalled";

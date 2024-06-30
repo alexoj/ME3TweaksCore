@@ -165,6 +165,10 @@
     <system:String x:Key="string_collectingME3SessionLog">Collecting ME3 session log</system:String>
     <system:String x:Key="string_gettingTextureInfo">Getting texture mod installation info</system:String>
     <system:String x:Key="string_collectingASILogFiles">Collecting ASI log files</system:String>
+    <system:String x:Key="string_collectingBasegameFileModifications">Collecting basegame file modifications</system:String>
+    <system:String x:Key="string_checkingForBlacklistedModsMEM">Checking for blacklisted mods (MEM)</system:String>
+    <system:String x:Key="string_collectingLODSettings">Collecting LOD settings</system:String>
+    <system:String x:Key="string_collectingTOCFileInformation">Collecting TOC file information</system:String>
 
     <!-- StringStructParser-->
     <system:String x:Key="string_interp_ssp_unopenedParenthsisFound">Error parsing parenthesis split list: Found closing parenthesis that does not match open parenthesis at position {0} in string {1}</system:String>

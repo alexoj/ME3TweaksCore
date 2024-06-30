@@ -1000,7 +1000,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 addDiagLine(@"Basegame changes", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
 
-                package.UpdateStatusCallback?.Invoke(@"Collecting basegame file modifications");
+                package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingBasegameFileModifications));
                 List<string> modifiedFiles = new List<string>();
 
                 void failedCallback(string file)
@@ -1072,7 +1072,7 @@ namespace ME3TweaksCore.Diagnostics
 
                 if (hasMEM)
                 {
-                    package.UpdateStatusCallback?.Invoke(@"Checking for blacklisted mods");
+                    package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_checkingForBlacklistedModsMEM));
                     args = $@"--detect-bad-mods --gameid {gameID} --ipc";
                     var blacklistedMods = new List<string>();
                     MEMIPCHandler.RunMEMIPCUntilExit(package.DiagnosticTarget.Game.IsOTGame(), args, false, setMEMCrashLog: memExceptionOccured, ipcCallback: (string command, string param) =>
@@ -1495,7 +1495,7 @@ namespace ME3TweaksCore.Diagnostics
                     #region Texture LODs
                     MLog.Information(@"Collecting texture LODs");
 
-                    package.UpdateStatusCallback?.Invoke(@"Collecting LOD settings");
+                    package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingLODSettings));
                     var lods = MEMIPCHandler.GetLODs(package.DiagnosticTarget.Game);
                     if (lods != null)
                     {
@@ -1616,7 +1616,7 @@ namespace ME3TweaksCore.Diagnostics
                 {
                     MLog.Information(@"Collecting TOC information");
 
-                    package.UpdateStatusCallback?.Invoke(@"Collecting TOC file information");
+                    package.UpdateStatusCallback?.Invoke(LC.GetString(LC.string_collectingTOCFileInformation));
 
                     addDiagLine(@"File Table of Contents (TOC) check", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                     addDiagLine(@"PCConsoleTOC.bin files list all files the game can normally access and stores the values in hash tables for faster lookup.");
