@@ -193,6 +193,7 @@ namespace ME3TweaksCore.Helpers.MEM
 
             // No validation. Make sure exit code is checked in the calling process.
             var memPath = MCoreFilesystem.GetMEMNoGuiPath(classicMEM);
+            string lastProcessedFile = null;
 
             var cmd = Cli.Wrap(memPath).WithArguments(arguments).WithValidation(CommandResultValidation.None);
             Debug.WriteLine($@"Launching process: {memPath} {arguments}");
@@ -219,12 +220,21 @@ namespace ME3TweaksCore.Helpers.MEM
                         if (stdOut.Text.StartsWith(@"[IPC]"))
                         {
                             var ipc = breakdownIPC(stdOut.Text);
+                            if (ipc.command == @"PROCESSING_FILE" && ipc.param != null)
+                            {
+                                lastProcessedFile = ipc.param;
+                            }
                             internalHandleIPC(ipc.command, ipc.param);
                         }
                         else
                         {
                             if (exceptionOcurred)
                             {
+                                if (lastProcessedFile != null)
+                                {
+                                    MLog.Fatal($@"MEM crashed - last processed file was {lastProcessedFile}");
+                                    lastProcessedFile = null; // don't print again
+                                }
                                 MLog.Fatal($@"{stdOut.Text}");
                                 memCrashLine?.Invoke(stdOut.Text);
                             }
