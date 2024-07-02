@@ -19,7 +19,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Localization\Dictionaries\*.xaml.lzma" />
 		<EmbeddedResource Include="GameFilesystem\Bink\**\*.dll" />
 		<EmbeddedResource Include="Assets\**\*.exe" />
 		<EmbeddedResource Include="Assets\**\*.bin" />
@@ -79,5 +78,16 @@
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="powershell &quot;&amp; &quot;&quot;$(ProjectDir)\Build\preparelocalizations.ps1&quot;&quot;&quot;" />
+	</Target>
+	<Target Name="AddCompressedLocalizationDictionaries" AfterTargets="PreBuildEvent" BeforeTargets="BeforeCompile;CoreCompile">
+		<ItemGroup>
+			<EmbeddedResource Include="Localization\Dictionaries\int.xaml.lzma" />
+			<EmbeddedResource Include="Localization\Dictionaries\ita.xaml.lzma" />
+			<EmbeddedResource Include="Localization\Dictionaries\deu.xaml.lzma" />
+			<EmbeddedResource Include="Localization\Dictionaries\rus.xaml.lzma" />
+			<!-- Have not been updated and have thus been disabled. -->
+			<!--<EmbeddedResource Include="Localization\Dictionaries\pol.xaml.lzma" />-->
+			<!--<EmbeddedResource Include="Localization\Dictionaries\bra.xaml.lzma" />-->
+		</ItemGroup>
 	</Target>
 </Project>
