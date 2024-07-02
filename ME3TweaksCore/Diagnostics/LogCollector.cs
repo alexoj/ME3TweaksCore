@@ -1620,17 +1620,24 @@ namespace ME3TweaksCore.Diagnostics
 
                     addDiagLine(@"File Table of Contents (TOC) check", ME3TweaksLogViewer.LogSeverity.DIAGSECTION);
                     addDiagLine(@"PCConsoleTOC.bin files list all files the game can normally access and stores the values in hash tables for faster lookup.");
-                    addDiagLine(@"The vanilla shipping game includes references and incorrect size values for some files; these are normal.");
                     bool hadTocError = false;
-                    string markerfile = M3Directories.GetTextureMarkerPath(package.DiagnosticTarget);
-                    var bgTOC = Path.Combine(M3Directories.GetBioGamePath(package.DiagnosticTarget), @"PCConsoleTOC.bin"); // Basegame
-                    hadTocError |= CheckTOCFile(package, bgTOC, markerfile, addDiagLine);
+                    string markerfile = package.DiagnosticTarget.GetTextureMarkerPath();
+                    var bgTOC = Path.Combine(package.DiagnosticTarget.GetBioGamePath(), @"PCConsoleTOC.bin"); // Basegame
+                    var isTOCVanilla = VanillaDatabaseService.IsFileVanilla(package.DiagnosticTarget, bgTOC, true);
+                    if (isTOCVanilla)
+                    {
+                        addDiagLine($@"Unmodified vanilla TOC: {Path.GetRelativePath(package.DiagnosticTarget.TargetPath, bgTOC)}", ME3TweaksLogViewer.LogSeverity.GOOD);
+                        addDiagLine(@"The vanilla shipping game includes references to files that don't exist and incorrect size values for some files; these are normal.");
+                        addDiagLine(@"If you restored from a backup without all localizations, there may be additional missing LOC entries listed here, that is normal.");
+                    }
+
+                    hadTocError |= CheckTOCFile(package, bgTOC, markerfile, addDiagLine, isTOCVanilla);
 
                     var dlcs = package.DiagnosticTarget.GetInstalledDLC();
                     var dlcTOCs = new List<string>();
                     foreach (var v in dlcs)
                     {
-                        var tocPath = Path.Combine(M3Directories.GetDLCPath(package.DiagnosticTarget), v, @"PCConsoleTOC.bin");
+                        var tocPath = Path.Combine(package.DiagnosticTarget.GetDLCPath(), v, @"PCConsoleTOC.bin");
                         if (File.Exists(tocPath))
                         {
                             dlcTOCs.Add(tocPath);
@@ -1639,7 +1646,12 @@ namespace ME3TweaksCore.Diagnostics
 
                     foreach (string toc in dlcTOCs)
                     {
-                        hadTocError |= CheckTOCFile(package, toc, markerfile, addDiagLine);
+                        isTOCVanilla = VanillaDatabaseService.IsFileVanilla(package.DiagnosticTarget, toc, true);
+                        if (isTOCVanilla)
+                        {
+                            addDiagLine($@"Unmodified vanilla TOC: {Path.GetRelativePath(package.DiagnosticTarget.TargetPath, toc)}", ME3TweaksLogViewer.LogSeverity.GOOD);
+                        }
+                        hadTocError |= CheckTOCFile(package, toc, markerfile, addDiagLine, isTOCVanilla);
                     }
 
                     if (package.DiagnosticTarget.Game.IsOTGame())
@@ -1814,9 +1826,12 @@ namespace ME3TweaksCore.Diagnostics
         /// <summary>
         /// Checks the TOC file at the listed path and prints information to the diagnostic for it.
         /// </summary>
+        /// <param name="package"></param>
         /// <param name="tocFilePath">TOC file to check</param>
+        /// <param name="textureMarkerFilePath"></param>
         /// <param name="addDiagLine">Function to print to diagnostic</param>
-        private static bool CheckTOCFile(LogUploadPackage package, string tocFilePath, string textureMarkerFilePath, Action<string, ME3TweaksLogViewer.LogSeverity> addDiagLine)
+        /// <param name="isTocVanilla"></param>
+        private static bool CheckTOCFile(LogUploadPackage package, string tocFilePath, string textureMarkerFilePath, Action<string, ME3TweaksLogViewer.LogSeverity> addDiagLine, bool isTocVanilla)
         {
             bool hadTocError = false;
             var tocrootPath = package.DiagnosticTarget.TargetPath;
@@ -1828,9 +1843,17 @@ namespace ME3TweaksCore.Diagnostics
             MLog.Information($@"Checking TOC file {tocFilePath}");
 
             TOCBinFile tbf = new TOCBinFile(tocFilePath);
-            addDiagLine($@" - {tocFilePath.Substring(package.DiagnosticTarget.TargetPath.Length + 1)}: {tbf.GetAllEntries().Count} file entries, {tbf.HashBuckets.Count} hash buckets", ME3TweaksLogViewer.LogSeverity.INFO);
+            if (!isTocVanilla)
+            {
+                // If TOC is vanilla this information is not helpful and just pollutes the output.
+                addDiagLine($@" - {tocFilePath.Substring(package.DiagnosticTarget.TargetPath.Length + 1)}: {tbf.GetAllEntries().Count} file entries, {tbf.HashBuckets.Count} hash buckets", ME3TweaksLogViewer.LogSeverity.INFO);
+            }
+
             foreach (TOCBinFile.Entry ent in tbf.GetAllEntries())
             {
+                if (ent.name == "PCConsoleTOC.txt")
+                    continue; // This file is not shipped in most games, nor is it used, so we don't care.
+
                 //Console.WriteLine(index + "\t0x" + ent.offset.ToString("X6") + "\t" + ent.size + "\t" + ent.name);
 
                 string filepath = Path.Combine(tocrootPath, ent.name);
@@ -2092,46 +2115,53 @@ namespace ME3TweaksCore.Diagnostics
         {
             if (!target.Game.IsLEGame()) return null;
             var logs = new Dictionary<string, string>();
-            var directory = M3Directories.GetExecutableDirectory(target);
+            var directory = target.GetExecutableDirectory();
             if (Directory.Exists(directory))
             {
                 foreach (var f in Directory.GetFiles(directory, "*"))
                 {
-                    if (!asilogExtensions.Contains(Path.GetExtension(f)))
-                        continue; // Not parsable
-
-                    var fi = new FileInfo(f);
-                    var timeDelta = DateTime.Now - fi.LastWriteTime;
-                    if (timeDelta < TimeSpan.FromDays(1))
+                    try
                     {
-                        // If the log was written within the last day.
-                        StringBuilder sb = new StringBuilder();
-                        var fileContentsLines = File.ReadAllLines(f);
+                        if (!asilogExtensions.Contains(Path.GetExtension(f)))
+                            continue; // Not parsable
 
-                        int lastIndexRead = 0;
-                        // Read first 30 lines.
-                        for (int i = 0; i < 30 && i < fileContentsLines.Length - 1; i++)
+                        var fi = new FileInfo(f);
+                        var timeDelta = DateTime.Now - fi.LastWriteTime;
+                        if (timeDelta < TimeSpan.FromDays(1))
                         {
-                            sb.AppendLine(fileContentsLines[i]);
-                            lastIndexRead = i;
-                        }
+                            // If the log was written within the last day.
+                            StringBuilder sb = new StringBuilder();
+                            var fileContentsLines = File.ReadAllLines(f);
 
-                        // Read last 30 lines.
-                        if (lastIndexRead < fileContentsLines.Length - 1)
-                        {
-                            sb.AppendLine(@"...");
-                            var startIndex = Math.Max(lastIndexRead, fileContentsLines.Length - 30);
-                            for (int i = startIndex; i < fileContentsLines.Length - 1; i++)
+                            int lastIndexRead = 0;
+                            // Read first 30 lines.
+                            for (int i = 0; i < 30 && i < fileContentsLines.Length - 1; i++)
                             {
                                 sb.AppendLine(fileContentsLines[i]);
+                                lastIndexRead = i;
                             }
-                        }
 
-                        logs[Path.GetFileName(f)] = sb.ToString();
+                            // Read last 30 lines.
+                            if (lastIndexRead < fileContentsLines.Length - 1)
+                            {
+                                sb.AppendLine(@"...");
+                                var startIndex = Math.Max(lastIndexRead, fileContentsLines.Length - 30);
+                                for (int i = startIndex; i < fileContentsLines.Length - 1; i++)
+                                {
+                                    sb.AppendLine(fileContentsLines[i]);
+                                }
+                            }
+
+                            logs[Path.GetFileName(f)] = sb.ToString();
+                        }
+                        else
+                        {
+                            MLog.Information($@"Skipping log: {Path.GetFileName(f)}. Last write time was {fi.LastWriteTime}. Only files written within last day are included");
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        MLog.Information($@"Skipping log: {Path.GetFileName(f)}. Last write time was {fi.LastWriteTime}. Only files written within last day are included");
+                        logs[Path.GetFileName(f)] = e.Message;
                     }
                 }
             }

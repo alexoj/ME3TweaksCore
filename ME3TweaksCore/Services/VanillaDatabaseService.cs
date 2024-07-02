@@ -302,11 +302,17 @@ namespace ME3TweaksCore.Services
             return null;
         }
 
-
-        public static bool IsFileVanilla(GameTarget target, string file, bool md5check = false)
+        /// <summary>
+        /// Checks if a fullFilePath is vanilla
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="fullFilePath"></param>
+        /// <param name="md5check"></param>
+        /// <returns></returns>
+        public static bool IsFileVanilla(GameTarget target, string fullFilePath, bool md5check = false)
         {
-            var relativePath = file.Substring(target.TargetPath.Length + 1);
-            return IsFileVanilla(target.Game, file, relativePath, target.IsPolishME1, md5check);
+            var relativePath = fullFilePath.Substring(target.TargetPath.Length + 1);
+            return IsFileVanilla(target.Game, fullFilePath, relativePath, target.IsPolishME1, md5check);
         }
 
         public static bool IsFileVanilla(MEGame game, string fullpath, string relativepath, bool isME1Polish, bool md5check = false)
