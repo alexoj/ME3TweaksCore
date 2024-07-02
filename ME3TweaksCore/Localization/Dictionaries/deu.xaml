@@ -188,6 +188,10 @@
 	<system:String x:Key="string_collectingME3SessionLog">ME3 Sitzungsereignisprotokoll wird gesammelt</system:String>
 	<system:String x:Key="string_gettingTextureInfo">Texturmodinformationen werden gesammelt</system:String>
 	<system:String x:Key="string_collectingASILogFiles">ASI-Ereignisprotokoll wird gesammelt</system:String>
+	<system:String x:Key="string_collectingBasegameFileModifications">Erfasse Änderungen an Basisspieldateien</system:String>
+	<system:String x:Key="string_checkingForBlacklistedModsMEM">Prüfe auf geblacklistete Mods (MEM)</system:String>
+	<system:String x:Key="string_collectingLODSettings">Erfasse LOD-Einstellungen</system:String>
+	<system:String x:Key="string_collectingTOCFileInformation">Sammle TOC-Dateiinformationen</system:String>
 	<system:String x:Key="string_interp_serverRejectedTheUpload">Der Server hat deinen Upload abgewiesen. Die Antwort lautete: {0}</system:String>
 	<system:String x:Key="string_interp_logWasUnableToUpload" xml:space="preserve">Das Ereignisprotokoll konnte nicht hochgeladen werden:\n{0}.\nBitte kontaktiere uns im ME3Tweaks Discord (Englisch) für Hilfe.</system:String>
 	<system:String x:Key="string_interp_requestTimedOutUploading">Anfragezeitüberschreitung beim Hochladen des Ereignisprotokolls.</system:String>
