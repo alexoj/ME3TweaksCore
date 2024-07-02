@@ -84,11 +84,6 @@ namespace ME3TweaksCore.GameFilesystem
         public string ModdescSourceHash { get; set; }
 
         /// <summary>
-        /// List of option keys that were installed. This is similar to <see cref="OptionsSelectedAtInstallTime"/> but this is for programatic access.
-        /// </summary>
-        public List<string> OptionKeysSelectedAtInstallTime { get; set; } = new();
-
-        /// <summary>
         /// Writes the metacmm file to the specified filepath.
         /// </summary>
         /// <param name="path">Filepath to write to</param>
