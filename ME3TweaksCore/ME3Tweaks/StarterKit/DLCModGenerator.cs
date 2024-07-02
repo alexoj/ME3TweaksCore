@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using LegendaryExplorerCore.Coalesced;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Misc;
@@ -16,7 +14,6 @@ using ME3TweaksCore.Helpers;
 using ME3TweaksCore.Localization;
 using ME3TweaksCore.ME3Tweaks.M3Merge;
 using ME3TweaksCore.Objects;
-using Newtonsoft.Json;
 
 namespace ME3TweaksCore.ME3Tweaks.StarterKit
 {
