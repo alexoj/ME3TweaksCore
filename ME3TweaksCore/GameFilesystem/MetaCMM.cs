@@ -71,6 +71,13 @@ namespace ME3TweaksCore.GameFilesystem
         /// </summary>
         public DateTime? InstallTime { get; set; }
 
+
+        /// <summary>
+        /// List of option keys that were installed. This is similar to <see cref="OptionsSelectedAtInstallTime"/> but this is for programatic access.
+        /// </summary>
+        public List<string> OptionKeysSelectedAtInstallTime { get; set; } = new();
+
+
         /// <summary>
         /// Hash of the moddesc that installed this mod
         /// </summary>

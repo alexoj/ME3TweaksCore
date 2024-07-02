@@ -82,15 +82,38 @@
 	<system:String x:Key="string_gameNotInstalled">Игра не установлена</system:String>
 	<system:String x:Key="string_gameNotInstalledRunOnce">Игра не установлена. Запустите игру хотя бы один раз для завершения настройки.</system:String>
 	<system:String x:Key="string_cantCreateBackup">Невозможно создать архив</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidTargetFile">Недопустимый Bio2DA merge 'packagefile': {0} - невозможно осуществить merge в неисходные/Bring Down the Sky 2DA файлы</system:String>
+	<system:String x:Key="string_interp_2damerge_couldNotFindTarget">Недопустимый Bio2DA merge 'packagefile': {0} - отсутствует в исходной папке CookedPCConsole целевой игры</system:String>
+	<system:String x:Key="string_interp_2damerge_couldNotFindSourcePackage">Недопустимый Bio2DA merge 'packagefile': {0} - отсутствует в папке CookedPCConsole мода</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidTableNameMissingPart">Недопустимое значение Bio2DA merge 'mergetables': {0} - базовое имя объекта не оканчивается на _part</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidCouldNotFindSourceTableExport">Недопустимое значение Bio2DA merge 'mergetables': {0} - отсутствует таблица, содежащая полный путь в пакетном файле '{1}'</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidSourceObjectIsNot2DA">Недопустимое значение Bio2DA merge 'mergetables': {0} - экспорт не является Bio2DA или подклассом. Он является: {1}</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidCouldNotFindTargetTable">Недопустимое значение Bio2DA merge 'mergetables': {0} - отсутствует исходная таблица с базовым именем '{1}' в пакетном файле '{2}'</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidNotAVanillaTable">Недопустимое значение Bio2DA merge 'mergetables': {0} - это неоригинальная таблица. Bio2DA merge не работает с неоригинальными таблицами</system:String>
 	<system:String x:Key="string_interp_XDoesNotSupportGameY">{0} не поддерживает игру {1}</system:String>
 	<system:String x:Key="string_interp_copyDidntWorkX">Конечный файл не существует после копирования: {0}</system:String>
 	<system:String x:Key="string_interp_failedToLoadPackageXY">Ошибка загрузки пакетного файла {0}: {1}</system:String>
+	<system:String x:Key="string_generatingMod">Генерация мода</system:String>
+	<system:String x:Key="string_interp_dok_mustContainDescriptorX">Структура DLCOptionKey должна содержать дескриптор с именем '{0}'</system:String>
+	<system:String x:Key="string_interp_dok_withOptionXInstalled">(с установленной опцией {0})</system:String>
+	<system:String x:Key="string_interp_dok_withOptionXNotInstalled">(с НЕустановленной опцией {0})</system:String>
 	<system:String x:Key="string_dlcRequirementInvalidParenthesis">Недопустимое значение DLCRequirement: Версия должна быть указана в скобках.</system:String>
 	<system:String x:Key="string_interp_dlcRequirementInvalidBadVersion">Недопустимое значение DLCRequirement: Недопустимая строка версии '{0}'</system:String>
+	<system:String x:Key="string_interp_minVersionAppend">(минимальная версия: {0})</system:String>
+	<system:String x:Key="string_interp_maxVersionAppend">(максимальная версия: {0})</system:String>
+	<system:String x:Key="string_interp_drb_malformedDR">Условия в DLСRequirementBase должны быть в {0}{1}, разделены запятой, и использовать формат ключ=значение. Неверное значение: {2}</system:String>
+	<system:String x:Key="string_interp_drb_unknownDescriptor">Неизвестный дескриптор в DLСRequirementBase: {0}</system:String>
+	<system:String x:Key="string_interp_drb_notInstalledWithOptionX">Не установлено с опцией {0}</system:String>
+	<system:String x:Key="string_interp_drb_installedWithIncompatibleOptionX">Установлено с несовместимой опцией {0}</system:String>
+	<system:String x:Key="string_interp_drb_notInstalledWithAtLeastX">Не установлено хотя бы с одной из требуемый опций: {1}</system:String>
+	<system:String x:Key="string_interp_drb_withAtLeastOneOfTheFollowingX">(хотя бы с одной из следующих установленных опций: {0})</system:String>
+	<system:String x:Key="string_synchronizingEmails">Синхронизация Писем</system:String>
+	<system:String x:Key="string_emailsNotMergedMessagesFileNotFound">Почта не синхронизирована: Сообщения не найдены</system:String>
+	<system:String x:Key="string_game2EmailMergeWrongGame">Манифест синхронизации почты Game 2 применяется к некорректной игре</system:String>
 	<system:String x:Key="string_cannotBackupGame">Невозможно создать архив игры</system:String>
 	<system:String x:Key="string_interp_cannotBackupGameIsRunning">Невозможно создать архив {0}, когда игра запущена.</system:String>
 	<system:String x:Key="string_ensureCorrectGameChosen">Удостоверьтеся, что выбрана верная игра</system:String>
-	<system:String x:Key="string_warningLinkedTargetWillNotLoad">Будет проверено наличие оригинальной игры по указанному пути. По завершении проверки игра будет отмечена как архив и инструменты моддинга откажутся ее модифицировать. Удостоверьтесь, что это не путь к активной игре, иначе ее моддинг будет невозможен.</system:String>
+	<system:String x:Key="string_warningLinkedTargetWillNotLoad">Указанный вами путь будет проверен на соответствие архиву оригинальной игры. По завершении проверки игра будет отмечена как архив и инструменты моддинга откажутся ее модифицировать. Удостоверьтесь, что это не путь к активной игре, иначе ее моддинг будет невозможен.</system:String>
 	<system:String x:Key="string_iUnderstand">Я понимаю</system:String>
 	<system:String x:Key="string_abortLinking">Отменить привязку</system:String>
 	<system:String x:Key="string_cannotLinkTargetWrongGenerationLEneedOT">Невозможно использовать данную целевую игру в качестве архива: Это версия игры Legendary Edition, вы же пытаетесь привязать игру из Оригинальной Трилогии.</system:String>
@@ -123,6 +146,7 @@
 	<system:String x:Key="string_restoringFromBackup">Восстановление из архива</system:String>
 	<system:String x:Key="string_restoringMovies">Восстановление видеороликов</system:String>
 	<system:String x:Key="string_calculatingHowManyFilesWillBeRestored">Вычисление количества восстанавливаемых файлов</system:String>
+	<system:String x:Key="string_comparingGameAgainstVanillaDatabase">Сравнение игры с базой данных оригинала</system:String>
 	<system:String x:Key="string_interp_invalidTargetMissingFile">Недопустимый путь: {0} не обнаружен в папке игры.</system:String>
 	<system:String x:Key="string_invalidTargetProtectedByCmmvanilla">Недопустимый путь: Отмечен как архивный наличием файла cmm_vanilla</system:String>
 	<system:String x:Key="string_dialog_cannotRemoveActiveTarget" xml:space="preserve">Невозможно убрать из списка игру, выбранную в качестве загружаемой.\nВыберите другую загружаемую игру в главном окне, что эту можно было убрать из списка.</system:String>
@@ -156,6 +180,8 @@
 	<system:String x:Key="string_tooltip_disableDLC" xml:space="preserve">Отключает загрузку данного DLC-мода.&#10;Это не затрагивает никакие файлы и может быть безопасно сделано после установки текстурных модов</system:String>
 	<system:String x:Key="string_tooltip_enableDLC" xml:space="preserve">Включает загрузку данного DLC-мода в игре</system:String>
 	<system:String x:Key="string_other">Другое</system:String>
+	<system:String x:Key="string_m3ConsoleKeybinds">M3 Console Keybinds</system:String>
+	<system:String x:Key="string_buildNotSigned">Сборка не подписана</system:String>
 	<system:String x:Key="string_preparingToCollectDiagnosticInfo">Подготовка к сбору данных диагностики</system:String>
 	<system:String x:Key="string_interp_preparingMEMNoGUIX">Подготовка MEM No GUI {0}%</system:String>
 	<system:String x:Key="string_collectingGameInformation">Сбор игровых данных</system:String>
@@ -170,6 +196,10 @@
 	<system:String x:Key="string_collectingME3SessionLog">Сбор лога сессии ME3</system:String>
 	<system:String x:Key="string_gettingTextureInfo">Получение информации об установке текстурного мода</system:String>
 	<system:String x:Key="string_collectingASILogFiles">Сбор логов ASI</system:String>
+	<system:String x:Key="string_collectingBasegameFileModifications">Сбор модификаций файлов исходной игры</system:String>
+	<system:String x:Key="string_checkingForBlacklistedModsMEM">Проверка неразрешенных модов (MEM)</system:String>
+	<system:String x:Key="string_collectingLODSettings">Сбор настроек LOD</system:String>
+	<system:String x:Key="string_collectingTOCFileInformation">Сбор информации файла TOC</system:String>
 	<system:String x:Key="string_interp_serverRejectedTheUpload">Сервер отказал в загрузке. Полученный ответ: {0}</system:String>
 	<system:String x:Key="string_interp_logWasUnableToUpload" xml:space="preserve">Не удалось отправить лог:\n{0}.\nПожалуйста, обратитесь на ME3Tweaks Discord для помощи.</system:String>
 	<system:String x:Key="string_interp_requestTimedOutUploading">Превышение времени запроса при отправке лога.</system:String>
@@ -196,6 +226,7 @@
 	<system:String x:Key="string_interp_fileWasRemovedX">Файл был удален: {0}</system:String>
 	<system:String x:Key="string_interp_fileWasAddedX">Файл был добавлен: {0}</system:String>
 	<system:String x:Key="string_interp_fileWasReplacedX">Файл был заменен: {0}</system:String>
+	<system:String x:Key="string_dialog_memRunningCloseAttempt">Текстуры сейчас устанавливаются. Прекращение процесса скоррее всего приведет к неработоспособности игры.</system:String>
 	<system:String x:Key="string_extractingMassEffectModderNoGui">Извлечение MassEffectModderNoGui</system:String>
 	<system:String x:Key="string_no">Нет</system:String>
 	<system:String x:Key="string_ok">OK</system:String>
@@ -213,6 +244,9 @@
 	<system:String x:Key="string_debugDifficulty">Отладка сложности</system:String>
 	<system:String x:Key="string_interp_unknownDifficultyLevelX">Неизвестный уровень сложности: {1}</system:String>
 	<system:String x:Key="string_interp_onlineContentHashWrong">Хэш загруженного элемента ({0}) не соответствует ожидаемому. Ожидалось: {1}, получено {2}.</system:String>
+	<system:String x:Key="string_interp_plotManagerSyncForX">Синхронизация PlotManager для {0}</system:String>
+	<system:String x:Key="string_interp_errorCompilingFunctionReason" xml:space="preserve">Ошибка компиляции функции {0}: {1}</system:String>
+	<system:String x:Key="string_interp_fileLibInitFailedPlotManager">Невозможно инициализировать FileLib для PlotManagerSync: {0}</system:String>
 	<system:String x:Key="string_insufficientDiskSpace">Недостаточно места на диске</system:String>
 	<system:String x:Key="string_interp_restoringXpercent">Восстановление {0}%</system:String>
 	<system:String x:Key="string_interp_restoringX">Восстановление {0}</system:String>
@@ -222,6 +256,17 @@
 	<system:String x:Key="string_fullGameRestore">Полное восстановление игры</system:String>
 	<system:String x:Key="string_interp_copyingX">Копирование {0}</system:String>
 	<system:String x:Key="string_interp_directoryNotEmptyWillDeleteEverything">Выбранная директория не пуста: {0}. ВСЕ НЕИГРОВЫЕ ФАЙЛЫ И ПАПКИ В ЭТОЙ ДИРЕКТОРИИ БУДУТ УДАЛЕНЫ. Вы уверены, что хотите продолжить?</system:String>
+	<system:String x:Key="string_cannotRestore">Восстановление невозможно</system:String>
+	<system:String x:Key="string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive">Недопустимое имя напарника: {0}. Значение чувствительно к регистру.</system:String>
+	<system:String x:Key="string_errorReadingSquadmateOutfitManifestFileSeeLogs">Ошибка чтения файла манифеста squadmate outfit для мода(ов), подробнее в логах</system:String>
+	<system:String x:Key="string_someSquadmateOutfitsWereNotMergedSeeLogs">Некоторые костюмы напарников не были синхронизированы, подробнее в логах</system:String>
+	<system:String x:Key="string_interp_errorCompilingConditionalFunction">Ошибка компиляции условной функции {0}: {1}</system:String>
+	<system:String x:Key="string_synchronizingSquadmateOutfits">Синхронизация костюмов напарников</system:String>
+	<system:String x:Key="string_interp_sk_sqmNoBackup">Не обнаружено архивов для {0}, невозможно сгенерировать файлы squadmate merge</system:String>
+	<system:String x:Key="string_interp_sk_sqmBackupMissingRequiredFile">Требуемый для squadmate merge файл не обнаружен в архиве: {0}</system:String>
+	<system:String x:Key="string_skai_fileLibInitFailedMSM">Ошибка инициализации filelib для пакета данных ModSettingsMenu: {0}</system:String>
+	<system:String x:Key="string_skai_failedToCompileParentClassMSM">Ошибка компиляции родительского класса ModSettingsMenu для пакета данных ModSettingsMenu: {0}</system:String>
+	<system:String x:Key="string_skai_failedToCompileClassMSM">Ошибка компиляции {0} для пакета данных ModSettingsMenu: {1}</system:String>
 	<system:String x:Key="string_interp_ssp_unopenedParenthsisFound">Ошибка парсинга списка разделяющих скобок: Обнаружина закрывающая скобка, несоответствующаая открывающей скобке на позиции {0} в строке {1}</system:String>
 	<system:String x:Key="string_interp_ssp_unclosedParenthesisFound">В {0} обнаружена незакрытая открывающая скобка при парсинге списка разделяющих скобок</system:String>
 	<system:String x:Key="string_checkingBackup">Проверка архива</system:String>
