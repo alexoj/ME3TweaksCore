@@ -82,11 +82,34 @@
 	<system:String x:Key="string_gameNotInstalled">Gioco non installato</system:String>
 	<system:String x:Key="string_gameNotInstalledRunOnce">Gioco non installato. Avvialo almeno una volta per assicurarti che sia configurato completamente</system:String>
 	<system:String x:Key="string_cantCreateBackup">Impossibile creare il backup</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidTargetFile">Il merge Bio2DA 'packagefile' non è valido:  {0} - impossibile effettuare il merge all'interno di file 2DA non del gioco di base/Impatto Imminente</system:String>
+	<system:String x:Key="string_interp_2damerge_couldNotFindTarget">Il merge Bio2DA 'packagefile' non è valido: {0} - impossibile trovare il file all'interno della cartella CookedPCConsole del gioco di base target</system:String>
+	<system:String x:Key="string_interp_2damerge_couldNotFindSourcePackage">Il merge Bio2DA 'mergepackagegile' non è valido: {0} - impossibile trovare il file all'interno della cartella CookerPCConsole della mod</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidTableNameMissingPart">Il merge Bio2DA 'mergetables' non è valido: {0} - il nome base dell'oggetto non termina in _base</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidCouldNotFindSourceTableExport">Il merge Bio2DA 'mergetables' non è valido: {0} - impossibile trovare la tabella con la specifica istanza del percorso completo all'interno del pacchetto '{1}'</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidSourceObjectIsNot2DA">Il merge Bio2DA 'mergetables' non è valido: {0} - l'esportazione non è un Bio2DA o una sottoclasse. Era: {1}</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidCouldNotFindTargetTable">Il merge Bio2DA 'mergetables' non è valido: {0} - impossibile trovare una tabella del gioco di base con nome base '{1}' all'interno del pacchetto '{2}'</system:String>
+	<system:String x:Key="string_interp_2damerge_invalidNotAVanillaTable">Il merge Bio2DA 'mergetables' non è valido: {0} - questa non è una tabella vanilla. La merge Bio2DA non funziona con tabelle non vanilla</system:String>
 	<system:String x:Key="string_interp_XDoesNotSupportGameY">{0} non supporta il gioco {1}</system:String>
 	<system:String x:Key="string_interp_copyDidntWorkX">Il file di destinazione non esiste dopo la copia del file: {0}</system:String>
 	<system:String x:Key="string_interp_failedToLoadPackageXY">Impossibile caricare il pacchetto {0}: {1}</system:String>
+	<system:String x:Key="string_generatingMod">Generazione mod in corso</system:String>
+	<system:String x:Key="string_interp_dok_mustContainDescriptorX">Le struct DLCOptionKey devono contenere un descrittore di nome '{0}'</system:String>
+	<system:String x:Key="string_interp_dok_withOptionXInstalled">(con opzione {0} installata)</system:String>
+	<system:String x:Key="string_interp_dok_withOptionXNotInstalled">(con opzione {0} NON installata)</system:String>
 	<system:String x:Key="string_dlcRequirementInvalidParenthesis">L'input DLCRequirement non è valido: Version deve essere racchiuso tra parentesi</system:String>
 	<system:String x:Key="string_interp_dlcRequirementInvalidBadVersion">L'input DLCRequirement non è valido: Stringa di versione invalida: {0}</system:String>
+	<system:String x:Key="string_interp_minVersionAppend">(versione minima: {0})</system:String>
+	<system:String x:Key="string_interp_maxVersionAppend">(versione massima: {0})</system:String>
+	<system:String x:Key="string_interp_drb_malformedDR">Le condizioni all'interno di DLCRequirementBase devono trovarsi tra {0}{1}, essere separate da virgole, e utilizzare il formato chiave=valore. Valore non valido: {2}</system:String>
+	<system:String x:Key="string_interp_drb_unknownDescriptor">Descrittore sconosciuto all'interno di DLCRequirementBase: {0}</system:String>
+	<system:String x:Key="string_interp_drb_notInstalledWithOptionX">Non installato con opzione {0}</system:String>
+	<system:String x:Key="string_interp_drb_installedWithIncompatibleOptionX">Installato con opzione incompativile {0}</system:String>
+	<system:String x:Key="string_interp_drb_notInstalledWithAtLeastX">Non installato con almeno una delle seguenti opzioni richieste: {0}</system:String>
+	<system:String x:Key="string_interp_drb_withAtLeastOneOfTheFollowingX">(con almeno una delle seguenti opzioni installate: {0})</system:String>
+	<system:String x:Key="string_synchronizingEmails">Sincronizzazione Email in corso</system:String>
+	<system:String x:Key="string_emailsNotMergedMessagesFileNotFound">Merge Email non effettuato: file Messaggi non trovato</system:String>
+	<system:String x:Key="string_game2EmailMergeWrongGame">Il manifesto di merge delle email del gioco 2 puntano al gioco sbagliato</system:String>
 	<system:String x:Key="string_cannotBackupGame">Impossibile eseguire il backup del gioco</system:String>
 	<system:String x:Key="string_interp_cannotBackupGameIsRunning">Impossibile eseguire il backup mentre {0} è in esecuzione.</system:String>
 	<system:String x:Key="string_ensureCorrectGameChosen">Assicurati di avere scelto il gioco giusto</system:String>
@@ -123,6 +146,7 @@
 	<system:String x:Key="string_restoringFromBackup">Ripristino dal backup</system:String>
 	<system:String x:Key="string_restoringMovies">Ripristino dei filmati</system:String>
 	<system:String x:Key="string_calculatingHowManyFilesWillBeRestored">Calcolo del numero di file che verranno ripristinati</system:String>
+	<system:String x:Key="string_comparingGameAgainstVanillaDatabase">Confronto del gioco rispetto al database vanilla in corso</system:String>
 	<system:String x:Key="string_interp_invalidTargetMissingFile">Obiettivo non valido: {0} non è stato trovato nella cartella di gioco.</system:String>
 	<system:String x:Key="string_invalidTargetProtectedByCmmvanilla">Obiettivo non valido: Impostato come backup protetto con il file cmm_vanilla</system:String>
 	<system:String x:Key="string_dialog_cannotRemoveActiveTarget" xml:space="preserve">Impossibile rimuovere un obiettivo che è al momento l'obiettivo di avvio.\nCambia l'obiettivo attivo nel dropdown della finestra principale per permettere la rimozione di questo obiettivo</system:String>
@@ -156,6 +180,8 @@
 	<system:String x:Key="string_tooltip_disableDLC" xml:space="preserve">Disabilita questa mod DLC dal caricamento.&#10;Questo non modifica nessun file e può essere fatto tranquillamente dopo che le mod delle texture sono state installate</system:String>
 	<system:String x:Key="string_tooltip_enableDLC" xml:space="preserve">Abilita questa mod DLC per caricarla in gioco</system:String>
 	<system:String x:Key="string_other">Altro</system:String>
+	<system:String x:Key="string_m3ConsoleKeybinds">Assegnazione Tasti Console M3</system:String>
+	<system:String x:Key="string_buildNotSigned">Build non firmata</system:String>
 	<system:String x:Key="string_preparingToCollectDiagnosticInfo">Preparazione alla raccolta di informazioni di diagnostica</system:String>
 	<system:String x:Key="string_interp_preparingMEMNoGUIX">Preparando MEM No GUI {0}%</system:String>
 	<system:String x:Key="string_collectingGameInformation">Raccolta di informazioni sul gioco</system:String>
@@ -170,6 +196,10 @@
 	<system:String x:Key="string_collectingME3SessionLog">Raccolta dei log di sessione di ME3</system:String>
 	<system:String x:Key="string_gettingTextureInfo">Raccolta di informazioni sull'installazione di texture moddate</system:String>
 	<system:String x:Key="string_collectingASILogFiles">Raccolta dei file di log ASI</system:String>
+	<system:String x:Key="string_collectingBasegameFileModifications">Raccolta modifiche file del gioco di base in corso</system:String>
+	<system:String x:Key="string_checkingForBlacklistedModsMEM">Controllo di mod in lista nera (MEM) in corso</system:String>
+	<system:String x:Key="string_collectingLODSettings">Raccolta impostazioni LOD in corso</system:String>
+	<system:String x:Key="string_collectingTOCFileInformation">Raccolta informazioni file TOC in corso</system:String>
 	<system:String x:Key="string_interp_serverRejectedTheUpload">Il server ha rifiutato il caricamento. La risposta è stata: {0}</system:String>
 	<system:String x:Key="string_interp_logWasUnableToUpload" xml:space="preserve">Impossibile caricare il log:\n{0}.\nPer favore unisciti al server Discord di ME3Tweaks per ottenere assistenza.</system:String>
 	<system:String x:Key="string_interp_requestTimedOutUploading">Richiesta scaduta durante il caricamento del log.</system:String>
@@ -196,6 +226,7 @@
 	<system:String x:Key="string_interp_fileWasRemovedX">Il file é stato rimosso: {0}</system:String>
 	<system:String x:Key="string_interp_fileWasAddedX">Il file é stato aggiunto: {0}</system:String>
 	<system:String x:Key="string_interp_fileWasReplacedX">Il file é stato sostituito: {0}</system:String>
+	<system:String x:Key="string_dialog_memRunningCloseAttempt">Installazione delle texture in corso. L'arresto forzato di questo processo molto probabilmente lascerà il gioco in uno stato inutilizzabile.</system:String>
 	<system:String x:Key="string_extractingMassEffectModderNoGui">Estrazione di MassEffectModderNoGui in corso</system:String>
 	<system:String x:Key="string_no">No</system:String>
 	<system:String x:Key="string_ok">OK</system:String>
@@ -213,6 +244,9 @@
 	<system:String x:Key="string_debugDifficulty">Difficoltá di debug</system:String>
 	<system:String x:Key="string_interp_unknownDifficultyLevelX">Livello di difficoltá sconosciuto: {0}</system:String>
 	<system:String x:Key="string_interp_onlineContentHashWrong">L'hash degli elementi scaricati ({0}) non coincide con l'hash previsto. Previsto: {1}, ottenuto: {2}</system:String>
+	<system:String x:Key="string_interp_plotManagerSyncForX">Sincronizzazione PlotManager per {0}</system:String>
+	<system:String x:Key="string_interp_errorCompilingFunctionReason" xml:space="preserve">Errore nella compilazione della funzione {0}: {1}</system:String>
+	<system:String x:Key="string_interp_fileLibInitFailedPlotManager">Impossibile inizializzare il FileLib per PlotManagerSync: {0}</system:String>
 	<system:String x:Key="string_insufficientDiskSpace">Spazio su disco insufficiente</system:String>
 	<system:String x:Key="string_interp_restoringXpercent">Ripristino {0}%</system:String>
 	<system:String x:Key="string_interp_restoringX">Ripristino di {0}</system:String>
@@ -222,6 +256,17 @@
 	<system:String x:Key="string_fullGameRestore">Ripristino completo del gioco</system:String>
 	<system:String x:Key="string_interp_copyingX">Copia di {0}</system:String>
 	<system:String x:Key="string_interp_directoryNotEmptyWillDeleteEverything">La cartella selezionata non è vuota: {0}. TUTTI I FILE NON DI GIOCO E LE CARTELLE PRESENTI IN QUESTA CARTELLA VERRANNO ELIMINATI. Sei sicuro di voler continuare?</system:String>
+	<system:String x:Key="string_cannotRestore">Impossibile ripristinare</system:String>
+	<system:String x:Key="string_interp_invalidHenchNameSquadmateNameValueIsCaseSensitive">Nome hench non valido: {0}. Il valore è sensibile a maiuscole e minuscole.</system:String>
+	<system:String x:Key="string_errorReadingSquadmateOutfitManifestFileSeeLogs">Errore nella lettura del file manifesto degli outfit dei compagni di squadra per la/e mod, vedi i log</system:String>
+	<system:String x:Key="string_someSquadmateOutfitsWereNotMergedSeeLogs">Impossibile effettuare il merge degli outfit di alcuni compagni di squadra, vedi i log</system:String>
+	<system:String x:Key="string_interp_errorCompilingConditionalFunction">Errore nella compilazione della funzione condizionale {0}: {1}</system:String>
+	<system:String x:Key="string_synchronizingSquadmateOutfits">Sincronizzazione degli outfit dei compagni di squadra in corso</system:String>
+	<system:String x:Key="string_interp_sk_sqmNoBackup">Nessun backup disponibile per {0}, impossibile generare i file di merge dei compagni di squadra</system:String>
+	<system:String x:Key="string_interp_sk_sqmBackupMissingRequiredFile">Il file richiesto per il merge dei compagni di squadra non è disponibile all'interno del backup: {0}</system:String>
+	<system:String x:Key="string_skai_fileLibInitFailedMSM">Impossibile inizializzade il filelib per il pacchetto dati ModSettingsMenu: {0}</system:String>
+	<system:String x:Key="string_skai_failedToCompileParentClassMSM">Impossibile compilare la parent class ModSettingsMenu per il pacchetto dati ModSettingsMenu: {0}</system:String>
+	<system:String x:Key="string_skai_failedToCompileClassMSM">Impossibile compilare {0} per il pacchetto dati ModSettingsMenu: {1}</system:String>
 	<system:String x:Key="string_interp_ssp_unopenedParenthsisFound">Errore durante l'analisi della lista divisa con parentesi: Trovata una parentesi chiusa non corrispondente a parentesi aperte nella posizione {0} della stringa {1}</system:String>
 	<system:String x:Key="string_interp_ssp_unclosedParenthesisFound">Parentesi di apertura senza parentesi di chiusura trovata durante l'analisi della lista divisa con parentesi in {0}</system:String>
 	<system:String x:Key="string_checkingBackup">Controllo del backup in corso</system:String>
