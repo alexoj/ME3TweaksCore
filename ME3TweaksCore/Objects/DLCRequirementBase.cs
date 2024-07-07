@@ -178,7 +178,7 @@ namespace ME3TweaksCore.Objects
                     {
                         if (Version.TryParse(meta.Version, out var version))
                         {
-                            if (!ProperVersion.IsLessThan(version, MinVersion))
+                            if (ProperVersion.IsLessThan(version, MinVersion))
                             {
                                 // Does not meet minimum version requirement
                                 MLog.Error($@"DLCRequirement not met: {version} is less than MinVersion {MinVersion}");
@@ -190,6 +190,27 @@ namespace ME3TweaksCore.Objects
                         else
                         {
                             MLog.Error($@"DLCRequirement not met: Could not read a semantic mod version of {DLCFolderName} from its _metacmm file. Cannot conduct minimum version requirement. Value: {meta.Version}");
+                            return false;
+                        }
+                    }
+
+                    // MAXIMUM VERSION
+                    if (MaxVersion != null)
+                    {
+                        if (Version.TryParse(meta.Version, out var version))
+                        {
+                            if (ProperVersion.IsGreaterThan(version, MaxVersion))
+                            {
+                                // Does not meet minimum version requirement
+                                MLog.Error($@"DLCRequirement not met: {version} is greater than MaxVersion {MaxVersion}");
+                                return false;
+                            }
+
+                            // Version DLC Requirement Met
+                        }
+                        else
+                        {
+                            MLog.Error($@"DLCRequirement not met: Could not read a semantic mod version of {DLCFolderName} from its _metacmm file. Cannot conduct maximum version requirement. Value: {meta.Version}");
                             return false;
                         }
                     }
