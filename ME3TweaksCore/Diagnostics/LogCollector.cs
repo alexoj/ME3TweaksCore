@@ -14,6 +14,7 @@ using Flurl.Http;
 using LegendaryExplorerCore.Compression;
 using LegendaryExplorerCore.GameFilesystem;
 using LegendaryExplorerCore.Gammtek.Extensions;
+using LegendaryExplorerCore.Gammtek.Paths;
 using LegendaryExplorerCore.Helpers;
 using LegendaryExplorerCore.ME1.Unreal.UnhoodBytecode;
 using LegendaryExplorerCore.Misc;
@@ -1015,11 +1016,12 @@ namespace ME3TweaksCore.Diagnostics
                 }
                 else
                 {
-                    if (!package.DiagnosticTarget.TextureModded)
+                    if (!package.DiagnosticTarget.TextureModded || package.DiagnosticTarget.Game.IsLEGame())
                     {
                         var modifiedBGFiles = new List<string>();
-                        var cookedPath = M3Directories.GetCookedPath(package.DiagnosticTarget);
-                        var markerPath = M3Directories.GetTextureMarkerPath(package.DiagnosticTarget);
+                        bool hasAtLeastOneTextureModdedOnlyFile = false;
+                        var cookedPath = package.DiagnosticTarget.GetCookedPath();
+                        var markerPath = package.DiagnosticTarget.GetTextureMarkerPath();
                         foreach (var mf in modifiedFiles)
                         {
                             if (mf.StartsWith(cookedPath, StringComparison.InvariantCultureIgnoreCase))
@@ -1028,15 +1030,27 @@ namespace ME3TweaksCore.Diagnostics
                                 var info = BasegameFileIdentificationService.GetBasegameFileSource(package.DiagnosticTarget, mf);
                                 if (info != null)
                                 {
-                                    modifiedBGFiles.Add($@" - {mf.Substring(cookedPath.Length + 1)} - {info.source}");
+                                    modifiedBGFiles.Add($@" - {mf.Substring(cookedPath.Length + 1)} - {info.source.Replace("\n", ", ")}"); // do not localize
                                 }
                                 else
                                 {
-                                    modifiedBGFiles.Add($@" - {mf.Substring(cookedPath.Length + 1)}");
+                                    if (package.DiagnosticTarget.TextureModded)
+                                    {
+                                        // Do not print out texture modded only files
+                                        hasAtLeastOneTextureModdedOnlyFile = true;
+                                    }
+                                    else
+                                    {
+                                        modifiedBGFiles.Add($@" - {mf.Substring(cookedPath.Length + 1)}");
+                                    }
                                 }
                             }
                         }
 
+                        if (hasAtLeastOneTextureModdedOnlyFile)
+                        {
+                            addDiagLine(@"Files' whose only modification was from Mass Effect Modder are not shown.");
+                        }
                         if (modifiedBGFiles.Any())
                         {
                             addDiagLine(@"The following basegame files have been modified:");
@@ -1849,6 +1863,8 @@ namespace ME3TweaksCore.Diagnostics
                 addDiagLine($@" - {tocFilePath.Substring(package.DiagnosticTarget.TargetPath.Length + 1)}: {tbf.GetAllEntries().Count} file entries, {tbf.HashBuckets.Count} hash buckets", ME3TweaksLogViewer.LogSeverity.INFO);
             }
 
+            int notPresentOnDiskCount = 0;
+            bool isSubbed = false;
             foreach (TOCBinFile.Entry ent in tbf.GetAllEntries())
             {
                 if (ent.name == "PCConsoleTOC.txt")
@@ -1874,8 +1890,23 @@ namespace ME3TweaksCore.Diagnostics
                 }
                 else
                 {
+                    if (!isSubbed && notPresentOnDiskCount > 10)
+                    {
+                        isSubbed = true;
+                        addDiagLine("Click to view more", ME3TweaksLogViewer.LogSeverity.SUB);
+                    }
+                    else
+                    {
+                        notPresentOnDiskCount++;
+                    }
+
                     addDiagLine($@"   > {filepath} is listed in TOC but is not present on disk", ME3TweaksLogViewer.LogSeverity.WARN);
                 }
+            }
+
+            if (notPresentOnDiskCount > 10)
+            {
+                addDiagLine(END_SUB, ME3TweaksLogViewer.LogSeverity.INFO);
             }
 
             return hadTocError;
