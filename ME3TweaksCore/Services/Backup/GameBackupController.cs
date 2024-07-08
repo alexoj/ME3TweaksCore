@@ -317,7 +317,7 @@ namespace ME3TweaksCore.Services.Backup
             {
                 // Creating a new backup
                 MLog.Information(@"Prompting user to select backup destination");
-                backupPath = SelectGameBackupFolderDestination?.Invoke(LC.GetString(LC.string_selectEmptyBackupDestinationDirectory)); // NEEDS LOCALIZED
+                backupPath = SelectGameBackupFolderDestination?.Invoke(LC.GetString(LC.string_selectEmptyBackupDestinationDirectory));
                 if (backupPath != null && Directory.Exists(backupPath))
                 {
                     MLog.Information(@"Backup path chosen: " + backupPath);
@@ -330,6 +330,7 @@ namespace ME3TweaksCore.Services.Backup
                 }
                 else
                 {
+                    MLog.Information(@"User canceled making a backup"); // also could be dir doesn't exist anymore
                     EndBackup();
                     return false;
                 }
@@ -349,6 +350,8 @@ namespace ME3TweaksCore.Services.Backup
 
             if (!targetToBackup.IsCustomOption)
             {
+                MLog.Information(@"Preparing to backup");
+
                 // Making new backup
                 #region callbacks and copy code
 
@@ -557,7 +560,7 @@ namespace ME3TweaksCore.Services.Backup
                 MLog.Information(@"Not writing vanilla marker as this is not a vanilla backup");
             }
 
-            MLog.Information(@"Backup completed.");
+            MLog.Information(@"Backup completed");
             TelemetryInterposer.TrackEvent(@"Created a backup", new Dictionary<string, string>()
                         {
                                 {@"game", Game.ToString()},
