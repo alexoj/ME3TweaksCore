@@ -144,7 +144,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Game2Email
             var startupInstalled = loadedFiles.ContainsKey(StartupFileName);
             using IMEPackage startup = startupInstalled
                 ? MEPackageHandler.OpenMEPackage(loadedFiles[StartupFileName])
-                : MEPackageHandler.OpenMEPackageFromStream(MUtilities.GetResourceStream($@"ME3TweaksCore..modmanager.merge.dlc.{mergeDLC.Target.Game}.{StartupFileName}"), StartupFileName);
+                : MEPackageHandler.OpenMEPackageFromStream(MUtilities.GetResourceStream($@"ME3TweaksCore.modmanager.merge.dlc.{mergeDLC.Target.Game}.{StartupFileName}"), StartupFileName);
 
             var emailInfos = new List<ME2EmailMergeFile>();
             var jsonSupercedances = M3Directories.GetFileSupercedances(mergeDLC.Target, new[] { EMAIL_MERGE_FILE_SUFFIX });
