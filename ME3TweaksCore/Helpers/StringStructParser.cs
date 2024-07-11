@@ -149,6 +149,10 @@ namespace ME3TweaksCore.Helpers
             var values = canBeCaseInsensitive ? new CaseInsensitiveDictionary<string>() : new Dictionary<string, string>();
             for (int i = 0; i < inputString.Length; i++)
             {
+#if DEBUG
+                // See what's parsing
+                string currentStr = inputString.Substring(i);
+#endif
                 switch (inputString[i])
                 {
                     case ')':
@@ -175,7 +179,8 @@ namespace ME3TweaksCore.Helpers
                         }
                         break;
                     case '=':
-                        if (!isInQuotes && openParenthesisCount <= 0)
+                        // 07/10/2024 only track first = so it doesn't take substructs in the values.
+                        if (lastEqualsPos == -1 && !isInQuotes && openParenthesisCount <= 0)
                         {
                             lastEqualsPos = i;
                         }
