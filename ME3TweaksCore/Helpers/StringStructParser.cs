@@ -338,7 +338,7 @@ namespace ME3TweaksCore.Helpers
                         }
                         break;
                     case '=':
-                        if (!isInQuotes && openParenthesisCount <= 0)
+                        if (lastEqualsPos == -1 && !isInQuotes && openParenthesisCount <= 0)
                         {
                             lastEqualsPos = i;
                         }
