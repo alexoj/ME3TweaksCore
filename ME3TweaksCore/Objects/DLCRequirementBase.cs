@@ -144,7 +144,8 @@ namespace ME3TweaksCore.Objects
 
             return $@"{DLCFolderName}{StringStructParser.BuildCommaSeparatedSplitMultiValueList(keyMap, '[', ']', quoteValues: false)}";
         }
-        protected bool HasConditions()
+
+        public bool HasConditions()
         {
             return MinVersion != null || MaxVersion != null || DLCOptionKeys != null;
         }
