@@ -79,7 +79,7 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.LE1Config
             if (mergedAny)
             {
                 // Serialize the assets
-                configBundle.CommitAssets(coalFile);
+                configBundle.CommitAssets(coalFile, MELocalization.INT);
 
                 // Submit to BGFIS
                 records.Add(new BasegameFileRecord(coalFile, target, recordedMergeName.Trim()));
