@@ -40,9 +40,10 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.GlobalShader
                 return false;
             }
 
-            var globalShaderCacheF = Path.Combine(backup, "BioGame", "CookedPCConsole", "GlobalShaderCache-PC-D3D-SM5.upk");
+            var globalShaderCacheF = Path.Combine(backup, "BioGame", "CookedPCConsole", "GlobalShaderCache-PC-D3D-SM5.bin");
             using var fs = File.OpenRead(globalShaderCacheF);
-            var globalShaderCache = ShaderCache.ReadGlobalShaderCache(fs);
+            var globalShaderCache = ShaderCache.ReadGlobalShaderCache(fs, target.Game);
+            var shaders = globalShaderCache.Shaders.Values.ToList();
 
             var dlcMountsInOrder = MELoadedDLC.GetDLCNamesInMountOrder(target.Game, target.TargetPath);
 
@@ -66,24 +67,23 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.GlobalShader
 
                 foreach (var gs in globalShaders)
                 {
-                    MLog.Information($@"Merging M3 Global Shader {gs}");
-                    using var shaderStream = File.OpenRead(gs);
-                    var shaderGuid = shaderStream.ReadGuid();
-                    if (globalShaderCache.Shaders.TryGetValue(shaderGuid, out var shader))
+                    var extractedShaderIdx = ExtractShaderIndex(gs, out var shaderIndex);
+                    if (extractedShaderIdx && shaderIndex >= 0 && shaderIndex < shaders.Count)
                     {
-                        shader.ShaderByteCode = shaderStream.ReadToBuffer(shaderStream.Length - shaderStream.Position);
+                        MLog.Information($@"Merging M3 Global Shader {gs}");
+                        shaders[shaderIndex].ShaderByteCode = File.ReadAllBytes(gs);
                         recordMerge($@"{dlc}-{Path.GetFileName(gs)}");
                         mergedAny = true;
                     }
                     else
                     {
-                        MLog.Error($@"Shader guid not found in GlobalShaderCache: {shaderGuid}");
+                        MLog.Error($@"Invalid filename for global shader: {Path.GetFileName(gs)}. Must be in the form: GlobalShader-INDEX[...].m3gs and between 0 and {shaders.Count}. Skipping.");
                     }
                 }
             }
 
             var records = new List<BasegameFileRecord>();
-            var outF = Path.Combine(target.GetCookedPath(), "GlobalShaderCache-PC-D3D-SM5.upk");
+            var outF = Path.Combine(target.GetCookedPath(), "GlobalShaderCache-PC-D3D-SM5.bin");
 
             // Set the BGFIS record name
             if (mergedAny)
@@ -105,6 +105,20 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.GlobalShader
             }
 
             return true;
+        }
+
+        private static bool ExtractShaderIndex(string filepath, out int shaderIndex)
+        {
+            shaderIndex = -1;
+            var filename = Path.GetFileName(filepath);
+            filename = filename.Substring(filename.IndexOf('-') + 1);
+            var nextDash = filename.IndexOf('-');
+            if (nextDash > 0 && int.TryParse(filename.Substring(0, nextDash), out shaderIndex))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public static bool NeedsMerged(GameTarget target)
