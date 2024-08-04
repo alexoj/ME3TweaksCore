@@ -274,7 +274,7 @@ namespace ME3TweaksCore.Helpers
         /// <param name="inputString">The string to split to value</param>
         /// <param name="canBeCaseInsensitive">If the keys can be case insensitive. This changes the return to a case insensitive dictionary type, casted to Dictionary</param>
         /// <returns></returns>
-        public static Dictionary<string, string> GetSplitMapValues(string inputString, bool canBeCaseInsensitive = false, char openChar = '(', char closeChar = ')')
+        public static Dictionary<string, string> GetSplitMapValues(string inputString, bool canBeCaseInsensitive = false, char openChar = '(', char closeChar = ')', char openChar2 = Char.MinValue, char closeChar2 = Char.MinValue)
         {
 #if DEBUG
             var origString = inputString;
@@ -303,11 +303,11 @@ namespace ME3TweaksCore.Helpers
                 var remainingString = inputString.Substring(i);
 #endif
                 // Variables
-                if (inputString[i] == closeChar)
+                if (inputString[i] == closeChar || (closeChar2 != char.MinValue && inputString[i] == closeChar2))
                 {
                     if (openParenthesisCount <= 0)
                     {
-                        throw new Exception($@"ASSERT ERROR: StringStructParser cannot handle closing {closeChar} without an opening {openChar} - at position {i}");
+                        throw new Exception($@"ASSERT ERROR: StringStructParser cannot handle closing {closeChar} without an opening {openChar} (or {openChar2}) - at position {i}");
                     }
 
                     //closingParenthesisPos = i;
@@ -316,6 +316,12 @@ namespace ME3TweaksCore.Helpers
                 }
 
                 if (inputString[i] == openChar)
+                {
+                    openParenthesisCount++;
+                    continue;
+                }
+
+                if (openChar2 != char.MinValue && inputString[i] == openChar2)
                 {
                     openParenthesisCount++;
                     continue;
