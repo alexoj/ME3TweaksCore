@@ -286,8 +286,8 @@ namespace ME3TweaksCore.ME3Tweaks.M3Merge.Bio2DATable
                 var modPackagePath = Directory.GetFileSystemEntries(dlcCookedPath, obj.ModPackageFile, SearchOption.AllDirectories).FirstOrDefault();
                 if (modPackagePath == null)
                 {
-                    MLog.Error($@"Bio2DA merge 'mergepackagefile' is invalid: {obj.GamePackageFile} - could not find in CookedPCConsole folder of mod");
-                    throw new Exception(LC.GetString(LC.string_interp_2damerge_couldNotFindSourcePackage, obj.GamePackageFile));
+                    MLog.Error($@"Bio2DA merge 'mergepackagefile' is invalid: {obj.ModPackageFile} - could not find in CookedPCConsole folder of mod");
+                    throw new Exception(LC.GetString(LC.string_interp_2damerge_couldNotFindSourcePackage, obj.ModPackageFile));
                 }
 
                 var baseFile = packageContainer.GetTargetPackage(basePackagePath);
