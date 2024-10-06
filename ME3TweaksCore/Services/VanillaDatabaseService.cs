@@ -446,6 +446,12 @@ namespace ME3TweaksCore.Services
                     {
                         var localFileInfo = new FileInfo(file);
                         var extension = Path.GetExtension(file);
+
+                        if (extension == @".exe")
+                        {
+                            continue;
+                        }
+
                         if (extension != @".sfar")
                         {
                             // Normal file
