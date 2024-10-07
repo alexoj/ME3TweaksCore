@@ -286,6 +286,19 @@ namespace ME3TweaksCore.Helpers.MEM
         /// <returns>True if exit code is zero</returns>
         public static bool SetGamePath(bool classicMEM, MEGame targetGame, string targetPath)
         {
+            // ALEX: For some reason this is setting the wrong path????
+            if (classicMEM == false) {
+                // MELE/Game/ME1/ -> MELE/
+                if (new FileInfo(targetPath).Name.ToUpper() == "ME1" || new FileInfo(targetPath).Name.ToUpper() == "ME2" || new FileInfo(targetPath).Name.ToUpper() == "ME3")
+                {
+                    if (new FileInfo(new FileInfo(targetPath).DirectoryName).Name.ToUpper() == "GAME")
+                    {
+                        targetPath = new FileInfo(targetPath).DirectoryName;
+                        targetPath = new FileInfo(targetPath).DirectoryName;
+                    }
+                }
+            }
+             
             int exitcode = 0;
             string args =
                 $"--set-game-data-path --gameid {targetGame.ToMEMGameNum()} --path \"{targetPath}\""; //do not localize
